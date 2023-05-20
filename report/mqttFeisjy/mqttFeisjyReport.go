@@ -139,6 +139,7 @@ func (r *ReportServiceParamFeisjyTemplate) GWPropertyPost() {
 	ycPropertyMap := make([]MQTTFeisjyReportDataTemplate, 0)
 	ycProperty := MQTTFeisjyReportDataTemplate{}
 
+	count++
 	ycProperty.ID = 1
 	ycProperty.Name = "M2M上报计数"
 	ycProperty.Value = count
