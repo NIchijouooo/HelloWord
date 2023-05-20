@@ -1,0 +1,30 @@
+// 自定义样式覆写element样式
+.el-button{
+  height: 36px;
+  padding: 8px 16px;
+}
+.el-icon{
+  margin-right: 5px;
+}
+.cell .el-button{
+  height: 36px;
+  padding: 0;
+}
+.right-btn {
+  margin-left: 20px;
+}
+.el-form-item__label {
+  line-height: 36px;
+}
+
+:deep(.content .el-table__body .el-table__row .el-table__cell:first-child){
+  border-left: 1px solid #ebeef5;
+}
+:deep(.content .el-table__body .el-table__row .el-table__cell:last-child){
+  border-right: 1px solid #ebeef5;
+}
+:deep(.el-table__empty-text) {
+  width: calc(100% - 2px);
+  border-left: 1px solid #ebeef5;
+  border-right: 1px solid #ebeef5;
+}

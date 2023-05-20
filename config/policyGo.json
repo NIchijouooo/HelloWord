@@ -1,0 +1,352 @@
+[
+  {
+    "sub": "admin",
+    "obj": "/api/v1/system/status",
+    "act": "GET"
+  },
+  {
+    "sub": "admin",
+    "obj": "/api/v1/system/reboot",
+    "act": "POST"
+  },
+  {
+    "sub": "admin",
+    "obj": "/api/v1/system/backup",
+    "act": "GET"
+  },
+  {
+    "sub": "admin",
+    "obj": "/api/v1/system/recover",
+    "act": "POST"
+  },
+  {
+    "sub": "admin",
+    "obj": "/api/v1/system/update",
+    "act": "POST"
+  },
+  {
+    "sub": "admin",
+    "obj": "/api/v1/system/loginParam",
+    "act": "GET"
+  },
+  {
+    "sub": "admin",
+    "obj": "/api/v1/system/MemUseList",
+    "act": "GET"
+  },
+  {
+    "sub": "admin",
+    "obj": "/api/v1/system/DiskUseList",
+    "act": "GET"
+  },
+  {
+    "sub": "admin",
+    "obj": "/api/v1/system/DeviceOnlineList",
+    "act": "GET"
+  },
+  {
+    "sub": "admin",
+    "obj": "/api/v1/system/DevicePacketLossList",
+    "act": "GET"
+  },
+  {
+    "sub": "admin",
+    "obj": "/api/v1/system/systemRTC",
+    "act": "GET"
+  },
+  {
+    "sub": "admin",
+    "obj": "/api/v1/log/param",
+    "act": "GET"
+  },
+  {
+    "sub": "admin",
+    "obj": "/api/v1/log/param",
+    "act": "POST"
+  },
+  {
+    "sub": "admin",
+    "obj": "/api/v1/log/filesInfo",
+    "act": "GET"
+  },
+  {
+    "sub": "admin",
+    "obj": "/api/v1/log/files",
+    "act": "DELETE"
+  },
+  {
+    "sub": "admin",
+    "obj": "/api/v1/log/file",
+    "act": "GET"
+  },
+  {
+    "sub": "admin",
+    "obj": "/api/v1/network/param",
+    "act": "POST"
+  },
+  {
+    "sub": "admin",
+    "obj": "/api/v1/network/param",
+    "act": "PUT"
+  },
+  {
+    "sub": "admin",
+    "obj": "/api/v1/network/param",
+    "act": "DELETE"
+  },
+  {
+    "sub": "admin",
+    "obj": "/api/v1/network/param",
+    "act": "GET"
+  },
+  {
+    "sub": "admin",
+    "obj": "/api/v1/mobile/param",
+    "act": "GET"
+  },
+  {
+    "sub": "admin",
+    "obj": "/api/v1/mobile/param",
+    "act": "POST"
+  },
+  {
+    "sub": "admin",
+    "obj": "/api/v1/mobile/param",
+    "act": "PUT"
+  },
+  {
+    "sub": "admin",
+    "obj": "/api/v1/mobile/param",
+    "act": "DELETE"
+  },
+  {
+    "sub": "admin",
+    "obj": "/api/v1/device/interface",
+    "act": "POST"
+  },
+  {
+    "sub": "admin",
+    "obj": "/api/v1/device/interface",
+    "act": "PUT"
+  },
+  {
+    "sub": "admin",
+    "obj": "/api/v1/device/interface",
+    "act": "DELETE"
+  },
+  {
+    "sub": "admin",
+    "obj": "/api/v1/device/interface",
+    "act": "GET"
+  },
+  {
+    "sub": "admin",
+    "obj": "/api/v1/device/allInterface",
+    "act": "GET"
+  },
+  {
+    "sub": "admin",
+    "obj": "/api/v1/device/interface/directData",
+    "act": "POST"
+  },
+  {
+    "sub": "admin",
+    "obj": "/api/v1/device/node",
+    "act": "POST"
+  },
+  {
+    "sub": "admin",
+    "obj": "/api/v1/device/node",
+    "act": "PUT"
+  },
+  {
+    "sub": "admin",
+    "obj": "/api/v1/device/nodes",
+    "act": "PUT"
+  },
+  {
+    "sub": "admin",
+    "obj": "/api/v1/device/node",
+    "act": "GET"
+  },
+  {
+    "sub": "admin",
+    "obj": "/api/v1/device/nodeVariable",
+    "act": "GET"
+  },
+  {
+    "sub": "admin",
+    "obj": "/api/v1/device/nodeHistoryVariable",
+    "act": "GET"
+  },
+  {
+    "sub": "admin",
+    "obj": "/api/v1/device/nodeRealVariable",
+    "act": "GET"
+  },
+  {
+    "sub": "admin",
+    "obj": "/api/v1/device/node",
+    "act": "DELETE"
+  },
+  {
+    "sub": "admin",
+    "obj": "/api/v1/device/service",
+    "act": "POST"
+  },
+  {
+    "sub": "admin",
+    "obj": "/api/v1/device/tsl",
+    "act": "POST"
+  },
+  {
+    "sub": "admin",
+    "obj": "/api/v1/device/tsl",
+    "act": "DELETE"
+  },
+  {
+    "sub": "admin",
+    "obj": "/api/v1/device/tsl",
+    "act": "PUT"
+  },
+  {
+    "sub": "admin",
+    "obj": "/api/v1/device/tsl",
+    "act": "GET"
+  },
+  {
+    "sub": "admin",
+    "obj": "/api/v1/device/tsl/contents",
+    "act": "GET"
+  },
+  {
+    "sub": "admin",
+    "obj": "/api/v1/device/tsl/contents/csv",
+    "act": "POST"
+  },
+  {
+    "sub": "admin",
+    "obj": "/api/v1/device/tsl/contents/csv",
+    "act": "GET"
+  },
+  {
+    "sub": "admin",
+    "obj": "/api/v1/device/tsl/contents/template",
+    "act": "GET"
+  },
+  {
+    "sub": "admin",
+    "obj": "/api/v1/device/tsl/plugin",
+    "act": "POST"
+  },
+  {
+    "sub": "admin",
+    "obj": "/api/v1/device/tsl/plugin",
+    "act": "GET"
+  },
+  {
+    "sub": "admin",
+    "obj": "/api/v1/device/tsl/property",
+    "act": "POST"
+  },
+  {
+    "sub": "admin",
+    "obj": "/api/v1/device/tsl/property",
+    "act": "PUT"
+  },
+  {
+    "sub": "admin",
+    "obj": "/api/v1/device/tsl/properties",
+    "act": "DELETE"
+  },
+  {
+    "sub": "admin",
+    "obj": "/api/v1/device/tsl/properties",
+    "act": "GET"
+  },
+  {
+    "sub": "admin",
+    "obj": "/api/v1/device/tsl/service",
+    "act": "POST"
+  },
+  {
+    "sub": "admin",
+    "obj": "/api/v1/device/tsl/service",
+    "act": "PUT"
+  },
+  {
+    "sub": "admin",
+    "obj": "/api/v1/device/tsl/services",
+    "act": "DELETE"
+  },
+  {
+    "sub": "admin",
+    "obj": "/api/v1/device/commInterface",
+    "act": "GET"
+  },
+  {
+    "sub": "admin",
+    "obj": "/api/v1/device/commInterface",
+    "act": "POST"
+  },
+  {
+    "sub": "admin",
+    "obj": "/api/v1/device/commInterface",
+    "act": "PUT"
+  },
+  {
+    "sub": "admin",
+    "obj": "/api/v1/device/commInterface",
+    "act": "DELETE"
+  },
+  {
+    "sub": "admin",
+    "obj": "/api/v1/tool/commMessage",
+    "act": "POST"
+  },
+  {
+    "sub": "admin",
+    "obj": "/api/v1/update/plugin",
+    "act": "POST"
+  },
+  {
+    "sub": "admin",
+    "obj": "/api/v1/report/param",
+    "act": "POST"
+  },
+  {
+    "sub": "admin",
+    "obj": "/api/v1/report/param",
+    "act": "GET"
+  },
+  {
+    "sub": "admin",
+    "obj": "/api/v1/report/param",
+    "act": "DELETE"
+  },
+  {
+    "sub": "admin",
+    "obj": "/api/v1/report/node/param",
+    "act": "POST"
+  },
+  {
+    "sub": "admin",
+    "obj": "/api/v1/report/nodes/param",
+    "act": "POST"
+  },
+  {
+    "sub": "admin",
+    "obj": "/api/v1/report/node/param",
+    "act": "GET"
+  },
+  {
+    "sub": "admin",
+    "obj": "/api/v1/report/node/param/export",
+    "act": "GET"
+  },
+  {
+    "sub": "admin",
+    "obj": "/api/v1/report/node/param",
+    "act": "DELETE"
+  }
+]

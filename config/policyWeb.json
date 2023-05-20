@@ -1,0 +1,458 @@
+[
+  {
+    "role": "root",
+    "password": "root",
+    "policy": [
+      {
+        "path": "/dashboard",
+        "name": "Dashboard",
+        "meta": {
+          "title": "首页",
+          "icon": "dashboard"
+        },
+        "children": []
+      },
+      {
+        "path": "/collectService",
+        "name": "CollectService",
+        "meta": {
+          "title": "下行通信",
+          "icon": "collectService"
+        },
+        "children": [
+          {
+            "path": "/commInterface",
+            "name": "CommInterface",
+            "meta": {
+              "title": "通道管理",
+              "icon": "commInterface"
+            },
+            "children": []
+          },
+          {
+            "path": "/interface",
+            "name": "Interface",
+            "meta": {
+              "title": "采集管理",
+              "icon": "interface"
+            },
+            "children": []
+          },
+          {
+            "path": "/deviceManage",
+            "name": "DeviceManage",
+            "meta": {
+              "title": "设备管理",
+              "icon": "deviceManage"
+            },
+            "children": []
+          },
+          {
+            "path": "/deviceModel",
+            "name": "DeviceModel",
+            "meta": {
+              "title": "设备模型",
+              "icon": "deviceModel"
+            },
+            "children": [
+              {
+                "path": "/deviceModelLua",
+                "name": "DeviceModelLua",
+                "meta": {
+                  "title": "通用",
+                  "icon": "deviceModelLua"
+                },
+                "children": []
+              },
+              {
+                "path": "/deviceModelS7",
+                "name": "deviceModelS7",
+                "meta": {
+                  "title": "PLC",
+                  "icon": ""
+                },
+                "children": []
+              },
+              {
+                "path": "/deviceModelD07",
+                "name": "deviceModelD07",
+                "meta": {
+                  "title": "DL/T645-2007",
+                  "icon": ""
+                },
+                "children": []
+              },
+              {
+                "path": "/deviceModelRtu",
+                "name": "DeviceModelRtu",
+                "meta": {
+                  "title": "Modbus",
+                  "icon": "deviceModelRtu"
+                },
+                "children": []
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "path": "/reportService",
+        "name": "ReportService",
+        "meta": {
+          "title": "上行通信",
+          "icon": "reportService"
+        },
+        "children": [
+          {
+            "path": "/dataService",
+            "name": "DataService",
+            "meta": {
+              "title": "上报通道",
+              "icon": "dataService"
+            },
+            "children": []
+          },
+          {
+            "path": "/transferModel",
+            "name": "TransferModel",
+            "meta": {
+              "title": "上报模型",
+              "icon": "transferModel"
+            },
+            "children": []
+          }
+        ]
+      },
+      {
+        "path": "/networkService",
+        "name": "NetworkService",
+        "meta": {
+          "title": "网络链路",
+          "icon": "networkService"
+        },
+        "children": [
+          {
+            "path": "/network",
+            "name": "Network",
+            "meta": {
+              "title": "网络设置",
+              "icon": "network"
+            },
+            "children": []
+          },
+          {
+            "path": "/mobile",
+            "name": "Mobile",
+            "meta": {
+              "title": "4G设置",
+              "icon": "mobile"
+            },
+            "children": []
+          }
+        ]
+      },
+      {
+        "path": "/systemService",
+        "name": "SystemService",
+        "meta": {
+          "title": "系统设置",
+          "icon": "systemService"
+        },
+        "children": [
+          {
+            "path": "/backupRestore",
+            "name": "BackupRestore",
+            "meta": {
+              "title": "备份还原",
+              "icon": "backupRestore"
+            },
+            "children": []
+          },
+          {
+            "path": "/sysUpgrade",
+            "name": "SysUpgrade",
+            "meta": {
+              "title": "系统升级",
+              "icon": "sysUpgrade"
+            },
+            "children": []
+          },
+          {
+            "path": "/sysLog",
+            "name": "SysLog",
+            "meta": {
+              "title": "系统日志",
+              "icon": "sysLog"
+            },
+            "children": []
+          }
+        ]
+      },
+      {
+        "path": "/systemTool",
+        "name": "SystemTool",
+        "meta": {
+          "title": "调试工具",
+          "icon": "systemTool"
+        },
+        "children": [
+          {
+            "path": "/commDebug",
+            "name": "CommDebug",
+            "meta": {
+              "title": "通讯调试",
+              "icon": "commDebug"
+            },
+            "children": []
+          },
+          {
+            "path": "/networkTest",
+            "name": "NetworkTest",
+            "meta": {
+              "title": "网络诊断",
+              "icon": "networkTest"
+            },
+            "children": []
+          },
+          {
+            "path": "/ntpTiming",
+            "name": "NTPTiming",
+            "meta": {
+              "title": "NTP校时",
+              "icon": "ntpTiming"
+            },
+            "children": []
+          }
+        ]
+      },
+      {
+        "path": "/production",
+        "name": "Production",
+        "meta": {
+          "title": "SN",
+          "icon": "production"
+        },
+        "children": []
+      }
+    ]
+  },
+  {
+    "role": "admin",
+    "password": "gw0201",
+    "policy": [
+      {
+        "path": "/dashboard",
+        "name": "Dashboard",
+        "meta": {
+          "title": "首页",
+          "icon": "dashboard"
+        },
+        "children": []
+      },
+      {
+        "path": "/collectService",
+        "name": "CollectService",
+        "meta": {
+          "title": "下行通信",
+          "icon": "collectService"
+        },
+        "children": [
+          {
+            "path": "/commInterface",
+            "name": "CommInterface",
+            "meta": {
+              "title": "通道管理",
+              "icon": "commInterface"
+            },
+            "children": []
+          },
+          {
+            "path": "/interface",
+            "name": "Interface",
+            "meta": {
+              "title": "采集管理",
+              "icon": "interface"
+            },
+            "children": []
+          },
+          {
+            "path": "/deviceManage",
+            "name": "DeviceManage",
+            "meta": {
+              "title": "设备管理",
+              "icon": "deviceManage"
+            },
+            "children": []
+          },
+          {
+            "path": "/deviceModel",
+            "name": "DeviceModel",
+            "meta": {
+              "title": "设备模型",
+              "icon": "deviceModel"
+            },
+            "children": [
+              {
+                "path": "/deviceModelLua",
+                "name": "DeviceModelLua",
+                "meta": {
+                  "title": "通用",
+                  "icon": "deviceModelLua"
+                },
+                "children": []
+              },
+              {
+                "path": "/deviceModelS7",
+                "name": "DeviceModelS7",
+                "meta": {
+                  "title": "西门子PLC",
+                  "icon": "deviceModelS7"
+                },
+                "children": []
+              },
+              {
+                "path": "/deviceModelRtu",
+                "name": "DeviceModelRtu",
+                "meta": {
+                  "title": "Modbus",
+                  "icon": "deviceModelRtu"
+                },
+                "children": []
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "path": "/reportService",
+        "name": "ReportService",
+        "meta": {
+          "title": "上行通信",
+          "icon": "reportService"
+        },
+        "children": [
+          {
+            "path": "/dataService",
+            "name": "DataService",
+            "meta": {
+              "title": "上报通道",
+              "icon": "dataService"
+            },
+            "children": []
+          },
+          {
+            "path": "/transferModel",
+            "name": "TransferModel",
+            "meta": {
+              "title": "上报模型",
+              "icon": "transferModel"
+            },
+            "children": []
+          }
+        ]
+      },
+      {
+        "path": "/networkService",
+        "name": "NetworkService",
+        "meta": {
+          "title": "网络链路",
+          "icon": "networkService"
+        },
+        "children": [
+          {
+            "path": "/network",
+            "name": "Network",
+            "meta": {
+              "title": "网络设置",
+              "icon": "network"
+            },
+            "children": []
+          },
+          {
+            "path": "/mobile",
+            "name": "Mobile",
+            "meta": {
+              "title": "4G设置",
+              "icon": "mobile"
+            },
+            "children": []
+          }
+        ]
+      },
+      {
+        "path": "/systemService",
+        "name": "SystemService",
+        "meta": {
+          "title": "系统设置",
+          "icon": "systemService"
+        },
+        "children": [
+          {
+            "path": "/backupRestore",
+            "name": "BackupRestore",
+            "meta": {
+              "title": "备份还原",
+              "icon": "backupRestore"
+            },
+            "children": []
+          },
+          {
+            "path": "/sysUpgrade",
+            "name": "SysUpgrade",
+            "meta": {
+              "title": "系统升级",
+              "icon": "sysUpgrade"
+            },
+            "children": []
+          },
+          {
+            "path": "/sysLog",
+            "name": "SysLog",
+            "meta": {
+              "title": "系统日志",
+              "icon": "sysLog"
+            },
+            "children": []
+          }
+        ]
+      },
+      {
+        "path": "/systemTool",
+        "name": "SystemTool",
+        "meta": {
+          "title": "调试工具",
+          "icon": "systemTool"
+        },
+        "children": [
+          {
+            "path": "/commDebug",
+            "name": "CommDebug",
+            "meta": {
+              "title": "通讯调试",
+              "icon": "commDebug"
+            },
+            "children": []
+          },
+          {
+            "path": "/networkTest",
+            "name": "NetworkTest",
+            "meta": {
+              "title": "网络诊断",
+              "icon": "networkTest"
+            },
+            "children": []
+          },
+          {
+            "path": "/ntpTiming",
+            "name": "NTPTiming",
+            "meta": {
+              "title": "NTP校时",
+              "icon": "ntpTiming"
+            },
+            "children": []
+          }
+        ]
+      }
+    ]
+  }
+]

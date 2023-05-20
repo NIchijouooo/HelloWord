@@ -1,0 +1,60 @@
+// sidebar
+$menuText: rgb(255, 255, 255, 0.65);
+$menuActiveText: #ffffff;
+$subMenuActiveText: #ffffff; //https://github.com/ElemeFE/element/issues/12951
+
+$menuBg: #001529;
+$menuHover: #3054eb;
+
+$subMenuBg: #1f2d3d;
+$subMenuHover: #001528;
+
+$sideBarWidth: 200px;
+$sideBarCloseWidth: 64px;
+// 风格颜色统一定义
+$primary-color: #3054eb;
+$warning-color: #fa8b16;
+$danger-color: #ee484d;
+$success-color: #2ea554;
+
+$font-white-color: white;
+
+$header-text-color: #333333;
+// the :export directive is the magic sauce for webpack
+// https://www.bluematador.com/blog/how-to-share-variables-between-js-and-sass
+// js 全局变量
+:export {
+  menuText: $menuText;
+  menuActiveText: $menuActiveText;
+  subMenuActiveText: $subMenuActiveText;
+  menuBg: $menuBg;
+  menuHover: $menuHover;
+  subMenuBg: $subMenuBg;
+  subMenuHover: $subMenuHover;
+  sideBarWidth: $sideBarWidth;
+  sideBarCloseWidth: $sideBarCloseWidth;
+  primaryColor: $primary-color;
+  successColor: $success-color;
+  warningColor: $warning-color;
+  dangerColor: $danger-color;
+  fontWhiteColor: $font-white-color;
+  headerTextColor: $header-text-color;
+}
+// scss 全局变量
+:root {
+  // 主题色
+  --system-primary-color: #3054eb; // 可做背景色和文本色，用做背景色时，需要和--system-primary-text-color配合使用，避免文件颜色和主题色冲突
+  --system-primary-text-color: #fff; // 主题色作为背景色时使用
+  // header区域
+  --system-header-background: #fff;
+  --system-header-text-color: #303133;
+  --system-header-breadcrumb-text-color: #97a8be;
+  --system-header-item-hover-color: rgb(240, 240, 240);
+  --system-header-border-color: #d8dce5;
+  --system-header-tab-background: #fff;
+
+  --system-warning-color: #fa8b16;
+  --system-danger-color: #ee484d;
+
+  // --el-border-base: #c0c4cc !important;
+}

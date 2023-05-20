@@ -1,0 +1,31 @@
+// element-variables.scss
+@forward 'element-plus/theme-chalk/src/common/var.scss' with (
+  $colors: (
+    'primary': (
+      'base': #3054eb,
+    ),
+  ),
+  // $border-radius: (
+  //   'base': 0px,
+  //   'small': 0px,
+  // ),
+  // $button-padding-horizontal: (
+  //   'medium': 16px,
+  // ),
+  // $pagination: (
+  //   'border-radius': 0px,
+  // ),
+  // $tag: (
+  //   'border-radius': 0px,
+  // ),
+  // $slider: (
+  //   'border-radius': 0px,
+  // ),
+  // $messagebox: (
+  //   'border-radius': 0px,
+  // )
+);
+:root {
+  --el-component-size: 36px;
+}
+// @use 'element-plus/theme-chalk/src/index.scss' as *;
