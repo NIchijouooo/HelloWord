@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"gateway/pin"
 	"gateway/protocol/modbus"
 	"gateway/setting"
 	"gateway/utils"
@@ -63,6 +64,22 @@ type CommunicationMBRTUTemplate struct {
 var CommunicationMBRTUMap = make([]*CommunicationMBRTUTemplate, 0)
 
 func (c *CommunicationMBRTUTemplate) Open() bool {
+
+	//if c.Param.Name == "/dev/ttyS4" {
+	//	setting.Exec_shell("echo 95 > /sys/class/gpio/export")
+	//} else if c.Param.Name == "/dev/ttyS5" {
+	//	setting.Exec_shell("echo 94 > /sys/class/gpio/export")
+	//}
+
+	if c.Param.Name == "/dev/ttyS4" {
+		if pin.Rs485PinInit(pin.Rs4851Pin) == false {
+			setting.ZAPS.Errorf("[%s]初始化RS485控制脚失败", c.Param.Name)
+		}
+	} else if c.Param.Name == "/dev/ttyS5" {
+		if pin.Rs485PinInit(pin.Rs4852Pin) == false {
+			setting.ZAPS.Errorf("[%s]初始化RS485控制脚失败", c.Param.Name)
+		}
+	}
 
 	serialBaud, _ := strconv.Atoi(c.Param.BaudRate)
 	//serialDataBits, _ := strconv.Atoi(c.Param.DataBits)
@@ -289,6 +306,18 @@ func (c *CommunicationMBRTUTemplate) WriteData(data []byte) ([]byte, error) {
 
 	dataWrite := MBRTUInterfaceParamTemplate{}
 
+	//if c.Param.Name == "/dev/ttyS4" {
+	//	setting.Exec_shell("echo high > /sys/class/gpio/gpio95/direction")
+	//} else if c.Param.Name == "/dev/ttyS5" {
+	//	setting.Exec_shell("echo high > /sys/class/gpio/gpio94/direction")
+	//}
+
+	if c.Param.Name == "/dev/ttyS4" {
+		pin.Rs485xTX(pin.Rs4851Pin)
+	} else if c.Param.Name == "/dev/ttyS5" {
+		pin.Rs485xTX(pin.Rs4852Pin)
+	}
+
 	err := json.Unmarshal(data, &dataWrite)
 	if err != nil {
 		setting.ZAPS.Errorf("通信接口ModbusRTU[%s]写变量JSON格式化错误%v", c.Name, err)
@@ -410,6 +439,18 @@ func (c *CommunicationMBRTUTemplate) ProcessWriteMutilRegs(dataWrite MBRTUInterf
 }
 
 func (c *CommunicationMBRTUTemplate) ReadData(data []byte) ([]byte, error) {
+
+	//if c.Param.Name == "/dev/ttyS4" {
+	//	setting.Exec_shell("echo low > /sys/class/gpio/gpio95/direction")
+	//} else if c.Param.Name == "/dev/ttyS5" {
+	//	setting.Exec_shell("echo low > /sys/class/gpio/gpio94/direction")
+	//}
+
+	if c.Param.Name == "/dev/ttyS4" {
+		pin.Rs485xRX(pin.Rs4851Pin)
+	} else if c.Param.Name == "/dev/ttyS5" {
+		pin.Rs485xRX(pin.Rs4852Pin)
+	}
 
 	dataRead := MBRTUInterfaceParamTemplate{}
 	err := json.Unmarshal(data, &dataRead)

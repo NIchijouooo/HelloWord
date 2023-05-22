@@ -3,11 +3,12 @@ package commInterface
 import (
 	"encoding/json"
 	"errors"
+	"gateway/pin"
+	"gateway/setting"
+	"gateway/utils"
 	"log"
 	"strconv"
 	"time"
-	"gateway/setting"
-	"gateway/utils"
 
 	"github.com/tarm/serial"
 )
@@ -33,6 +34,22 @@ type CommunicationSerialTemplate struct {
 var CommunicationSerialMap = make([]*CommunicationSerialTemplate, 0)
 
 func (c *CommunicationSerialTemplate) Open() bool {
+
+	//if c.Param.Name == "/dev/ttyS4" {
+	//	setting.Exec_shell("echo 95 > /sys/class/gpio/export")
+	//} else if c.Param.Name == "/dev/ttyS5" {
+	//	setting.Exec_shell("echo 94 > /sys/class/gpio/export")
+	//}
+
+	if c.Param.Name == "/dev/ttyS4" {
+		if pin.Rs485PinInit(pin.Rs4851Pin) == false {
+			setting.ZAPS.Errorf("[%s]初始化RS485控制脚失败", c.Param.Name)
+		}
+	} else if c.Param.Name == "/dev/ttyS5" {
+		if pin.Rs485PinInit(pin.Rs4852Pin) == false {
+			setting.ZAPS.Errorf("[%s]初始化RS485控制脚失败", c.Param.Name)
+		}
+	}
 
 	serialParam := c.Param
 	serialBaud, _ := strconv.Atoi(serialParam.BaudRate)
@@ -101,6 +118,18 @@ func (c *CommunicationSerialTemplate) WriteData(data []byte) ([]byte, error) {
 		return nil, nil
 	}
 
+	//if c.Param.Name == "/dev/ttyS4" {
+	//	setting.Exec_shell("echo high > /sys/class/gpio/gpio95/direction")
+	//} else if c.Param.Name == "/dev/ttyS5" {
+	//	setting.Exec_shell("echo high > /sys/class/gpio/gpio94/direction")
+	//}
+
+	if c.Param.Name == "/dev/ttyS4" {
+		pin.Rs485xTX(pin.Rs4851Pin)
+	} else if c.Param.Name == "/dev/ttyS5" {
+		pin.Rs485xTX(pin.Rs4852Pin)
+	}
+
 	_, err := c.Port.Write(data)
 	if err != nil {
 		log.Println(err)
@@ -113,6 +142,18 @@ func (c *CommunicationSerialTemplate) ReadData(data []byte) ([]byte, error) {
 
 	if c.Port == nil {
 		return nil, errors.New("端口不存在")
+	}
+
+	//if c.Param.Name == "/dev/ttyS4" {
+	//	setting.Exec_shell("echo low > /sys/class/gpio/gpio95/direction")
+	//} else if c.Param.Name == "/dev/ttyS5" {
+	//	setting.Exec_shell("echo low > /sys/class/gpio/gpio94/direction")
+	//}
+
+	if c.Param.Name == "/dev/ttyS4" {
+		pin.Rs485xRX(pin.Rs4851Pin)
+	} else if c.Param.Name == "/dev/ttyS5" {
+		pin.Rs485xRX(pin.Rs4852Pin)
 	}
 
 	cnt, err := c.Port.Read(data)
