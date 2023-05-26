@@ -3,6 +3,7 @@ package mqttFeisjy
 import (
 	"encoding/json"
 	"fmt"
+	"gateway/buildInfo"
 	"gateway/device"
 	"gateway/setting"
 	"net"
@@ -156,18 +157,24 @@ func (r *ReportServiceParamFeisjyTemplate) GWPropertyPost() {
 
 	//当前设备时间  id =1
 	settingProperty.ID = 1
-	settingProperty.Name = "当前时间"
+	settingProperty.Name = "设备当前时间"
 	settingProperty.Value = time.Now().Format("2006-01-02 15:04:05")
 	settingPropertyMap = append(settingPropertyMap, settingProperty)
 
-	//设备的网卡名称 id =2
+	//当前设备时间  id =2
+	settingProperty.ID = 2
+	settingProperty.Name = "软件编译时间"
+	settingProperty.Value = buildInfo.BuildTime
+	settingPropertyMap = append(settingPropertyMap, settingProperty)
+
+	//设备的网卡名称 id =3
 	data := setting.GetNetworkNames()
 	str := ""
 	for _, v := range data {
 		str += v
 		str += " & "
 	}
-	settingProperty.ID = 2
+	settingProperty.ID = 3
 	settingProperty.Name = "网卡名称"
 	settingProperty.Value = str // "eth0,usb0"
 	settingPropertyMap = append(settingPropertyMap, settingProperty)
@@ -182,18 +189,18 @@ func (r *ReportServiceParamFeisjyTemplate) GWPropertyPost() {
 	ip, mask := setting.GetIPAndMask(params.Name)
 	gateway := setting.GetGateway(params.Name)
 
-	//设备的eth0网卡ip id =3
-	settingProperty.ID = 3
+	//设备的eth0网卡ip id =4
+	settingProperty.ID = 4
 	settingProperty.Name = "eth0 IP"
 	settingProperty.Value = ip
 	settingPropertyMap = append(settingPropertyMap, settingProperty)
-	//设备的eth0网卡mask id =4
-	settingProperty.ID = 4
+	//设备的eth0网卡mask id =5
+	settingProperty.ID = 5
 	settingProperty.Name = "eth0 mask"
 	settingProperty.Value = mask
 	settingPropertyMap = append(settingPropertyMap, settingProperty)
-	//设备的eth0网卡gateway id =5
-	settingProperty.ID = 5
+	//设备的eth0网卡gateway id =6
+	settingProperty.ID = 6
 	settingProperty.Name = "eth0 gateway"
 	settingProperty.Value = gateway
 	settingPropertyMap = append(settingPropertyMap, settingProperty)
@@ -251,7 +258,9 @@ func (r *ReportServiceParamFeisjyTemplate) NodePropertyPost(name []string) {
 				//获取节点属性数据
 				if node.CommStatus == "offLine" {
 					ycPropertyPostParam.CommStatus = "offLine"
+					r.NodeList[k].CommStatus = "offLine"
 				} else {
+					r.NodeList[k].CommStatus = "onLink"
 					for _, v := range node.Properties {
 						if num, err := strconv.Atoi(v.Name); err == nil {
 							ycProperty := MQTTFeisjyReportDataTemplate{

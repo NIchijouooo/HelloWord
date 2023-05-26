@@ -628,11 +628,51 @@ const handlePSizeChange = (val) => {
 const selectedProp = (row) => {
   return !ctxData.AllPropertyNameList.includes(row.name)
 }
-const saveProperties = () => {
+const saveProperties = async() => {
   console.log('saveProperties')
 
   if (ctxData.selectList.length > 0) {
     let count = 0
+    const promises = ctxData.selectList.map( async item => {
+      let property = {}
+      property['name'] = item.name
+      property['label'] = item.label
+      property['uploadName'] = item.name
+      property['type'] = item.type
+      property['decimals'] = item.decimals
+      property['unit'] = item.unit
+      let params = {}
+      if (item.type !== 3) {
+        params['min'] = ''
+        params['max'] = ''
+        params['minMaxAlarm'] = false
+        params['step'] = ''
+        params['stepAlarm'] = false
+      } else {
+        params['dataLength'] = ''
+        params['dataLengthAlarm'] = false
+      }
+      property['params'] = params
+      console.log('saveProperties -> property', property)
+      const pData = {
+        token: users.token,
+        data: {
+          name: props.curTransferModel.name,
+          property: property,
+        },
+      }
+
+      const res = await TransferModelApi.addProperty(pData)
+      return res
+    })
+    const resultList = await Promise.all(promises)
+    if (resultList.length > 0) {
+      // 操作成功的提示信息，控制在最后一条弹出
+      const res = resultList[resultList.length - 1]
+      handleResult(res, getModelPropertiesList)
+      cancelProperties() // 添加成功，关闭弹窗
+    }
+    /*
     ctxData.selectList.forEach((item) => {
       let property = {}
       property['name'] = item.name
@@ -668,6 +708,7 @@ const saveProperties = () => {
         }
       })
     })
+    */
   }
 }
 const cancelProperties = () => {

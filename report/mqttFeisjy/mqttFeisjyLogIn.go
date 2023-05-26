@@ -67,6 +67,16 @@ func MQTTFeisjySubscribeTopic(client MQTT.Client, topic string) {
 	setting.ZAPS.Infof("Feisjy上报服务订阅主题%s成功", topic)
 }
 
+// 用于指定默认的消息处理函数。如果客户端订阅了一个主题但没有指定回调函数，则会使用默认的消息处理函数。
+func MQTTFeisjyUnsubscribeTopic(client MQTT.Client, topic string) {
+
+	if token := client.Unsubscribe(topic); token.Wait() && token.Error() != nil {
+		setting.ZAPS.Warnf("Feisjy上报服务解除订阅主题%s失败 %v", topic, token.Error())
+		return
+	}
+	setting.ZAPS.Infof("Feisjy上报服务解除订阅主题%s成功", topic)
+}
+
 // Feisjy平台需要订阅的主题统一在这里添加
 func (r *ReportServiceParamFeisjyTemplate) MQTTFeisjySubTopicList(client MQTT.Client, param ReportServiceGWParamFeisjyTemplate) {
 
@@ -88,15 +98,56 @@ func (r *ReportServiceParamFeisjyTemplate) MQTTFeisjySubTopicList(client MQTT.Cl
 	subTopic = fmt.Sprintf(FeisjyMQTTTopicTxFormat, param.Param.AppKey, param.Param.DeviceID, "fileList")
 	MQTTFeisjySubscribeTopic(client, subTopic)
 
-	for _, node := range r.NodeList {
-		//平台登陆确认报文
-		subTopic = fmt.Sprintf(FeisjyMQTTTopicTxFormat, param.Param.AppKey, node.Param.DeviceID, "login")
-		MQTTFeisjySubscribeTopic(client, subTopic)
+	// 平台回复信息
+	subTopic = fmt.Sprintf(FeisjyMQTTTopicTxFormat, param.Param.AppKey, param.Param.DeviceID, "resultMsg")
+	MQTTFeisjySubscribeTopic(client, subTopic)
 
-		//设备总招命令下发
-		subTopic = fmt.Sprintf(FeisjyMQTTTopicTxFormat, param.Param.AppKey, node.Param.DeviceID, "deviceControl")
-		MQTTFeisjySubscribeTopic(client, subTopic)
-	}
+	//for _, node := range r.NodeList {
+	//	//平台登陆确认报文
+	//	subTopic = fmt.Sprintf(FeisjyMQTTTopicTxFormat, param.Param.AppKey, node.Param.DeviceID, "login")
+	//	MQTTFeisjySubscribeTopic(client, subTopic)
+	//
+	//	//设备总招命令下发
+	//	subTopic = fmt.Sprintf(FeisjyMQTTTopicTxFormat, param.Param.AppKey, node.Param.DeviceID, "deviceControl")
+	//	MQTTFeisjySubscribeTopic(client, subTopic)
+	//
+	//	// 平台回复信息
+	//	subTopic = fmt.Sprintf(FeisjyMQTTTopicTxFormat, param.Param.AppKey, node.Param.DeviceID, "resultMsg")
+	//	MQTTFeisjySubscribeTopic(client, subTopic)
+	//}
+}
+func (r *ReportServiceParamFeisjyTemplate) MQTTFeisjySubNodeTopic(DeviceID string) {
+
+	subTopic := ""
+
+	//平台登陆确认报文
+	subTopic = fmt.Sprintf(FeisjyMQTTTopicTxFormat, r.GWParam.Param.AppKey, DeviceID, "login")
+	MQTTFeisjySubscribeTopic(r.GWParam.MQTTClient, subTopic)
+
+	//设备总招命令下发
+	subTopic = fmt.Sprintf(FeisjyMQTTTopicTxFormat, r.GWParam.Param.AppKey, DeviceID, "deviceControl")
+	MQTTFeisjySubscribeTopic(r.GWParam.MQTTClient, subTopic)
+
+	// 平台回复信息
+	subTopic = fmt.Sprintf(FeisjyMQTTTopicTxFormat, r.GWParam.Param.AppKey, DeviceID, "resultMsg")
+	MQTTFeisjySubscribeTopic(r.GWParam.MQTTClient, subTopic)
+}
+
+func (r *ReportServiceParamFeisjyTemplate) MQTTFeisjyUnsubNodeTopic(DeviceID string) {
+
+	subTopic := ""
+
+	//平台登陆确认报文
+	subTopic = fmt.Sprintf(FeisjyMQTTTopicTxFormat, r.GWParam.Param.AppKey, DeviceID, "login")
+	MQTTFeisjyUnsubscribeTopic(r.GWParam.MQTTClient, subTopic)
+
+	//设备总招命令下发
+	subTopic = fmt.Sprintf(FeisjyMQTTTopicTxFormat, r.GWParam.Param.AppKey, DeviceID, "deviceControl")
+	MQTTFeisjyUnsubscribeTopic(r.GWParam.MQTTClient, subTopic)
+
+	// 平台回复信息
+	subTopic = fmt.Sprintf(FeisjyMQTTTopicTxFormat, r.GWParam.Param.AppKey, DeviceID, "resultMsg")
+	MQTTFeisjyUnsubscribeTopic(r.GWParam.MQTTClient, subTopic)
 }
 
 // MQTT Broker配置，连接

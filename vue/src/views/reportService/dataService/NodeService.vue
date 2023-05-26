@@ -73,16 +73,17 @@
           </el-table-column>
           <el-table-column prop="collInterfaceName" label="采集接口名称" width="auto" min-width="150" align="center">
           </el-table-column>
-          <el-table-column label="通信状态" width="auto" min-width="100" align="center">
+          <!-- el-table-column label="通信状态" width="auto" min-width="100" align="center">
             <template #default="scope">
               {{ scope.row.commStatus === 'onLine' ? '在线' : '离线' }}
             </template>
-          </el-table-column>
-          <!-- <el-table-column label="上报状态" width="auto" min-width="100" align="center">
+          </el-table-column -->
+
+          <el-table-column label="上报状态" width="auto" min-width="100" align="center">
             <template #default="scope">
               {{ scope.row.reportStatus === 'onLine' ? '在线' : '离线' }}
             </template>
-          </el-table-column> -->
+          </el-table-column>
           <el-table-column label="上报参数" width="auto" min-width="180" align="center">
             <template #default="scope">
               {{ scope.row.param }}
@@ -244,6 +245,7 @@
               </el-option>
             </el-select>
           </el-form-item>
+
           <el-form-item v-if="ctxData.nodeForm.protocol != 'FSJY.MQTT'" label="通讯编码" prop="deviceCode">
             <el-input type="text" v-model="ctxData.nodeForm.deviceCode" autocomplete="off" placeholder="请输入通讯编码">
             </el-input>
@@ -709,10 +711,15 @@ const editNode = (row) => {
     deviceCode: row.param.deviceCode === '' ? row.deviceAddr : row.param.deviceCode, //通讯编码
 
     //gwai add 2023-04-05
-    productKey: row.productKey,
-    deviceID: row.deviceID,
-    deviceSecret: row.deviceSecret,
+    //productKey: row.productKey,
+    //deviceID: row.deviceID,
+    //deviceSecret: row.deviceSecret,
   }
+  
+  ctxData.nodeForm['productKey'] = row.param.ProductKey
+  ctxData.nodeForm['deviceID'] = row.param.DeviceID
+  ctxData.nodeForm['deviceSecret'] = row.param.DeviceSecret
+
 }
 const nodeFormRef = ref(null)
 const submitNodeForm = () => {

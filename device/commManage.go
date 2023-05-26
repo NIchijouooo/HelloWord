@@ -1886,6 +1886,8 @@ func (c *CommunicationManageTemplate) CommunicationStateMachineDLT64507(cmd Comm
 		Status: false,
 	}
 
+	rxStatus := false
+
 	type packAndProperties struct {
 		BlockRead     byte //是否按块读写 0是单个标识读取  1是按块读取
 		frame         dlt645.D07PackFrame
@@ -1965,6 +1967,7 @@ func (c *CommunicationManageTemplate) CommunicationStateMachineDLT64507(cmd Comm
 									timerOut.Stop()
 									setting.ZAPS.Infof("采集服务[%s]设备[%s]接收成功 接收数据[%d:%X]", collName, node.Name, len(rxTotalBuf), rxTotalBuf)
 									c.CommunicationManageMessageAdd(collName, MessageDirection_RX, rxTotalBuf)
+									rxStatus = true
 
 									var d07Data dlt645.TransD07DataTemplate
 									for _, properties := range curPackAndProperties.propertiesMap {
@@ -2007,37 +2010,6 @@ func (c *CommunicationManageTemplate) CommunicationStateMachineDLT64507(cmd Comm
 													}
 												}
 											}
-											rxResult.Status = true
-
-											//设备从离线变成上线
-											if node.CommStatus == "offLine" {
-												content := CollectInterfaceEventTemplate{
-													Topic:    "onLine",
-													CollName: collName,
-													NodeName: node.Name,
-													Content:  node.Name,
-												}
-												err := eventBus.Publish("onLine", content)
-												if err != nil {
-													setting.ZAPS.Debugf("采集接口[%s]发布节点[%s]上线消息", collName, node.Name)
-												}
-											} else {
-												content := CollectInterfaceEventTemplate{
-													Topic:    "update",
-													CollName: collName,
-													NodeName: node.Name,
-													Content:  node.Name,
-												}
-												err := eventBus.Publish("update", content)
-												if err != nil {
-													setting.ZAPS.Debugf("采集接口[%s]发布节点[%s]属性更新消息", collName, node.Name)
-												}
-											}
-
-											node.CommSuccessCnt++
-											node.CurCommFailCnt = 0
-											node.CommStatus = "onLine"
-											node.LastCommRTC = time.Now().Format("2006-01-02 15:04:05")
 										}
 									}
 									return
@@ -2052,25 +2024,8 @@ func (c *CommunicationManageTemplate) CommunicationStateMachineDLT64507(cmd Comm
 								c.CommunicationManageMessageAdd(collName, MessageDirection_RX, rxTotalBuf)
 							}
 							setting.ZAPS.Infof("采集接口[%s]设备[%s]接收超时 接收数据[%d:%X]", collName, node.Name, len(rxTotalBuf), rxTotalBuf)
+							rxStatus = false
 
-							node.CurCommFailCnt++
-							if node.CurCommFailCnt >= offLineCnt {
-								node.CurCommFailCnt = 0
-								//设备从上线变成离线
-								if node.CommStatus == "onLine" {
-									content := CollectInterfaceEventTemplate{
-										Topic:    "offLine",
-										CollName: collName,
-										NodeName: node.Name,
-										Content:  node.Name,
-									}
-									err := eventBus.Publish("offLine", content)
-									if err != nil {
-										setting.ZAPS.Debugf("采集接口[%s]发布节点[%s]离线消息", collName, node.Name)
-									}
-								}
-								node.CommStatus = "offLine"
-							}
 							rxTotalBufCnt = 0
 							rxTotalBuf = rxTotalBuf[0:0]
 
@@ -2081,7 +2036,11 @@ func (c *CommunicationManageTemplate) CommunicationStateMachineDLT64507(cmd Comm
 			}()
 
 		}
+
 	}
+
+	rxResult.Status = rxStatus
+	CommunicationUpdateNodeState(node, rxStatus, collName, eventBus, offLineCnt)
 
 	return rxResult
 }

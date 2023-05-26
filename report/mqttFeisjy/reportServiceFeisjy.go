@@ -145,8 +145,9 @@ func ReportServiceFeisjyPoll(ctx context.Context, r *ReportServiceParamFeisjyTem
 				case 0: //  配置MQTT,连接MQTT BREAK,
 					if r.GWLogin() == true {
 						reportState = 1
+					} else {
+						time.Sleep(120 * time.Second)
 					}
-					break
 
 				case 1: //  网关登录流程
 					for _, node := range r.NodeList {
@@ -165,6 +166,7 @@ func ReportServiceFeisjyPoll(ctx context.Context, r *ReportServiceParamFeisjyTem
 				case 2: //  节点登录流程
 					if r.GWParam.ReportStatus == "onLine" {
 						for i, node := range r.NodeList {
+							r.MQTTFeisjySubNodeTopic(node.Param.DeviceID)
 							if node.ReportStatus == "offLine" {
 								if r.FeisjyLogInMachine(node.Param.DeviceID) == true {
 									r.NodeList[i].ReportStatus = "onLine"
@@ -305,93 +307,123 @@ func (r *ReportServiceParamFeisjyTemplate) ProcessDownLinkFrame(ctx context.Cont
 
 				switch Command {
 				case "login": //平台下发的登录相关报文
-					ackFrame := MQTTFeisjyLogInAckTemplate{}
-					err := json.Unmarshal(frame.Payload, &ackFrame)
-					if err != nil {
-						setting.ZAPS.Errorf("LogIn Ack json unmarshal err")
-						continue
+					{
+						ackFrame := MQTTFeisjyLogInAckTemplate{}
+						err := json.Unmarshal(frame.Payload, &ackFrame)
+						if err != nil {
+							setting.ZAPS.Errorf("LogIn Ack json unmarshal err")
+							continue
+						}
+						r.ReceiveLogInAckFrameChan <- ackFrame
 					}
-					r.ReceiveLogInAckFrameChan <- ackFrame
-					break
 
 				case "deviceControl": //平台下发的deviceControl报文
-
-					type CmdItemsFeisjyTemplate struct {
-						Code  int    `json:"code"`
-						Name  string `json:"name"`
-						Value int    `json:"value"`
-					}
-
-					var deviceControlData struct {
-						DeviceAddr string                   `json:"deviceAddr"`
-						CmdType    string                   `json:"cmdType"`
-						CmdItems   []CmdItemsFeisjyTemplate `json:"cmdItems"`
-					}
-
-					err := json.Unmarshal(frame.Payload, &deviceControlData)
-					if err != nil {
-						setting.ZAPS.Error("Unmarshal deviceControl err", err)
-						continue
-					}
-
-					switch deviceControlData.CmdType {
-					case "allcall":
-						if ID == r.GWParam.Param.DeviceID {
-							reportGWProperty := MQTTFeisjyReportPropertyTemplate{
-								DeviceType: "gw",
-							}
-							r.ReportPropertyRequestFrameChan <- reportGWProperty
-						} else {
-							name := make([]string, 0)
-							for _, v := range r.NodeList {
-								if v.Param.DeviceID == ID {
-									name = append(name, v.Name)
-								}
-							}
-
-							reportNodeProperty := MQTTFeisjyReportPropertyTemplate{
-								DeviceType: "node",
-								DeviceName: name,
-							}
-							r.ReportPropertyRequestFrameChan <- reportNodeProperty
+					{
+						type CmdItemsFeisjyTemplate struct {
+							Code  int    `json:"code"`
+							Name  string `json:"name"`
+							Value int    `json:"value"`
 						}
-					case "yk":
-						fmt.Println(deviceControlData.DeviceAddr, r.GWParam.Param.DeviceID)
-						if deviceControlData.DeviceAddr == r.GWParam.Param.DeviceID {
-							for _, v := range deviceControlData.CmdItems {
-								fmt.Println(v.Code, v.Name, v.Value)
-								if v.Code == 3 && v.Name == "远程重启" && v.Value == 1 {
-									fmt.Println("即将进行远程重启！... ")
-									os.Exit(9)
+
+						var deviceControlData struct {
+							DeviceAddr string                   `json:"deviceAddr"`
+							CmdType    string                   `json:"cmdType"`
+							CmdItems   []CmdItemsFeisjyTemplate `json:"cmdItems"`
+						}
+
+						err := json.Unmarshal(frame.Payload, &deviceControlData)
+						if err != nil {
+							setting.ZAPS.Error("Unmarshal deviceControl err", err)
+							continue
+						}
+
+						switch deviceControlData.CmdType {
+						case "allcall":
+							if ID == r.GWParam.Param.DeviceID {
+								reportGWProperty := MQTTFeisjyReportPropertyTemplate{
+									DeviceType: "gw",
+								}
+								r.ReportPropertyRequestFrameChan <- reportGWProperty
+							} else {
+								name := make([]string, 0)
+								for _, v := range r.NodeList {
+									if v.Param.DeviceID == ID {
+										name = append(name, v.Name)
+									}
+								}
+
+								reportNodeProperty := MQTTFeisjyReportPropertyTemplate{
+									DeviceType: "node",
+									DeviceName: name,
+								}
+								r.ReportPropertyRequestFrameChan <- reportNodeProperty
+							}
+						case "yk":
+							//fmt.Println(deviceControlData.DeviceAddr, r.GWParam.Param.DeviceID)
+							if deviceControlData.DeviceAddr == r.GWParam.Param.DeviceID {
+								for _, v := range deviceControlData.CmdItems {
+									fmt.Println(v.Code, v.Name, v.Value)
+									if v.Code == 3 && v.Name == "远程重启" && v.Value == 1 {
+										fmt.Println("即将进行远程重启！... ")
+										os.Exit(9)
+									}
 								}
 							}
 						}
 					}
 
 				case "deviceUpgrade":
+					{
+						deviceUpgradeData := MQTTFeisjyUpGradeTemplate{}
 
-					deviceUpgradeData := MQTTFeisjyUpGradeTemplate{}
+						err := json.Unmarshal(frame.Payload, &deviceUpgradeData)
+						if err != nil {
+							setting.ZAPS.Error("Unmarshal deviceUpgrade err", err)
+							continue
+						}
 
-					err := json.Unmarshal(frame.Payload, &deviceUpgradeData)
-					if err != nil {
-						setting.ZAPS.Error("Unmarshal deviceUpgrade err", err)
-						continue
+						setting.ZAPS.Info("发送升级信息...")
+						r.ReceiveDevUpGradeChan <- deviceUpgradeData
 					}
-
-					setting.ZAPS.Info("发送升级信息...")
-					r.ReceiveDevUpGradeChan <- deviceUpgradeData
 
 				case "fileList": //获取文件列表
+					{
+						fileListData := FileListFeisjyTemplate{}
 
-					fileListData := FileListFeisjyTemplate{}
+						err := json.Unmarshal(frame.Payload, &fileListData)
+						if err != nil {
+							setting.ZAPS.Error("Unmarshal deviceUpgrade err", err)
+							continue
+						}
 
-					err := json.Unmarshal(frame.Payload, &fileListData)
-					if err != nil {
-						setting.ZAPS.Error("Unmarshal deviceUpgrade err", err)
-						continue
+						r.ReceiveFileListChan <- fileListData
 					}
 
-					r.ReceiveFileListChan <- fileListData
+				case "resultMsg":
+					{
+						var resultMsgData struct {
+							Topic string `json:"topic"`
+							Data  string `json:"data"`
+							Msg   string `json:"msg"`
+						}
+						err := json.Unmarshal(frame.Payload, &resultMsgData)
+						if err != nil {
+							setting.ZAPS.Error("Unmarshal deviceControl err", err)
+							continue
+						}
+
+						if resultMsgData.Msg == "no_login" || resultMsgData.Msg == "no_login_confirm" {
+							if ID == r.GWParam.Param.DeviceID {
+								r.GWLogin()
+							} else {
+								for k, v := range r.NodeList {
+									if v.Param.DeviceID == ID {
+										r.NodeList[k].ReportStatus = "offLine"
+									}
+								}
+							}
+						}
+					}
 				}
 			}
 		}
@@ -521,6 +553,7 @@ func (r *ReportServiceParamFeisjyTemplate) AddReportNode(param ReportServiceNode
 	if ok {
 		param.Properties = rModel.Properties
 	}
+	param.ReportStatus = "offLine"
 	r.NodeList = append(r.NodeList, param)
 	ReportServiceFeisjyWriteParamToJson()
 
@@ -540,8 +573,10 @@ func (r *ReportServiceParamFeisjyTemplate) ModifyReportNode(param ReportServiceN
 			if ok {
 				param.Properties = rModel.Properties
 			}
+			param.ReportStatus = "offLine"
 			r.NodeList[k] = param
 			ReportServiceFeisjyWriteParamToJson()
+
 			return nil
 		}
 	}
@@ -558,6 +593,10 @@ func (r *ReportServiceParamFeisjyTemplate) DeleteReportNode(name string) int {
 		//节点已经存在
 		if v.Name == name {
 			index = k
+
+			//解除订阅主题
+			r.MQTTFeisjyUnsubNodeTopic(v.Param.DeviceID)
+
 			r.NodeList = append(r.NodeList[:k], r.NodeList[k+1:]...)
 			ReportServiceFeisjyWriteParamToJson()
 			return index
