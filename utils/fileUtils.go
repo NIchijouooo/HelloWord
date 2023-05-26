@@ -390,3 +390,45 @@ func GetAllFileFormDir(dir string) ([]string, error) {
 
 	return fileList, nil
 }
+
+func Unzip(zipFilePath, destFolder string) bool {
+	exist := FileIsExist(zipFilePath)
+	if !exist {
+		log.Fatalln("unzip file error file is not exist path = [%s]", zipFilePath)
+		return false
+	}
+	r, err := zip.OpenReader(zipFilePath)
+	if err != nil {
+		log.Fatalln("open zip error", err)
+		return false
+	}
+	defer r.Close()
+	for _, f := range r.File {
+		filePath := filepath.Join(destFolder, f.Name)
+		if f.FileInfo().IsDir() {
+			os.MkdirAll(filePath, f.Mode())
+			continue
+		}
+		if err = os.MkdirAll(filepath.Dir(filePath), os.ModePerm); err != nil {
+			log.Fatalln("mk dir all error", err)
+			return false
+		}
+		outFile, err := os.OpenFile(filePath, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, f.Mode())
+		if err != nil {
+			log.Fatalln("open file error", err)
+			return false
+		}
+		defer outFile.Close()
+		rc, err := f.Open()
+		if err != nil {
+			log.Fatalln("open error", err)
+			return false
+		}
+		defer rc.Close()
+		if _, err = io.Copy(outFile, rc); err != nil {
+			log.Fatalln("copy file error", err)
+			return false
+		}
+	}
+	return true
+}

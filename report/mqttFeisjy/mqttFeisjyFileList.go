@@ -32,6 +32,7 @@ type FileListFeisjyTemplate struct {
 	FileStep string                       `json:"fileStep"`
 	FileList []FileNameListFeisjyTemplate `json:"fileList"`
 	Url      string                       `json:"url"`
+	DeviceId string                       `json:"deviceId"`
 }
 
 // 设备固件升级流程状态机
@@ -77,6 +78,46 @@ func (r *ReportServiceParamFeisjyTemplate) FeisjyFileListMachine(f FileListFeisj
 							setting.ZAPS.Errorf("File[%s] 下载失败！:%v", v.Name, err)
 						} else {
 							setting.ZAPS.Infof("File[%s] 下载成功", v.Name)
+						}
+					}
+				}
+			}()
+		}
+	case "readyToReceiveZip":
+		{
+			go func() {
+				name, err := setting.UpLoadGatewayConfigFeisjy(f.Url, f.DeviceId)
+				if err != nil {
+					setting.ZAPS.Errorf("File[%s] 上传失败！:%v", name, err)
+				} else {
+					setting.ZAPS.Infof("File[%s] 上传成功", name)
+				}
+			}()
+		}
+	case "resultDownloadFileZip":
+		{
+			go func() {
+				for _, v := range f.FileList { // 遍历文件列表 [{"code":xx,"uniqueCode":"xxx","name":"xxx","url":"xxx"},]
+					if v.Code == 200 { // 等于200为文件正常可下载，其他为不可下载
+						var ext string                          // 文件拓展名
+						dir, fileName := filepath.Split(v.Name) //
+						if len(dir) <= 0 {
+							dir = "./other/"
+						}
+						if len(filepath.Ext(v.Name)) == 0 {
+							ext = filepath.Ext(v.Url)
+						}
+
+						setting.ZAPS.Infof("服务[FileList->%s] File[%s] 开始下载", f.FileStep, fileName+ext)
+
+						err := setting.DownloadFileFeisjy(dir, fileName+ext, v.Url, 3)
+						if err != nil {
+							setting.ZAPS.Errorf("File[%s] 下载失败！:%v", v.Name, err)
+						} else {
+							setting.ZAPS.Infof("File[%s] 下载成功", v.Name)
+							filePath := dir + v.Name
+							success := utils.Unzip(filePath, "./selfpara")
+							setting.ZAPS.Infof("File[%s] 解压结果[%v]", filePath, success)
 						}
 					}
 				}
