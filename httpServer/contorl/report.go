@@ -851,6 +851,51 @@ func ApiAddReportModelProperty(context *gin.Context) {
 	return
 }
 
+func ApiAddReportModelPropertyes(context *gin.Context) { //ltg add 2023-05-26
+
+	type ModelInfoTemplate struct {
+		ModelName string                                  `json:"name"`     // 名称
+		Property  reportModel.ReportModelPropertyTemplate `json:"property"` //
+	}
+
+	modelInfo := make([]ModelInfoTemplate, 0)
+
+	err := context.BindJSON(&modelInfo)
+	if err != nil {
+		setting.ZAPS.Error("增加上报模型属性JSON格式化错误 %v", err)
+		context.JSON(http.StatusOK, model.ResponseData{
+			Code:    "1",
+			Message: "增加上报模型属性JSON格式化错误",
+			Data:    "",
+		})
+		return
+	}
+
+	count := 0
+	for _, v := range modelInfo {
+		err = reportModel.AddReportModelProperty(v.ModelName, &v.Property)
+		if err != nil {
+			count++
+		}
+	}
+
+	if count == 0 {
+		context.JSON(http.StatusOK, model.ResponseData{
+			Code:    "1",
+			Message: "添加上报模型属性错误 ",
+			Data:    "",
+		})
+		return
+	}
+
+	context.JSON(http.StatusOK, model.ResponseData{
+		Code:    "0",
+		Message: "添加上报模型属性成功",
+		Data:    "",
+	})
+	return
+}
+
 func ApiModifyReportModelProperty(context *gin.Context) {
 
 	modelInfo := &struct {

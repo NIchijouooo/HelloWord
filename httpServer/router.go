@@ -413,6 +413,8 @@ func RouterWeb(port string) {
 
 			reportRouter.POST("/model/property", contorl.ApiAddReportModelProperty)
 
+			reportRouter.POST("/model/properties", contorl.ApiAddReportModelPropertyes) //ltg add 2023-05-26
+
 			reportRouter.PUT("/model/property", contorl.ApiModifyReportModelProperty)
 
 			reportRouter.GET("/model/properties", contorl.ApiGetReportModelProperties)
