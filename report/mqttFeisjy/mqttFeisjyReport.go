@@ -99,6 +99,23 @@ func (r *ReportServiceParamFeisjyTemplate) FeisjyPublishYcData(msg *MQTTFeisjyRe
 	return status
 }
 
+func (r *ReportServiceParamFeisjyTemplate) FeisjyPublishdeviceControlResult(sJson []byte, id string) bool {
+	status := false
+
+	//propertyPostTopic := "iot/rx/" + r.GWParam.Param.AppKey + "/" + id + "/resultYc"
+	propertyPostTopic := fmt.Sprintf(FeisjyMQTTTopicRxFormat, r.GWParam.Param.AppKey, id, "deviceControlResult")
+	//sJson, _ := json.Marshal(msg)
+
+	data := &MQTTFeisjyReportFrameTemplate{
+		Topic:   propertyPostTopic,
+		Payload: sJson,
+	}
+
+	status = r.FeisjyPublishData(data)
+
+	return status
+}
+
 func (r *ReportServiceParamFeisjyTemplate) FeisjyPublishSettingData(msg *MQTTFeisjyReportSettingTemplate, id string) bool {
 	status := false
 
