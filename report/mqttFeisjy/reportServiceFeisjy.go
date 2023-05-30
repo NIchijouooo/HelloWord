@@ -320,17 +320,18 @@ func (r *ReportServiceParamFeisjyTemplate) ProcessDownLinkFrame(ctx context.Cont
 				case "deviceControl": //平台下发的deviceControl报文
 					{
 						type CmdItemsFeisjyTemplate struct {
-							Code  int    `json:"code"`
-							Name  string `json:"name"`
-							Value int    `json:"value"`
+							Code  int         `json:"code"`
+							Value interface{} `json:"value"`
 						}
 
 						var deviceControlData struct {
+							Uuid       string                   `json:"uuid"`
 							DeviceAddr string                   `json:"deviceAddr"`
 							CmdType    string                   `json:"cmdType"`
 							CmdItems   []CmdItemsFeisjyTemplate `json:"cmdItems"`
 						}
 
+						setting.ZAPS.Infof("%s", frame.Payload)
 						err := json.Unmarshal(frame.Payload, &deviceControlData)
 						if err != nil {
 							setting.ZAPS.Error("Unmarshal deviceControl err", err)
@@ -359,15 +360,47 @@ func (r *ReportServiceParamFeisjyTemplate) ProcessDownLinkFrame(ctx context.Cont
 								r.ReportPropertyRequestFrameChan <- reportNodeProperty
 							}
 						case "yk":
-							//fmt.Println(deviceControlData.DeviceAddr, r.GWParam.Param.DeviceID)
-							if deviceControlData.DeviceAddr == r.GWParam.Param.DeviceID {
-								for _, v := range deviceControlData.CmdItems {
-									fmt.Println(v.Code, v.Name, v.Value)
-									if v.Code == 3 && v.Name == "远程重启" && v.Value == 1 {
-										fmt.Println("即将进行远程重启！... ")
-										os.Exit(9)
+							{
+								if deviceControlData.DeviceAddr == r.GWParam.Param.DeviceID {
+									for _, v := range deviceControlData.CmdItems {
+										if v.Code == 3 && v.Value == 1 {
+											os.Exit(9)
+										}
 									}
 								}
+							}
+						case "yc":
+							{
+								reqFrame := MQTTFeisjyWritePropertyTemplate{
+									Uuid:       deviceControlData.Uuid,
+									DeviceAddr: deviceControlData.DeviceAddr,
+									Properties: nil,
+								}
+								for _, v := range deviceControlData.CmdItems {
+									reqFrame.Properties = append(reqFrame.Properties, MQTTFeisjyWritePropertyRequestParamPropertyTemplate{fmt.Sprintf("%d", v.Code), v.Value})
+								}
+
+								setting.ZAPS.Infof("遥测遥调下发信息%v", reqFrame)
+
+								r.ReportServiceFeisjyProcessWriteProperty(reqFrame)
+
+								type deviceControlResult struct {
+									Uuid   string `json:"uuid"`
+									Status int    `json:"status"`
+								}
+								v := deviceControlResult{
+									Uuid:   deviceControlData.Uuid,
+									Status: 1,
+								}
+								sJson, _ := json.Marshal(v)
+
+								setting.ZAPS.Info(v)
+
+								r.FeisjyPublishdeviceControlResult(sJson, deviceControlData.DeviceAddr)
+							}
+						case "setting":
+							{
+
 							}
 						}
 					}
