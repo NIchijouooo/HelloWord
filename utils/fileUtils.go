@@ -232,6 +232,26 @@ func CompressDirToZip(srcDirMap string, fileName string) error {
 	return err
 }
 
+// 压缩单个路径到一个zip文件里面(压缩后不带路径名)
+// Param 1: 需要添加到zip文件里面的路径
+// Param 2: 打包后zip文件名称
+func NewCompressDirToZip(srcDir string, dstFileName string) error {
+	var srcFiles []string
+	DirIsExist(srcDir)
+	// 读取目录下全部文件
+	err := filepath.Walk(srcDir, func(path string, info os.FileInfo, _ error) error {
+		if !info.IsDir() {
+			srcFiles = append(srcFiles, path)
+		}
+		return nil
+	})
+	if err != nil || len(srcFiles) == 0 {
+		log.Fatalln("NewCompressDirToZip error or no files err = ", err)
+		return err
+	}
+	return CompressFilesToZip(srcFiles, dstFileName)
+}
+
 // 压缩单个路径到一个zip文件里面
 // Param 1: 需要添加到zip文件里面的路径
 // Param 2: 打包后zip文件名称
@@ -397,6 +417,7 @@ func Unzip(zipFilePath, destFolder string) bool {
 		log.Fatalln("unzip file error file is not exist path = [%s]", zipFilePath)
 		return false
 	}
+	DirIsExist(destFolder)
 	r, err := zip.OpenReader(zipFilePath)
 	if err != nil {
 		log.Fatalln("open zip error", err)

@@ -167,10 +167,8 @@ func UpLoadGatewayConfigFeisjy(url string, deviceId string) (string, error) {
 	fileName := "current.zip"
 	dir := "./tmp/"
 	filePath := dir + fileName
-	err := utils.CompressFilesToZip([]string{"./selfpara/collInterface.json",
-		"./selfpara/reportModel.json",
-		"./selfpara/reportServiceParamListFeisjyIot.json",
-		"./selfpara/commInterfaceProtocol.json"}, filePath)
+	utils.DirIsExist(dir)
+	err := utils.NewCompressDirToZip("./selfpara", filePath)
 	if err != nil {
 		return "", err
 	}
