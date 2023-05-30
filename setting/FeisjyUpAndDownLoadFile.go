@@ -3,6 +3,7 @@ package setting
 import (
 	"bufio"
 	"bytes"
+	"crypto/tls"
 	"errors"
 	"fmt"
 	"gateway/utils"
@@ -204,7 +205,11 @@ func UpLoadGatewayConfigFeisjy(url string, deviceId string) (string, error) {
 	}
 
 	// 发送 HTTP POST 请求并上传文件
-	response, err := http.Post(url, contentType, requestBody)
+	tr := &http.Transport{
+		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
+	}
+	client := &http.Client{Transport: tr}
+	response, err := client.Post(url, contentType, requestBody)
 	if err != nil {
 		fmt.Println("Failed to upload file:", err)
 		return "", errors.New(fmt.Sprintf("UpLoadFileFeisjy -> http.Post() Faile! : %s", err.Error()))
