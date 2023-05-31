@@ -31,7 +31,7 @@ func main() {
 	if foo == "" {
 		fmt.Println("foo is empty.")
 	} else {
-		fmt.Printf("foo=%s\n", foo)
+		fmt.Printf("foo=%s \n", foo)
 	}
 
 	fmt.Println(buildInfo.BuildTime)
@@ -87,5 +87,4 @@ func main() {
 	httpServer.RouterWeb(setting.HttpPort)
 	setting.ZAPS.Infof("gateway 初始化成功!")
 	//**************应用程序监听退出****************/
-
 }

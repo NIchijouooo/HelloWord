@@ -14,7 +14,7 @@ import (
 
 	lua "github.com/yuin/gopher-lua"
 
-	"github.com/robfig/cron"
+	"github.com/robfig/cron/v3"
 )
 
 type CollectInterfaceEventTemplate struct {
@@ -40,6 +40,7 @@ type CollectInterfaceTemplate struct {
 	DeviceNodeMap       map[string]*DeviceNodeTemplate       `json:"deviceNodeMap"`       //节点表
 	CollEventBus        eventBus.Bus                         `json:"-"`                   //事件总线
 	Cron                *cron.Cron                           `json:"-"`                   //定时管理
+	CronId              cron.EntryID                         `json:"-"`                   //定时器ID 2023/5/31 QJHui ADD
 	ContextCancelFun    context.CancelFunc                   `json:"-"`
 	WG                  sync.WaitGroup                       `json:"-"`
 	TSLLuaStateMap      map[string]*lua.LState               `json:"-"`
@@ -339,7 +340,7 @@ func NewCollectInterface(collInterfaceName, commInterfaceName, protocolTypeName 
 	str := fmt.Sprintf("@every %dm%ds", coll.PollPeriod/60, coll.PollPeriod%60)
 	setting.ZAPS.Infof("采集接口[%s]定时轮询任务开启 %dm%ds执行一次", collInterfaceName, coll.PollPeriod/60, coll.PollPeriod%60)
 	//添加定时任务
-	_ = coll.Cron.AddFunc(str, coll.CommunicationManagePoll)
+	coll.CronId, _ = coll.Cron.AddFunc(str, coll.CommunicationManagePoll)
 	coll.Cron.Start()
 	//创建通信接口接收协程
 	switch coll.CommInterface.GetType() {
@@ -411,8 +412,11 @@ func ModifyCollectInterface(collName string, commName string, protocolTypeName s
 		str := fmt.Sprintf("@every %dm%ds", pollPeriod/60, pollPeriod%60)
 		setting.ZAPS.Infof("采集任务[%s] %+v", coll.CollInterfaceName, str)
 		//添加定时任务
-		_ = coll.Cron.AddFunc(str, coll.CommunicationManagePoll)
+		coll.CronId, _ = coll.Cron.AddFunc(str, coll.CommunicationManagePoll)
 		coll.Cron.Start()
+
+		// 2023/5/31 QJHui ADD
+		coll.PollPeriod = pollPeriod
 	}
 
 	//通信接口发生了变化
@@ -931,6 +935,7 @@ func (d *CollectInterfaceTemplate) CommunicationManageDel(ctx context.Context) {
 								d.TSLLuaStateMap,
 								d.OfflinePeriod)
 						}
+
 						//更新设备在线数量,当本次采集最后一个设备时进行更新
 						if len(d.CommQueueManage.CommonRequestChan) == 0 {
 							d.DeviceNodeOnlineCnt = 0
@@ -942,6 +947,29 @@ func (d *CollectInterfaceTemplate) CommunicationManageDel(ctx context.Context) {
 						}
 					}
 				default:
+
+					// 2023/5/31 QJHui ADD 解决设备采集一段时间后不再采集问题
+					if d.Cron != nil {
+						entry := d.Cron.Entry(d.CronId)
+						// 判断当前条目是否在运行
+						lastTime := entry.Prev
+						nextTime := entry.Next
+						if nextTime.IsZero() || nextTime.Before(lastTime) {
+							setting.ZAPS.Errorf("检测到采集接口[%s]定时未运行,将重启采集定时器", d.CollInterfaceName)
+
+							//停止
+							d.Cron.Stop()
+							//重启
+							d.Cron = cron.New()
+
+							str := fmt.Sprintf("@every %dm%ds", d.PollPeriod/60, d.PollPeriod%60)
+							setting.ZAPS.Infof("采集任务[%s] %+v", d.CollInterfaceName, str)
+							//添加定时任务
+							d.CronId, _ = d.Cron.AddFunc(str, d.CommunicationManagePoll)
+							d.Cron.Start()
+						}
+					}
+
 					time.Sleep(100 * time.Millisecond)
 				}
 			}
@@ -961,7 +989,7 @@ func (d *CollectInterfaceTemplate) CommunicationManagePoll() {
 	if d.CommInterface.GetType() == commInterface.CommTypeIoIn || d.CommInterface.GetType() == commInterface.CommTypeIoOut {
 		return
 	}
-	//setting.ZAPS.Debugf("采集接口[%s]通信对列节点总数为%d", d.CollInterfaceName, len(d.CommQueueManage.CommonRequestChan))
+	// setting.ZAPS.Debugf("采集接口[%s]通信对列节点总数为%d", d.CollInterfaceName, len(d.CommQueueManage.CommonRequestChan))
 }
 
 func (d *CollectInterfaceTemplate) ReadDeviceRealVariable(name string) (error, []TSLPropertiesTemplate) {

@@ -149,7 +149,7 @@ func (r *ReportServiceParamFeisjyTemplate) FeisjyPublishLocationData(msg *MQTTFe
 	return status
 }
 
-//上传网关属性
+// 上传网关属性
 var count uint32 = 0
 
 func (r *ReportServiceParamFeisjyTemplate) GWPropertyPost() {
@@ -236,7 +236,7 @@ func (r *ReportServiceParamFeisjyTemplate) GWPropertyPost() {
 	}
 }
 
-//指定设备上传属性，可以是多个设备
+// 指定设备上传属性，可以是多个设备
 func (r *ReportServiceParamFeisjyTemplate) NodePropertyPost(name []string) {
 
 	for _, n := range name {

@@ -12,7 +12,7 @@ import (
 	"gateway/setting"
 	"gateway/utils"
 	MQTT "github.com/eclipse/paho.mqtt.golang"
-	"github.com/robfig/cron"
+	"github.com/robfig/cron/v3"
 	"os"
 	"strings"
 	"time"
@@ -108,7 +108,6 @@ func NewReportServiceParamFeisjy(gw ReportServiceGWParamFeisjyTemplate, nodeList
 }
 
 func ReportServiceFeisjyPoll(ctx context.Context, r *ReportServiceParamFeisjyTemplate) {
-
 	reportState := 0
 
 	// 定义一个cron运行器
@@ -117,7 +116,7 @@ func ReportServiceFeisjyPoll(ctx context.Context, r *ReportServiceParamFeisjyTem
 	reportTime := fmt.Sprintf("@every %dm%ds", r.GWParam.ReportTime/60, r.GWParam.ReportTime%60)
 	setting.ZAPS.Infof("上报服务[%s]定时上报周期为%v", r.GWParam.ServiceName, reportTime)
 
-	_ = cronProcess.AddFunc(reportTime, r.ReportTimeFun)
+	cronProcess.AddFunc(reportTime, r.ReportTimeFun)
 
 	//订阅采集接口消息
 	device.CollectInterfaceMap.Lock.Lock()
@@ -150,8 +149,8 @@ func ReportServiceFeisjyPoll(ctx context.Context, r *ReportServiceParamFeisjyTem
 					}
 
 				case 1: //  网关登录流程
-					for _, node := range r.NodeList {
-						node.ReportStatus = "offLine" //网关未登陆，节点配置为离线状态
+					for i, _ := range r.NodeList {
+						r.NodeList[i].ReportStatus = "offLine" //网关未登陆，节点配置为离线状态
 					}
 
 					if r.FeisjyLogInMachine(r.GWParam.Param.DeviceID) == true {
@@ -166,8 +165,8 @@ func ReportServiceFeisjyPoll(ctx context.Context, r *ReportServiceParamFeisjyTem
 				case 2: //  节点登录流程
 					if r.GWParam.ReportStatus == "onLine" {
 						for i, node := range r.NodeList {
-							r.MQTTFeisjySubNodeTopic(node.Param.DeviceID)
 							if node.ReportStatus == "offLine" {
+								r.MQTTFeisjySubNodeTopic(node.Param.DeviceID)
 								if r.FeisjyLogInMachine(node.Param.DeviceID) == true {
 									r.NodeList[i].ReportStatus = "onLine"
 								}
@@ -328,6 +327,7 @@ func (r *ReportServiceParamFeisjyTemplate) ProcessDownLinkFrame(ctx context.Cont
 							Uuid       string                   `json:"uuid"`
 							DeviceAddr string                   `json:"deviceAddr"`
 							CmdType    string                   `json:"cmdType"`
+							Time       int64                    `json:"time"`
 							CmdItems   []CmdItemsFeisjyTemplate `json:"cmdItems"`
 						}
 
@@ -338,71 +338,18 @@ func (r *ReportServiceParamFeisjyTemplate) ProcessDownLinkFrame(ctx context.Cont
 							continue
 						}
 
-						switch deviceControlData.CmdType {
-						case "allcall":
-							if ID == r.GWParam.Param.DeviceID {
-								reportGWProperty := MQTTFeisjyReportPropertyTemplate{
-									DeviceType: "gw",
-								}
-								r.ReportPropertyRequestFrameChan <- reportGWProperty
-							} else {
-								name := make([]string, 0)
-								for _, v := range r.NodeList {
-									if v.Param.DeviceID == ID {
-										name = append(name, v.Name)
-									}
-								}
-
-								reportNodeProperty := MQTTFeisjyReportPropertyTemplate{
-									DeviceType: "node",
-									DeviceName: name,
-								}
-								r.ReportPropertyRequestFrameChan <- reportNodeProperty
-							}
-						case "yk":
-							{
-								if deviceControlData.DeviceAddr == r.GWParam.Param.DeviceID {
-									for _, v := range deviceControlData.CmdItems {
-										if v.Code == 3 && v.Value == 1 {
-											os.Exit(9)
-										}
-									}
-								}
-							}
-						case "yc":
-							{
-								reqFrame := MQTTFeisjyWritePropertyTemplate{
-									Uuid:       deviceControlData.Uuid,
-									DeviceAddr: deviceControlData.DeviceAddr,
-									Properties: nil,
-								}
-								for _, v := range deviceControlData.CmdItems {
-									reqFrame.Properties = append(reqFrame.Properties, MQTTFeisjyWritePropertyRequestParamPropertyTemplate{fmt.Sprintf("%d", v.Code), v.Value})
-								}
-
-								setting.ZAPS.Infof("遥测遥调下发信息%v", reqFrame)
-
-								r.ReportServiceFeisjyProcessWriteProperty(reqFrame)
-
-								type deviceControlResult struct {
-									Uuid   string `json:"uuid"`
-									Status int    `json:"status"`
-								}
-								v := deviceControlResult{
-									Uuid:   deviceControlData.Uuid,
-									Status: 1,
-								}
-								sJson, _ := json.Marshal(v)
-
-								setting.ZAPS.Info(v)
-
-								r.FeisjyPublishdeviceControlResult(sJson, deviceControlData.DeviceAddr)
-							}
-						case "setting":
-							{
-
-							}
+						reqFrame := MQTTFeisjyWritePropertyTemplate{
+							CmdType:    deviceControlData.CmdType,
+							Uuid:       deviceControlData.Uuid,
+							DeviceAddr: deviceControlData.DeviceAddr,
+							Properties: nil,
 						}
+
+						for _, v := range deviceControlData.CmdItems {
+							reqFrame.Properties = append(reqFrame.Properties, MQTTFeisjyWritePropertyRequestParamPropertyTemplate{fmt.Sprintf("%d", v.Code), v.Value})
+						}
+
+						r.FeisjyDeviceControlMachine(reqFrame)
 					}
 
 				case "deviceUpgrade":
