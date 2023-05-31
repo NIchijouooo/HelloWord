@@ -979,6 +979,7 @@ func (d *CollectInterfaceTemplate) CommunicationManageDel(ctx context.Context) {
 
 func (d *CollectInterfaceTemplate) CommunicationManagePoll() {
 
+	d.Cron.Stop() //gwai add 20230531
 	cmd := CommunicationCmdTemplate{}
 	for _, v := range d.DeviceNodeMap {
 		cmd.CollInterfaceName = d.CollInterfaceName
@@ -986,6 +987,9 @@ func (d *CollectInterfaceTemplate) CommunicationManagePoll() {
 		cmd.FunName = "GetDeviceRealVariables"
 		d.CommQueueManage.CommunicationManageAddCommon(cmd)
 	}
+
+	d.Cron.Run() //gwai add 20230531
+
 	if d.CommInterface.GetType() == commInterface.CommTypeIoIn || d.CommInterface.GetType() == commInterface.CommTypeIoOut {
 		return
 	}

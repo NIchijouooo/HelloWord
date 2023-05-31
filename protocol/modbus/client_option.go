@@ -19,7 +19,8 @@ func WithLogProvider(provider LogProvider) ClientProviderOption {
 // WithEnableLogger enable log output when you has set logger.
 func WithEnableLogger() ClientProviderOption {
 	return func(p ClientProvider) {
-		p.LogMode(true)
+		//p.LogMode(true)
+		p.LogMode(false) //gwai modify 20230531
 	}
 }
 
