@@ -90,7 +90,7 @@
       <template #footer>
         <span class="dialog-footer">
           <el-button type="primary" @click="submitPwdForm()">保存</el-button>
-          <el-button @click="closetPwdFormDialog()">取消</el-button>
+          <el-button @click="handleClose()">取消</el-button>
         </span>
       </template>
     </el-dialog>
