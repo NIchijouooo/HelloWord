@@ -208,6 +208,7 @@ const activeIndex = computed(() => route.path)
 
 :deep(.el-sub-menu__title) {
   height: 68px;
+  padding: 0px 0px;
   font-size: 16px;
   letter-spacing: 1px; //字间距
   background-color: inherit !important;
