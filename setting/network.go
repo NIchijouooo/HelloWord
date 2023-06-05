@@ -76,7 +76,7 @@ func GetNetworkNames() []string {
 	return names
 }
 
-//获取当前网络参数
+// 获取当前网络参数
 func GetNetworkParams() []NetworkParamTemplate {
 
 	inters, err := net.Interfaces()
@@ -102,7 +102,7 @@ func GetNetworkParams() []NetworkParamTemplate {
 	return NetworkParams
 }
 
-//获取系统所有网卡参数
+// 获取系统所有网卡参数
 func GetNetworkInterface() []NetworkParamTemplate {
 
 	params := make([]NetworkParamTemplate, 0)
@@ -198,7 +198,7 @@ func AddNetworkConfigParam(configParam NetworkConfigParamTemplate) error {
 	return nil
 }
 
-//修改网络参数
+// 修改网络参数
 func ModifyNetworkConfigParam(configParam NetworkConfigParamTemplate) error {
 
 	names := GetNetworkNames()
@@ -236,7 +236,7 @@ func ModifyNetworkConfigParam(configParam NetworkConfigParamTemplate) error {
 	return nil
 }
 
-//删除网络参数
+// 删除网络参数
 func DeleteNetworkConfigParam(name string) error {
 
 	names := GetNetworkNames()
@@ -309,11 +309,12 @@ func (n *NetworkConfigParamTemplate) CmdSetStaticIP() {
 		ZAPS.Debugf("网卡[%s]设置IP[%s]Netmask[%s]成功", n.Name, n.ConfigIP, n.ConfigNetmask)
 	}
 
-	out, err = exec.Command("/sbin/route", "add", "default", "gw", n.ConfigGateway).Output()
-	if err != nil {
-		ZAPS.Debugf("网卡[%s]添加默认网关[%s]失败 %s %v", n.Name, n.ConfigGateway, string(out), err)
-		return
-	}
+	// UPDATA QJHui 2023/6/5 修改路由表，导致4G使用问题
+	//out, err = exec.Command("/sbin/route", "add", "default", "gw", n.ConfigGateway).Output()
+	//if err != nil {
+	//	ZAPS.Debugf("网卡[%s]添加默认网关[%s]失败 %s %v", n.Name, n.ConfigGateway, string(out), err)
+	//	return
+	//}
 	ZAPS.Debugf("网卡[%s]添加默认网关[%s]成功", n.Name, n.ConfigGateway)
 
 }
