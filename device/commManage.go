@@ -1651,11 +1651,12 @@ func (c *CommunicationManageTemplate) CommunicationStateMachineModbusTCP(cmd Com
 			}
 		}
 	} else if cmd.FunName == "SetVariables" {
+
 		wVariables := make(map[string]interface{})
 		setting.ZAPS.Debugf("采集服务[%s]SetVariables函数调用参数%v", collName, cmd.FunPara)
 		err := json.Unmarshal([]byte(cmd.FunPara), &wVariables)
 		if err != nil {
-			setting.ZAPS.Errorf("采集服务[%s]SetVariables函数调用失败", collName)
+			setting.ZAPS.Errorf("采集服务[%s]SetVariables 函数调用失败", collName)
 			return rxResult
 		}
 

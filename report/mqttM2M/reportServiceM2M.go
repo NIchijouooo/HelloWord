@@ -9,7 +9,7 @@ import (
 	"gateway/setting"
 	"gateway/utils"
 	MQTT "github.com/eclipse/paho.mqtt.golang"
-	"github.com/robfig/cron"
+	"github.com/robfig/cron/v3"
 	"io"
 	"net/http"
 	"os"
@@ -116,7 +116,7 @@ func ReportServiceM2MPoll(ctx context.Context, r *ReportServiceParamM2MTemplate)
 	reportTime := fmt.Sprintf("@every %dm%ds", r.GWParam.ReportTime/60, r.GWParam.ReportTime%60)
 	setting.ZAPS.Infof("上报服务[%s]定时上报周期为%v", r.GWParam.ServiceName, reportTime)
 
-	_ = cronProcess.AddFunc(reportTime, r.ReportTimeFun)
+	cronProcess.AddFunc(reportTime, r.ReportTimeFun)
 
 	go r.ProcessUpLinkFrame(ctx)
 	go r.ProcessDownLinkFrame(ctx)
