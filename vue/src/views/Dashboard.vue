@@ -127,9 +127,37 @@
         </div>
       </div>
       <div class="chart-info">
-        <div class="bi-title">{{ ctxData.headItemName['hin' + ctxData.activeIndex] }}</div>
-        <div class="bi-body">
-          <line-chart :chart-data="ctxData.curChartData" :key="ctxData.curChartData"></line-chart>
+        <div style="height: calc(50% - 10px);position: relative; background-color: #fff;border-radius: 4px;">
+          <div class="bi-title">{{ ctxData.headItemName['hin' + ctxData.activeIndex] }}</div>
+          <div class="bi-body">
+            <line-chart :chart-data="ctxData.curChartData" :key="ctxData.curChartData"></line-chart>
+          </div>
+        </div>
+        <div style="height: calc(50% - 10px);position: relative; background-color: #fff;border-radius: 4px;top: 20px">
+          <div class="bi-title">三元组信息</div>
+          <div class="bi-body">
+            <div class="info-list">
+              <div class="info-item" v-for="(item, index) in ctxData.gatewayTableData" :key="index">
+                <div class="bib-item" style="height: 45px;">
+                  <h3 class="bibi-label" style="width: 100%;text-align: center">{{ item.serviceName }}</h3>
+                </div>
+                <div class="bib-item" style="height: 45px;">
+                  <div class="bibi-label" style="height: 45px;line-height: 45px;">产品密钥：</div>
+                  <div class="bibi-info">{{ item.param.ProductKey }}</div>
+                </div>
+
+                <div class="bib-item" style="height: 45px;">
+                  <div class="bibi-label" style="height: 45px;line-height: 45px;">通讯地址：</div>
+                  <div class="bibi-info">{{ item.param.DeviceID }}</div>
+                </div>
+
+                <div class="bib-item" style="height: 45px;">
+                  <div class="bibi-label" style="height: 45px;line-height: 45px;">设备密钥：</div>
+                  <div class="bibi-info" style="width: calc(100% - 100px);word-break: break-all">{{ item.param.DeviceSecret }}</div>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -143,8 +171,10 @@
 <script setup>
 import LineChart from 'comps/LineChart.vue'
 import DashboardApi from 'api/dashboard.js'
+import ServiceApi from 'api/service.js'
 import { nextTick } from 'vue'
 import { userStore } from 'stores/user'
+import { ElMessage, ElMessageBox } from 'element-plus'
 import Vue3Barcode from 'vue3-barcode'
 const users = userStore()
 // 自定义响应数据
@@ -176,6 +206,8 @@ const ctxData = reactive({
   showFlag: false,
   bFlag: false,
   barcodeVale: 0,
+
+  gatewayTableData: []
 })
 
 const changeIndex = (indexValue) => {
@@ -244,6 +276,32 @@ getSysParams()
 const showBarcode = () => {
   ctxData.bFlag = true
 }
+// 获取所有上报服务信息
+const getGatewayList = (flag) => {
+  const pData = {
+    token: users.token,
+    data: {},
+  }
+  ServiceApi.getGatewayList(pData).then(async (res) => {
+    console.log('getGatewayList -> res', res)
+    if (!res) return
+    if (res.code === '0') {
+      ctxData.gatewayTableData = res.data
+      if (flag === 1) {
+        ElMessage({
+          type: 'success',
+          message: '刷新成功！',
+        })
+      }
+    } else {
+      showOneResMsg(res)
+    }
+    await nextTick(() => {
+      ctxData.tableMaxHeight = contentRef.value.clientHeight - 34 - 36 - 22
+    })
+  })
+}
+getGatewayList()
 </script>
 <style lang="scss" scoped>
 .dashboard {
@@ -387,8 +445,6 @@ const showBarcode = () => {
       left: 600px;
       right: 0;
       bottom: 0;
-      background-color: #fff;
-      border-radius: 4px;
     }
     .bi-title {
       position: absolute;
@@ -415,7 +471,7 @@ const showBarcode = () => {
         display: flex;
         align-items: center;
         .bibi-label {
-          width: 120px;
+          width: 100px;
           color: #666;
           height: 60px;
           line-height: 60px;
@@ -423,6 +479,22 @@ const showBarcode = () => {
         .bibi-info {
           color: #000;
         }
+      }
+
+      .info-list {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 20px;
+        padding: 10px;
+      }
+
+      .info-item {
+        width: calc(50% - 10px);
+        background: #dff4fa;
+        box-shadow: 0 0 6px #cccccc;
+        border-radius: 4px;
+        padding: 10px 30px;
+        box-sizing: border-box;
       }
     }
   }
@@ -481,7 +553,7 @@ const showBarcode = () => {
     left: 36px;
     bottom: 20px;
     right: 20px;
-    overflow: auto;
+    overflow: hidden;
   }
   .dashboard .content .bi-body .bib-item {
     height: 36px;
