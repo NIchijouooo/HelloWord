@@ -152,7 +152,7 @@
           </el-form-item>
           <el-form-item
             label="上报地址"
-            :prop="ctxData.gatewayForm.protocol !== 'ModbusTCP' ? ip : ''"
+            :prop="ctxData.gatewayForm.protocol !== 'ModbusTCP' ? 'ip' : ''"
             v-show="ctxData.gatewayForm.protocol !== 'ModbusTCP'"
           >
             <el-input type="text" v-model="ctxData.gatewayForm.ip" autocomplete="off" placeholder="请输入上报地址">
@@ -494,6 +494,13 @@ const ctxData = reactive({
       {
         required: true,
         message: '协议名称不能为空',
+        trigger: 'blur',
+      },
+    ],
+    ModbusTCP: [
+      {
+        required: true,
+        message: '上报地址不能为空',
         trigger: 'blur',
       },
     ],
