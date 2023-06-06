@@ -947,6 +947,7 @@ func (d *CollectInterfaceTemplate) CommunicationManageDel(ctx context.Context) {
 						}
 					}
 				default:
+
 					time.Sleep(100 * time.Millisecond)
 				}
 			}

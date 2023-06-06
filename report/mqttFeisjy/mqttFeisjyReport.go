@@ -18,7 +18,7 @@ type MQTTFeisjyReportFrameTemplate struct {
 
 type MQTTFeisjyReportDataTemplate struct {
 	ID    int         `json:"id"`
-	Name  string      `json:"name"`
+	Name  string      `json:"name,omitempty"`
 	Value interface{} `json:"value"`
 }
 
@@ -281,8 +281,9 @@ func (r *ReportServiceParamFeisjyTemplate) NodePropertyPost(name []string) {
 					for _, v := range node.Properties {
 						if num, err := strconv.Atoi(v.Name); err == nil {
 							ycProperty := MQTTFeisjyReportDataTemplate{
-								ID:   num,
-								Name: v.Label,
+								ID: num,
+								// QJH Delect 2023/6/6 去掉name上报，解决数据包上报流量过大
+								//Name: v.Label,
 							}
 							if len(v.Value) >= 1 { //当前属性有数据
 								ycProperty.Value = v.Value[len(v.Value)-1].Value
