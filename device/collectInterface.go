@@ -947,29 +947,6 @@ func (d *CollectInterfaceTemplate) CommunicationManageDel(ctx context.Context) {
 						}
 					}
 				default:
-
-					// 2023/5/31 QJHui ADD 解决设备采集一段时间后不再采集问题
-					if d.Cron != nil {
-						entry := d.Cron.Entry(d.CronId)
-						// 判断当前条目是否在运行
-						lastTime := entry.Prev
-						nextTime := entry.Next
-						if nextTime.IsZero() || nextTime.Before(lastTime) {
-							setting.ZAPS.Errorf("检测到采集接口[%s]定时未运行,将重启采集定时器", d.CollInterfaceName)
-
-							//停止
-							d.Cron.Stop()
-							//重启
-							d.Cron = cron.New()
-
-							str := fmt.Sprintf("@every %dm%ds", d.PollPeriod/60, d.PollPeriod%60)
-							setting.ZAPS.Infof("采集任务[%s] %+v", d.CollInterfaceName, str)
-							//添加定时任务
-							d.CronId, _ = d.Cron.AddFunc(str, d.CommunicationManagePoll)
-							d.Cron.Start()
-						}
-					}
-
 					time.Sleep(100 * time.Millisecond)
 				}
 			}
@@ -979,7 +956,6 @@ func (d *CollectInterfaceTemplate) CommunicationManageDel(ctx context.Context) {
 
 func (d *CollectInterfaceTemplate) CommunicationManagePoll() {
 
-	d.Cron.Stop() //gwai add 20230531
 	cmd := CommunicationCmdTemplate{}
 	for _, v := range d.DeviceNodeMap {
 		cmd.CollInterfaceName = d.CollInterfaceName
@@ -987,8 +963,6 @@ func (d *CollectInterfaceTemplate) CommunicationManagePoll() {
 		cmd.FunName = "GetDeviceRealVariables"
 		d.CommQueueManage.CommunicationManageAddCommon(cmd)
 	}
-
-	d.Cron.Run() //gwai add 20230531
 
 	if d.CommInterface.GetType() == commInterface.CommTypeIoIn || d.CommInterface.GetType() == commInterface.CommTypeIoOut {
 		return
