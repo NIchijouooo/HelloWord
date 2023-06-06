@@ -9,6 +9,7 @@ import (
 	"gateway/device/eventBus"
 	"gateway/setting"
 	"gateway/utils"
+	"math"
 	"sync"
 	"time"
 
@@ -947,6 +948,26 @@ func (d *CollectInterfaceTemplate) CommunicationManageDel(ctx context.Context) {
 						}
 					}
 				default:
+
+					// QJHui ADD 当系统时间校准时出现，当前时间与下一次执行时间相差很多的情况
+					entry := d.Cron.Entry(d.CronId)
+					now := time.Now().In(d.Cron.Location())
+					next := entry.Next
+					setting.ZAPS.Infof("系统当前时间:%v  采集服务[%s]定时器下次执行时间%v", now, d.CollInterfaceName, next)
+					if now.Before(next) {
+						diff := now.Sub(next)
+						diffSec := int(math.Abs(diff.Seconds()))
+
+						if diffSec > d.PollPeriod {
+							setting.ZAPS.Errorf("系统当前时间 在 定时器下次执行时间 之前, 相差：%v %d %v", diff, diffSec, diff.Seconds())
+							setting.ZAPS.Errorf("相差为 %d s 大于设定 %d s", diffSec, d.PollPeriod)
+
+							//停止
+							d.Cron.Stop()
+							time.Sleep(10 * time.Millisecond)
+							d.Cron.Start()
+						}
+					}
 
 					time.Sleep(100 * time.Millisecond)
 				}
