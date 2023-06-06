@@ -1,5 +1,5 @@
 <template>
-  <el-header height="56px">
+  <el-header height="66px">
     <div class="header_right">
       <span>
         {{ ctxData.configInfo.name }}

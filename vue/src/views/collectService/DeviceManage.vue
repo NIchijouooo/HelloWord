@@ -1,16 +1,102 @@
 <template>
   <div class="main-container">
     <div v-if="ctxData.idFlag" class="main">
-      <div class="title" style="justify-content: space-between">
+      <div class="search-bar">
+        <el-form :model="ctxData.screenForm"  :inline="true" ref="searchFormRef" status-icon label-width="90px">
+          <el-form-item label="设备名称" prop="name">
+            <el-input type="text" v-model="ctxData.screenForm.name" autocomplete="off" placeholder="请输入设备名称">
+            </el-input>
+          </el-form-item>
+          <el-form-item label="设备标签" prop="label">
+            <el-input type="text" v-model="ctxData.screenForm.label" autocomplete="off" placeholder="请输入设备标签">
+            </el-input>
+          </el-form-item>
+          <el-form-item label="设备地址" prop="addr">
+            <el-input type="text" v-model="ctxData.screenForm.addr" autocomplete="off" placeholder="请输入设备地址">
+            </el-input>
+          </el-form-item>
+          <el-form-item label="设备模型" prop="tsl">
+            <el-select v-model="ctxData.screenForm.tsl" clearable style="width: 100%" placeholder="请选择设备模型">
+              <el-option
+                v-for="(item, index) of ctxData.deviceModelList"
+                :key="'dm_' + index"
+                :label="item.name"
+                :value="item.name"
+              >
+              </el-option>
+            </el-select>
+          </el-form-item>
+          <el-form-item label="采集接口" prop="collInterfaceName">
+            <el-select
+              v-model="ctxData.screenForm.collInterfaceName"
+              clearable
+              style="width: 100%"
+              placeholder="请选择采集接口"
+              multiple
+              collapse-tags
+              collapse-tags-tooltip
+            >
+              <el-option
+                v-for="(item, index) of ctxData.interfaceList"
+                :key="'cin_' + index"
+                :label="item.collInterfaceName"
+                :value="item.collInterfaceName"
+              >
+              </el-option>
+            </el-select>
+          </el-form-item>
+          <el-form-item label="通信状态">
+            <el-radio-group v-model="ctxData.screenForm.commStatus">
+              <el-radio label="Line">全部</el-radio>
+              <el-radio label="onLine">在线</el-radio>
+              <el-radio label="offLine">离线</el-radio>
+            </el-radio-group>
+          </el-form-item>
+          <el-form-item style="margin-left: 20px;">
+            <el-button type="primary" @click="doScreen()">搜索</el-button>
+          </el-form-item>
+          <el-form-item>
+            <el-button @click="cancelScreen()">重置</el-button>
+          </el-form-item>
+          <el-form-item>
+            <el-button style="color: #fff" color="#2EA554" @click="refresh()">
+              <el-icon class="btn-icon">
+                <Icon name="local-refresh" size="14px" color="#ffffff" />
+              </el-icon>
+              刷新
+            </el-button>
+          </el-form-item>
+          
+        </el-form>
+      </div>
+      <div class="tool-bar">
         <div class="title-left">
-          <el-button type="success" bg @click="showScreen()">
+          <el-button type="primary" bg class="right-btn" @click="addDevice()">
             <el-icon class="btn-icon">
-              <Icon name="el-icon-Menu" size="14px" color="#ffffff" />
+              <Icon name="local-add" size="14px" color="#ffffff" />
             </el-icon>
-            筛选
+            添加
+          </el-button>
+          <el-button type="danger" bg class="right-btn" @click="deleteDevice()">
+            <el-icon class="btn-icon">
+              <Icon name="local-delete" size="14px" color="#ffffff" />
+            </el-icon>
+            删除
+          </el-button>
+          <el-button type="primary" bg class="right-btn" @click="allCollect()">
+            <el-icon class="btn-icon">
+              <Icon name="local-refresh" size="14px" color="#ffffff" />
+            </el-icon>
+            批量采集
           </el-button>
         </div>
-        <div>
+        <div class="title-count">
+          <div>
+            <span style="margin-right: 10px">设备总数：{{ ctxData.deviceTotal }}</span>
+            <span>在线：{{ ctxData.deviceOnline }}</span>
+          </div>
+        </div>
+        <div style="padding-right: 20px;">
           <el-button type="primary" plain class="right-btn" @click="importDevice()">
             <el-icon class="el-input__icon"><download /></el-icon>
             导入设备
@@ -19,44 +105,13 @@
             <el-icon class="el-input__icon"><upload /></el-icon>
             导出设备
           </el-button>
-          <el-button type="primary" bg class="right-btn" @click="addDevice()">
-            <el-icon class="btn-icon">
-              <Icon name="local-add" size="14px" color="#ffffff" />
-            </el-icon>
-            添加
-          </el-button>
-          <el-button type="primary" bg class="right-btn" @click="allCollect()">
-            <el-icon class="btn-icon">
-              <Icon name="local-refresh" size="14px" color="#ffffff" />
-            </el-icon>
-            批量采集
-          </el-button>
-          <el-button style="color: #fff" color="#2EA554" class="right-btn" @click="refresh()">
-            <el-icon class="btn-icon">
-              <Icon name="local-refresh" size="14px" color="#ffffff" />
-            </el-icon>
-            刷新
-          </el-button>
-          <el-button type="danger" bg class="right-btn" @click="deleteDevice()">
-            <el-icon class="btn-icon">
-              <Icon name="local-delete" size="14px" color="#ffffff" />
-            </el-icon>
-            删除
-          </el-button>
         </div>
       </div>
-      <div class="title" style="top: 60px; height: 76px; padding: 20px 0; justify-content: space-between">
-        <div>
-          <span style="margin-right: 10px">设备总数：{{ ctxData.deviceTotal }}</span>
-          <span>在线：{{ ctxData.deviceOnline }}</span>
-        </div>
-      </div>
-      <div class="content" ref="contentRef" style="top: 136px">
+      <div class="content" ref="contentRef">
         <el-table
           :data="filterTableData"
           :cell-style="ctxData.cellStyle"
           :header-cell-style="ctxData.headerCellStyle"
-          :max-height="ctxData.tableMaxHeight"
           style="width: 100%"
           stripe
           @selection-change="handleSelectionChange"
@@ -206,68 +261,6 @@
         <span class="dialog-footer">
           <el-button @click="cancelUploadDevice">取消</el-button>
           <el-button type="primary" @click="submitUploadDevice">上传</el-button>
-        </span>
-      </template>
-    </el-dialog>
-    <!-- 筛选设备 -->
-    <el-dialog v-model="ctxData.sFlag" title="筛选设备" width="400px">
-      <div class="dialog-content" style="min-height: 280px">
-        <el-form :model="ctxData.screenForm" ref="screenFormRef" status-icon label-position="right" label-width="100px">
-          <el-form-item label="设备名称" prop="name">
-            <el-input type="text" v-model="ctxData.screenForm.name" autocomplete="off" placeholder="请输入设备名称">
-            </el-input>
-          </el-form-item>
-          <el-form-item label="设备标签" prop="label">
-            <el-input type="text" v-model="ctxData.screenForm.label" autocomplete="off" placeholder="请输入设备标签">
-            </el-input>
-          </el-form-item>
-          <el-form-item label="设备地址" prop="addr">
-            <el-input type="text" v-model="ctxData.screenForm.addr" autocomplete="off" placeholder="请输入设备地址">
-            </el-input>
-          </el-form-item>
-          <el-form-item label="设备模型" prop="tsl">
-            <el-select v-model="ctxData.screenForm.tsl" clearable style="width: 100%" placeholder="请选择设备模型">
-              <el-option
-                v-for="(item, index) of ctxData.deviceModelList"
-                :key="'dm_' + index"
-                :label="item.name"
-                :value="item.name"
-              >
-              </el-option>
-            </el-select>
-          </el-form-item>
-          <el-form-item label="采集接口" prop="collInterfaceName">
-            <el-select
-              v-model="ctxData.screenForm.collInterfaceName"
-              clearable
-              style="width: 100%"
-              placeholder="请选择采集接口"
-              multiple
-              collapse-tags
-              collapse-tags-tooltip
-            >
-              <el-option
-                v-for="(item, index) of ctxData.interfaceList"
-                :key="'cin_' + index"
-                :label="item.collInterfaceName"
-                :value="item.collInterfaceName"
-              >
-              </el-option>
-            </el-select>
-          </el-form-item>
-          <el-form-item label="通信状态">
-            <el-radio-group v-model="ctxData.screenForm.commStatus">
-              <el-radio label="Line">全部</el-radio>
-              <el-radio label="onLine">在线</el-radio>
-              <el-radio label="offLine">离线</el-radio>
-            </el-radio-group>
-          </el-form-item>
-        </el-form>
-      </div>
-      <template #footer>
-        <span class="dialog-footer">
-          <el-button @click="cancelScreen()">取消</el-button>
-          <el-button type="primary" @click="doScreen()">筛选</el-button>
         </span>
       </template>
     </el-dialog>
@@ -728,11 +721,6 @@ const cancelUploadDevice = () => {
 const beforeCloseUploadDevice = () => {
   cancelUploadDevice()
 }
-//查看过滤
-const showScreen = () => {
-  ctxData.sFlag = true
-  //initScreenForm()
-}
 //处理过滤
 const doScreen = () => {
   console.log('doScreen ctxData.deviceTableData = ', ctxData.deviceTableData)
@@ -757,11 +745,9 @@ const doScreen = () => {
       ctxData.deviceTotal++
     }
   })
-  ctxData.sFlag = false
 }
 //取消过滤
 const cancelScreen = () => {
-  ctxData.sFlag = false
   initScreenForm()
 }
 //初始化过滤表单
@@ -801,4 +787,8 @@ const handleResult = (res, doFunction) => {
 </script>
 <style lang="scss" scoped>
 @use 'styles/custom-scoped.scss' as *;
+.title-count {
+  display: flex;
+  justify-content: space-between;
+}
 </style>

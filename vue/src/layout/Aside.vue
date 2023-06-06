@@ -70,11 +70,12 @@ const ctxData = reactive({
   isCollapse: false,
 })
 const route = useRoute()
-console.log('Aside route', route)
+// console.log('Aside route', route)
 if (!user.userInfo) {
   setLoginInfo(user)
 }
 const routers = user.routers
+console.log('routers', routers)
 const concatPath = (p_path) => {
   const path = `${p_path !== '' ? p_path : '/'}`
   return path
@@ -140,7 +141,7 @@ const activeIndex = computed(() => route.path)
   justify-content: space-around;
   align-items: center;
   width: 100%;
-  height: 56px;
+  height: 66px;
   box-sizing: border-box;
   border-bottom: solid 1px #e6e6e6;
 }

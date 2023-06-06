@@ -185,6 +185,15 @@
               "icon": "sysLog"
             },
             "children": []
+          },
+          {
+            "path": "/production",
+            "name": "Production",
+            "meta": {
+              "title": "SN",
+              "icon": "production"
+            },
+            "children": []
           }
         ]
       },
@@ -224,15 +233,6 @@
             "children": []
           }
         ]
-      },
-      {
-        "path": "/production",
-        "name": "Production",
-        "meta": {
-          "title": "SN",
-          "icon": "production"
-        },
-        "children": []
       }
     ]
   },

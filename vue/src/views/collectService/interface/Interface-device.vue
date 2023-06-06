@@ -1,85 +1,106 @@
 <template>
+<div>
   <div v-if="ctxData.dpFlag" class="main">
-    <div class="title" style="justify-content: space-between">
-      <div class="title-left">
-        <el-button type="primary" plain @click="toInterface()" style="margin-right: 20px">
-          <el-icon class="el-input__icon"><back /></el-icon>
-          返回采集接口
-        </el-button>
-        <el-input
-          style="width: 230px; margin-right: 20px"
-          placeholder="请输入 名称/标签/地址/ 过滤"
-          clearable
-          v-model="ctxData.deviceInfo"
-        >
-          <template #prefix>
-            <el-icon class="el-input__icon"><search /></el-icon>
-          </template>
-        </el-input>
-        <span style="font-size: 14px; margin-right: 4px">通信状态:</span>
-        <el-select v-model="ctxData.commStatus" style="width: 100px" placeholder="请选择通信状态">
-          <el-option
-            v-for="(item, index) of ctxData.commStatusOptions"
-            :key="'cs_' + index"
-            :label="item.label"
-            :value="item.value"
-          >
-          </el-option>
-        </el-select>
-      </div>
-      <div>
-        <el-button type="primary" plain class="right-btn" @click="importDevice()">
-          <el-icon class="el-input__icon"><download /></el-icon>
-          批量导入设备
-        </el-button>
-        <el-button type="primary" plain class="right-btn" @click="exportDevice()">
-          <el-icon class="el-input__icon"><upload /></el-icon>
-          批量导出设备
-        </el-button>
-        <el-button type="primary" bg class="right-btn" @click="addDevice()">
-          <el-icon class="btn-icon">
-            <Icon name="local-add" size="14px" color="#ffffff" />
-          </el-icon>
-          添加
-        </el-button>
-        <!-- <el-button type="primary" bg class="right-btn" @click="editDevices()">
-          <el-icon class="btn-icon tianjia"></el-icon>
-          批量修改
-        </el-button> -->
-
-        <el-button type="primary" bg class="right-btn" @click="allCollect()">
-          <el-icon class="btn-icon">
-            <Icon name="local-refresh" size="14px" color="#ffffff" />
-          </el-icon>
-          批量采集
-        </el-button>
-        <el-button style="color: #fff" color="#2EA554" class="right-btn" @click="refresh()">
-          <el-icon class="btn-icon">
-            <Icon name="local-refresh" size="14px" color="#ffffff" />
-          </el-icon>
-          刷新
-        </el-button>
-        <el-button type="danger" bg class="right-btn" @click="deleteDevice()">
-          <el-icon class="btn-icon">
-            <Icon name="local-delete" size="14px" color="#ffffff" />
-          </el-icon>
-          删除
-        </el-button>
-      </div>
+    <div class="search-bar">
+      <el-form :inline="true" ref="searchFormRef" status-icon label-width="90px">
+        <el-form-item style="margin-left: 20px;">
+          <el-button type="primary" plain @click="toInterface()" style="margin-right: 20px">
+            <el-icon class="el-input__icon"><back /></el-icon>
+            返回采集接口
+          </el-button>
+        </el-form-item>
+        <el-form-item>
+          <el-button type="primary" plain class="right-btn" @click="importDevice()">
+            <el-icon class="el-input__icon"><download /></el-icon>
+            批量导入设备
+          </el-button>
+        </el-form-item>
+        <el-form-item>
+          <el-button type="primary" plain class="right-btn" @click="exportDevice()">
+            <el-icon class="el-input__icon"><upload /></el-icon>
+            批量导出设备
+          </el-button>
+        </el-form-item>
+      </el-form>
     </div>
-    <div class="title" style="top: 60px; height: 76px; padding: 20px 0; justify-content: space-between">
-      <div class="tName">{{ props.curInterface.collInterfaceName }}</div>
-      <div>
-        <span style="margin-right: 10px">设备总数：{{ ctxData.deviceTotal }}</span>
-        <span>在线：{{ ctxData.deviceOnline }}</span>
+    
+    <div class="search-bar" style="display: flex;">
+      <div class="title" style="position: relative;margin-right: 40px;justify-content: flex-start;padding: 0px 0px;height: 40px;">
+        <div class="tName">{{ props.curInterface.collInterfaceName }}</div>
       </div>
+      <el-form :inline="true" ref="searchFormRef2" status-icon label-width="90px">
+        <el-form-item label="">
+          <el-input
+            style="width: 230px; margin-right: 20px"
+            placeholder="请输入 名称/标签/地址/ 过滤"
+            clearable
+            v-model="ctxData.deviceInfo"
+          >
+            <template #prefix>
+              <el-icon class="el-input__icon"><search /></el-icon>
+            </template>
+          </el-input>
+        </el-form-item>
+        <el-form-item label="通信状态">
+          <el-select v-model="ctxData.commStatus" style="width: 100px" placeholder="请选择通信状态">
+            <el-option
+              v-for="(item, index) of ctxData.commStatusOptions"
+              :key="'cs_' + index"
+              :label="item.label"
+              :value="item.value"
+            >
+            </el-option>
+          </el-select>
+        </el-form-item>
+        <el-form-item>
+          <el-button type="primary" bg class="right-btn" @click="addDevice()">
+            <el-icon class="btn-icon">
+              <Icon name="local-add" size="14px" color="#ffffff" />
+            </el-icon>
+            添加
+          </el-button>
+        </el-form-item>
+        <el-form-item>
+          <!-- <el-button type="primary" bg class="right-btn" @click="editDevices()">
+            <el-icon class="btn-icon tianjia"></el-icon>
+            批量修改
+          </el-button> -->
+
+          <el-button type="primary" bg class="right-btn" @click="allCollect()">
+            <el-icon class="btn-icon">
+              <Icon name="local-refresh" size="14px" color="#ffffff" />
+            </el-icon>
+            批量采集
+          </el-button>
+        </el-form-item>
+        <el-form-item>
+          <el-button type="danger" bg class="right-btn" @click="deleteDevice()">
+            <el-icon class="btn-icon">
+              <Icon name="local-delete" size="14px" color="#ffffff" />
+            </el-icon>
+            删除
+          </el-button>
+        </el-form-item>
+        <el-form-item>
+          <el-button style="color: #fff" color="#2EA554" class="right-btn" @click="refresh()">
+            <el-icon class="btn-icon">
+              <Icon name="local-refresh" size="14px" color="#ffffff" />
+            </el-icon>
+            刷新
+          </el-button>
+        </el-form-item>
+        <el-form-item>
+          <span style="margin-right: 10px">设备总数：{{ ctxData.deviceTotal }}</span>
+          <span>在线：{{ ctxData.deviceOnline }}</span>
+        </el-form-item>
+      </el-form>
     </div>
     <div class="content" ref="contentRef" style="top: 136px">
       <el-table
         :data="filterTableData"
         :cell-style="ctxData.cellStyle"
         :header-cell-style="ctxData.headerCellStyle"
-        :max-height="ctxData.tableMaxHeight"
+        height="660"
         style="width: 100%"
         stripe
         @selection-change="handleSelectionChange"
@@ -227,6 +248,7 @@
       </span>
     </template>
   </el-dialog>
+</div>
 </template>
 <script setup>
 import { Search, Back, Download, Upload } from '@element-plus/icons-vue'

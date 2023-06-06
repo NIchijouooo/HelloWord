@@ -1,63 +1,96 @@
 <template>
   <div class="main">
-    <div class="title" style="justify-content: space-between">
-      <div class="title-left">
-        <el-button type="primary" plain @click="toTransferModel()" style="margin-right: 20px">
-          <el-icon class="el-input__icon"><back /></el-icon>
-          返回上报模型
-        </el-button>
-      </div>
+    <div class="search-bar">
+      <el-form :inline="true" ref="searchFormRef" status-icon label-width="120px">
+        <el-form-item style="margin-left: 20px;">
+          <el-button type="primary" plain @click="toTransferModel()" style="margin-right: 20px">
+            <el-icon class="el-input__icon"><back /></el-icon>
+            返回上报模型
+          </el-button>
+        </el-form-item>
+      </el-form>
     </div>
-    <div class="title" style="top: 60px; height: 76px; padding: 20px 0; justify-content: space-between">
-      <div class="tName">{{ props.curTransferModel.label }}</div>
-      <div style="display: flex; align-items: center">
-        <el-input style="width: 200px" placeholder="请输入属性名称或者标签" clearable v-model="ctxData.PropertyInfo">
-          <template #prefix>
-            <el-icon class="el-input__icon"><search /></el-icon>
-          </template>
-        </el-input>
-        <el-button type="primary" bg class="right-btn" @click="addProperty()">
-          <el-icon class="btn-icon">
-            <Icon name="local-add" size="14px" color="#ffffff" />
-          </el-icon>
-          手动添加
-        </el-button>
-        <el-button type="primary" bg class="right-btn" @click="addProperties()">
-          <el-icon class="btn-icon">
-            <Icon name="local-tongbu" size="14px" color="#ffffff" />
-          </el-icon>
-          同步
-        </el-button>
-        <!-- <el-button type="primary" bg class="right-btn" @click="editProperties()">
-          <el-icon class="btn-icon tianjia"></el-icon>
-          批量修改
-        </el-button> -->
-        <el-button type="danger" bg class="right-btn" @click="deleteProperty()">
-          <el-icon class="btn-icon">
-            <Icon name="local-delete" size="14px" color="#ffffff" />
-          </el-icon>
-          删除
-        </el-button>
-        <el-button style="color: #fff" color="#2EA554" class="right-btn" @click="refresh()">
-          <el-icon class="btn-icon">
-            <Icon name="local-refresh" size="14px" color="#ffffff" />
-          </el-icon>
-          刷新
-        </el-button>
+    
+    <div class="search-bar" style="display: flex;">
+      <div class="title" style="position: relative;margin-right: 40px;height: 40px; padding: 0px 0; justify-content: flex-start">
+        <div class="tName">{{ props.curTransferModel.label }}</div>
       </div>
+      <el-form :inline="true" ref="searchFormRef2" status-icon label-width="90px">
+        <el-form-item label="">
+          <el-input style="width: 200px" placeholder="请输入属性名称或者标签" clearable v-model="ctxData.PropertyInfo">
+            <template #prefix>
+              <el-icon class="el-input__icon"><search /></el-icon>
+            </template>
+          </el-input>
+        </el-form-item>
+        <el-form-item>
+          <el-button type="primary" bg class="right-btn" @click="addProperty()">
+            <el-icon class="btn-icon">
+              <Icon name="local-add" size="14px" color="#ffffff" />
+            </el-icon>
+            手动添加
+          </el-button>
+        </el-form-item>
+        <el-form-item>
+          <el-button type="primary" bg class="right-btn" @click="addProperties()">
+            <el-icon class="btn-icon">
+              <Icon name="local-tongbu" size="14px" color="#ffffff" />
+            </el-icon>
+            同步
+          </el-button>
+        </el-form-item>
+        <el-form-item>
+          <!-- <el-button type="primary" bg class="right-btn" @click="editProperties()">
+            <el-icon class="btn-icon tianjia"></el-icon>
+            批量修改
+          </el-button> -->
+          <el-button type="danger" bg class="right-btn" @click="deleteProperty()">
+            <el-icon class="btn-icon">
+              <Icon name="local-delete" size="14px" color="#ffffff" />
+            </el-icon>
+            删除
+          </el-button>
+        </el-form-item>
+        <el-form-item>
+          <el-button style="color: #fff" color="#2EA554" class="right-btn" @click="refresh()">
+            <el-icon class="btn-icon">
+              <Icon name="local-refresh" size="14px" color="#ffffff" />
+            </el-icon>
+            刷新
+          </el-button>
+        </el-form-item>
+      </el-form>
     </div>
     <div class="content" ref="contentRef" style="top: 136px">
       <el-table
         :data="filterTableData"
         :cell-style="ctxData.cellStyle"
         :header-cell-style="ctxData.headerCellStyle"
-        :max-height="ctxData.tableMaxHeight"
+        height="660"
         style="width: 100%"
         stripe
         @selection-change="handleSelectionChange"
         @row-dblclick="editProperty"
       >
         <el-table-column type="selection" width="55" />
+        <el-table-column type="expand">
+          <template #default="props">
+            <div class="param-content">
+              <div class="pc-title">
+                <div class="pct-info">
+                  <b> {{ props.row.name }} </b>
+                  {{ '参数详情' }}
+                </div>
+              </div>
+              <div class="pc-content">
+                <div class="param-item" v-for="(item, key, index) of props.row.params" :key="index">
+                  <div class="param-value">{{ ctxData.paramName[key] }}：</div>
+                  <div class="param-name">{{ typeof item === 'boolean' ? (item ? '是' : '否') : item || '-' }}</div>
+                </div>
+              </div>
+            </div>
+          </template>
+        </el-table-column>
         <el-table-column prop="name" label="属性名称" width="auto" min-width="180" align="center"> </el-table-column>
         <el-table-column prop="label" label="属性标签" width="auto" min-width="180" align="center"> </el-table-column>
         <el-table-column prop="uploadName" label="上报属性名称" width="auto" min-width="180" align="center">
@@ -73,38 +106,6 @@
           </template>
         </el-table-column>
         <el-table-column prop="unit" label="单位" width="auto" min-width="80" align="center"> </el-table-column>
-        <el-table-column label="参数详情" width="auto" min-width="400" align="center">
-          <template #default="scope">
-            <el-popover
-              trigger="hover"
-              :show-after="500"
-              :auto-close="500"
-              effect="light"
-              width="auto"
-              placement="left"
-            >
-              <template #default>
-                <div class="param-content">
-                  <div class="pc-title">
-                    <div class="pct-info">
-                      <b> {{ scope.row.name }} </b>
-                      {{ '参数详情' }}
-                    </div>
-                  </div>
-                  <div class="pc-content">
-                    <div class="param-item" v-for="(item, key, index) of scope.row.params">
-                      <div class="param-value">{{ ctxData.paramName[key] }}：</div>
-                      <div class="param-name">{{ typeof item === 'boolean' ? (item ? '是' : '否') : item }}</div>
-                    </div>
-                  </div>
-                </div>
-              </template>
-              <template #reference>
-                <el-tag size="large">{{ scope.row.params }}</el-tag>
-              </template>
-            </el-popover>
-          </template>
-        </el-table-column>
         <el-table-column label="操作" width="auto" min-width="150" align="center" fixed="right">
           <template #default="scope">
             <el-button @click="editProperty(scope.row)" text type="primary">编辑</el-button>

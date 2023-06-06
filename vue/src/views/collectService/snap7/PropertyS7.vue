@@ -1,63 +1,99 @@
 <template>
   <div class="main">
-    <div class="title" style="justify-content: space-between">
-      <div>
-        <el-button type="primary" plain @click="toDeviceModel()">
-          <el-icon class="el-input__icon"><back /></el-icon>
-          返回设备模型
-        </el-button>
-      </div>
-      <div style="display: flex; align-items: center">
-        <el-button type="primary" plain class="right-btn" @click="importDPS()">
-          <el-icon class="el-input__icon"><download /></el-icon>
-          导入模型属性
-        </el-button>
-        <el-button type="primary" plain class="right-btn" @click="exportDPS()">
-          <el-icon class="el-input__icon"><upload /></el-icon>
-          导出模型属性
-        </el-button>
-      </div>
+    <div class="search-bar">
+      <el-form :inline="true" ref="searchFormRef" status-icon label-width="90px">
+        <el-form-item style="margin-left: 20px;">
+          <el-button type="primary" plain @click="toDeviceModel()">
+            <el-icon class="el-input__icon"><back /></el-icon>
+            返回设备模型
+          </el-button>
+        </el-form-item>
+        <el-form-item>
+          <el-button type="primary" plain class="right-btn" @click="importDPS()">
+            <el-icon class="el-input__icon"><download /></el-icon>
+            导入模型属性
+          </el-button>
+        </el-form-item>
+        <el-form-item>
+          <el-button type="primary" plain class="right-btn" @click="exportDPS()">
+            <el-icon class="el-input__icon"><upload /></el-icon>
+            导出模型属性
+          </el-button>
+        </el-form-item>
+      </el-form>
     </div>
-    <div class="title" style="top: 60px; height: 76px; padding: 20px 0; justify-content: space-between">
-      <div class="tName">{{ props.curDeviceModel.label }}：属性列表</div>
-      <div style="display: flex">
-        <el-input style="width: 200px" placeholder="请输入属性名称" v-model="ctxData.deviceModelProperty">
-          <template #prefix>
-            <el-icon class="el-input__icon"><search /></el-icon>
-          </template>
-        </el-input>
-        <el-button type="primary" bg class="right-btn" @click="addDeviceModelProperty()">
-          <el-icon class="btn-icon">
-            <Icon name="local-add" size="14px" color="#ffffff" />
-          </el-icon>
-          添加
-        </el-button>
-        <el-button style="color: #fff" color="#2EA554" class="right-btn" @click="refresh()">
-          <el-icon class="btn-icon">
-            <Icon name="local-refresh" size="14px" color="#ffffff" />
-          </el-icon>
-          刷新
-        </el-button>
-        <el-button type="danger" bg class="right-btn" @click="deleteDeviceModelProperty()">
-          <el-icon class="btn-icon">
-            <Icon name="local-delete" size="14px" color="#ffffff" />
-          </el-icon>
-          删除
-        </el-button>
+    <div class="search-bar" style="display: flex;">
+      <div class="title" style="position: relative;margin-right: 40px;justify-content: flex-start;padding: 0px 0px;height: 40px;">
+        <div class="tName">{{ props.curDeviceModel.label }}：属性列表</div>
       </div>
+      <el-form :inline="true" ref="searchFormRef2" status-icon label-width="90px">
+        <el-form-item label="">
+          <el-input style="width: 200px" placeholder="请输入属性名称" v-model="ctxData.deviceModelProperty">
+            <template #prefix>
+              <el-icon class="el-input__icon"><search /></el-icon>
+            </template>
+          </el-input>
+        </el-form-item>
+        <el-form-item>
+          <el-button type="primary" bg class="right-btn" @click="addDeviceModelProperty()">
+            <el-icon class="btn-icon">
+              <Icon name="local-add" size="14px" color="#ffffff" />
+            </el-icon>
+            添加
+          </el-button>
+        </el-form-item>
+        <el-form-item>
+          <el-button style="color: #fff" color="#2EA554" class="right-btn" @click="refresh()">
+            <el-icon class="btn-icon">
+              <Icon name="local-refresh" size="14px" color="#ffffff" />
+            </el-icon>
+            刷新
+          </el-button>
+        </el-form-item>
+        <el-form-item>
+          <el-button type="danger" bg class="right-btn" @click="deleteDeviceModelProperty()">
+            <el-icon class="btn-icon">
+              <Icon name="local-delete" size="14px" color="#ffffff" />
+            </el-icon>
+            删除
+          </el-button>
+        </el-form-item>
+      </el-form>
     </div>
+    
     <div class="content" ref="contentRef" style="top: 136px">
       <el-table
         :data="filterDMPTableData"
         :cell-style="ctxData.cellStyle"
         :header-cell-style="ctxData.headerCellStyle"
-        :max-height="ctxData.tableMaxHeight"
+        height="660"
         style="width: 100%"
         stripe
         @selection-change="handleSelectionChange"
         @row-dblclick="editDeviceModelProperty"
       >
         <el-table-column type="selection" width="55" />
+        <el-table-column type="expand">
+            <template #default="scope">
+              <div class="param-content">
+                <div class="pc-title">
+                  <div class="pct-info">
+                    <b> {{ scope.row.name }} </b>
+                    {{ '参数详情' }}
+                  </div>
+                </div>
+                <div class="pc-content">
+                  <div class="param-item" v-for="(item, key, index) of scope.row.params" :key="index">
+                    <div class="param-value">{{ ctxData.paramName[key] }}：</div>
+                    <div v-if="key === 'dataType'" class="param-name">{{ ctxData.dataTypeNames['dt' + item] }}</div>
+                    <div v-if="key !== 'dataType'" class="param-name">
+                      {{ typeof item === 'boolean' ? (item ? '是' : '否') : item }}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </template>
+          </el-table-column>
         <el-table-column prop="name" label="属性名称" width="auto" min-width="150" align="center"> </el-table-column>
         <el-table-column prop="label" label="属性标签" width="auto" min-width="150" align="center"> </el-table-column>
         <el-table-column label="读写属性" width="auto" min-width="80" align="center">
@@ -76,41 +112,6 @@
           </template>
         </el-table-column>
         <el-table-column prop="unit" label="单位" width="auto" min-width="80" align="center" />
-        <el-table-column label="参数详情" width="auto" min-width="500" align="center">
-          <template #default="scope">
-            <el-popover
-              trigger="hover"
-              :show-after="500"
-              :auto-close="500"
-              effect="light"
-              width="auto"
-              placement="left"
-            >
-              <template #default>
-                <div class="param-content">
-                  <div class="pc-title">
-                    <div class="pct-info">
-                      <b> {{ scope.row.name }} </b>
-                      {{ '参数详情' }}
-                    </div>
-                  </div>
-                  <div class="pc-content">
-                    <div class="param-item" v-for="(item, key, index) of scope.row.params">
-                      <div class="param-value">{{ ctxData.paramName[key] }}：</div>
-                      <div v-if="key === 'dataType'" class="param-name">{{ ctxData.dataTypeNames['dt' + item] }}</div>
-                      <div v-if="key !== 'dataType'" class="param-name">
-                        {{ typeof item === 'boolean' ? (item ? '是' : '否') : item }}
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </template>
-              <template #reference>
-                <el-tag size="large">{{ scope.row.params }}</el-tag>
-              </template>
-            </el-popover>
-          </template>
-        </el-table-column>
         <el-table-column label="操作" width="auto" min-width="200" align="center" fixed="right">
           <template #default="scope">
             <el-button @click="editDeviceModelProperty(scope.row)" text type="primary">编辑</el-button>

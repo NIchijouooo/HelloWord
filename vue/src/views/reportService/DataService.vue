@@ -1,37 +1,61 @@
 <template>
   <div class="main-container">
     <div class="main" v-if="ctxData.dnFlag === 1">
-      <div class="title" style="justify-content: space-between">
-        <el-input style="width: 200px" placeholder="请输入上报服务名称" clearable v-model="ctxData.dataServiceName">
-          <template #prefix>
-            <el-icon class="el-input__icon"><search /></el-icon>
-          </template>
-        </el-input>
-        <div>
-          <el-button type="primary" bg class="right-btn" @click="addGateway()">
-            <el-icon class="btn-icon">
-              <Icon name="local-add" size="14px" color="#ffffff" />
-            </el-icon>
-            添加
-          </el-button>
-          <el-button style="color: #fff" color="#2EA554" class="right-btn" @click="refresh()">
-            <el-icon class="btn-icon">
-              <Icon name="local-refresh" size="14px" color="#ffffff" />
-            </el-icon>
-            刷新
-          </el-button>
-        </div>
+      <div class="search-bar">
+        <el-form :inline="true" ref="searchFormRef" status-icon label-width="120px">
+          <el-form-item label="上报服务名称">
+            <el-input style="width: 200px" placeholder="请输入上报服务名称" clearable v-model="ctxData.dataServiceName">
+              <template #prefix>
+                <el-icon class="el-input__icon"><search /></el-icon>
+              </template>
+            </el-input>
+          </el-form-item>
+          <el-form-item>
+            <el-button style="color: #fff; margin-left: 20px" color="#2EA554" class="right-btn" @click="refresh()">
+              <el-icon class="btn-icon">
+                <Icon name="local-refresh" size="14px" color="#ffffff" />
+              </el-icon>
+              刷新
+            </el-button>
+          </el-form-item>
+        </el-form>
+      </div>
+      <div class="tool-bar">
+        <el-button type="primary" bg class="right-btn" @click="addGateway()">
+          <el-icon class="btn-icon">
+            <Icon name="local-add" size="14px" color="#ffffff" />
+          </el-icon>
+          添加
+        </el-button>
       </div>
       <div class="content" ref="contentRef">
         <el-table
           :data="filterTableData"
           :cell-style="ctxData.cellStyle"
           :header-cell-style="ctxData.headerCellStyle"
-          :max-height="ctxData.tableMaxHeight"
           style="width: 100%"
+          height="660"
           stripe
           @row-dblclick="editGateway"
         >
+          <el-table-column type="expand">
+            <template #default="scope">
+              <div class="param-content">
+                <div class="pc-title">
+                  <div class="pct-info">
+                    <b> {{ scope.row.serviceName }} </b>
+                    参数详情
+                  </div>
+                </div>
+                <div class="pc-content">
+                  <div class="param-item" v-for="(item, key, index) of scope.row.param" :key="index">
+                    <div class="param-value">{{ ctxData.paramName[key] }}：</div>
+                    <div class="param-name">{{ item || '-' }}</div>
+                  </div>
+                </div>
+              </div>
+            </template>
+          </el-table-column>
           <el-table-column prop="serviceName" label="服务名称" width="auto" min-width="150" align="center">
           </el-table-column>
           <el-table-column prop="protocol" label="协议名称" width="auto" min-width="150" align="center">
@@ -43,31 +67,6 @@
           <el-table-column label="在线状态" width="auto" min-width="100" align="center">
             <template #default="scope">
               {{ scope.row.reportStatus === 'onLine' ? '在线' : '离线' }}
-            </template>
-          </el-table-column>
-          <el-table-column label="参数详情" width="auto" min-width="500" align="center">
-            <template #default="scope">
-              <el-popover trigger="hover" :show-after="500" :auto-close="500" effect="light" width="auto">
-                <template #default>
-                  <div class="param-content">
-                    <div class="pc-title">
-                      <div class="pct-info">
-                        <b> {{ scope.row.serviceName }} </b>
-                        参数详情
-                      </div>
-                    </div>
-                    <div class="pc-content">
-                      <div class="param-item" v-for="(item, key, index) of scope.row.param">
-                        <div class="param-value">{{ ctxData.paramName[key] }}：</div>
-                        <div class="param-name">{{ key === 'cleanSession' ? (item ? '是' : '否') : item }}</div>
-                      </div>
-                    </div>
-                  </div>
-                </template>
-                <template #reference>
-                  <el-tag size="large">{{ scope.row.param }}</el-tag>
-                </template>
-              </el-popover>
             </template>
           </el-table-column>
           <el-table-column label="操作" width="auto" min-width="200" align="center" fixed="right">
@@ -443,19 +442,19 @@ const ctxData = reactive({
     reportTime: '上报时间',
     protocol: '协议名称',
     //EMQX.MQTT
-    userName: '用户名',
-    password: '密码',
-    clientID: '客户端名称',
+    UserName: '用户名',
+    Password: '密码',
+    ClientID: '客户端名称',
     keepAlive: '保活时间',
     cleanSession: '是否清除会话',
     deviceName: '通信编码',
     projectCode: '项目编码',
     token: '密钥',
     //gwai add 2023-04-05
-    appKey: 'appKey',
-    productKey: '产品密钥',
-    deviceID: '通讯地址',
-    deviceSecret: '设备密钥',
+    AppKey: 'appKey',
+    ProductKey: '产品密钥',
+    DeviceID: '通讯地址',
+    DeviceSecret: '设备密钥',
   },
   gatewayRules: {
     serviceName: [

@@ -1,45 +1,55 @@
 <template>
   <div class="main">
-    <div class="title" style="justify-content: space-between">
-      <div class="title-left">
-        <el-button type="primary" plain @click="toDevice()" style="margin-right: 20px">
-          <el-icon class="el-input__icon"><back /></el-icon>
-          返回采集设备
-        </el-button>
-        <el-input style="width: 200px" placeholder="请输入 名称/标签 过滤" clearable v-model="ctxData.propertyInfo">
-          <template #prefix>
-            <el-icon class="el-input__icon"><search /></el-icon>
-          </template>
-        </el-input>
-      </div>
-      <div class="title-right">
-        <el-button type="primary" plain class="right-btn" @click="showProperties()">
-          <el-icon class="el-input__icon"><edit /></el-icon>
-          写属性
-        </el-button>
-        <el-button
-          style="color: #fff"
-          color="#2EA554"
-          :loading="ctxData.isLoading"
-          class="right-btn"
-          @click="refresh()"
-        >
-          <el-icon class="btn-icon">
-            <Icon name="local-refresh" size="14px" color="#ffffff" />
-          </el-icon>
-          刷新
-        </el-button>
-      </div>
+    <div class="search-bar">
+      <el-form :inline="true" ref="searchFormRef" status-icon label-width="90px">
+        <el-form-item style="margin-left: 20px;">
+          <el-button type="primary" plain @click="toDevice()" style="margin-right: 20px">
+            <el-icon class="el-input__icon"><back /></el-icon>
+            返回采集设备
+          </el-button>
+        </el-form-item>
+      </el-form>
     </div>
-    <div class="title" style="top: 60px; height: 76px; padding: 20px 0; justify-content: flex-start">
-      <div class="tName">{{ props.curDevice.name }}({{ props.curDevice.label }})</div>
+    <div class="search-bar" style="display: flex;">
+      <div class="title" style="position: relative;margin-right: 40px;justify-content: flex-start;padding: 0px 0px;height: 40px;">
+        <div class="tName">{{ props.curDevice.name }}({{ props.curDevice.label }})</div>
+      </div>
+      <el-form :inline="true" ref="searchFormRef2" status-icon label-width="90px">
+        <el-form-item label="">
+          <el-input style="width: 200px" placeholder="请输入 名称/标签 过滤" clearable v-model="ctxData.propertyInfo">
+            <template #prefix>
+              <el-icon class="el-input__icon"><search /></el-icon>
+            </template>
+          </el-input>
+        </el-form-item>
+        <el-form-item>
+          <el-button type="primary" plain class="right-btn" @click="showProperties()">
+            <el-icon class="el-input__icon"><edit /></el-icon>
+            写属性
+          </el-button>
+        </el-form-item>
+        <el-form-item>
+          <el-button
+            style="color: #fff"
+            color="#2EA554"
+            :loading="ctxData.isLoading"
+            class="right-btn"
+            @click="refresh()"
+          >
+            <el-icon class="btn-icon">
+              <Icon name="local-refresh" size="14px" color="#ffffff" />
+            </el-icon>
+            刷新
+          </el-button>
+        </el-form-item>
+      </el-form>
     </div>
     <div class="content" ref="contentRef" style="top: 136px">
       <el-table
         :data="filterTableData"
         :cell-style="ctxData.cellStyle"
         :header-cell-style="ctxData.headerCellStyle"
-        :max-height="ctxData.tableMaxHeight"
+        height="660"
         style="width: 100%"
         stripe
       >
