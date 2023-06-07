@@ -983,7 +983,10 @@ func (d *CollectInterfaceTemplate) CommunicationManagePoll() {
 		cmd.CollInterfaceName = d.CollInterfaceName
 		cmd.DeviceName = v.Name
 		cmd.FunName = "GetDeviceRealVariables"
-		d.CommQueueManage.CommunicationManageAddCommon(cmd)
+		// QJHui ADD 2023/6/7
+		if len(d.CommQueueManage.CommonRequestChan) < 100 {
+			d.CommQueueManage.CommunicationManageAddCommon(cmd)
+		}
 	}
 
 	if d.CommInterface.GetType() == commInterface.CommTypeIoIn || d.CommInterface.GetType() == commInterface.CommTypeIoOut {

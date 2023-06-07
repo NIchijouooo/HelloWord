@@ -5,6 +5,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"gateway/buildInfo"
 	"gateway/utils"
 	"os"
 	"os/exec"
@@ -36,6 +37,7 @@ type SystemStateTemplate struct {
 	GOOS             string `json:"GOOS"`
 	GOARCH           string `json:"GOARCH"`
 	AuthStatus       string `json:"authStatus"`
+	BuildTime        string `json:"buildTime"`
 }
 
 type DataPointTemplate struct {
@@ -72,6 +74,7 @@ var SystemState = SystemStateTemplate{
 	RunTime:          "0",
 	DeviceOnline:     "0",
 	DevicePacketLoss: "0",
+	BuildTime:        buildInfo.BuildTime,
 	LockStatus:       LockCmdDisable,
 	GOOS:             runtime.GOOS,
 	GOARCH:           runtime.GOARCH,
@@ -98,6 +101,7 @@ func SystemInit() {
 	DevicePacketLossDataStream = NewDataStreamTemplate("通信丢包率")
 
 	_ = ReadProductParamFromJson()
+
 	SystemState.HardVer = GetHardVer()
 
 	//_ = GetSystemLock()

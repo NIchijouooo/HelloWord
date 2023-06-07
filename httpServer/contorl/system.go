@@ -87,6 +87,7 @@ func ApiGetSystemStatus(context *gin.Context) {
 
 	GetDeviceOnline()
 	GetDevicePacketLoss()
+
 	context.JSON(http.StatusOK, model.ResponseData{
 		Code:    "0",
 		Message: "",
