@@ -13,6 +13,7 @@ import (
 	"gateway/report/mqttSagooIOT"
 	"gateway/report/mqttThingsBoard"
 	"gateway/report/reportModel"
+	"strconv"
 
 	"gateway/setting"
 	"gateway/utils"
@@ -854,11 +855,11 @@ func ApiAddReportModelProperty(context *gin.Context) {
 func ApiAddReportModelPropertyes(context *gin.Context) { //ltg add 2023-05-26
 
 	type ModelInfoTemplate struct {
-		ModelName string                                  `json:"name"`     // 名称
-		Property  reportModel.ReportModelPropertyTemplate `json:"property"` //
+		ModelName string                                    `json:"name"`     // 名称
+		Property  []reportModel.ReportModelPropertyTemplate `json:"property"` //
 	}
 
-	modelInfo := make([]ModelInfoTemplate, 0)
+	modelInfo := ModelInfoTemplate{}
 
 	err := context.BindJSON(&modelInfo)
 	if err != nil {
@@ -872,14 +873,14 @@ func ApiAddReportModelPropertyes(context *gin.Context) { //ltg add 2023-05-26
 	}
 
 	count := 0
-	for _, v := range modelInfo {
-		err = reportModel.AddReportModelProperty(v.ModelName, &v.Property)
+	for _, v := range modelInfo.Property {
+		err = reportModel.AddReportModelProperty(modelInfo.ModelName, &v)
 		if err != nil {
 			count++
 		}
 	}
 
-	if count == 0 {
+	if count != 0 {
 		context.JSON(http.StatusOK, model.ResponseData{
 			Code:    "1",
 			Message: "添加上报模型属性错误 ",
@@ -891,7 +892,7 @@ func ApiAddReportModelPropertyes(context *gin.Context) { //ltg add 2023-05-26
 	context.JSON(http.StatusOK, model.ResponseData{
 		Code:    "0",
 		Message: "添加上报模型属性成功",
-		Data:    "",
+		Data:    strconv.Itoa(len(modelInfo.Property) - count),
 	})
 	return
 }
