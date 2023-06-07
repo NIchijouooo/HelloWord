@@ -1,6 +1,6 @@
 <template>
   <div class="lineChart">
-    <v-chart :option="lineChartOption" />
+    <v-chart :option="lineChartOption" :height="'400px'" />
   </div>
 </template>
 <script setup>
@@ -101,10 +101,15 @@ if (props.chartDat !== null) {
 </script>
 <style lang="scss" scoped>
 .lineChart {
-  position: absolute;
-  left: 0;
-  right: 0;
-  top: 0;
-  bottom: 0;
+  width: 100%;
+  height: 100%;
+}
+:deep(x-vue-echarts div) {
+  width: 100% !important;
+  height: 100% !important;
+}
+:deep(x-vue-echarts div canvas) {
+  width: 100% !important;
+  height: 400px !important;
 }
 </style>

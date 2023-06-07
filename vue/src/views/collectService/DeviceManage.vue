@@ -112,6 +112,7 @@
           :data="filterTableData"
           :cell-style="ctxData.cellStyle"
           :header-cell-style="ctxData.headerCellStyle"
+          height="660"
           style="width: 100%"
           stripe
           @selection-change="handleSelectionChange"

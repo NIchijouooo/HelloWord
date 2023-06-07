@@ -134,6 +134,7 @@ import DeviceModelApi from 'api/deviceModel.js'
 import PropertyRtu from './PropertyRtu.vue'
 import ModelBlockRtu from './ModelBlockRtu.vue'
 import { userStore } from 'stores/user'
+import { useRoute } from 'vue-router'
 
 const users = userStore()
 
@@ -189,7 +190,13 @@ const ctxData = reactive({
   dmTitle: '添加采集模型',
   pluginList: [], //
   curDeviceModel: '', //当前采集模型
+  tsl: '',
 })
+
+//接收参数，处理命令详情页面的显示
+const route = useRoute()
+ctxData.tsl = route.query.tsl;
+
 // 获取采集模型列表
 const getDeviceModelList = (flag) => {
   //
@@ -203,6 +210,11 @@ const getDeviceModelList = (flag) => {
     if (!res) return
     if (res.code === '0') {
       ctxData.tableData = res.data
+      // 首页传参跳转到列表页面，根据参数自动进入命令详情页面中
+      if (ctxData.tsl) {
+        const detail = ctxData.tableData.find(item => item.name === ctxData.tsl)
+        showBlockParams(detail);
+      }
       if (flag === 1) {
         ElMessage({
           type: 'success',

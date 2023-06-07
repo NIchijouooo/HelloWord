@@ -361,6 +361,7 @@ import { Search } from '@element-plus/icons-vue'
 import variables from 'styles/variables.module.scss'
 import ServiceApi from 'api/service.js'
 import { userStore } from 'stores/user'
+import { useRoute } from 'vue-router'
 import NodeService from './dataService/NodeService.vue'
 import RegInfo from './dataService/RegInfo.vue'
 import ProductApi from 'api/product.js'
@@ -671,7 +672,13 @@ const ctxData = reactive({
   dnList: ['RT.STLV1', 'RT.STLV2'],
   kaList: ['EMQX.MQTT', 'RT.MQTT', 'RT.STLV2','FSJY.MQTT'],
   dnFlag: 1,
+  serviceName: ''
 })
+
+//接收参数，处理命令详情页面的显示
+const route = useRoute()
+ctxData.serviceName = route.query.serviceName;
+
 // 获取所有上报服务信息
 const getGatewayList = (flag) => {
   const pData = {
@@ -683,6 +690,11 @@ const getGatewayList = (flag) => {
     if (!res) return
     if (res.code === '0') {
       ctxData.gatewayTableData = res.data
+      // 首页传参跳转到列表页面，根据参数自动进入上报节点页面中
+      if (ctxData.serviceName) {
+        const detail = ctxData.gatewayTableData.find(item => item.serviceName === ctxData.serviceName)
+        showGateway(detail);
+      }
       if (flag === 1) {
         ElMessage({
           type: 'success',
