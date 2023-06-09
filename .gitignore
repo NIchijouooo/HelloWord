@@ -6,3 +6,4 @@ backup/*
 *.exe
 armV7_gw_linux
 ubutun_openGW_linux
+/.idea/

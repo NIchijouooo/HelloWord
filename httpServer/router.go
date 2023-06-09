@@ -1,6 +1,7 @@
 package httpServer
 
 import (
+	"gateway/controllers"
 	"gateway/httpServer/contorl"
 	"gateway/httpServer/middleware"
 	"gateway/setting"
@@ -55,6 +56,10 @@ func RouterWeb(port string) {
 	{
 		//		router.Use(middleware.Privilege())
 		//		{
+
+		emController := controllers.NewCommInterfaceProtocolController()
+		emController.RegisterRoutes(&router.RouterGroup)
+
 		accountRouter := router.Group("/api/v2/account")
 		{
 			accountRouter.GET("/permissions", contorl.ApiGetPermissions)

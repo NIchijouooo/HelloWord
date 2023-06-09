@@ -7,6 +7,7 @@ import (
 	"gateway/buildInfo"
 	"gateway/device"
 	"gateway/httpServer"
+	"gateway/models"
 	"gateway/report"
 	"gateway/setting"
 	"gateway/utils"
@@ -20,6 +21,9 @@ import (
 var foo string
 
 func main() {
+	// 连接SQLite数据库
+	models.InitDB()
+
 	utils.ErrorLogInit()
 	defer func() {
 		r := recover()
