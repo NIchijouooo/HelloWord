@@ -1,5 +1,6 @@
 <template>
-<div>
+<div class="main-container">
+  <div class="main">
   <div class="mc-left">
     <div class="title">
       <el-button type="primary" style="width: 100%" plain @click="toDeviceModel()">
@@ -79,7 +80,7 @@
           :cell-style="ctxData.cellStyle"
           :header-cell-style="ctxData.headerCellStyle"
           style="width: 100%"
-          height="290"
+          :max-height="ctxData.tableMaxHeight"
           stripe
           @selection-change="handleSelectionChange"
           @row-dblclick="editDeviceModelBlock"
@@ -123,7 +124,6 @@
       <BlockPropertyD07 :curModelBlock="ctxData.curModelBlock"> </BlockPropertyD07>
     </div>
   </div>
-
   <!-- 添加编辑命令 -->
   <el-dialog
     v-model="ctxData.pFlag"
@@ -215,6 +215,7 @@
       </span>
     </template>
   </el-dialog>
+  </div>
 </div>
 </template>
 <script setup>
@@ -433,7 +434,7 @@ const getDeviceModelBlock = (flag) => {
       showOneResMsg(res)
     }
     await nextTick(() => {
-      ctxData.tableMaxHeight = contentRef.value.clientHeight - 34 - 22
+      ctxData.tableMaxHeight = contentRef.value.clientHeight - 34 - 22 - 82
       if (flag === 2) showModelPropertyBlock(ctxData.curModelBlock, 1)
     })
   })

@@ -112,7 +112,7 @@
           :data="filterTableData"
           :cell-style="ctxData.cellStyle"
           :header-cell-style="ctxData.headerCellStyle"
-          height="660"
+          :max-height="ctxData.tableMaxHeight"
           style="width: 100%"
           stripe
           @selection-change="handleSelectionChange"
@@ -164,7 +164,7 @@
       </div>
     </div>
 
-    <DeviceProperty v-else :curDevice="ctxData.curDevice" @changeIdFlag="changeIdFlag"></DeviceProperty>
+    <DeviceProperty v-else :curDevice="ctxData.curDevice" @changeIdFlag="changeIdFlag" style="width: 100%; height: 100%;overflow:hidden;"></DeviceProperty>
     <!-- 添加编辑设备 -->
     <el-dialog
       v-model="ctxData.dFlag"

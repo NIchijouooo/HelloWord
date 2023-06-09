@@ -34,7 +34,7 @@
           :cell-style="ctxData.cellStyle"
           :header-cell-style="ctxData.headerCellStyle"
           style="width: 100%"
-          height="660"
+          :max-height="ctxData.tableMaxHeight"
           stripe
           @row-dblclick="editGateway"
         >
@@ -104,9 +104,16 @@
       v-if="ctxData.dnFlag === 2"
       :curGateway="ctxData.curGateway"
       @changeDnFlag="changeDnFlag()"
+      style="width: 100%; height: 100%;overflow:hidden;"
     ></NodeService>
 
-    <RegInfo v-if="ctxData.dnFlag === 3" :curGateway="ctxData.curGateway" @changeDnFlag="changeDnFlag()"></RegInfo>
+    <RegInfo 
+      v-if="ctxData.dnFlag === 3" 
+      :curGateway="ctxData.curGateway" 
+      @changeDnFlag="changeDnFlag()"
+      style="width: 100%; height: 100%;overflow:hidden;"
+    ></RegInfo>
+
     <el-dialog
       v-model="ctxData.dFlag"
       :title="ctxData.dTitle"

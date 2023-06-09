@@ -56,7 +56,7 @@
       :header-cell-style="ctxData.headerCellStyle"
       style="width: 100%"
       stripe
-      height="300"
+      :max-height="ctxData.tableMaxHeight"
       @selection-change="handleSelectionChange"
       @row-dblclick="editDeviceModelProperty"
     >
@@ -568,7 +568,7 @@ const getDeviceModelBlockProperty = (flag) => {
     }
     
     await nextTick(() => {
-      ctxData.tableMaxHeight = contentRef.value.clientHeight - 34 - 22
+      ctxData.tableMaxHeight = contentRef.value.clientHeight - 34 - 22 - 82
     })
   })
 }

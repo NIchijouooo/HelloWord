@@ -115,10 +115,10 @@
       :title="ctxData.headItemName['hin' + ctxData.activeIndex]" 
       :before-close="handleFlagClose" 
       :close-on-click-modal="false"
-      width="50%"
+      width="45%"
     >
-      <div style="width: 100%;height: calc(410px);">
-        <line-chart :chart-data="ctxData.curChartData" :key="ctxData.curChartData" style="width: 100%;height: calc(410px);"></line-chart>
+      <div class="dialog-content-chart">
+        <line-chart :chart-data="ctxData.curChartData" :key="ctxData.curChartData" :style="ctxData.bFlag ? 'width: 100%;height: 100%;':''"></line-chart>
       </div>
     </el-dialog>
   </el-header>
@@ -415,6 +415,14 @@ const showOneResMsg = (res) => {
     &:hover {
       color: #409EFF;
     }
+  }
+  
+  .dialog-content-chart {
+    position: relative;
+    width: 100%;
+    min-height: 400px;
+    max-height: 550px;
+    overflow: auto;
   }
 
   .header_right {

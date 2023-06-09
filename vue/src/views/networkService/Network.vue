@@ -20,7 +20,7 @@
           :data="ctxData.networkTableData"
           :cell-style="ctxData.cellStyle"
           :header-cell-style="ctxData.headerCellStyle"
-          height="660"
+          :max-height="ctxData.tableMaxHeight"
           style="width: 100%"
           stripe
         >

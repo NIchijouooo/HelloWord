@@ -1,4 +1,5 @@
 <template>
+<div class="main-container">
   <div class="main">
     <div class="search-bar">
       <el-form :inline="true" ref="searchFormRef" status-icon label-width="90px">
@@ -61,12 +62,12 @@
       </el-form>
     </div>
     
-    <div class="content" ref="contentRef" style="top: 136px">
+    <div class="content" ref="contentRef">
       <el-table
         :data="filterDMPTableData"
         :cell-style="ctxData.cellStyle"
         :header-cell-style="ctxData.headerCellStyle"
-        height="660"
+        :max-height="ctxData.tableMaxHeight"
         style="width: 100%"
         stripe
         @selection-change="handleSelectionChange"
@@ -291,6 +292,7 @@
       </template>
     </el-dialog>
   </div>
+</div>
 </template>
 <script setup>
 import { Search, Back, Download, Upload } from '@element-plus/icons-vue'

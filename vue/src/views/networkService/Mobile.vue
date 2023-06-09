@@ -34,7 +34,7 @@
           :cell-style="ctxData.cellStyle"
           :header-cell-style="ctxData.headerCellStyle"
           style="width: 100%"
-          height="660"
+          :max-height="ctxData.tableMaxHeight"
           stripe
           @row-dblclick="editModule"
         >

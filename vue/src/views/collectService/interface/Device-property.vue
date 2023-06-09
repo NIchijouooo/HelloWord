@@ -1,4 +1,5 @@
 <template>
+<div class="main-container">
   <div class="main">
     <div class="search-bar">
       <el-form :inline="true" ref="searchFormRef" status-icon label-width="90px">
@@ -49,7 +50,7 @@
         :data="filterTableData"
         :cell-style="ctxData.cellStyle"
         :header-cell-style="ctxData.headerCellStyle"
-        height="660"
+        :max-height="ctxData.tableMaxHeight"
         style="width: 100%"
         stripe
       >
@@ -164,6 +165,7 @@
       </template>
     </el-dialog>
   </div>
+</div>
 </template>
 <script setup>
 import { Search, Back, Edit } from '@element-plus/icons-vue'
@@ -247,7 +249,7 @@ const getDeviceDataReal = (flag) => {
     ctxData.isLoading = false
     console.log('getDeviceDataReal -> ctxData.propertyTableData', ctxData.propertyTableData)
     await nextTick(() => {
-      ctxData.tableMaxHeight = contentRef.value.clientHeight - 34 - 36 - 22
+      ctxData.tableMaxHeight = contentRef.value.clientHeight - 34 - 36 - 132
     })
   })
 }

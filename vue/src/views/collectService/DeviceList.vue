@@ -1,6 +1,6 @@
 <template>
   <div class="main-container">
-    <div v-if="ctxData.idFlag" class="main">
+    <div v-if="ctxData.idFlag" class="main" style="overflow:hidden;">
       <div class="search-bar">
         <el-form :model="ctxData.screenForm"  :inline="true" ref="searchFormRef" status-icon label-width="90px">
           <el-form-item label="设备名称" prop="name">
@@ -75,7 +75,7 @@
           :cell-style="ctxData.cellStyle"
           :header-cell-style="ctxData.headerCellStyle"
           style="width: 100%"
-          height="372"
+          :max-height="ctxData.tableMaxHeight"
           stripe
         >
           <el-table-column prop="name" label="设备名称" width="auto" min-width="160" align="center" fixed="left">
@@ -125,7 +125,7 @@
         </div>
       </div>
     </div>
-    <DeviceProperty v-else :curDevice="ctxData.curDevice" @changeIdFlag="changeIdFlag"></DeviceProperty>
+    <DeviceProperty v-else :curDevice="ctxData.curDevice" @changeIdFlag="changeIdFlag" style="width: 100%; height: 100%;overflow:hidden;"></DeviceProperty>
   </div>
 </template>
 <script setup>

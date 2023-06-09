@@ -39,12 +39,13 @@
           </el-form-item>
         </el-form>
       </div>
-      <div class="content" ref="contentRef" style="top: 136px">
+      <div class="content" ref="contentRef">
         <el-table
           :data="filterTableData"
           :cell-style="ctxData.cellStyle"
           :header-cell-style="ctxData.headerCellStyle"
           style="width: 100%"
+          :max-height="ctxData.tableMaxHeight"
           stripe
         >
           <el-table-column prop="index" label="序号" width="55" />
@@ -242,7 +243,8 @@ const getDeviceDataReal = (flag) => {
     ctxData.isLoading = false
     console.log('getDeviceDataReal -> ctxData.propertyTableData', ctxData.propertyTableData)
     await nextTick(() => {
-      ctxData.tableMaxHeight = contentRef.value.clientHeight - 34 - 36 - 22
+      ctxData.tableMaxHeight = contentRef.value.clientHeight - 34 - 36 - 42
+      console.log('000',ctxData.tableMaxHeight);
     })
   })
 }

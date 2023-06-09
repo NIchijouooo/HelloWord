@@ -1,5 +1,5 @@
 <template>
-<div>
+<div class="main-container">
   <div style="display: flex; justify-content: space-between;">
     <div class="title" style="position: relative;width: 40%;justify-content: flex-start;">
       <div class="tName">{{ props.curModelBlock.label }}：命令参数列表</div>
@@ -55,7 +55,7 @@
       :cell-style="ctxData.cellStyle"
       :header-cell-style="ctxData.headerCellStyle"
       style="width: 100%"
-      height="300"
+      :max-height="ctxData.tableMaxHeight"
       stripe
       @selection-change="handleSelectionChange"
       @row-dblclick="editDeviceModelProperty"
@@ -616,7 +616,7 @@ const getDeviceModelBlockProperty = (flag) => {
       showOneResMsg(res)
     }
     await nextTick(() => {
-      ctxData.tableMaxHeight = contentRef.value.clientHeight - 34 - 22
+      ctxData.tableMaxHeight = contentRef.value.clientHeight - 34 - 22 - 82
     })
   })
 }

@@ -1,5 +1,5 @@
 <template>
-<div>
+<div class="main-container">
   <div v-if="ctxData.dpFlag" class="main">
     <div class="search-bar">
       <el-form :inline="true" ref="searchFormRef" status-icon label-width="90px">
@@ -100,7 +100,7 @@
         :data="filterTableData"
         :cell-style="ctxData.cellStyle"
         :header-cell-style="ctxData.headerCellStyle"
-        height="660"
+        :max-height="ctxData.tableMaxHeight"
         style="width: 100%"
         stripe
         @selection-change="handleSelectionChange"
@@ -385,7 +385,7 @@ const getCollDevices = (flag) => {
       showOneResMsg(res)
     }
     await nextTick(() => {
-      ctxData.tableMaxHeight = contentRef.value.clientHeight - 34 - 36 - 22
+      ctxData.tableMaxHeight = contentRef.value.clientHeight - 34 - 36 - 132
     })
   })
 }

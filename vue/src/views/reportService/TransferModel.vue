@@ -33,7 +33,7 @@
           :data="filterTableData"
           :cell-style="ctxData.cellStyle"
           :header-cell-style="ctxData.headerCellStyle"
-          height="660"
+          :max-height="ctxData.tableMaxHeight"
           style="width: 100%"
           stripe
           @row-dblclick="editTransferModel"
@@ -70,7 +70,7 @@
         </div>
       </div>
     </div>
-    <ModelProperty v-else :curTransferModel="ctxData.curTransferModel" @changeTmFlag="changeTmFlag()"></ModelProperty>
+    <ModelProperty v-else :curTransferModel="ctxData.curTransferModel" @changeTmFlag="changeTmFlag()" style="width: 100%; height: 100%;overflow:hidden;"></ModelProperty>
     <el-dialog
       v-model="ctxData.tFlag"
       :title="ctxData.tTitle"

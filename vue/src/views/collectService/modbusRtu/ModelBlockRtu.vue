@@ -1,5 +1,6 @@
 <template>
-<div>
+<div class="main-container">
+  <div class="main">
   <div class="mc-left">
     <div class="title">
       <el-button type="primary" style="width: 100%" plain @click="toDeviceModel()">
@@ -78,7 +79,7 @@
           :data="filterDMPTableData"
           :cell-style="ctxData.cellStyle"
           :header-cell-style="ctxData.headerCellStyle"
-          height="290"
+          :max-height="ctxData.tableMaxHeight"
           style="width: 100%"
           stripe
           @selection-change="handleSelectionChange"
@@ -224,6 +225,7 @@
       </span>
     </template>
   </el-dialog>
+  </div>
 </div>
 </template>
 <script setup>
@@ -433,7 +435,7 @@ const getDeviceModelBlock = (flag) => {
       showOneResMsg(res)
     }
     await nextTick(() => {
-      ctxData.tableMaxHeight = contentRef.value.clientHeight - 34 - 22
+      ctxData.tableMaxHeight = contentRef.value.clientHeight - 34 - 22 - 82
       if (flag === 2) showModelPropertyBlock(ctxData.curModelBlock, 1)
     })
   })

@@ -1,4 +1,5 @@
 <template>
+<div class="main-container">
   <div class="main">
     <div class="search-bar">
       <el-form :inline="true" ref="searchFormRef" status-icon label-width="120px">
@@ -29,7 +30,7 @@
         </el-form-item>
       </el-form>
     </div>
-    <div v-if="ctxData.varParamType === 'Properties'">
+    <div v-if="ctxData.varParamType === 'Properties'" style="height: calc(100% - 20px)">
       <div class="search-bar" style="display: flex;">
         <div class="title" style="position: relative;margin-right: 40px;justify-content: flex-start;padding: 0px 0px;height: 40px;">
           <div class="tName">
@@ -78,11 +79,12 @@
           </el-form-item>
         </el-form>
       </div>
-      <div class="content" ref="contentRef" style="top: 136px">
+      <div class="content" ref="contentRef">
         <el-table
           :data="filterDMPTableData"
           :cell-style="ctxData.cellStyle"
           :header-cell-style="ctxData.headerCellStyle"
+          :max-height="ctxData.tableMaxHeight"
           style="width: 100%"
           stripe
           @selection-change="handleSelectionChange"
@@ -331,6 +333,7 @@
       </template>
     </el-dialog>
   </div>
+</div>
 </template>
 <script setup>
 import { Search, Back, Download, Upload } from '@element-plus/icons-vue'

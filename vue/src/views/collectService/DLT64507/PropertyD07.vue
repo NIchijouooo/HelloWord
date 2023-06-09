@@ -1,4 +1,5 @@
 <template>
+<div class="main-container">
   <div class="main">
     <div class="search-bar">
       <el-form :inline="true" ref="searchFormRef" status-icon label-width="90px">
@@ -44,7 +45,7 @@
         :cell-style="ctxData.cellStyle"
         :header-cell-style="ctxData.headerCellStyle"
         style="width: 100%"
-        height="660"
+        :max-height="ctxData.tableMaxHeight"
         stripe
       >
         <el-table-column type="index" width="60">
@@ -73,7 +74,7 @@
           <div>无数据</div>
         </template>
       </el-table>
-      <div class="pagination">
+      <div class="pagination" style="z-index: 9;">
         <el-pagination
           :current-page="ctxData.currentPage"
           :page-size="ctxData.pagesize"
@@ -88,6 +89,7 @@
       </div>
     </div>
   </div>
+</div>
 </template>
 <script setup>
 import { Search, Back, Upload } from '@element-plus/icons-vue'
@@ -187,7 +189,7 @@ const getDeviceModelPropertyList = (flag) => {
       showOneResMsg(res)
     }
     await nextTick(() => {
-      ctxData.tableMaxHeight = contentRef.value.clientHeight - 34 - 36 - 22
+      ctxData.tableMaxHeight = contentRef.value.clientHeight - 34 - 36 - 132
     })
   })
 }

@@ -33,6 +33,7 @@
           :data="filterTableData"
           :cell-style="ctxData.cellStyle"
           :header-cell-style="ctxData.headerCellStyle"
+          :max-height="ctxData.tableMaxHeight"
           style="width: 100%"
           stripe
           @row-dblclick="editInterface"

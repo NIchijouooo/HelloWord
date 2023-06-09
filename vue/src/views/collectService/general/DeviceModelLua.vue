@@ -34,6 +34,7 @@
           :data="filterDMTableData"
           :cell-style="ctxData.cellStyle"
           :header-cell-style="ctxData.headerCellStyle"
+          :max-height="ctxData.tableMaxHeight"
           style="width: 100%"
           stripe
           @row-dblclick="editDeviceModel"
@@ -93,7 +94,7 @@
 
     <!-- 变量页 -->
     <!-- lua -->
-    <PropertyLua v-else :curDeviceModel="ctxData.curDeviceModel" @changeDpFlag="changeDpFlag()"></PropertyLua>
+    <PropertyLua v-else :curDeviceModel="ctxData.curDeviceModel" @changeDpFlag="changeDpFlag()" style="width: 100%; height: 100%;overflow:hidden;"></PropertyLua>
     <!-- dialog 内容 -->
     <!-- 添加编辑采集模型 -->
     <el-dialog

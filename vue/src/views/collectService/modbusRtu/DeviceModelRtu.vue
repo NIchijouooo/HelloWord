@@ -34,6 +34,7 @@
           :data="filterDMTableData"
           :cell-style="ctxData.cellStyle"
           :header-cell-style="ctxData.headerCellStyle"
+          :max-height="ctxData.tableMaxHeight"
           style="width: 100%"
           stripe
           @row-dblclick="editDeviceModel"
@@ -76,12 +77,14 @@
       v-if="ctxData.showFlag === 1"
       :curDeviceModel="ctxData.curDeviceModel"
       @changeShowFlag="changeShowFlag()"
+      style="width: 100%; height: 100%;overflow:hidden;"
     ></PropertyRtu>
     <ModelBlockRtu
       v-if="ctxData.showFlag === 2"
       :curDeviceModel="ctxData.curDeviceModel"
       :deviceModelList="ctxData.tableData"
       @changeShowFlag="changeShowFlag()"
+      style="width: 100%; height: 100%;overflow:hidden;"
     >
     </ModelBlockRtu>
     <!-- dialog 内容 -->
