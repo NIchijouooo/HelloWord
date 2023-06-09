@@ -3,6 +3,7 @@ package controllers
 import (
 	"encoding/json"
 	"fmt"
+	"gateway/httpServer/model"
 	"gateway/models"
 	repositories "gateway/repositories"
 	"github.com/gin-gonic/gin"
@@ -46,7 +47,11 @@ func (c *EmController) GetAllCommInterfaceProtocols(ctx *gin.Context) {
 		ctx.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
-	ctx.JSON(http.StatusOK, rows)
+	ctx.JSON(http.StatusOK, model.ResponseData{
+		Code:    "1",
+		Message: "查询成功",
+		Data:    rows,
+	})
 }
 
 // AddCommInterface 新增通道
@@ -67,7 +72,10 @@ func (c *EmController) AddCommInterface(ctx *gin.Context) {
 	// 判断是否有重名的通道，有就直接返回
 	commInterfaceByName, _ := c.repo.GetCommInterfaceByName(commInterface.Name)
 	if commInterfaceByName != nil {
-		ctx.JSON(http.StatusOK, "通道名已存在，添加失败")
+		ctx.JSON(http.StatusOK, model.ResponseData{
+			Code:    "0",
+			Message: "通道名已存在，添加失败",
+		})
 		return
 	}
 
@@ -78,7 +86,10 @@ func (c *EmController) AddCommInterface(ctx *gin.Context) {
 	if err != nil {
 		fmt.Println("error:", err)
 	}
-	ctx.JSON(http.StatusOK, "添加通道成功")
+	ctx.JSON(http.StatusOK, model.ResponseData{
+		Code:    "1",
+		Message: "添加通道成功",
+	})
 }
 
 // GetCommInterfaces 获取所有通道
@@ -109,7 +120,11 @@ func (c *EmController) GetCommInterfaces(ctx *gin.Context) {
 			res = append(res, t)
 		}
 	}
-	ctx.JSON(http.StatusOK, res)
+	ctx.JSON(http.StatusOK, model.ResponseData{
+		Code:    "1",
+		Message: "成功",
+		Data:    res,
+	})
 }
 
 // UpdateCommInterface 修改通道
@@ -136,7 +151,11 @@ func (c *EmController) UpdateCommInterface(ctx *gin.Context) {
 	if err != nil {
 		fmt.Println("error:", err)
 	}
-	ctx.JSON(http.StatusOK, commInterface)
+	ctx.JSON(http.StatusOK, model.ResponseData{
+		Code:    "1",
+		Message: "成功",
+		Data:    commInterface,
+	})
 }
 
 // DelComInterface 删除通道
@@ -151,7 +170,10 @@ func (c *EmController) DelComInterface(ctx *gin.Context) {
 		ctx.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
-	ctx.JSON(http.StatusOK, gin.H{"message": "ComInterface deleted successfully"})
+	ctx.JSON(http.StatusOK, model.ResponseData{
+		Code:    "1",
+		Message: "删除通信接口成功",
+	})
 }
 
 // AddCollInterface 新增采集接口
@@ -167,7 +189,10 @@ func (c *EmController) AddCollInterface(ctx *gin.Context) {
 	emCollInterface.Name = addEmCollInterface.CollInterfaceName
 	emCollInterfaceByName, _ := c.repo.GetCollInterfaceByName(emCollInterface.Name)
 	if emCollInterfaceByName != nil {
-		ctx.JSON(http.StatusOK, "通道名已存在，添加失败")
+		ctx.JSON(http.StatusOK, model.ResponseData{
+			Code:    "0",
+			Message: "通道名已存在，添加失败",
+		})
 		return
 	}
 
@@ -175,7 +200,10 @@ func (c *EmController) AddCollInterface(ctx *gin.Context) {
 	emCollInterface.PollPeriod = addEmCollInterface.PollPeriod
 	commInterfaceByName, _ := c.repo.GetCommInterfaceByName(addEmCollInterface.CommInterfaceName)
 	if commInterfaceByName == nil {
-		ctx.JSON(http.StatusOK, "通信接口名未找到")
+		ctx.JSON(http.StatusOK, model.ResponseData{
+			Code:    "0",
+			Message: "通信接口名未找到",
+		})
 		return
 	}
 	emCollInterface.CommInterfaceId = commInterfaceByName.Id
@@ -187,7 +215,10 @@ func (c *EmController) AddCollInterface(ctx *gin.Context) {
 		ctx.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-	ctx.JSON(http.StatusOK, "添加采集接口成功")
+	ctx.JSON(http.StatusOK, model.ResponseData{
+		Code:    "1",
+		Message: "添加采集接口成功",
+	})
 	return
 }
 
@@ -207,20 +238,29 @@ func (c *EmController) AddEmDevice(ctx *gin.Context) {
 	emDevice.Name = addEmDevice.Name
 	emDeviceByName, _ := c.repo.GetEmDeviceByName(emDevice.Name)
 	if emDeviceByName != nil {
-		ctx.JSON(http.StatusOK, "设备名已存在，添加失败")
+		ctx.JSON(http.StatusOK, model.ResponseData{
+			Code:    "0",
+			Message: "设备名已存在，添加失败",
+		})
 		return
 	}
 	// 判断是否有对应的采集接口
 	emCollInterfaceByName, _ := c.repo.GetCollInterfaceByName(addEmDevice.InterfaceName)
 	if emCollInterfaceByName == nil {
-		ctx.JSON(http.StatusOK, "采集接口名不存在，添加失败")
+		ctx.JSON(http.StatusOK, model.ResponseData{
+			Code:    "0",
+			Message: "采集接口名不存在，添加失败",
+		})
 		return
 	}
 	emDevice.CollInterfaceId = emCollInterfaceByName.Id
 	// 判断是否有对应的设备模型
 	emDeviceModelByName, _ := c.repo.GetEmDeviceModelByName(addEmDevice.Tsl)
 	if emDeviceModelByName == nil {
-		ctx.JSON(http.StatusOK, "设备模型名不存在，添加失败")
+		ctx.JSON(http.StatusOK, model.ResponseData{
+			Code:    "0",
+			Message: "设备模型名不存在，添加失败",
+		})
 		return
 	}
 	emDevice.ModelId = emDeviceModelByName.Id
@@ -231,7 +271,10 @@ func (c *EmController) AddEmDevice(ctx *gin.Context) {
 	if err != nil {
 		ctx.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 	}
-	ctx.JSON(http.StatusOK, "添加设备成功")
+	ctx.JSON(http.StatusOK, model.ResponseData{
+		Code:    "1",
+		Message: "添加设备成功",
+	})
 	return
 }
 
@@ -251,7 +294,10 @@ func (c *EmController) AddEmDeviceModel(ctx *gin.Context) {
 	emDeviceModel.Name = addEmDeviceModel.Name
 	emDeviceModelByName, _ := c.repo.GetEmDeviceModelByName(emDeviceModel.Name)
 	if emDeviceModelByName != nil {
-		ctx.JSON(http.StatusOK, "设备模型已存在，添加失败")
+		ctx.JSON(http.StatusOK, model.ResponseData{
+			Code:    "0",
+			Message: "设备模型已存在，添加失败",
+		})
 		return
 	}
 
@@ -261,7 +307,10 @@ func (c *EmController) AddEmDeviceModel(ctx *gin.Context) {
 	if err != nil {
 		ctx.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 	}
-	ctx.JSON(http.StatusOK, "添加设备模型成功")
+	ctx.JSON(http.StatusOK, model.ResponseData{
+		Code:    "1",
+		Message: "添加设备模型成功",
+	})
 	return
 }
 
@@ -280,13 +329,19 @@ func (c *EmController) AddEmDeviceModelCmd(ctx *gin.Context) {
 	emDeviceModelCmd.Name = addEmDeviceModelCmd.Name
 	emDeviceModelCmdByName, _ := c.repo.GetEmDeviceModelCmdByName(emDeviceModelCmd.Name)
 	if emDeviceModelCmdByName != nil {
-		ctx.JSON(http.StatusOK, "设备模型命令已存在，添加失败")
+		ctx.JSON(http.StatusOK, model.ResponseData{
+			Code:    "0",
+			Message: "设备模型命令已存在，添加失败",
+		})
 		return
 	}
 	// 查询对应的模型
 	emDeviceModelByName, _ := c.repo.GetEmDeviceModelByName(addEmDeviceModelCmd.TslName)
 	if emDeviceModelByName == nil {
-		ctx.JSON(http.StatusOK, "设备模型不存在，添加失败")
+		ctx.JSON(http.StatusOK, model.ResponseData{
+			Code:    "0",
+			Message: "设备模型不存在，添加失败",
+		})
 		return
 	}
 	data, _ = json.Marshal(addEmDeviceModelCmd)
@@ -297,7 +352,10 @@ func (c *EmController) AddEmDeviceModelCmd(ctx *gin.Context) {
 	if err != nil {
 		ctx.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 	}
-	ctx.JSON(http.StatusOK, "添加设备模型命令成功")
+	ctx.JSON(http.StatusOK, model.ResponseData{
+		Code:    "1",
+		Message: "添加设备模型命令成功",
+	})
 	return
 }
 
@@ -316,13 +374,19 @@ func (c *EmController) AddEmDeviceModelCmdParam(ctx *gin.Context) {
 	emDeviceModelCmdParam.Name = addEmDeviceModelCmdParam.Name
 	emDeviceModelCmdParamByName, _ := c.repo.GetEmDeviceModelCmdParamByName(emDeviceModelCmdParam.Name)
 	if emDeviceModelCmdParamByName != nil {
-		ctx.JSON(http.StatusOK, "设备模型命令参数，添加失败")
+		ctx.JSON(http.StatusOK, model.ResponseData{
+			Code:    "0",
+			Message: "设备模型命令参数，添加失败",
+		})
 		return
 	}
 	// 找对应的cmd
 	emDeviceModelCmdByName, _ := c.repo.GetEmDeviceModelCmdByName(addEmDeviceModelCmdParam.CmdName)
 	if emDeviceModelCmdByName == nil {
-		ctx.JSON(http.StatusOK, "设备模型命令名不存在，添加失败")
+		ctx.JSON(http.StatusOK, model.ResponseData{
+			Code:    "0",
+			Message: "设备模型命令名不存在，添加失败",
+		})
 		return
 	}
 	emDeviceModelCmdParam.DeviceModelCmdId = emDeviceModelCmdByName.Id
@@ -334,6 +398,9 @@ func (c *EmController) AddEmDeviceModelCmdParam(ctx *gin.Context) {
 	if err != nil {
 		ctx.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 	}
-	ctx.JSON(http.StatusOK, "添加设备模型命令参数成功")
+	ctx.JSON(http.StatusOK, model.ResponseData{
+		Code:    "1",
+		Message: "添加设备模型命令参数成功",
+	})
 	return
 }
