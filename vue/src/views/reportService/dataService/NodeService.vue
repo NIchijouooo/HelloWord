@@ -1,55 +1,73 @@
 <template>
   <div class="main-container">
     <div class="main">
-      <div class="title" style="justify-content: space-between">
-        <div class="title-left">
-          <el-button type="primary" plain @click="toDataService()" style="margin-right: 20px">
-            <el-icon class="el-input__icon"><back /></el-icon>
-            返回上报服务
-          </el-button>
-          <el-input style="width: 200px" placeholder="请输入 地址/名称 过滤" clearable v-model="ctxData.nodeInfo">
-            <template #prefix>
-              <el-icon class="el-input__icon"><search /></el-icon>
-            </template>
-          </el-input>
-        </div>
-        <div>
-          <el-button type="primary" plain class="right-btn" @click="importDevice()">
-            <el-icon class="el-input__icon"><download /></el-icon>
-            导入设备
-          </el-button>
-          <el-button type="primary" plain class="right-btn" @click="exportDevice">
-            <el-icon class="el-input__icon"><upload /></el-icon>
-            导出设备
-          </el-button>
-          <el-button type="primary" bg class="right-btn" @click="reportNode()">
-            <el-icon class="btn-icon">
-              <Icon name="local-report" size="14px" color="#ffffff" />
-            </el-icon>
-            主动上报
-          </el-button>
-          <el-button type="primary" bg class="right-btn" @click="addNode()">
-            <el-icon class="btn-icon">
-              <Icon name="local-add" size="14px" color="#ffffff" />
-            </el-icon>
-            添加
-          </el-button>
-          <el-button type="danger" bg class="right-btn" @click="deleteNode()">
-            <el-icon class="btn-icon">
-              <Icon name="local-delete" size="14px" color="#ffffff" />
-            </el-icon>
-            删除
-          </el-button>
-          <el-button style="color: #fff" color="#2EA554" class="right-btn" @click="refresh()">
-            <el-icon class="btn-icon">
-              <Icon name="local-refresh" size="14px" color="#ffffff" />
-            </el-icon>
-            刷新
-          </el-button>
-        </div>
+      <div class="search-bar">
+        <el-form :inline="true" ref="searchFormRef" status-icon label-width="120px">
+          <el-form-item style="margin-left: 20px;">
+            <el-button type="primary" plain @click="toDataService()" style="margin-right: 20px">
+              <el-icon class="el-input__icon"><back /></el-icon>
+              返回上报服务
+            </el-button>
+          </el-form-item>
+          <el-form-item>
+            <el-button type="primary" plain class="right-btn" @click="importDevice()">
+              <el-icon class="el-input__icon"><download /></el-icon>
+              导入设备
+            </el-button>
+          </el-form-item>
+          <el-form-item>
+            <el-button type="primary" plain class="right-btn" @click="exportDevice">
+              <el-icon class="el-input__icon"><upload /></el-icon>
+              导出设备
+            </el-button>
+          </el-form-item>
+        </el-form>
       </div>
-      <div class="title" style="top: 60px; height: 76px; padding: 20px 0; justify-content: flex-start">
-        <div class="tName">{{ props.curGateway.serviceName }}</div>
+      <div class="search-bar" style="display: flex;">
+        <div class="title" style="position: relative;margin-right: 40px;height: 40px; padding: 0px 0; justify-content: flex-start">
+          <div class="tName">{{ props.curGateway.serviceName }}</div>
+        </div>
+        <el-form :inline="true" ref="searchFormRef2" status-icon label-width="90px">
+          <el-form-item label="">
+            <el-input style="width: 200px" placeholder="请输入 地址/名称 过滤" clearable v-model="ctxData.nodeInfo">
+              <template #prefix>
+                <el-icon class="el-input__icon"><search /></el-icon>
+              </template>
+            </el-input>
+          </el-form-item>
+          <el-form-item>
+            <el-button type="primary" bg class="right-btn" @click="reportNode()">
+              <el-icon class="btn-icon">
+                <Icon name="local-report" size="14px" color="#ffffff" />
+              </el-icon>
+              主动上报
+            </el-button>
+          </el-form-item>
+          <el-form-item>
+            <el-button type="primary" bg class="right-btn" @click="addNode()">
+              <el-icon class="btn-icon">
+                <Icon name="local-add" size="14px" color="#ffffff" />
+              </el-icon>
+              添加
+            </el-button>
+          </el-form-item>
+          <el-form-item>
+            <el-button type="danger" bg class="right-btn" @click="deleteNode()">
+              <el-icon class="btn-icon">
+                <Icon name="local-delete" size="14px" color="#ffffff" />
+              </el-icon>
+              删除
+            </el-button>
+          </el-form-item>
+          <el-form-item>
+            <el-button style="color: #fff" color="#2EA554" class="right-btn" @click="refresh()">
+              <el-icon class="btn-icon">
+                <Icon name="local-refresh" size="14px" color="#ffffff" />
+              </el-icon>
+              刷新
+            </el-button>
+          </el-form-item>
+        </el-form>
       </div>
       <div class="content" ref="contentRef" style="top: 136px">
         <el-table
@@ -465,7 +483,7 @@ const getNodeList = (flag) => {
       showOneResMsg(res)
     }
     await nextTick(() => {
-      ctxData.tableMaxHeight = contentRef.value.clientHeight - 34 - 36 - 22
+      ctxData.tableMaxHeight = contentRef.value.clientHeight - 34 - 36 - 132
     })
   })
 }

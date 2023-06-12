@@ -1,26 +1,32 @@
 <template>
   <div class="main-container">
     <div class="main">
-      <div class="title" style="justify-content: space-between">
-        <el-input style="width: 200px" placeholder="请输入接口名称" clearable v-model="ctxData.interfaceName">
-          <template #prefix>
-            <el-icon class="el-input__icon"><search /></el-icon>
-          </template>
-        </el-input>
-        <div>
-          <el-button type="primary" bg class="right-btn" @click="addInterface()">
-            <el-icon class="btn-icon">
-              <Icon name="local-add" size="14px" color="#ffffff" />
-            </el-icon>
-            添加
-          </el-button>
-          <el-button style="color: #fff; margin-left: 20px" color="#2EA554" class="right-btn" @click="refresh()">
-            <el-icon class="btn-icon">
-              <Icon name="local-refresh" size="14px" color="#ffffff" />
-            </el-icon>
-            刷新
-          </el-button>
-        </div>
+      <div class="search-bar">
+        <el-form :inline="true" ref="searchFormRef" status-icon label-width="90px">
+          <el-form-item label="接口名称">
+            <el-input style="width: 200px" placeholder="请输入接口名称" clearable v-model="ctxData.interfaceName">
+              <template #prefix>
+                <el-icon class="el-input__icon"><search /></el-icon>
+              </template>
+            </el-input>
+          </el-form-item>
+          <el-form-item>
+            <el-button style="color: #fff; margin-left: 20px" color="#2EA554" class="right-btn" @click="refresh()">
+              <el-icon class="btn-icon">
+                <Icon name="local-refresh" size="14px" color="#ffffff" />
+              </el-icon>
+              刷新
+            </el-button>
+          </el-form-item>
+        </el-form>
+      </div>
+      <div class="tool-bar">
+        <el-button type="primary" bg class="right-btn" @click="addInterface()">
+          <el-icon class="btn-icon">
+            <Icon name="local-add" size="14px" color="#ffffff" />
+          </el-icon>
+          添加
+        </el-button>
       </div>
       <div class="content-up">
         <div class="cu-main">
@@ -55,7 +61,7 @@
                       </template>
                       <div class="card-content">
                         <div class="cc-body">
-                          <div v-for="(param, key1, index) in item.param" class="ccb-item">
+                          <div v-for="(param, key1, index) in item.param" class="ccb-item" :key="index">
                             <div class="">{{ ctxData.paramName[key1] }}：</div>
                             <div class="head-name" v-if="key1 == 'ledModuleEnable'">{{ param ? '是' : '否' }}</div>
                             <div class="head-name" v-else>{{ param }}</div>
@@ -1055,11 +1061,6 @@ const handleResult = (res, doFunction) => {
   overflow: auto;
 }
 .content-up {
-  position: absolute;
-  top: 80px;
-  left: 16px;
-  right: 16px;
-  bottom: 24px;
   overflow: auto;
   min-width: 700px;
   padding: 0 8px;

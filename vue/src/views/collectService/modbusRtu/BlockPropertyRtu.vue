@@ -1,38 +1,52 @@
 <template>
-  <div class="title" style="justify-content: space-between">
-    <div class="tName">{{ props.curModelBlock.label }}：命令参数列表</div>
-    <div style="display: flex">
-      <el-input style="width: 200px" placeholder="请输入命令参数名称" v-model="ctxData.deviceModelProperty">
-        <template #prefix>
-          <el-icon class="el-input__icon"><search /></el-icon>
-        </template>
-      </el-input>
-      <el-button type="primary" plain class="right-btn" @click="importDPS()">
-        <el-icon class="el-input__icon"><download /></el-icon>
-        导入命令参数
-      </el-button>
-      <el-button type="primary" plain class="right-btn" @click="exportDPS()">
-        <el-icon class="el-input__icon"><upload /></el-icon>
-        导出命令参数
-      </el-button>
-      <el-button type="primary" bg class="right-btn" @click="addDeviceModelProperty()">
-        <el-icon class="btn-icon">
-          <Icon name="local-add" size="14px" color="#ffffff" />
-        </el-icon>
-        添加
-      </el-button>
-      <el-button style="color: #fff" color="#2EA554" class="right-btn" @click="refresh()">
-        <el-icon class="btn-icon">
-          <Icon name="local-refresh" size="14px" color="#ffffff" />
-        </el-icon>
-        刷新
-      </el-button>
-      <el-button type="danger" bg class="right-btn" @click="deleteDeviceModelProperty()">
-        <el-icon class="btn-icon">
-          <Icon name="local-delete" size="14px" color="#ffffff" />
-        </el-icon>
-        删除
-      </el-button>
+<div>
+  <div style="display: flex; justify-content: space-between;">
+    <div class="title" style="position: relative;width: 40%;justify-content: flex-start;">
+      <div class="tName">{{ props.curModelBlock.label }}：命令参数列表</div>
+    </div>
+    <div class="search-bar" style="text-align:right;">
+      <el-form :inline="true" ref="searchFormRef" status-icon label-width="90px">
+        <el-form-item style="margin-left: 20px;">
+          <el-input style="width: 200px" placeholder="请输入命令参数名称" v-model="ctxData.deviceModelProperty">
+            <template #prefix>
+              <el-icon class="el-input__icon"><search /></el-icon>
+            </template>
+          </el-input>
+        </el-form-item>
+        <el-form-item>
+          <el-button type="primary" plain class="right-btn" @click="importDPS()">
+            <el-icon class="el-input__icon"><download /></el-icon>
+            导入命令参数
+          </el-button>
+        </el-form-item>
+        <el-form-item>
+          <el-button type="primary" plain class="right-btn" @click="exportDPS()">
+            <el-icon class="el-input__icon"><upload /></el-icon>
+            导出命令参数
+          </el-button>
+        </el-form-item>
+        <el-form-item>
+          <el-button type="primary" bg class="right-btn" @click="addDeviceModelProperty()">
+            <el-icon class="btn-icon"> <Icon name="local-add" size="14px" color="#ffffff" /> </el-icon> 添加
+          </el-button>
+        </el-form-item>
+        <el-form-item>
+          <el-button style="color: #fff" color="#2EA554" class="right-btn" @click="refresh()">
+            <el-icon class="btn-icon">
+              <Icon name="local-refresh" size="14px" color="#ffffff" />
+            </el-icon>
+            刷新
+          </el-button>
+        </el-form-item>
+        <el-form-item>
+          <el-button type="danger" bg class="right-btn" @click="deleteDeviceModelProperty()">
+            <el-icon class="btn-icon">
+              <Icon name="local-delete" size="14px" color="#ffffff" />
+            </el-icon>
+            删除
+          </el-button>
+        </el-form-item>
+      </el-form>
     </div>
   </div>
   <div class="content" ref="contentRef">
@@ -40,9 +54,9 @@
       :data="filterDMPTableData"
       :cell-style="ctxData.cellStyle"
       :header-cell-style="ctxData.headerCellStyle"
-      :max-height="ctxData.tableMaxHeight"
       style="width: 100%"
       stripe
+      :max-height="ctxData.tableMaxHeight"
       @selection-change="handleSelectionChange"
       @row-dblclick="editDeviceModelProperty"
     >
@@ -255,7 +269,7 @@
       <el-form :model="ctxData.formulaForm" label-position="right" label-width="120px">
         <el-form-item label="运算符号">
           <div style="width: 100%">
-            <div v-for="item in ctxData.operationList" class="operation">
+            <div v-for="(item, index) in ctxData.operationList" :key="index" class="operation">
               <div style="padding-right: 10px">
                 <el-button style="width: 100%" @click="setOperation(item)">{{ item.label }}</el-button>
               </div>
@@ -322,6 +336,7 @@
       </span>
     </template>
   </el-dialog>
+</div>
 </template>
 <script setup>
 import { Search, Back, Download, Upload } from '@element-plus/icons-vue'
@@ -551,8 +566,9 @@ const getDeviceModelBlockProperty = (flag) => {
     } else {
       showOneResMsg(res)
     }
+    
     await nextTick(() => {
-      ctxData.tableMaxHeight = contentRef.value.clientHeight - 34 - 22
+      ctxData.tableMaxHeight = contentRef.value.clientHeight - 34 - 22 - 82
     })
   })
 }

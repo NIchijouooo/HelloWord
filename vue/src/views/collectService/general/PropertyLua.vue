@@ -1,66 +1,85 @@
 <template>
+<div class="main-container">
   <div class="main">
-    <div class="title" style="justify-content: space-between">
-      <div>
-        <el-button type="primary" plain @click="toDeviceModel()">
-          <el-icon class="el-input__icon"><back /></el-icon>
-          返回设备模型
-        </el-button>
-      </div>
-      <div style="display: flex; align-items: center">
-        <el-radio-group v-model="ctxData.varParamType" style="margin-right: 20px">
-          <el-radio label="Properties" border>属性</el-radio>
-          <!-- <el-radio label="Services" border>服务</el-radio> -->
-        </el-radio-group>
-        <el-divider direction="vertical" style="height: 2em" />
-        <el-button type="primary" plain class="right-btn" @click="importDPS()">
-          <el-icon class="el-input__icon"><download /></el-icon>
-          导入属性
-        </el-button>
-        <el-button type="primary" plain class="right-btn" @click="exportDPS()">
-          <el-icon class="el-input__icon"><upload /></el-icon>
-          导出属性
-        </el-button>
-      </div>
+    <div class="search-bar">
+      <el-form :inline="true" ref="searchFormRef" status-icon label-width="120px">
+        <el-form-item style="margin-right: 20px;margin-left: 20px;">
+          <el-button type="primary" plain @click="toDeviceModel()">
+            <el-icon class="el-input__icon"><back /></el-icon>
+            返回设备模型
+          </el-button>
+        </el-form-item>
+        <el-form-item>
+          <el-radio-group v-model="ctxData.varParamType" style="margin-right: 20px">
+            <el-radio label="Properties" border>属性</el-radio>
+            <!-- <el-radio label="Services" border>服务</el-radio> -->
+          </el-radio-group>
+          <el-divider direction="vertical" style="height: 2em" />
+        </el-form-item>
+        <el-form-item>
+          <el-button type="primary" plain class="right-btn" @click="importDPS()">
+            <el-icon class="el-input__icon"><download /></el-icon>
+            导入属性
+          </el-button>
+        </el-form-item>
+        <el-form-item>
+          <el-button type="primary" plain class="right-btn" @click="exportDPS()">
+            <el-icon class="el-input__icon"><upload /></el-icon>
+            导出属性
+          </el-button>
+        </el-form-item>
+      </el-form>
     </div>
-    <div v-if="ctxData.varParamType === 'Properties'">
-      <div class="title" style="top: 60px; height: 76px; padding: 20px 0; justify-content: space-between">
-        <div class="tName">
-          {{ props.curDeviceModel.label }}：{{ ctxData.varParamType === 'Properties' ? '属性列表' : '服务列表' }}
+    <div v-if="ctxData.varParamType === 'Properties'" style="height: calc(100% - 20px)">
+      <div class="search-bar" style="display: flex;">
+        <div class="title" style="position: relative;margin-right: 40px;justify-content: flex-start;padding: 0px 0px;height: 40px;">
+          <div class="tName">
+            {{ props.curDeviceModel.label }}：{{ ctxData.varParamType === 'Properties' ? '属性列表' : '服务列表' }}
+          </div>
         </div>
-        <div style="display: flex">
-          <el-input style="width: 200px" placeholder="请输入属性名称" v-model="ctxData.deviceModelProperty">
-            <template #prefix>
-              <el-icon class="el-input__icon"><search /></el-icon>
-            </template>
-          </el-input>
-          <el-button type="primary" bg class="right-btn" @click="syncDeviceModelProperty()">
-            <el-icon class="btn-icon">
-              <Icon name="local-tongbu" size="14px" color="#ffffff" />
-            </el-icon>
-            同步
-          </el-button>
-          <el-button type="primary" bg class="right-btn" @click="addDeviceModelProperty()">
-            <el-icon class="btn-icon">
-              <Icon name="local-add" size="14px" color="#ffffff" />
-            </el-icon>
-            添加
-          </el-button>
-          <el-button style="color: #fff" color="#2EA554" class="right-btn" @click="refresh('deviceModelProperty')">
-            <el-icon class="btn-icon">
-              <Icon name="local-refresh" size="14px" color="#ffffff" />
-            </el-icon>
-            刷新
-          </el-button>
-          <el-button type="danger" bg class="right-btn" @click="deleteDeviceModelProperty()">
-            <el-icon class="btn-icon">
-              <Icon name="local-delete" size="14px" color="#ffffff" />
-            </el-icon>
-            删除
-          </el-button>
-        </div>
+        <el-form :inline="true" ref="searchFormRef" status-icon label-width="90px">
+          <el-form-item label="">
+            <el-input style="width: 200px" placeholder="请输入属性名称" v-model="ctxData.deviceModelProperty">
+              <template #prefix>
+                <el-icon class="el-input__icon"><search /></el-icon>
+              </template>
+            </el-input>
+          </el-form-item>
+          <el-form-item>
+            <el-button type="primary" bg class="right-btn" @click="syncDeviceModelProperty()">
+              <el-icon class="btn-icon">
+                <Icon name="local-tongbu" size="14px" color="#ffffff" />
+              </el-icon>
+              同步
+            </el-button>
+          </el-form-item>
+          <el-form-item>
+            <el-button type="primary" bg class="right-btn" @click="addDeviceModelProperty()">
+              <el-icon class="btn-icon">
+                <Icon name="local-add" size="14px" color="#ffffff" />
+              </el-icon>
+              添加
+            </el-button>
+          </el-form-item>
+          <el-form-item>
+            <el-button type="danger" bg class="right-btn" @click="deleteDeviceModelProperty()">
+              <el-icon class="btn-icon">
+                <Icon name="local-delete" size="14px" color="#ffffff" />
+              </el-icon>
+              删除
+            </el-button>
+          </el-form-item>
+          <el-form-item>
+            <el-button style="color: #fff; margin-left: 20px" color="#2EA554" class="right-btn" @click="refresh('deviceModelProperty')">
+              <el-icon class="btn-icon">
+                <Icon name="local-refresh" size="14px" color="#ffffff" />
+              </el-icon>
+              刷新
+            </el-button>
+          </el-form-item>
+        </el-form>
       </div>
-      <div class="content" ref="contentRef" style="top: 136px">
+      <div class="content" ref="contentRef">
         <el-table
           :data="filterDMPTableData"
           :cell-style="ctxData.cellStyle"
@@ -314,6 +333,7 @@
       </template>
     </el-dialog>
   </div>
+</div>
 </template>
 <script setup>
 import { Search, Back, Download, Upload } from '@element-plus/icons-vue'

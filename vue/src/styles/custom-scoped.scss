@@ -28,3 +28,15 @@
   border-left: 1px solid #ebeef5;
   border-right: 1px solid #ebeef5;
 }
+:deep(.el-form--inline .el-form-item) {
+  margin-bottom: 10px;
+  margin-right: 10px;
+}
+
+:deep(.el-table .el-table__header-wrapper th) {
+  word-break: break-word;
+  background: #f8f8f9 !important;
+  color: #515a6e !important;
+  height: 40px;
+  font-size: 13px;
+}

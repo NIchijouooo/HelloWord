@@ -25,14 +25,20 @@ import zhCn from 'element-plus/lib/locale/lang/zh-cn'
   left: 0;
   right: 0;
   bottom: 0;
+  width: 99%;
+  height: calc(100% - 20px);
+  overflow: hidden;
   .main {
     position: absolute;
     top: 20px;
     left: 20px;
     right: 20px;
     bottom: 20px;
+    width: 100%;
+    height: calc(100%);
     background-color: #fff;
     border-radius: 4px;
+    overflow: hidden;
   }
   .title {
     position: absolute;
@@ -57,12 +63,21 @@ import zhCn from 'element-plus/lib/locale/lang/zh-cn'
     }
   }
   .content {
-    position: absolute;
-    top: 80px;
-    left: 24px;
-    right: 24px;
-    bottom: 0;
+    width: auto;
+    height: 100%;
     min-width: 700px;
+    overflow-x: hidden;
+  }
+  .search-bar {
+    width: 100%;
+    margin-top: 15px;
+  }
+  .tool-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: 10px;
+    margin-bottom: 15px;
   }
   .btn-icon {
     display: flex;
@@ -95,6 +110,7 @@ import zhCn from 'element-plus/lib/locale/lang/zh-cn'
 .param-content {
   position: relative;
   width: 400px;
+  padding-left: 40px;
   .pc-title {
     position: relative;
     display: flex;

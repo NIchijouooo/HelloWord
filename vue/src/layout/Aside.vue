@@ -2,16 +2,6 @@
   <el-aside :width="ctxData.isCollapse ? variables.sideBarCloseWidth : variables.sideBarWidth">
     <div class="logo">
       <el-image :src="logoUrl"></el-image>
-      <el-tooltip :content="ctxData.isCollapse ? '展开菜单' : '折叠菜单'">
-        <el-icon
-          :size="18"
-          color="#fff"
-          :class="{ 'menu-collapse': true, isOpened: !ctxData.isCollapse }"
-          @click="ctxData.isCollapse = !ctxData.isCollapse"
-        >
-          <expand />
-        </el-icon>
-      </el-tooltip>
     </div>
     <el-menu
       ref="menu"
@@ -22,15 +12,15 @@
       :default-active="activeIndex"
       :collapse="ctxData.isCollapse"
     >
-      <template v-for="item in routers" :key="item.name">
+      <template v-for="item in routers">
         <template v-if="!item['hidden']">
-          <el-sub-menu v-if="item.children && item.children.length" :index="concatPath(item.path)">
+          <el-sub-menu v-if="item.children && item.children.length" :key="item.name" :index="concatPath(item.path)">
             <template #title>
               <div class="menu-icon" :class="itemClass(item.meta['icon'])"></div>
               <span>{{ item.meta.title }}</span>
             </template>
-            <template v-for="sub in item.children" :key="sub.name">
-              <el-sub-menu class="in-sub-menu" v-if="sub.children && sub.children.length" :index="concatPath(sub.path)">
+            <template v-for="sub in item.children">
+              <el-sub-menu class="in-sub-menu" :key="sub.name" v-if="sub.children && sub.children.length" :index="concatPath(sub.path)">
                 <template #title>
                   <span class="in-sub-menu-item"> {{ sub.meta.title }}</span>
                 </template>
@@ -40,18 +30,29 @@
                   </template>
                 </el-menu-item>
               </el-sub-menu>
-              <el-menu-item v-else :index="concatPath(sub.path)">
+              <el-menu-item v-else :index="concatPath(sub.path)" :key="sub.name">
                 <template #title>{{ sub.meta.title }}</template>
               </el-menu-item>
             </template>
           </el-sub-menu>
-          <el-menu-item v-else :index="concatPath(item.path)">
+          <el-menu-item v-else :index="concatPath(item.path)" :key="item.name">
             <div class="menu-icon" :class="itemClass(item.meta['icon'])"></div>
             <template #title>{{ item.meta.title }}</template>
           </el-menu-item>
         </template>
       </template>
     </el-menu>
+
+    <div class="sidebar-toggle" @click="ctxData.isCollapse = !ctxData.isCollapse">
+      <el-icon
+        :size="18"
+        color="#1890ff"
+        :class="{ 'menu-collapse': true, isOpened: !ctxData.isCollapse }"
+      >
+        <expand />
+      </el-icon>
+      <span class="text" v-show="!ctxData.isCollapse">收缩侧边栏</span>
+    </div>
   </el-aside>
 </template>
 
@@ -62,18 +63,19 @@ import variables from 'styles/variables.module.scss'
 import { Expand } from '@element-plus/icons-vue'
 import { userStore } from '@/stores/user.js'
 import setLoginInfo from 'utils/setLoginInfo.js'
-import logoUrl from '@/assets/logo.png'
+import logoUrl from '@/assets/logo.png'//'@/assets/logo.png'
 
 const user = userStore()
 const ctxData = reactive({
   isCollapse: false,
 })
 const route = useRoute()
-console.log('Aside route', route)
+// console.log('Aside route', route)
 if (!user.userInfo) {
   setLoginInfo(user)
 }
 const routers = user.routers
+console.log('routers', routers)
 const concatPath = (p_path) => {
   const path = `${p_path !== '' ? p_path : '/'}`
   return path
@@ -115,8 +117,9 @@ const activeIndex = computed(() => route.path)
   display: flex;
   display: -webkit-flex;
   flex-direction: column;
-  background: linear-gradient(180deg, #384969, #22304c);
-  box-shadow: 0 10px 10px -10px #35304c inset;
+ /*background: linear-gradient(180deg, #384969, #22304c);
+  box-shadow: 0 10px 10px -10px #35304c inset;*/
+  box-shadow: 1px 0px 6px rgba(0, 21, 41, 0.35);
   overflow: hidden;
   transition: width 0.3s ease-in-out;
   -moz-transition: width 0.3s ease-in-out;
@@ -138,8 +141,9 @@ const activeIndex = computed(() => route.path)
   justify-content: space-around;
   align-items: center;
   width: 100%;
-  height: 50px;
+  height: 66px;
   box-sizing: border-box;
+  border-bottom: solid 1px #e6e6e6;
 }
 
 .dashboard {
@@ -205,6 +209,7 @@ const activeIndex = computed(() => route.path)
 
 :deep(.el-sub-menu__title) {
   height: 68px;
+  padding: 0px 0px;
   font-size: 16px;
   letter-spacing: 1px; //字间距
   background-color: inherit !important;
@@ -228,16 +233,16 @@ const activeIndex = computed(() => route.path)
   background: initial;
 }
 :deep(.el-menu-item:hover) {
-  background-color: inherit;
+  background-color: #f0f0f0;
 }
 :deep(.el-menu-item.is-active:hover) {
-  background-color: #273047;
+  background-color: #f0f0f0;
 }
-:deep(.is-active) {
-  background-color: #273047;
-}
+/*:deep(.is-active) {
+  background-color: #f0f0f0;
+}*/
 :deep(.el-sub-menu .el-menu-item.is-active) {
-  background-color: #343b4c;
+  background-color: #f0f0f0;
 }
 :deep(.el-sub-menu .el-menu-item .menu-icon) {
   height: 18px;
@@ -249,6 +254,7 @@ const activeIndex = computed(() => route.path)
   display: flex !important;
   // justify-content: center;
   align-items: center;
+  justify-content: center;
   .menu-icon {
     margin: 0;
   }
@@ -258,7 +264,7 @@ const activeIndex = computed(() => route.path)
 }
 
 :deep(.el-popper.is-light) {
-  background: #001529;
+  background: #f0f0f0;
 }
 :deep(.el-menu--popup-right-start .el-menu-item) {
   font-size: 14px;
@@ -274,9 +280,28 @@ const activeIndex = computed(() => route.path)
   cursor: pointer;
   font-size: 24px;
   margin-right: 10px;
-  color: #fff;
 }
 .isOpened {
   transform: rotate(180deg);
+}
+.sidebar-toggle {
+  height: 56px;
+  width: 100%;
+  margin-bottom: 10px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 14px;
+  color: #1890ff;
+  background: transparent;
+  box-shadow: inset 0 -50px 30px rgba(123, 240, 255,  0.02);
+  transition: all .15s;
+  cursor: pointer;
+  user-select: none;
+
+  .text {
+    margin: 0 0px;
+    word-break: keep-all;
+  }
 }
 </style>

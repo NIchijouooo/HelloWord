@@ -2,26 +2,32 @@
   <div class="main-container">
     <!-- 模型页 -->
     <div class="main" v-if="ctxData.showFlag === 0">
-      <div class="title" style="justify-content: space-between">
-        <el-input style="width: 200px" placeholder="请输入采集模型名称" v-model="ctxData.deviceModelInfo">
-          <template #prefix>
-            <el-icon class="el-input__icon"><search /></el-icon>
-          </template>
-        </el-input>
-        <div>
-          <el-button type="primary" bg class="right-btn" @click="addDeviceModel()">
-            <el-icon class="btn-icon">
-              <Icon name="local-add" size="14px" color="#ffffff" />
-            </el-icon>
-            添加
-          </el-button>
-          <el-button style="color: #fff" color="#2EA554" class="right-btn" @click="refresh()">
-            <el-icon class="btn-icon">
-              <Icon name="local-refresh" size="14px" color="#ffffff" />
-            </el-icon>
-            刷新
-          </el-button>
-        </div>
+      <div class="search-bar">
+        <el-form :inline="true" ref="searchFormRef" status-icon label-width="120px">
+          <el-form-item label="采集模型名称">
+            <el-input style="width: 200px" placeholder="请输入采集模型名称" v-model="ctxData.deviceModelInfo">
+              <template #prefix>
+                <el-icon class="el-input__icon"><search /></el-icon>
+              </template>
+            </el-input>
+          </el-form-item>
+          <el-form-item>
+            <el-button style="color: #fff; margin-left: 20px" color="#2EA554" class="right-btn" @click="refresh()">
+              <el-icon class="btn-icon">
+                <Icon name="local-refresh" size="14px" color="#ffffff" />
+              </el-icon>
+              刷新
+            </el-button>
+          </el-form-item>
+        </el-form>
+      </div>
+      <div class="tool-bar">
+        <el-button type="primary" bg class="right-btn" @click="addDeviceModel()">
+          <el-icon class="btn-icon">
+            <Icon name="local-add" size="14px" color="#ffffff" />
+          </el-icon>
+          添加
+        </el-button>
       </div>
       <div class="content" ref="contentRef">
         <el-table
@@ -71,12 +77,14 @@
       v-if="ctxData.showFlag === 1"
       :curDeviceModel="ctxData.curDeviceModel"
       @changeShowFlag="changeShowFlag()"
+      style="width: 100%; height: 100%;overflow:hidden;"
     ></PropertyRtu>
     <ModelBlockRtu
       v-if="ctxData.showFlag === 2"
       :curDeviceModel="ctxData.curDeviceModel"
       :deviceModelList="ctxData.tableData"
       @changeShowFlag="changeShowFlag()"
+      style="width: 100%; height: 100%;overflow:hidden;"
     >
     </ModelBlockRtu>
     <!-- dialog 内容 -->
@@ -129,6 +137,7 @@ import DeviceModelApi from 'api/deviceModel.js'
 import PropertyRtu from './PropertyRtu.vue'
 import ModelBlockRtu from './ModelBlockRtu.vue'
 import { userStore } from 'stores/user'
+import { useRoute } from 'vue-router'
 
 const users = userStore()
 
@@ -184,7 +193,13 @@ const ctxData = reactive({
   dmTitle: '添加采集模型',
   pluginList: [], //
   curDeviceModel: '', //当前采集模型
+  tsl: '',
 })
+
+//接收参数，处理命令详情页面的显示
+const route = useRoute()
+ctxData.tsl = route.query.tsl;
+
 // 获取采集模型列表
 const getDeviceModelList = (flag) => {
   //
@@ -198,6 +213,11 @@ const getDeviceModelList = (flag) => {
     if (!res) return
     if (res.code === '0') {
       ctxData.tableData = res.data
+      // 首页传参跳转到列表页面，根据参数自动进入命令详情页面中
+      if (ctxData.tsl) {
+        const detail = ctxData.tableData.find(item => item.name === ctxData.tsl)
+        showBlockParams(detail);
+      }
       if (flag === 1) {
         ElMessage({
           type: 'success',

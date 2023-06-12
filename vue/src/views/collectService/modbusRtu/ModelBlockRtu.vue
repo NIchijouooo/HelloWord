@@ -1,4 +1,6 @@
 <template>
+<div class="main-container">
+  <div class="main">
   <div class="mc-left">
     <div class="title">
       <el-button type="primary" style="width: 100%" plain @click="toDeviceModel()">
@@ -22,39 +24,56 @@
   </div>
   <div class="mc-right">
     <div class="mcr-top">
-      <div class="title" style="justify-content: space-between">
-        <div class="tName">{{ ctxData.curDeviceModel.label }}：命令列表</div>
-        <div style="display: flex">
-          <el-input style="width: 200px" placeholder="请输入命令名称" v-model="ctxData.deviceModelBlock">
-            <template #prefix>
-              <el-icon class="el-input__icon"><search /></el-icon>
-            </template>
-          </el-input>
-          <el-button type="primary" plain class="right-btn" @click="importDPS()">
-            <el-icon class="el-input__icon"><download /></el-icon>
-            导入命令
-          </el-button>
-          <el-button type="primary" plain class="right-btn" @click="exportDPS()">
-            <el-icon class="el-input__icon"><upload /></el-icon>
-            导出命令
-          </el-button>
-          <el-button type="primary" bg class="right-btn" @click="addDeviceModelBlock()">
-            <el-icon class="btn-icon"> <Icon name="local-add" size="14px" color="#ffffff" /> </el-icon> 添加
-          </el-button>
-          <el-button style="color: #fff" color="#2EA554" class="right-btn" @click="refresh()">
-            <el-icon class="btn-icon">
-              <Icon name="local-refresh" size="14px" color="#ffffff" />
-            </el-icon>
-            刷新
-          </el-button>
-          <el-button type="danger" bg class="right-btn" @click="deleteDeviceModelBlock()">
-            <el-icon class="btn-icon">
-              <Icon name="local-delete" size="14px" color="#ffffff" />
-            </el-icon>
-            删除
-          </el-button>
+      <div style="display: flex; justify-content: space-between;">
+        <div class="title" style="position: relative;width: 40%;justify-content: flex-start;">
+          <div class="tName">{{ ctxData.curDeviceModel.label }}：命令列表</div>
+        </div>
+        <div class="search-bar" style="text-align:right;">
+          <el-form :inline="true" ref="searchFormRef" status-icon label-width="90px">
+            <el-form-item style="margin-left: 20px;">
+              <el-input style="width: 200px" placeholder="请输入命令名称" v-model="ctxData.deviceModelBlock">
+                <template #prefix>
+                  <el-icon class="el-input__icon"><search /></el-icon>
+                </template>
+              </el-input>
+            </el-form-item>
+            <el-form-item>
+              <el-button type="primary" plain class="right-btn" @click="importDPS()">
+                <el-icon class="el-input__icon"><download /></el-icon>
+                导入命令
+              </el-button>
+            </el-form-item>
+            <el-form-item>
+              <el-button type="primary" plain class="right-btn" @click="exportDPS()">
+                <el-icon class="el-input__icon"><upload /></el-icon>
+                导出命令
+              </el-button>
+            </el-form-item>
+            <el-form-item>
+              <el-button type="primary" bg class="right-btn" @click="addDeviceModelBlock()">
+                <el-icon class="btn-icon"> <Icon name="local-add" size="14px" color="#ffffff" /> </el-icon> 添加
+              </el-button>
+            </el-form-item>
+            <el-form-item>
+              <el-button style="color: #fff" color="#2EA554" class="right-btn" @click="refresh()">
+                <el-icon class="btn-icon">
+                  <Icon name="local-refresh" size="14px" color="#ffffff" />
+                </el-icon>
+                刷新
+              </el-button>
+            </el-form-item>
+            <el-form-item>
+              <el-button type="danger" bg class="right-btn" @click="deleteDeviceModelBlock()">
+                <el-icon class="btn-icon">
+                  <Icon name="local-delete" size="14px" color="#ffffff" />
+                </el-icon>
+                删除
+              </el-button>
+            </el-form-item>
+          </el-form>
         </div>
       </div>
+
       <div class="content" ref="contentRef">
         <el-table
           :data="filterDMPTableData"
@@ -206,6 +225,8 @@
       </span>
     </template>
   </el-dialog>
+  </div>
+</div>
 </template>
 <script setup>
 import { Search, Back, Download, Upload } from '@element-plus/icons-vue'
@@ -414,7 +435,7 @@ const getDeviceModelBlock = (flag) => {
       showOneResMsg(res)
     }
     await nextTick(() => {
-      ctxData.tableMaxHeight = contentRef.value.clientHeight - 34 - 22
+      ctxData.tableMaxHeight = contentRef.value.clientHeight - 34 - 22 - 82
       if (flag === 2) showModelPropertyBlock(ctxData.curModelBlock, 1)
     })
   })

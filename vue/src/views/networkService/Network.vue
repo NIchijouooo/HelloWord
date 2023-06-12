@@ -1,14 +1,14 @@
 <template>
   <div class="main-container">
     <div class="main">
-      <div class="title">
+      <div class="tool-bar">
         <el-button type="primary" bg class="right-btn" @click="addNetwork()">
           <el-icon class="btn-icon">
             <Icon name="local-add" size="14px" color="#ffffff" />
           </el-icon>
           添加
         </el-button>
-        <el-button style="color: #fff" color="#2EA554" class="right-btn" @click="refresh()">
+        <el-button style="color: #fff; margin-right: 20px" color="#2EA554" class="right-btn" @click="refresh()">
           <el-icon class="btn-icon">
             <Icon name="local-refresh" size="14px" color="#ffffff" />
           </el-icon>

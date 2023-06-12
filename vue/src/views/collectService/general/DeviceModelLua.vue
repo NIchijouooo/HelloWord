@@ -2,26 +2,32 @@
   <div class="main-container">
     <!-- 模型页 -->
     <div class="main" v-if="ctxData.dpFlag">
-      <div class="title" style="justify-content: space-between">
-        <el-input style="width: 200px" placeholder="请输入采集模型名称/标签" v-model="ctxData.deviceModelInfo">
-          <template #prefix>
-            <el-icon class="el-input__icon"><search /></el-icon>
-          </template>
-        </el-input>
-        <div>
-          <el-button type="primary" bg class="right-btn" @click="addDeviceModel()">
-            <el-icon class="btn-icon">
-              <Icon name="local-add" size="14px" color="#ffffff" />
-            </el-icon>
-            添加
-          </el-button>
-          <el-button style="color: #fff" color="#2EA554" class="right-btn" @click="refresh()">
-            <el-icon class="btn-icon">
-              <Icon name="local-refresh" size="14px" color="#ffffff" />
-            </el-icon>
-            刷新
-          </el-button>
-        </div>
+      <div class="search-bar">
+        <el-form :inline="true" ref="searchFormRef" status-icon label-width="120px">
+          <el-form-item label="模型名称/标签">
+            <el-input style="width: 200px" placeholder="请输入采集模型名称/标签" v-model="ctxData.deviceModelInfo">
+              <template #prefix>
+                <el-icon class="el-input__icon"><search /></el-icon>
+              </template>
+            </el-input>
+          </el-form-item>
+          <el-form-item>
+            <el-button style="color: #fff; margin-left: 20px" color="#2EA554" class="right-btn" @click="refresh()">
+              <el-icon class="btn-icon">
+                <Icon name="local-refresh" size="14px" color="#ffffff" />
+              </el-icon>
+              刷新
+            </el-button>
+          </el-form-item>
+        </el-form>
+      </div>
+      <div class="tool-bar">
+        <el-button type="primary" bg class="right-btn" @click="addDeviceModel()">
+          <el-icon class="btn-icon">
+            <Icon name="local-add" size="14px" color="#ffffff" />
+          </el-icon>
+          添加
+        </el-button>
       </div>
       <div class="content" ref="contentRef">
         <el-table
@@ -33,61 +39,27 @@
           stripe
           @row-dblclick="editDeviceModel"
         >
+          <el-table-column type="expand">
+            <template #default="scope">
+              <div class="param-content">
+                <div class="pc-title">
+                  <div class="pct-info">
+                    <b> {{ scope.row.serviceName }} </b>
+                    参数详情
+                  </div>
+                </div>
+                <div class="pc-content">
+                  <div class="param-item" v-for="(item, key, index) of scope.row.param" :key="index">
+                    <div class="param-value">{{ ctxData.paramName[key] }}：</div>
+                    <div class="param-name">{{ item || '-' }}</div>
+                  </div>
+                </div>
+              </div>
+            </template>
+          </el-table-column>
           <el-table-column prop="name" label="采集模型名称" width="auto" min-width="150" align="center">
           </el-table-column>
           <el-table-column prop="label" label="采集模型标签" width="auto" min-width="150" align="center">
-          </el-table-column>
-          <el-table-column label="采集模型插件信息" width="auto" min-width="600" align="center">
-            <template #default="scope">
-              <el-popover
-                trigger="hover"
-                :show-after="500"
-                :auto-close="500"
-                effect="light"
-                width="auto"
-                placement="left"
-                v-if="scope.row.type === undefined || scope.row.type === 0"
-              >
-                <template #default>
-                  <div class="param-content">
-                    <div class="pc-title">
-                      <div class="pct-info">
-                        <b> {{ scope.row.name }} </b>参数详情
-                      </div>
-                    </div>
-                    <div class="pc-content">
-                      <div class="param-item">
-                        <div class="param-value">插件名称：</div>
-                        <div class="param-name">{{ scope.row.param.name }}</div>
-                      </div>
-                      <div class="param-item">
-                        <div class="param-value">插件标签：</div>
-                        <div class="param-name">{{ scope.row.param.label }}</div>
-                      </div>
-                      <div class="param-item">
-                        <div class="param-value">插件版本：</div>
-                        <div class="param-name">{{ scope.row.param.version }}</div>
-                      </div>
-                      <div class="param-item">
-                        <div class="param-value">插件描述：</div>
-                        <div class="param-name">{{ scope.row.param.message }}</div>
-                      </div>
-                      <div class="param-item">
-                        <div class="param-value">上传日期：</div>
-                        <div class="param-name">{{ scope.row.param.date }}</div>
-                      </div>
-                      <div class="param-item">
-                        <div class="param-value">插件作者：</div>
-                        <div class="param-name">{{ scope.row.param.author }}</div>
-                      </div>
-                    </div>
-                  </div>
-                </template>
-                <template #reference>
-                  <el-tag size="large">{{ scope.row.param }}</el-tag>
-                </template>
-              </el-popover>
-            </template>
           </el-table-column>
           <el-table-column label="操作" width="auto" min-width="300" align="center" fixed="right">
             <template #default="scope">
@@ -122,7 +94,7 @@
 
     <!-- 变量页 -->
     <!-- lua -->
-    <PropertyLua v-else :curDeviceModel="ctxData.curDeviceModel" @changeDpFlag="changeDpFlag()"></PropertyLua>
+    <PropertyLua v-else :curDeviceModel="ctxData.curDeviceModel" @changeDpFlag="changeDpFlag()" style="width: 100%; height: 100%;overflow:hidden;"></PropertyLua>
     <!-- dialog 内容 -->
     <!-- 添加编辑采集模型 -->
     <el-dialog
@@ -257,6 +229,15 @@ const ctxData = reactive({
   dmTitle: '添加采集模型',
   pluginList: [], //
   curDeviceModel: '', //当前采集模型
+  
+  paramName: {
+    name: '插件名称',
+    label: '插件标签',
+    version: '插件版本',
+    message: '插件描述',
+    date: '上传日期',
+    author: '插件作者',
+  },
 })
 // 获取采集模型列表
 const getDeviceModelList = (flag) => {
