@@ -25,9 +25,9 @@ func (ctrl *DictTypeController) RegisterRoutes(router *gin.RouterGroup) {
 	router.POST("/api/v2/dictType/createDictType", ctrl.CreateDictType)
 	router.POST("/api/v2/dictType/updateDictType", ctrl.UpdateDictType)
 	router.POST("/api/v2/dictType/deleteDictType", ctrl.DeleteDictType)
-	router.GET("/api/v2/dictType/getDictTypeList", ctrl.GetDictTypeList)
-	router.GET("/api/v2/dictType/getDictTypeByID", ctrl.GetDictTypeByID)
-	router.GET("/api/v2/dictData/getDictTypeListByDictTypeId", ctrl.GetDictTypeListByDictTypeId)
+	router.POST("/api/v2/dictType/getDictTypeList", ctrl.GetDictTypeList)
+	router.POST("/api/v2/dictType/getDictTypeByID", ctrl.GetDictTypeByID)
+	router.POST("/api/v2/dictData/getDictTypeListByDictTypeId", ctrl.GetDictTypeListByDictTypeId)
 	// 注册其他路由...
 }
 
@@ -35,8 +35,8 @@ type ParamType struct {
 	DictId          int    `form:"dictId"`
 	DictType        string `form:"dictType"`
 	DictCode        int    `form:"dictCode"`
-	PageNum         *int   `form:"pageNum"`
-	PageSize        *int   `form:"pageSize"`
+	PageNum         int    `form:"pageNum"`
+	PageSize        int    `form:"pageSize"`
 	DictName        string `form:"dictName"`
 	CreateTimeStart string `form:"createTimeStart"`
 	CreateTimeEnd   string `form:"createTimeEnd"`
@@ -135,12 +135,8 @@ func (c *DictTypeController) GetDictTypeList(ctx *gin.Context) {
 		})
 		return
 	}
-	paramType.PageNum = new(int)
-	*paramType.PageNum = 1
-	paramType.PageSize = new(int)
-	*paramType.PageSize = 10
 
-	dictTypeList, total, err := c.repo.GetAll(paramType.DictName, paramType.CreateTimeStart, paramType.CreateTimeEnd, *paramType.PageNum, *paramType.PageSize)
+	dictTypeList, total, err := c.repo.GetAll(paramType.DictName, paramType.CreateTimeStart, paramType.CreateTimeEnd, paramType.PageNum, paramType.PageSize)
 	if err != nil {
 		ctx.JSON(http.StatusOK, model.ResponseData{
 			"1",

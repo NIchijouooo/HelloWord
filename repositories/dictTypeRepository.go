@@ -1,6 +1,7 @@
 package models
 
 import (
+	"fmt"
 	"gateway/models"
 
 	"gorm.io/gorm"
@@ -36,6 +37,8 @@ func (r *DictTypeRepository) GetAll(dictName, createTimeStart, createTimeEnd str
 		dictTypeList []models.DictType
 		total        int64
 	)
+	fmt.Println(page)
+	fmt.Println(pageSize)
 
 	query := r.db.Model(&models.DictType{})
 	if dictName != "" {

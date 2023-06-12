@@ -34,8 +34,8 @@ type ParamData struct {
 	DictLabel string `form:"dictLabel"`
 	DictType  string `form:"dictType"`
 	DictCode  int    `form:"dictCode"`
-	PageNum   *int   `form:"pageNum"`
-	PageSize  *int   `form:"pageSize"`
+	PageNum   int    `form:"pageNum"`
+	PageSize  int    `form:"pageSize"`
 }
 
 // 新增字典数据
@@ -127,12 +127,8 @@ func (c *DictDataController) GetDictDataList(ctx *gin.Context) {
 		})
 		return
 	}
-	paramData.PageNum = new(int)
-	*paramData.PageNum = 1
-	paramData.PageSize = new(int)
-	*paramData.PageSize = 10
 
-	dictDataList, total, err := c.repo.GetAll(paramData.DictLabel, paramData.DictType, *paramData.PageNum, *paramData.PageSize)
+	dictDataList, total, err := c.repo.GetAll(paramData.DictLabel, paramData.DictType, paramData.PageNum, paramData.PageSize)
 	if err != nil {
 		ctx.JSON(http.StatusOK, model.ResponseData{
 			"1",
