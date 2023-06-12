@@ -1,5 +1,5 @@
 <template>
-<div>
+<div class="main-container">
   <div style="display: flex; justify-content: space-between;">
     <div class="title" style="position: relative;width: 40%;justify-content: flex-start;">
       <div class="tName">{{ props.curModelBlock.label }}：命令参数列表</div>

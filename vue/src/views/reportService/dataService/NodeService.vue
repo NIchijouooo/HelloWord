@@ -338,14 +338,17 @@ const props = defineProps({
     type: Object,
     default: {},
   },
+  pageInfo: String,
 })
 console.log('id -> props', props)
 
-const emit = defineEmits(['changeDnFlag'])
+const emit = defineEmits(['changeDnFlag','update:pageInfo'])
 const toDataService = () => {
   emit('changeDnFlag')
+  ctxData.isBackBtn = 'back'
 }
 const ctxData = reactive({
+  isBackBtn: '',
   headerCellStyle: {
     background: variables.primaryColor,
     color: variables.fontWhiteColor,
@@ -939,6 +942,10 @@ const handleResult = (res, doFunction) => {
     doFunction()
   }
 }
+//暴露属性和方法
+defineExpose({
+  ctxData
+});
 </script>
 <style lang="scss" scoped>
 @use 'styles/custom-scoped.scss' as *;

@@ -370,7 +370,7 @@
 </template>
 <script setup>
 import { Search, Back } from '@element-plus/icons-vue'
-import { ElMessage, ElMessageBox } from 'element-plus'
+import { ElMessage, ElMessageBox, ElLoading } from 'element-plus'
 import variables from 'styles/variables.module.scss'
 import TransferModelApi from 'api/transferModel.js'
 import DeviceModelApi from 'api/deviceModel.js'
@@ -632,11 +632,16 @@ const selectedProp = (row) => {
   return !ctxData.AllPropertyNameList.includes(row.name)
 }
 const saveProperties = async() => {
+  const loading = ElLoading.service({
+    lock: true,
+    text: 'Loading',
+    background: 'rgba(0, 0, 0, 0.7)',
+  })
   console.log('saveProperties')
 
   if (ctxData.selectList.length > 0) {
-    let count = 0
-    const promises = ctxData.selectList.map( async item => {
+    let properties = [];
+    ctxData.selectList.map(item => {
       let property = {}
       property['name'] = item.name
       property['label'] = item.label
@@ -656,62 +661,42 @@ const saveProperties = async() => {
         params['dataLengthAlarm'] = false
       }
       property['params'] = params
-      console.log('saveProperties -> property', property)
-      const pData = {
-        token: users.token,
-        data: {
-          name: props.curTransferModel.name,
-          property: property,
-        },
-      }
 
-      const res = await TransferModelApi.addProperty(pData)
-      return res
+      properties.push(property)
     })
-    const resultList = await Promise.all(promises)
-    if (resultList.length > 0) {
-      // 操作成功的提示信息，控制在最后一条弹出
-      const res = resultList[resultList.length - 1]
+
+    console.log('saveProperties -> properties', properties)
+
+    const pData = {
+      token: users.token,
+      data: {
+        name: props.curTransferModel.name,
+        property: properties,
+      },
+    }
+    const res = await TransferModelApi.addProperties(pData)
+    const count = properties.length;
+    if (res.data == count) {// 全部操作成功
+      loading.close()
       handleResult(res, getModelPropertiesList)
       cancelProperties() // 添加成功，关闭弹窗
-    }
-    /*
-    ctxData.selectList.forEach((item) => {
-      let property = {}
-      property['name'] = item.name
-      property['label'] = item.label
-      property['uploadName'] = item.name
-      property['type'] = item.type
-      property['decimals'] = item.decimals
-      property['unit'] = item.unit
-      let params = {}
-      if (item.type !== 3) {
-        params['min'] = ''
-        params['max'] = ''
-        params['minMaxAlarm'] = false
-        params['step'] = ''
-        params['stepAlarm'] = false
-      } else {
-        params['dataLength'] = ''
-        params['dataLengthAlarm'] = false
-      }
-      property['params'] = params
-      console.log('saveProperties -> property', property)
-      const pData = {
-        token: users.token,
-        data: {
-          name: props.curTransferModel.name,
-          property: property,
-        },
-      }
-      TransferModelApi.addProperty(pData).then((res) => {
-        count++
-        if (count === ctxData.selectList.length) {
-          handleResult(res, getModelPropertiesList)
-        }
+    } else if (!res.data) { // 操作失败，同时刷新同步属性的弹窗列表
+      loading.close()
+      let message = '添加失败';
+      ElMessage({
+        type: 'error',
+        message: message,
       })
-    })
-    */
+      selectColl()
+    } else { // 部分成功，同时刷新同步属性的弹窗列表
+      loading.close()
+      let message = res.data + '个添加成功，' + (count - res.data) + '个添加失败';
+      ElMessage({
+        type: 'error',
+        message: message,
+      })
+      selectColl()
+    }
   }
 }
 const cancelProperties = () => {

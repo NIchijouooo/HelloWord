@@ -101,6 +101,7 @@
       </div>
     </div>
     <NodeService
+      ref="nodeService"
       v-if="ctxData.dnFlag === 2"
       :curGateway="ctxData.curGateway"
       @changeDnFlag="changeDnFlag()"
@@ -396,6 +397,7 @@ const validateRegAddr = (rule, value, callback) => {
   }
 }
 const contentRef = ref(null)
+const nodeService = ref(null)
 const ctxData = reactive({
   headerCellStyle: {
     background: variables.primaryColor,
@@ -705,7 +707,7 @@ const getGatewayList = (flag) => {
     if (res.code === '0') {
       ctxData.gatewayTableData = res.data
       // 首页传参跳转到列表页面，根据参数自动进入上报节点页面中
-      if (ctxData.serviceName) {
+      if (ctxData.serviceName && !nodeService.value.ctxData.isBackBtn) { // 从属性页返回列表页，通过ctxData.pageInfo的值判断是否需要执行页面显示
         const detail = ctxData.gatewayTableData.find(item => item.serviceName === ctxData.serviceName)
         showGateway(detail);
       }
@@ -835,6 +837,7 @@ const showRegInfo = (row) => {
 }
 const changeDnFlag = () => {
   ctxData.dnFlag = 1
+  getGatewayList()
 }
 
 const changeProtocol = (protocol) => {
