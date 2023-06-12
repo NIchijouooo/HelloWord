@@ -161,3 +161,12 @@ func (r *EmRepository) GetEmDeviceModelCmdParamByName(name string) (*models.EmDe
 	}
 	return &emDeviceModelCmdParam, nil
 }
+
+//根据设备获取模型列表
+func (r *EmRepository) GetEmDeviceModelCmdParamListByName(name string) ([]models.EmDeviceModelCmdParam, error) {
+	var emDeviceModelCmdParam []models.EmDeviceModelCmdParam
+	if err := r.db.Where("name = ?", name).Find(&emDeviceModelCmdParam).Error; err != nil {
+		return nil, err
+	}
+	return emDeviceModelCmdParam, nil
+}

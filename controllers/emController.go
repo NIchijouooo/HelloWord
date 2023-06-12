@@ -39,6 +39,7 @@ func (c *EmController) RegisterRoutes(router *gin.RouterGroup) {
 	router.POST("/api/v2/em/addEmDeviceModel", c.AddEmDeviceModel)
 	router.POST("/api/v2/em/addEmDeviceModelCmd", c.AddEmDeviceModelCmd)
 	router.POST("/api/v2/em/addEmDeviceModelCmdParam", c.AddEmDeviceModelCmdParam)
+	router.POST("/api/v2/em/getEmDeviceModelCmdParamListByName", c.GetEmDeviceModelCmdParamListByName)
 }
 
 func (c *EmController) GetAllCommInterfaceProtocols(ctx *gin.Context) {
@@ -408,4 +409,40 @@ func (c *EmController) AddEmDeviceModelCmdParam(ctx *gin.Context) {
 		Message: "添加设备模型命令参数成功",
 	})
 	return
+}
+
+//根据设备名称获取所有模型
+func (c *EmController) GetEmDeviceModelCmdParamListByName(ctx *gin.Context) {
+	var tmp struct {
+		Name string `json:"name"`
+	}
+	if err := ctx.ShouldBindBodyWith(&tmp, binding.JSON); err != nil {
+		ctx.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+	var deviceCmdParamList []models.EmDeviceModelCmdParam
+	deviceCmdParamList, _ = c.repo.GetEmDeviceModelCmdParamListByName(tmp.Name)
+	if deviceCmdParamList == nil {
+		ctx.JSON(http.StatusOK, model.ResponseData{
+			Code:    "1",
+			Message: "无数据",
+		})
+	}
+	var retList []models.AddEmDeviceModelCmdParam
+	//deviceCmdParamList
+	for i := 0; i < len(deviceCmdParamList); i++ {
+		//取出data
+		var addEmDeviceModelCmdParam models.AddEmDeviceModelCmdParam
+		if err := json.Unmarshal([]byte(deviceCmdParamList[i].Data), &addEmDeviceModelCmdParam); err != nil {
+			ctx.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			return
+		}
+		retList = append(retList, addEmDeviceModelCmdParam)
+	}
+
+	ctx.JSON(http.StatusOK, model.ResponseData{
+		Code:    "0",
+		Message: "成功",
+		Data:    retList,
+	})
 }
