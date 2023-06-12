@@ -2,10 +2,12 @@ package contorl
 
 import (
 	"encoding/json"
+	"gateway/controllers"
 	"gateway/device"
 	"gateway/device/commInterface"
 	"gateway/httpServer/model"
 	"gateway/setting"
+	"github.com/gin-gonic/gin/binding"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -22,7 +24,10 @@ func ApiAddCommInterface(context *gin.Context) {
 		Param: &Param,
 	}
 
-	err := context.BindJSON(&interfaceInfo)
+	emController := controllers.NewCommInterfaceProtocolController()
+	emController.AddCommInterface(context)
+
+	err := context.ShouldBindBodyWith(&interfaceInfo, binding.JSON)
 	if err != nil {
 		context.JSON(http.StatusOK, model.ResponseData{
 			Code:    "1",
@@ -557,7 +562,10 @@ func ApiModifyCommInterface(context *gin.Context) {
 		Param: &Param,
 	}
 
-	err := context.BindJSON(&interfaceInfo)
+	emController := controllers.NewCommInterfaceProtocolController()
+	emController.UpdateCommInterface(context)
+
+	err := context.ShouldBindBodyWith(&interfaceInfo, binding.JSON)
 	if err != nil {
 		context.JSON(http.StatusOK, model.ResponseData{
 			Code:    "1",
@@ -1106,7 +1114,10 @@ func ApiDeleteCommInterface(context *gin.Context) {
 		Name string `json:"name"`
 	}{}
 
-	err := context.BindJSON(&interfaceInfo)
+	emController := controllers.NewCommInterfaceProtocolController()
+	emController.DelComInterface(context)
+
+	err := context.ShouldBindBodyWith(&interfaceInfo, binding.JSON)
 	if err != nil {
 		context.JSON(http.StatusOK, model.ResponseData{
 			Code:    "1",

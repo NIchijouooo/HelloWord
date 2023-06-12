@@ -1,10 +1,12 @@
 package contorl
 
 import (
+	"gateway/controllers"
 	"gateway/device"
 	"gateway/httpServer/model"
 	"gateway/setting"
 	"github.com/gin-gonic/gin"
+	"github.com/gin-gonic/gin/binding"
 	"net/http"
 	"sort"
 )
@@ -18,7 +20,10 @@ func ApiAddCollectInterface(context *gin.Context) {
 		OfflinePeriod        int    `json:"offlinePeriod"`
 	}{}
 
-	err := context.ShouldBindJSON(&interfaceInfo)
+	emController := controllers.NewCommInterfaceProtocolController()
+	emController.AddCollInterface(context)
+
+	err := context.ShouldBindBodyWith(&interfaceInfo, binding.JSON)
 	if err != nil {
 		setting.ZAPS.Error("增加采集接口JSON格式化错误 %v", err)
 		context.JSON(http.StatusOK, model.ResponseData{
