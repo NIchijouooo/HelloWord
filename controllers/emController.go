@@ -6,9 +6,10 @@ import (
 	"gateway/httpServer/model"
 	"gateway/models"
 	repositories "gateway/repositories"
+	"net/http"
+
 	"github.com/gin-gonic/gin"
 	"github.com/gin-gonic/gin/binding"
-	"net/http"
 )
 
 type EmController struct {
