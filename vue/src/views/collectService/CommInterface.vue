@@ -946,16 +946,8 @@ const submitInterfaceForm = () => {
           handleResult(res, getInterfaceList)
           cancelSubmit()
         })
-        CommInterfaceApi.addEmCommInterface(pData).then((res) => {
-          handleResult(res, getInterfaceList)
-          cancelSubmit()
-        })
       } else {
         CommInterfaceApi.editCommInterface(pData).then((res) => {
-          handleResult(res, getInterfaceList)
-          cancelSubmit()
-        })
-        CommInterfaceApi.editEmCommInterface(pData).then((res) => {
           handleResult(res, getInterfaceList)
           cancelSubmit()
         })
@@ -992,9 +984,6 @@ const deleteInterface = (row) => {
         },
       }
       CommInterfaceApi.deleteCommInterface(pData).then((res) => {
-        handleResult(res, getInterfaceList)
-      })
-      CommInterfaceApi.deleteEmCommInterface(pData).then((res) => {
         handleResult(res, getInterfaceList)
       })
     })
