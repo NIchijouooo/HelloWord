@@ -74,6 +74,9 @@ func RouterWeb(port string) {
 		projectInfoController := controllers.NewProjectInfoController()
 		projectInfoController.RegisterRoutes(&router.RouterGroup)
 
+		auxiliaryController := controllers.NewAuxiliaryController()
+		auxiliaryController.RegisterRoutes(&router.RouterGroup)
+
 		accountRouter := router.Group("/api/v2/account")
 		{
 			accountRouter.GET("/permissions", contorl.ApiGetPermissions)
