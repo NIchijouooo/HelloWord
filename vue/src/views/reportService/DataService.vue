@@ -101,17 +101,16 @@
       </div>
     </div>
     <NodeService
-      ref="nodeService"
       v-if="ctxData.dnFlag === 2"
       :curGateway="ctxData.curGateway"
-      @changeDnFlag="changeDnFlag()"
+      @changeDnFlag="changeDnFlag"
       style="width: 100%; height: 100%;overflow:hidden;"
     ></NodeService>
 
     <RegInfo 
       v-if="ctxData.dnFlag === 3" 
       :curGateway="ctxData.curGateway" 
-      @changeDnFlag="changeDnFlag()"
+      @changeDnFlag="changeDnFlag"
       style="width: 100%; height: 100%;overflow:hidden;"
     ></RegInfo>
 
@@ -397,7 +396,6 @@ const validateRegAddr = (rule, value, callback) => {
   }
 }
 const contentRef = ref(null)
-const nodeService = ref(null)
 const ctxData = reactive({
   headerCellStyle: {
     background: variables.primaryColor,
@@ -688,7 +686,8 @@ const ctxData = reactive({
   dnList: ['RT.STLV1', 'RT.STLV2'],
   kaList: ['EMQX.MQTT', 'RT.MQTT', 'RT.STLV2','FSJY.MQTT'],
   dnFlag: 1,
-  serviceName: ''
+  serviceName: '',
+  handleFlag: '',//lp update 2023-06-12 首页上报信息查看详情，对点击返回按钮进行操作标识
 })
 
 //接收参数，处理命令详情页面的显示
@@ -707,7 +706,7 @@ const getGatewayList = (flag) => {
     if (res.code === '0') {
       ctxData.gatewayTableData = res.data
       // 首页传参跳转到列表页面，根据参数自动进入上报节点页面中
-      if (ctxData.serviceName && !nodeService.value.ctxData.isBackBtn) { // 从属性页返回列表页，通过ctxData.pageInfo的值判断是否需要执行页面显示
+      if (ctxData.serviceName && !ctxData.handleFlag) { //lp update 2023-06-12 返回按钮进行操作标识后，回到列表页面，不再在进行属性页面跳转
         const detail = ctxData.gatewayTableData.find(item => item.serviceName === ctxData.serviceName)
         showGateway(detail);
       }
@@ -835,7 +834,9 @@ const showRegInfo = (row) => {
   ctxData.dnFlag = 3
   ctxData.curGateway = row
 }
-const changeDnFlag = () => {
+const changeDnFlag = (flag) => {
+  //lp update 2023-06-12 首页上报信息查看详情，对点击返回按钮进行操作标识
+  ctxData.handleFlag = flag
   ctxData.dnFlag = 1
   getGatewayList()
 }

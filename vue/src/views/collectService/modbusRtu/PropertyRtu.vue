@@ -113,8 +113,8 @@ console.log('id -> props', props)
 // 返回设备模型
 const emit = defineEmits(['changeShowFlag'])
 const toDeviceModel = () => {
-  console.log('toDeviceModel')
-  emit('changeShowFlag')
+  //lp update 2023-06-12 首页设备模型跳转进入显示命令详情后，对点击返回按钮进行操作标识，防止死循环跳转显示详情页面
+  emit('changeShowFlag', 'goBack')
 }
 
 const contentRef = ref(null)

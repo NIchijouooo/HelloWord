@@ -76,14 +76,14 @@
     <PropertyRtu
       v-if="ctxData.showFlag === 1"
       :curDeviceModel="ctxData.curDeviceModel"
-      @changeShowFlag="changeShowFlag()"
+      @changeShowFlag="changeShowFlag"
       style="width: 100%; height: 100%;overflow:hidden;"
     ></PropertyRtu>
     <ModelBlockRtu
       v-if="ctxData.showFlag === 2"
       :curDeviceModel="ctxData.curDeviceModel"
       :deviceModelList="ctxData.tableData"
-      @changeShowFlag="changeShowFlag()"
+      @changeShowFlag="changeShowFlag"
       style="width: 100%; height: 100%;overflow:hidden;"
     >
     </ModelBlockRtu>
@@ -194,6 +194,7 @@ const ctxData = reactive({
   pluginList: [], //
   curDeviceModel: '', //当前采集模型
   tsl: '',
+  handleFlag: '' //lp update 2023-06-12 首页设备模型跳转进入显示命令详情后，对点击返回按钮进行操作标识
 })
 
 //接收参数，处理命令详情页面的显示
@@ -214,7 +215,7 @@ const getDeviceModelList = (flag) => {
     if (res.code === '0') {
       ctxData.tableData = res.data
       // 首页传参跳转到列表页面，根据参数自动进入命令详情页面中
-      if (ctxData.tsl) {
+      if (ctxData.tsl && !ctxData.handleFlag) {  //lp update 2023-06-12 返回按钮进行操作标识后，回到列表页面，不再在进行属性页面跳转
         const detail = ctxData.tableData.find(item => item.name === ctxData.tsl)
         showBlockParams(detail);
       }
@@ -359,8 +360,11 @@ const showBlockParams = (row) => {
   ctxData.curDeviceModel = row
   ctxData.showFlag = 2
 }
-const changeShowFlag = () => {
+const changeShowFlag = (flag) => {
+   //lp update 2023-06-12 首页设备模型跳转进入显示命令详情后，对点击返回按钮进行操作标识
+  ctxData.handleFlag = flag
   ctxData.showFlag = 0
+  getDeviceModelList()
 }
 //显示单个res结果，code不等于 '0' 的message
 const showOneResMsg = (res) => {

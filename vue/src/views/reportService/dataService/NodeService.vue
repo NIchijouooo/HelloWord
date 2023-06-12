@@ -342,13 +342,12 @@ const props = defineProps({
 })
 console.log('id -> props', props)
 
-const emit = defineEmits(['changeDnFlag','update:pageInfo'])
+const emit = defineEmits(['changeDnFlag'])
 const toDataService = () => {
-  emit('changeDnFlag')
-  ctxData.isBackBtn = 'back'
+  //lp update 2023-06-12 首页上报信息查看详情，对点击返回按钮进行操作标识，防止死循环跳转显示详情页面
+  emit('changeDnFlag', 'goBack')
 }
 const ctxData = reactive({
-  isBackBtn: '',
   headerCellStyle: {
     background: variables.primaryColor,
     color: variables.fontWhiteColor,
@@ -942,10 +941,6 @@ const handleResult = (res, doFunction) => {
     doFunction()
   }
 }
-//暴露属性和方法
-defineExpose({
-  ctxData
-});
 </script>
 <style lang="scss" scoped>
 @use 'styles/custom-scoped.scss' as *;
