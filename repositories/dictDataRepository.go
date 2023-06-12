@@ -27,8 +27,8 @@ func (r *DictDataRepository) Update(dictData *models.DictData) error {
 }
 
 // 删除字典类型
-func (r *DictDataRepository) Delete(dictId int) error {
-	return r.db.Delete(&models.DictData{}, dictId).Error
+func (r *DictDataRepository) Delete(dictCode int) error {
+	return r.db.Delete(&models.DictData{}, dictCode).Error
 }
 
 // 获取所有字典类型
@@ -60,6 +60,7 @@ func (r *DictDataRepository) GetAll(dictLabel, dictType string, page, pageSize i
 
 // 获取单个字典类型
 func (r *DictDataRepository) GetById(dictId int) (models.DictData, error) {
+	fmt.Println(dictId)
 	var dictData models.DictData
 	err := r.db.First(&dictData, dictId).Error
 	return dictData, err

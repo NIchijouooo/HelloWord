@@ -24,7 +24,7 @@ func NewDictDataController() *DictDataController {
 func (ctrl *DictDataController) RegisterRoutes(router *gin.RouterGroup) {
 	router.POST("/api/v2/dictData/createDictData", ctrl.CreateDictData)
 	router.POST("/api/v2/dictData/updateDictData", ctrl.UpdateDictData)
-	router.DELETE("/api/v2/dictData/deleteDictData", ctrl.DeleteDictData)
+	router.POST("/api/v2/dictData/deleteDictData", ctrl.DeleteDictData)
 	router.POST("/api/v2/dictData/getDictDataList", ctrl.GetDictDataList)
 	router.POST("/api/v2/dictData/getDictDataByID", ctrl.GetDictDataByID)
 	// 注册其他路由...
@@ -34,8 +34,8 @@ type ParamData struct {
 	DictLabel string `form:"dictLabel"`
 	DictType  string `form:"dictType"`
 	DictCode  int    `form:"dictCode"`
-	PageNum   int    `form:"pageNum"`
-	PageSize  int    `form:"pageSize"`
+	PageNum   *int   `form:"pageNum"`
+	PageSize  *int   `form:"pageSize"`
 }
 
 // 新增字典数据
@@ -43,7 +43,7 @@ func (c *DictDataController) CreateDictData(ctx *gin.Context) {
 	var dictData models.DictData
 	if err := ctx.ShouldBindJSON(&dictData); err != nil {
 		ctx.JSON(http.StatusOK, model.ResponseData{
-			"0",
+			"1",
 			"error" + err.Error(),
 			"",
 		})
@@ -51,7 +51,7 @@ func (c *DictDataController) CreateDictData(ctx *gin.Context) {
 	}
 	if err := c.repo.Create(&dictData); err != nil {
 		ctx.JSON(http.StatusOK, model.ResponseData{
-			"0",
+			"1",
 			"error" + err.Error(),
 			"",
 		})
@@ -69,7 +69,7 @@ func (c *DictDataController) UpdateDictData(ctx *gin.Context) {
 	var dictData models.DictData
 	if err := ctx.ShouldBindJSON(&dictData); err != nil {
 		ctx.JSON(http.StatusOK, model.ResponseData{
-			"0",
+			"1",
 			"error" + err.Error(),
 			"",
 		})
@@ -77,7 +77,7 @@ func (c *DictDataController) UpdateDictData(ctx *gin.Context) {
 	}
 	if err := c.repo.Update(&dictData); err != nil {
 		ctx.JSON(http.StatusOK, model.ResponseData{
-			"0",
+			"1",
 			"error" + err.Error(),
 			"",
 		})
@@ -103,7 +103,7 @@ func (c *DictDataController) DeleteDictData(ctx *gin.Context) {
 	}
 	if err := c.repo.Delete(paramData.DictCode); err != nil {
 		ctx.JSON(http.StatusOK, model.ResponseData{
-			"0",
+			"1",
 			"error" + err.Error(),
 			"",
 		})
@@ -127,9 +127,12 @@ func (c *DictDataController) GetDictDataList(ctx *gin.Context) {
 		})
 		return
 	}
-	// 从请求参数中获取页码和每页数量
+	paramData.PageNum = new(int)
+	*paramData.PageNum = 1
+	paramData.PageSize = new(int)
+	*paramData.PageSize = 10
 
-	dictDataList, total, err := c.repo.GetAll(paramData.DictLabel, paramData.DictType, paramData.PageNum, paramData.PageSize)
+	dictDataList, total, err := c.repo.GetAll(paramData.DictLabel, paramData.DictType, *paramData.PageNum, *paramData.PageSize)
 	if err != nil {
 		ctx.JSON(http.StatusOK, model.ResponseData{
 			"1",
