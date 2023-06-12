@@ -53,6 +53,14 @@ func ApiAddCommInterface(context *gin.Context) {
 		}
 
 		for _, v := range commInterface.CommunicationSerialMap {
+			if v.Name == SerialInterface.Name {
+				context.JSON(http.StatusOK, model.ResponseData{
+					Code:    "1",
+					Message: "通信接口名称已经存在",
+					Data:    "",
+				})
+				return
+			}
 			if v.Param.Name == SerialInterface.Param.Name {
 				context.JSON(http.StatusOK, model.ResponseData{
 					Code:    "1",
@@ -86,6 +94,14 @@ func ApiAddCommInterface(context *gin.Context) {
 		}
 
 		for _, v := range commInterface.CommunicationTcpClientMap {
+			if v.Name == TcpClientInterface.Name {
+				context.JSON(http.StatusOK, model.ResponseData{
+					Code:    "1",
+					Message: "通信接口名称已经存在",
+					Data:    "",
+				})
+				return
+			}
 			if (v.Param.Port == TcpClientInterface.Param.Port) && (v.Param.IP == TcpClientInterface.Param.IP) {
 				context.JSON(http.StatusOK, model.ResponseData{
 					Code:    "1",
@@ -120,6 +136,14 @@ func ApiAddCommInterface(context *gin.Context) {
 		}
 
 		for _, v := range commInterface.CommunicationTcpServerMap {
+			if v.Name == TcpServerInterface.Name {
+				context.JSON(http.StatusOK, model.ResponseData{
+					Code:    "1",
+					Message: "通信接口名称已经存在",
+					Data:    "",
+				})
+				return
+			}
 			if v.Param.Port == TcpServerInterface.Param.Port {
 				context.JSON(http.StatusOK, model.ResponseData{
 					Code:    "1",
@@ -153,6 +177,14 @@ func ApiAddCommInterface(context *gin.Context) {
 		}
 
 		for _, v := range commInterface.CommunicationIoOutMap {
+			if v.Name == IoOutInterface.Name {
+				context.JSON(http.StatusOK, model.ResponseData{
+					Code:    "1",
+					Message: "通信接口名称已经存在",
+					Data:    "",
+				})
+				return
+			}
 			if v.Param.Name == IoOutInterface.Param.Name {
 				context.JSON(http.StatusOK, model.ResponseData{
 					Code:    "1",
@@ -186,6 +218,14 @@ func ApiAddCommInterface(context *gin.Context) {
 		}
 
 		for _, v := range commInterface.CommunicationIoInMap {
+			if v.Name == IoInInterface.Name {
+				context.JSON(http.StatusOK, model.ResponseData{
+					Code:    "1",
+					Message: "通信接口名称已经存在",
+					Data:    "",
+				})
+				return
+			}
 			if v.Param.Name == IoInInterface.Param.Name {
 				context.JSON(http.StatusOK, model.ResponseData{
 					Code:    "1",

@@ -70,6 +70,10 @@ func (r *EmRepository) AddCommInterface(commInterface *models.CommInterface) err
 }
 
 func (r *EmRepository) UpdateCommInterface(commInterface *models.CommInterface) error {
+	var emCommInterface models.CommInterface
+	name := commInterface.Name
+	r.db.Where("name = ?", name).First(&emCommInterface)
+	commInterface.Id = emCommInterface.Id
 	return r.db.Save(commInterface).Error
 }
 

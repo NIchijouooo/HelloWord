@@ -9,7 +9,6 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/gin-gonic/gin/binding"
 	"net/http"
-	"strconv"
 )
 
 type EmController struct {
@@ -28,7 +27,7 @@ func (c *EmController) RegisterRoutes(router *gin.RouterGroup) {
 	router.POST("/api/v2/em/addCommInterface", c.AddCommInterface)
 	router.POST("/api/v2/em/communication", c.GetCommInterfaces)
 	router.DELETE("/api/v2/em/delComInterface", c.DelComInterface)
-	router.POST("/api/v2/em/updateCommInterface", c.UpdateCommInterface)
+	router.PUT("/api/v2/em/updateCommInterface", c.UpdateCommInterface)
 	// 采集接口
 	router.POST("/api/v2/em/addCollInterface", c.AddCollInterface)
 	// 设备
@@ -73,7 +72,7 @@ func (c *EmController) AddCommInterface(ctx *gin.Context) {
 	commInterfaceByName, _ := c.repo.GetCommInterfaceByName(commInterface.Name)
 	if commInterfaceByName != nil {
 		ctx.JSON(http.StatusOK, model.ResponseData{
-			Code:    "0",
+			Code:    "1",
 			Message: "通道名已存在，添加失败",
 		})
 		return
@@ -87,7 +86,7 @@ func (c *EmController) AddCommInterface(ctx *gin.Context) {
 		fmt.Println("error:", err)
 	}
 	ctx.JSON(http.StatusOK, model.ResponseData{
-		Code:    "1",
+		Code:    "0",
 		Message: "添加通道成功",
 	})
 }
@@ -160,13 +159,16 @@ func (c *EmController) UpdateCommInterface(ctx *gin.Context) {
 
 // DelComInterface 删除通道
 func (c *EmController) DelComInterface(ctx *gin.Context) {
-	idStr := ctx.Query("id")
-	id, err := strconv.Atoi(idStr)
-	if err != nil {
-		ctx.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": "Invalid ID"})
+	var tmp struct {
+		Name string `json:"name"`
+	}
+	if err := ctx.ShouldBindJSON(&tmp); err != nil {
+		ctx.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-	if err := c.repo.DelCommInterface(id); err != nil {
+	commInterfaceByName, _ := c.repo.GetCommInterfaceByName(tmp.Name)
+
+	if err := c.repo.DelCommInterface(commInterfaceByName.Id); err != nil {
 		ctx.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}

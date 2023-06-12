@@ -7,6 +7,13 @@ const addCommInterface = (params) => {
     data: params,
   })
 }
+const addEmCommInterface = (params) => {
+  return axios.request({
+    url: '/em/addCommInterface',
+    method: 'post',
+    data: params,
+  })
+}
 // 编辑通讯接口
 const editCommInterface = (params) => {
   return axios.request({
@@ -15,10 +22,26 @@ const editCommInterface = (params) => {
     data: params,
   })
 }
+// 编辑通讯接口
+const editEmCommInterface = (params) => {
+  return axios.request({
+    url: '/em/updateCommInterface',
+    method: 'put',
+    data: params,
+  })
+}
+
 // 删除通讯接口
 const deleteCommInterface = (params) => {
   return axios.request({
     url: '/interface/communication',
+    method: 'delete',
+    data: params,
+  })
+}
+const deleteEmCommInterface = (params) => {
+  return axios.request({
+    url: '/em/delComInterface',
     method: 'delete',
     data: params,
   })
@@ -41,8 +64,11 @@ const getCommProtocolList = (params) => {
 }
 export default {
   addCommInterface,
+  addEmCommInterface,
   editCommInterface,
+  editEmCommInterface,
   deleteCommInterface,
+  deleteEmCommInterface,
   getCommInterfaceList,
   getCommProtocolList,
 }
