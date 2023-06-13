@@ -68,6 +68,7 @@ func main() {
 		}
 	}()
 	/**************创建定时获取网络状态的任务***********************/
+
 	scheduler := gocron.NewScheduler()
 	// 定时60秒,定时获取系统信息
 	_ = scheduler.Every(60).Second().Do(setting.CollectSystemParam)
