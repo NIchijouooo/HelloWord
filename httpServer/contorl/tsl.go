@@ -711,7 +711,10 @@ func ApiAddTSLModbusCmd(context *gin.Context) {
 		RegCnt       int    `json:"regCnt"`
 	}{}
 
-	err := context.BindJSON(&cmdParam)
+	emController := controllers.NewEMController()
+	emController.AddEmDeviceModelCmd(context)
+
+	err := context.ShouldBindBodyWith(&cmdParam, binding.JSON)
 	if err != nil {
 		setting.ZAPS.Error("增加采集模型[Modbus]命令JSON格式化错误 %v", err)
 		context.JSON(http.StatusOK, model.ResponseData{
@@ -823,7 +826,10 @@ func ApiModifyTSLModbusCmd(context *gin.Context) {
 		RegCnt       int    `json:"regCnt"`
 	}{}
 
-	err := context.BindJSON(&cmdParam)
+	emController := controllers.NewEMController()
+	emController.UpdateEmDeviceModelCmd(context)
+
+	err := context.ShouldBindBodyWith(&cmdParam, binding.JSON)
 	if err != nil {
 		setting.ZAPS.Error("修改采集模型[Modbus]命令JSON格式化错误 %v", err)
 		context.JSON(http.StatusOK, model.ResponseData{
@@ -928,7 +934,10 @@ func ApiDeleteTSLModbusCmd(context *gin.Context) {
 		CmdNames []string `json:"names"`   //
 	}{}
 
-	err := context.BindJSON(&cmdParam)
+	emController := controllers.NewEMController()
+	emController.DeleteEmDeviceModelCmd(context)
+
+	err := context.ShouldBindBodyWith(&cmdParam, binding.JSON)
 	if err != nil {
 		setting.ZAPS.Error("删除物模型属性JSON格式化错误 %v", err)
 		context.JSON(http.StatusOK, model.ResponseData{
@@ -1080,7 +1089,10 @@ func ApiAddTSLModbusCmdProperty(context *gin.Context) {
 		Formula    string `json:"formula"`
 	}{}
 
-	err := context.BindJSON(propertyParam)
+	emController := controllers.NewEMController()
+	emController.AddEmDeviceModelCmdParam(context)
+
+	err := context.ShouldBindBodyWith(propertyParam, binding.JSON)
 	if err != nil {
 		setting.ZAPS.Error("增加采集模型[modbus]属性JSON格式化错误 %v", err)
 		context.JSON(http.StatusOK, model.ResponseData{
@@ -1652,7 +1664,10 @@ func ApiModifyTSLModbusCmdProperty(context *gin.Context) {
 		Formula    string `json:"formula"`
 	}{}
 
-	err := context.BindJSON(propertyParam)
+	emController := controllers.NewEMController()
+	emController.UpdateEmDeviceModelCmdParam(context)
+
+	err := context.ShouldBindBodyWith(propertyParam, binding.JSON)
 	if err != nil {
 		setting.ZAPS.Error("修改采集模型[modbus]属性JSON格式化错误 %v", err)
 		context.JSON(http.StatusOK, model.ResponseData{
@@ -1779,7 +1794,10 @@ func ApiDeleteTSLModbusCmdProperties(context *gin.Context) {
 		PropertyNames []string `json:"propertyNames"` //
 	}{}
 
-	err := context.BindJSON(&tslInfo)
+	emController := controllers.NewEMController()
+	emController.DeleteEmDeviceModelCmdParam(context)
+
+	err := context.ShouldBindBodyWith(&tslInfo, binding.JSON)
 	if err != nil {
 		setting.ZAPS.Error("删除采集模型[modbus]属性JSON格式化错误 %v", err)
 		context.JSON(http.StatusOK, model.ResponseData{

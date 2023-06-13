@@ -328,6 +328,54 @@ func (c *EmController) AddEmDevice(ctx *gin.Context) {
 	return
 }
 
+func (c *EmController) UpdateEmDevice(ctx *gin.Context) {
+	var addEmDevice models.AddEmDevice
+	var data []byte
+	err := ctx.ShouldBindBodyWith(&addEmDevice, binding.JSON)
+	if err != nil {
+		return
+	}
+	// 查名字获取id
+	var emDevice models.EmDevice
+	emDevice.Name = addEmDevice.Name
+	emDevice.Label = addEmDevice.Label
+
+	emCollInterfaceByName, _ := c.repo.GetCollInterfaceByName(addEmDevice.InterfaceName)
+	emDevice.CollInterfaceId = emCollInterfaceByName.Id
+	emDeviceModelByName, _ := c.repo.GetEmDeviceModelByName(addEmDevice.Tsl)
+	emDevice.ModelId = emDeviceModelByName.Id
+	emDevice.Addr = addEmDevice.Addr
+
+	EmDeviceByName, _ := c.repo.GetEmDeviceByName(addEmDevice.Name)
+	if EmDeviceByName == nil {
+		return
+	}
+	emDevice.Id = EmDeviceByName.Id
+	data, _ = json.Marshal(addEmDevice)
+	emDevice.Data = string(data)
+	err = c.repo.UpdateEmDevice(&emDevice)
+	if err != nil {
+		return
+	}
+	return
+}
+
+func (c *EmController) DeleteEmDevice(ctx *gin.Context) {
+	var tmp struct {
+		DeviceNames   []string `json:"deviceNames"`
+		InterfaceName string   `json:"interface_name"`
+	}
+	if err := ctx.ShouldBindBodyWith(&tmp, binding.JSON); err != nil {
+		ctx.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+	for _, name := range tmp.DeviceNames {
+		emDeviceByName, _ := c.repo.GetEmDeviceByName(name)
+		c.repo.DeleteEmDevice(emDeviceByName.Id)
+	}
+	return
+}
+
 func (c *EmController) AddEmDeviceModel(ctx *gin.Context) {
 	var emDeviceModel models.EmDeviceModel
 	var addEmDeviceModel models.AddEmDeviceModel
@@ -401,9 +449,27 @@ func (c *EmController) DeleteEmDeviceModel(ctx *gin.Context) {
 	}
 	emDeviceModelByName, _ := c.repo.GetEmDeviceModelByName(tmp.Name)
 
-	if err := c.repo.DeleteEmDeviceModel(emDeviceModelByName.Id); err != nil {
-		ctx.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+	if emDeviceModelByName == nil {
 		return
+	}
+
+	// 先查是否被device绑定，如果被绑定，不删，直接返回
+	deviceList, _ := c.repo.GetEmDeviceByModelId(emDeviceModelByName.Id)
+	if len(deviceList) == 0 {
+		// 删除模型
+		if emDeviceModelByName != nil {
+			c.repo.DeleteEmDeviceModel(emDeviceModelByName.Id)
+			// 删除cmd
+			cmdList, _ := c.repo.GetEmDeviceModelCmdByModelId(emDeviceModelByName.Id)
+			for _, cmd := range cmdList {
+				c.repo.DeleteEmDeviceModelCmd(cmd.Id)
+				// 删除param
+				paramList, _ := c.repo.GetEmDeviceModelCmdParamByCmdId(cmd.Id)
+				for _, param := range paramList {
+					c.repo.DeleteEmDeviceModelCmdParam(param.Id)
+				}
+			}
+		}
 	}
 	return
 }
@@ -453,6 +519,52 @@ func (c *EmController) AddEmDeviceModelCmd(ctx *gin.Context) {
 	return
 }
 
+func (c *EmController) UpdateEmDeviceModelCmd(ctx *gin.Context) {
+	var addEmDeviceModelCmd models.AddEmDeviceModelCmd
+	var data []byte
+	err := ctx.ShouldBindBodyWith(&addEmDeviceModelCmd, binding.JSON)
+	if err != nil {
+		return
+	}
+	// 查名字获取id
+	var emDeviceModelCmd models.EmDeviceModelCmd
+	emDeviceModelCmd.Name = addEmDeviceModelCmd.Name
+	emDeviceModelCmd.Label = addEmDeviceModelCmd.Label
+	emDeviceModelCmdByName, _ := c.repo.GetEmDeviceModelCmdByName(addEmDeviceModelCmd.Name)
+
+	emDeviceModelByName, _ := c.repo.GetEmDeviceModelByName(addEmDeviceModelCmd.TslName)
+	emDeviceModelCmd.DeviceModelId = emDeviceModelByName.Id
+	emDeviceModelCmd.Id = emDeviceModelCmdByName.Id
+	data, _ = json.Marshal(addEmDeviceModelCmd)
+	emDeviceModelCmd.Data = string(data)
+	err = c.repo.UpdateEmDeviceModelCmd(&emDeviceModelCmd)
+	if err != nil {
+		return
+	}
+	return
+}
+
+func (c *EmController) DeleteEmDeviceModelCmd(ctx *gin.Context) {
+	var tmp = struct {
+		TSLName string   `json:"tslName"`
+		Names   []string `json:"names"`
+	}{}
+	if err := ctx.ShouldBindBodyWith(&tmp, binding.JSON); err != nil {
+		ctx.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+	for _, name := range tmp.Names {
+		emDeviceModelCmdByName, _ := c.repo.GetEmDeviceModelCmdByName(name)
+		c.repo.DeleteEmDeviceModelCmd(emDeviceModelCmdByName.Id)
+		// 删除cmd下的param
+		paramList, _ := c.repo.GetEmDeviceModelCmdParamByCmdId(emDeviceModelCmdByName.Id)
+		for _, param := range paramList {
+			c.repo.DeleteEmDeviceModelCmdParam(param.Id)
+		}
+	}
+	return
+}
+
 func (c *EmController) AddEmDeviceModelCmdParam(ctx *gin.Context) {
 	var emDeviceModelCmdParam models.EmDeviceModelCmdParam
 	var addEmDeviceModelCmdParam models.AddEmDeviceModelCmdParam
@@ -499,7 +611,49 @@ func (c *EmController) AddEmDeviceModelCmdParam(ctx *gin.Context) {
 	return
 }
 
-//根据设备名称获取所有模型
+func (c *EmController) UpdateEmDeviceModelCmdParam(ctx *gin.Context) {
+	var addEmDeviceModelCmdParam models.AddEmDeviceModelCmdParam
+	var data []byte
+	err := ctx.ShouldBindBodyWith(&addEmDeviceModelCmdParam, binding.JSON)
+	if err != nil {
+		return
+	}
+	// 查名字获取id
+	var emDeviceModelCmdParam models.EmDeviceModelCmdParam
+	emDeviceModelCmdParam.Name = addEmDeviceModelCmdParam.Name
+	emDeviceModelCmdParam.Label = addEmDeviceModelCmdParam.Label
+	emDeviceModelCmdParamByName, _ := c.repo.GetEmDeviceModelCmdParamByName(addEmDeviceModelCmdParam.Name)
+	emDeviceModelCmdParam.Id = emDeviceModelCmdParamByName.Id
+
+	emDeviceModelCmdByName, _ := c.repo.GetEmDeviceModelCmdByName(addEmDeviceModelCmdParam.CmdName)
+	emDeviceModelCmdParam.DeviceModelCmdId = emDeviceModelCmdByName.Id
+	data, _ = json.Marshal(addEmDeviceModelCmdParam)
+	emDeviceModelCmdParam.Data = string(data)
+	err = c.repo.UpdateEmDeviceModelCmdParam(&emDeviceModelCmdParam)
+	if err != nil {
+		return
+	}
+	return
+}
+
+func (c *EmController) DeleteEmDeviceModelCmdParam(ctx *gin.Context) {
+	var tmp = struct {
+		TSLName       string   `json:"tslName"`
+		CmdName       string   `json:"cmdName"`
+		PropertyNames []string `json:"propertyNames"`
+	}{}
+	if err := ctx.ShouldBindBodyWith(&tmp, binding.JSON); err != nil {
+		ctx.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+	for _, name := range tmp.PropertyNames {
+		emDeviceModelCmdByNameParam, _ := c.repo.GetEmDeviceModelCmdParamByName(name)
+		c.repo.DeleteEmDeviceModelCmdParam(emDeviceModelCmdByNameParam.Id)
+	}
+	return
+}
+
+// 根据设备名称获取所有模型
 func (c *EmController) GetEmDeviceModelCmdParamListByName(ctx *gin.Context) {
 	var tmp struct {
 		Name string `json:"name"`

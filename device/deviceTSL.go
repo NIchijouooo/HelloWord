@@ -68,15 +68,23 @@ func TSLModelsInit() {
 	TSLLuaInit()
 	for _, v := range TSLLuaMap {
 		TSLModels[v.Name] = v
+		TSLModelsName[v.Name] = v
 	}
 
 	TSLModelS7Init()
 	for _, v := range TSLModelS7Map {
 		TSLModels[v.Name] = v
+		TSLModelsName[v.Name] = v
 	}
 
 	TSLModbusInit()
+	for _, v := range TSLModbusMap {
+		TSLModelsName[v.Name] = v
+	}
 	TSLDLT6452007Init()
+	for _, v := range TSLDLT6452007Map {
+		TSLModelsName[v.Name] = v
+	}
 }
 
 func AddTSLMode(name string, label string, modelType int) error {
@@ -84,7 +92,7 @@ func AddTSLMode(name string, label string, modelType int) error {
 	switch modelType {
 	case TSLModelTypeLua:
 		{
-			_, ok := TSLLuaMap[name]
+			_, ok := TSLModelsName[name]
 			if ok {
 				return errors.New("模型名称已经存在")
 			}
@@ -97,7 +105,7 @@ func AddTSLMode(name string, label string, modelType int) error {
 		}
 	case TSLModelTypeS7:
 		{
-			_, ok := TSLModelS7Map[name]
+			_, ok := TSLModelsName[name]
 			if ok {
 				return errors.New("模型名称已经存在")
 			}
@@ -109,7 +117,7 @@ func AddTSLMode(name string, label string, modelType int) error {
 		}
 	case TSLModelTypeModbus:
 		{
-			_, ok := TSLModbusMap[name]
+			_, ok := TSLModelsName[name]
 			if ok {
 				return errors.New("模型名称已经存在")
 			}
@@ -121,7 +129,7 @@ func AddTSLMode(name string, label string, modelType int) error {
 		}
 	case TSLModelTypeDLT6452007:
 		{
-			_, ok := TSLDLT6452007Map[name]
+			_, ok := TSLModelsName[name]
 			if ok {
 				return errors.New("模型名称已经存在")
 			}

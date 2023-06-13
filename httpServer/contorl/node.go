@@ -4,11 +4,13 @@ import (
 	"encoding/csv"
 	"encoding/json"
 	"fmt"
+	"gateway/controllers"
 	"gateway/device"
 	"gateway/httpServer/model"
 	"gateway/setting"
 	"gateway/utils"
 	"github.com/gin-gonic/gin"
+	"github.com/gin-gonic/gin/binding"
 	"log"
 	"net/http"
 	"net/url"
@@ -26,7 +28,10 @@ func ApiAddNode(context *gin.Context) {
 		TSL           string `json:"tsl"`
 	}{}
 
-	err := context.ShouldBindJSON(&nodeInfo)
+	emController := controllers.NewEMController()
+	emController.AddEmDevice(context)
+
+	err := context.ShouldBindBodyWith(&nodeInfo, binding.JSON)
 	if err != nil {
 		setting.ZAPS.Error("增加设备JSON格式化错误 %v", err)
 		context.JSON(http.StatusOK, model.ResponseData{
@@ -429,7 +434,10 @@ func ApiModifyNode(context *gin.Context) {
 		TSL           string `json:"tsl"`
 	}{}
 
-	err := context.ShouldBindJSON(&nodeInfo)
+	emController := controllers.NewEMController()
+	emController.UpdateEmDevice(context)
+
+	err := context.ShouldBindBodyWith(&nodeInfo, binding.JSON)
 	if err != nil {
 		setting.ZAPS.Error("增加设备JSON格式化错误 %v", err)
 		context.JSON(http.StatusOK, model.ResponseData{
@@ -549,7 +557,10 @@ func ApiDeleteNode(context *gin.Context) {
 		DNames        []string `json:"deviceNames"`
 	}{}
 
-	err := context.ShouldBindJSON(&nodeInfo)
+	emController := controllers.NewEMController()
+	emController.DeleteEmDevice(context)
+
+	err := context.ShouldBindBodyWith(&nodeInfo, binding.JSON)
 	if err != nil {
 		setting.ZAPS.Error("删除设备JSON格式化错误 %v", err)
 		context.JSON(http.StatusOK, model.ResponseData{
@@ -697,7 +708,8 @@ func ApiGetNodes(context *gin.Context) {
 	})
 }
 
-/**
+/*
+*
 从缓存中获取设备变量
 */
 func ApiGetNodeVariableFromCache(context *gin.Context) {
@@ -966,7 +978,8 @@ func ApiInvokeService(context *gin.Context) {
 	}
 }
 
-/**
+/*
+*
 从缓存中获取设备变量
 */
 func ApiV2GetNodeVariableFromCache(context *gin.Context) {

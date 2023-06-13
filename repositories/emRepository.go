@@ -111,8 +111,8 @@ func (r *EmRepository) UpdateEmDevice(emDevice *models.EmDevice) error {
 	return r.db.Save(emDevice).Error
 }
 
-func (r *EmRepository) DelEmDevice(emDevice *models.EmDevice) error {
-	return r.db.Delete(emDevice).Error
+func (r *EmRepository) DeleteEmDevice(id int) error {
+	return r.db.Delete(&models.EmDevice{}, id).Error
 }
 
 func (r *EmRepository) GetEmDeviceById(id int) (*models.EmDevice, error) {
@@ -129,6 +129,14 @@ func (r *EmRepository) GetEmDeviceByName(name string) (*models.EmDevice, error) 
 		return nil, err
 	}
 	return &emDevice, nil
+}
+
+func (r *EmRepository) GetEmDeviceByModelId(modelId int) ([]models.EmDevice, error) {
+	var emDevice []models.EmDevice
+	if err := r.db.Where("model_id = ?", modelId).Find(&emDevice).Error; err != nil {
+		return nil, err
+	}
+	return emDevice, nil
 }
 
 // AddEmDeviceModel EM设备模型
@@ -165,6 +173,14 @@ func (r *EmRepository) GetEmDeviceModelCmdByName(name string) (*models.EmDeviceM
 	return &emDeviceModelCmd, nil
 }
 
+func (r *EmRepository) GetEmDeviceModelCmdByModelId(modelId int) ([]models.EmDeviceModelCmd, error) {
+	var emDeviceModelCmd []models.EmDeviceModelCmd
+	if err := r.db.Where("device_model_id = ?", modelId).Find(&emDeviceModelCmd).Error; err != nil {
+		return nil, err
+	}
+	return emDeviceModelCmd, nil
+}
+
 func (r *EmRepository) UpdateEmDeviceModelCmd(emDeviceModelCmd *models.EmDeviceModelCmd) error {
 	return r.db.Save(emDeviceModelCmd).Error
 }
@@ -194,7 +210,15 @@ func (r *EmRepository) DeleteEmDeviceModelCmdParam(id int) error {
 	return r.db.Delete(&models.EmDeviceModelCmdParam{}, id).Error
 }
 
-//根据设备获取模型列表
+func (r *EmRepository) GetEmDeviceModelCmdParamByCmdId(cmdId int) ([]models.EmDeviceModelCmdParam, error) {
+	var emDeviceModelCmdParam []models.EmDeviceModelCmdParam
+	if err := r.db.Where("device_model_cmd_id = ?", cmdId).Find(&emDeviceModelCmdParam).Error; err != nil {
+		return nil, err
+	}
+	return emDeviceModelCmdParam, nil
+}
+
+// GetEmDeviceModelCmdParamListByName 根据设备获取模型列表
 func (r *EmRepository) GetEmDeviceModelCmdParamListByName(name string) ([]models.EmDeviceModelCmdParam, error) {
 	var emDeviceModelCmdParam []models.EmDeviceModelCmdParam
 	if err := r.db.Where("name = ?", name).Find(&emDeviceModelCmdParam).Error; err != nil {
