@@ -60,6 +60,23 @@ func RouterWeb(port string) {
 		emController := controllers.NewEMController()
 		emController.RegisterRoutes(&router.RouterGroup)
 
+		/**
+		20230605
+		*/
+		/**
+		字典
+		*/
+		dictTypeController := controllers.NewDictTypeController()
+		dictTypeController.RegisterRoutes(&router.RouterGroup)
+		dictDataController := controllers.NewDictDataController()
+		dictDataController.RegisterRoutes(&router.RouterGroup)
+
+		projectInfoController := controllers.NewProjectInfoController()
+		projectInfoController.RegisterRoutes(&router.RouterGroup)
+
+		auxiliaryController := controllers.NewAuxiliaryController()
+		auxiliaryController.RegisterRoutes(&router.RouterGroup)
+
 		accountRouter := router.Group("/api/v2/account")
 		{
 			accountRouter.GET("/permissions", contorl.ApiGetPermissions)

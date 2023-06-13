@@ -193,3 +193,12 @@ func (r *EmRepository) UpdateEmDeviceModelCmdParam(emDeviceModelCmdParam *models
 func (r *EmRepository) DeleteEmDeviceModelCmdParam(id int) error {
 	return r.db.Delete(&models.EmDeviceModelCmdParam{}, id).Error
 }
+
+//根据设备获取模型列表
+func (r *EmRepository) GetEmDeviceModelCmdParamListByName(name string) ([]models.EmDeviceModelCmdParam, error) {
+	var emDeviceModelCmdParam []models.EmDeviceModelCmdParam
+	if err := r.db.Where("name = ?", name).Find(&emDeviceModelCmdParam).Error; err != nil {
+		return nil, err
+	}
+	return emDeviceModelCmdParam, nil
+}

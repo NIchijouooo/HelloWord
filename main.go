@@ -23,7 +23,7 @@ var foo string
 func main() {
 	// 连接SQLite数据库
 	models.InitDB()
-
+	models.InitTaosDB()
 	utils.ErrorLogInit()
 	defer func() {
 		r := recover()

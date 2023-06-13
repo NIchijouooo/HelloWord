@@ -122,6 +122,20 @@ const layoutMap = [
     component: () => import('../views/systemService/SysLog.vue'),
     children: [],
   },
+  {
+    path: '/dictType',
+    name: 'DictType',
+    meta: { title: '字典管理', icon: 'sysDict' },
+    component: () => import('../views/systemService/dict/index.vue'),
+    children: [],
+  },
+  {
+    path: '/dictData',
+    name: 'dictData',
+    meta: { title: '字典详情', icon: 'sysDictData' },
+    component: () => import('../views/systemService/dict/data.vue'),
+    children: [],
+  },
   // 系统服务 end
   // 系统工具 start
   {
