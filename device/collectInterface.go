@@ -953,7 +953,7 @@ func (d *CollectInterfaceTemplate) CommunicationManageDel(ctx context.Context) {
 					entry := d.Cron.Entry(d.CronId)
 					now := time.Now().In(d.Cron.Location())
 					next := entry.Next
-					setting.ZAPS.Infof("系统当前时间:%v  采集服务[%s]定时器下次执行时间%v", now, d.CollInterfaceName, next)
+					//setting.ZAPS.Infof("系统当前时间:%v  采集服务[%s]定时器下次执行时间%v", now, d.CollInterfaceName, next)
 					if now.Before(next) {
 						diff := now.Sub(next)
 						diffSec := int(math.Abs(diff.Seconds()))
