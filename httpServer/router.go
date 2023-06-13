@@ -57,7 +57,7 @@ func RouterWeb(port string) {
 		//		router.Use(middleware.Privilege())
 		//		{
 
-		emController := controllers.NewCommInterfaceProtocolController()
+		emController := controllers.NewEMController()
 		emController.RegisterRoutes(&router.RouterGroup)
 
 		accountRouter := router.Group("/api/v2/account")

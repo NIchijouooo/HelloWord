@@ -14,6 +14,7 @@ type AddEmCollInterface struct {
 	CommInterfaceName string `json:"commInterfaceName"`
 	PollPeriod        int    `json:"pollPeriod"`
 	OfflinePeriod     int    `json:"offlinePeriod"`
+	ProtocolTypeName  string `json:"protocolTypeName"`
 }
 
 func (u *EmCollInterface) TableName() string {

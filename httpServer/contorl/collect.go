@@ -20,7 +20,7 @@ func ApiAddCollectInterface(context *gin.Context) {
 		OfflinePeriod        int    `json:"offlinePeriod"`
 	}{}
 
-	emController := controllers.NewCommInterfaceProtocolController()
+	emController := controllers.NewEMController()
 	emController.AddCollInterface(context)
 
 	err := context.ShouldBindBodyWith(&interfaceInfo, binding.JSON)
@@ -65,7 +65,10 @@ func ApiModifyCollectInterface(context *gin.Context) {
 		OfflinePeriod        int    `json:"offlinePeriod"`
 	}{}
 
-	err := context.ShouldBindJSON(&interfaceInfo)
+	emController := controllers.NewEMController()
+	emController.UpdateCollInterface(context)
+
+	err := context.ShouldBindBodyWith(&interfaceInfo, binding.JSON)
 	if err != nil {
 		setting.ZAPS.Error("修改采集接口JSON格式化错误 %v", err)
 		context.JSON(http.StatusOK, model.ResponseData{
@@ -102,8 +105,10 @@ func ApiDeleteCollectInterface(context *gin.Context) {
 	interfaceInfo := struct {
 		Name string `json:"name"` // 采集接口名字
 	}{}
+	emController := controllers.NewEMController()
+	emController.DeleteCollInterface(context)
 
-	err := context.ShouldBindJSON(&interfaceInfo)
+	err := context.ShouldBindBodyWith(&interfaceInfo, binding.JSON)
 	if err != nil {
 		setting.ZAPS.Error("删除采集接口JSON格式化错误 %v", err)
 		context.JSON(http.StatusOK, model.ResponseData{

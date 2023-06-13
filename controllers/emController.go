@@ -15,7 +15,7 @@ type EmController struct {
 	repo *repositories.EmRepository
 }
 
-func NewCommInterfaceProtocolController() *EmController {
+func NewEMController() *EmController {
 	return &EmController{
 		repo: repositories.NewEmRepository(),
 	}
@@ -30,6 +30,7 @@ func (c *EmController) RegisterRoutes(router *gin.RouterGroup) {
 	router.PUT("/api/v2/em/updateCommInterface", c.UpdateCommInterface)
 	// 采集接口
 	router.POST("/api/v2/em/addCollInterface", c.AddCollInterface)
+	router.POST("/api/v2/em/updateCollInterface", c.UpdateCollInterface)
 	// 设备
 	router.POST("/api/v2/em/addEmDevice", c.AddEmDevice)
 	router.POST("/api/v2/em/updateEmDevice", c.AddEmDevice)
@@ -226,12 +227,55 @@ func (c *EmController) AddCollInterface(ctx *gin.Context) {
 	return
 }
 
+func (c *EmController) UpdateCollInterface(ctx *gin.Context) {
+	var addEmCollInterface models.AddEmCollInterface
+	var data []byte
+	err := ctx.ShouldBindBodyWith(&addEmCollInterface, binding.JSON)
+	if err != nil {
+		return
+	}
+	// 查名字获取id
+	var emCollInterface models.EmCollInterface
+	emCollInterface.OfflinePeriod = addEmCollInterface.OfflinePeriod
+	emCollInterface.PollPeriod = addEmCollInterface.PollPeriod
+	collInterfaceByName, _ := c.repo.GetCollInterfaceByName(addEmCollInterface.CollInterfaceName)
+	if collInterfaceByName == nil {
+		return
+	}
+	emCollInterface.Id = collInterfaceByName.Id
+	emCollInterface.Name = addEmCollInterface.CollInterfaceName
+	data, _ = json.Marshal(addEmCollInterface)
+	emCollInterface.Data = string(data)
+	err = c.repo.UpdateCollInterface(&emCollInterface)
+	if err != nil {
+		return
+	}
+	return
+}
+
+func (c *EmController) DeleteCollInterface(ctx *gin.Context) {
+	var tmp struct {
+		Name string `json:"name"`
+	}
+	if err := ctx.ShouldBindBodyWith(&tmp, binding.JSON); err != nil {
+		ctx.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+	collInterfaceByName, _ := c.repo.GetCollInterfaceByName(tmp.Name)
+
+	if err := c.repo.DeleteCollInterface(collInterfaceByName.Id); err != nil {
+		ctx.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	return
+}
+
 func (c *EmController) AddEmDevice(ctx *gin.Context) {
 	var emDevice models.EmDevice
 	var addEmDevice models.AddEmDevice
 	var data []byte
 
-	if err := ctx.ShouldBindJSON(&addEmDevice); err != nil {
+	if err := ctx.ShouldBindBodyWith(&addEmDevice, binding.JSON); err != nil {
 		ctx.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
@@ -242,29 +286,29 @@ func (c *EmController) AddEmDevice(ctx *gin.Context) {
 	emDevice.Name = addEmDevice.Name
 	emDeviceByName, _ := c.repo.GetEmDeviceByName(emDevice.Name)
 	if emDeviceByName != nil {
-		ctx.JSON(http.StatusOK, model.ResponseData{
-			Code:    "0",
-			Message: "设备名已存在，添加失败",
-		})
+		//ctx.JSON(http.StatusOK, model.ResponseData{
+		//	Code:    "0",
+		//	Message: "设备名已存在，添加失败",
+		//})
 		return
 	}
 	// 判断是否有对应的采集接口
 	emCollInterfaceByName, _ := c.repo.GetCollInterfaceByName(addEmDevice.InterfaceName)
 	if emCollInterfaceByName == nil {
-		ctx.JSON(http.StatusOK, model.ResponseData{
-			Code:    "0",
-			Message: "采集接口名不存在，添加失败",
-		})
+		//ctx.JSON(http.StatusOK, model.ResponseData{
+		//	Code:    "0",
+		//	Message: "采集接口名不存在，添加失败",
+		//})
 		return
 	}
 	emDevice.CollInterfaceId = emCollInterfaceByName.Id
 	// 判断是否有对应的设备模型
 	emDeviceModelByName, _ := c.repo.GetEmDeviceModelByName(addEmDevice.Tsl)
 	if emDeviceModelByName == nil {
-		ctx.JSON(http.StatusOK, model.ResponseData{
-			Code:    "0",
-			Message: "设备模型名不存在，添加失败",
-		})
+		//ctx.JSON(http.StatusOK, model.ResponseData{
+		//	Code:    "0",
+		//	Message: "设备模型名不存在，添加失败",
+		//})
 		return
 	}
 	emDevice.ModelId = emDeviceModelByName.Id
@@ -275,10 +319,10 @@ func (c *EmController) AddEmDevice(ctx *gin.Context) {
 	if err != nil {
 		ctx.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 	}
-	ctx.JSON(http.StatusOK, model.ResponseData{
-		Code:    "1",
-		Message: "添加设备成功",
-	})
+	//ctx.JSON(http.StatusOK, model.ResponseData{
+	//	Code:    "1",
+	//	Message: "添加设备成功",
+	//})
 	return
 }
 
@@ -287,7 +331,7 @@ func (c *EmController) AddEmDeviceModel(ctx *gin.Context) {
 	var addEmDeviceModel models.AddEmDeviceModel
 	var data []byte
 
-	if err := ctx.ShouldBindJSON(&addEmDeviceModel); err != nil {
+	if err := ctx.ShouldBindBodyWith(&addEmDeviceModel, binding.JSON); err != nil {
 		ctx.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
@@ -298,10 +342,10 @@ func (c *EmController) AddEmDeviceModel(ctx *gin.Context) {
 	emDeviceModel.Name = addEmDeviceModel.Name
 	emDeviceModelByName, _ := c.repo.GetEmDeviceModelByName(emDeviceModel.Name)
 	if emDeviceModelByName != nil {
-		ctx.JSON(http.StatusOK, model.ResponseData{
-			Code:    "0",
-			Message: "设备模型已存在，添加失败",
-		})
+		//ctx.JSON(http.StatusOK, model.ResponseData{
+		//	Code:    "0",
+		//	Message: "设备模型已存在，添加失败",
+		//})
 		return
 	}
 
@@ -311,10 +355,54 @@ func (c *EmController) AddEmDeviceModel(ctx *gin.Context) {
 	if err != nil {
 		ctx.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 	}
-	ctx.JSON(http.StatusOK, model.ResponseData{
-		Code:    "1",
-		Message: "添加设备模型成功",
-	})
+	//ctx.JSON(http.StatusOK, model.ResponseData{
+	//	Code:    "1",
+	//	Message: "添加设备模型成功",
+	//})
+	return
+}
+
+func (c *EmController) UpdateEmDeviceModel(ctx *gin.Context) {
+	var addEmDeviceModel models.AddEmDeviceModel
+	var data []byte
+	err := ctx.ShouldBindBodyWith(&addEmDeviceModel, binding.JSON)
+	if err != nil {
+		return
+	}
+	// 查名字获取id
+	var emDeviceModel models.EmDeviceModel
+	emDeviceModel.Type = addEmDeviceModel.Type
+	emDeviceModel.Name = addEmDeviceModel.Name
+	emDeviceModel.Label = addEmDeviceModel.Label
+	emDeviceModelByName, _ := c.repo.GetEmDeviceModelByName(addEmDeviceModel.Name)
+	if emDeviceModelByName == nil {
+		return
+	}
+	emDeviceModel.Id = emDeviceModelByName.Id
+	emDeviceModel.Name = addEmDeviceModel.Name
+	data, _ = json.Marshal(addEmDeviceModel)
+	emDeviceModel.Data = string(data)
+	err = c.repo.UpdateEmDeviceModel(&emDeviceModel)
+	if err != nil {
+		return
+	}
+	return
+}
+
+func (c *EmController) DeleteEmDeviceModel(ctx *gin.Context) {
+	var tmp struct {
+		Name string `json:"name"`
+	}
+	if err := ctx.ShouldBindBodyWith(&tmp, binding.JSON); err != nil {
+		ctx.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+	emDeviceModelByName, _ := c.repo.GetEmDeviceModelByName(tmp.Name)
+
+	if err := c.repo.DeleteEmDeviceModel(emDeviceModelByName.Id); err != nil {
+		ctx.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
 	return
 }
 
@@ -323,7 +411,7 @@ func (c *EmController) AddEmDeviceModelCmd(ctx *gin.Context) {
 	var addEmDeviceModelCmd models.AddEmDeviceModelCmd
 	var data []byte
 
-	if err := ctx.ShouldBindJSON(&addEmDeviceModelCmd); err != nil {
+	if err := ctx.ShouldBindBodyWith(&addEmDeviceModelCmd, binding.JSON); err != nil {
 		ctx.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
@@ -333,19 +421,19 @@ func (c *EmController) AddEmDeviceModelCmd(ctx *gin.Context) {
 	emDeviceModelCmd.Name = addEmDeviceModelCmd.Name
 	emDeviceModelCmdByName, _ := c.repo.GetEmDeviceModelCmdByName(emDeviceModelCmd.Name)
 	if emDeviceModelCmdByName != nil {
-		ctx.JSON(http.StatusOK, model.ResponseData{
-			Code:    "0",
-			Message: "设备模型命令已存在，添加失败",
-		})
+		//ctx.JSON(http.StatusOK, model.ResponseData{
+		//	Code:    "0",
+		//	Message: "设备模型命令已存在，添加失败",
+		//})
 		return
 	}
 	// 查询对应的模型
 	emDeviceModelByName, _ := c.repo.GetEmDeviceModelByName(addEmDeviceModelCmd.TslName)
 	if emDeviceModelByName == nil {
-		ctx.JSON(http.StatusOK, model.ResponseData{
-			Code:    "0",
-			Message: "设备模型不存在，添加失败",
-		})
+		//ctx.JSON(http.StatusOK, model.ResponseData{
+		//	Code:    "0",
+		//	Message: "设备模型不存在，添加失败",
+		//})
 		return
 	}
 	data, _ = json.Marshal(addEmDeviceModelCmd)
@@ -356,10 +444,10 @@ func (c *EmController) AddEmDeviceModelCmd(ctx *gin.Context) {
 	if err != nil {
 		ctx.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 	}
-	ctx.JSON(http.StatusOK, model.ResponseData{
-		Code:    "1",
-		Message: "添加设备模型命令成功",
-	})
+	//ctx.JSON(http.StatusOK, model.ResponseData{
+	//	Code:    "1",
+	//	Message: "添加设备模型命令成功",
+	//})
 	return
 }
 
@@ -368,7 +456,7 @@ func (c *EmController) AddEmDeviceModelCmdParam(ctx *gin.Context) {
 	var addEmDeviceModelCmdParam models.AddEmDeviceModelCmdParam
 	var data []byte
 
-	if err := ctx.ShouldBindJSON(&addEmDeviceModelCmdParam); err != nil {
+	if err := ctx.ShouldBindBodyWith(&addEmDeviceModelCmdParam, binding.JSON); err != nil {
 		ctx.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
@@ -378,19 +466,19 @@ func (c *EmController) AddEmDeviceModelCmdParam(ctx *gin.Context) {
 	emDeviceModelCmdParam.Name = addEmDeviceModelCmdParam.Name
 	emDeviceModelCmdParamByName, _ := c.repo.GetEmDeviceModelCmdParamByName(emDeviceModelCmdParam.Name)
 	if emDeviceModelCmdParamByName != nil {
-		ctx.JSON(http.StatusOK, model.ResponseData{
-			Code:    "0",
-			Message: "设备模型命令参数，添加失败",
-		})
+		//ctx.JSON(http.StatusOK, model.ResponseData{
+		//	Code:    "0",
+		//	Message: "设备模型命令参数，添加失败",
+		//})
 		return
 	}
 	// 找对应的cmd
 	emDeviceModelCmdByName, _ := c.repo.GetEmDeviceModelCmdByName(addEmDeviceModelCmdParam.CmdName)
 	if emDeviceModelCmdByName == nil {
-		ctx.JSON(http.StatusOK, model.ResponseData{
-			Code:    "0",
-			Message: "设备模型命令名不存在，添加失败",
-		})
+		//ctx.JSON(http.StatusOK, model.ResponseData{
+		//	Code:    "0",
+		//	Message: "设备模型命令名不存在，添加失败",
+		//})
 		return
 	}
 	emDeviceModelCmdParam.DeviceModelCmdId = emDeviceModelCmdByName.Id
@@ -402,9 +490,9 @@ func (c *EmController) AddEmDeviceModelCmdParam(ctx *gin.Context) {
 	if err != nil {
 		ctx.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 	}
-	ctx.JSON(http.StatusOK, model.ResponseData{
-		Code:    "1",
-		Message: "添加设备模型命令参数成功",
-	})
+	//ctx.JSON(http.StatusOK, model.ResponseData{
+	//	Code:    "1",
+	//	Message: "添加设备模型命令参数成功",
+	//})
 	return
 }

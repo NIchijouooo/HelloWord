@@ -61,6 +61,7 @@ type TSLModelInterface interface {
 }
 
 var TSLModels = make(map[string]TSLModelInterface)
+var TSLModelsName = make(map[string]interface{})
 
 func TSLModelsInit() {
 
@@ -83,7 +84,7 @@ func AddTSLMode(name string, label string, modelType int) error {
 	switch modelType {
 	case TSLModelTypeLua:
 		{
-			_, ok := TSLModels[name]
+			_, ok := TSLLuaMap[name]
 			if ok {
 				return errors.New("模型名称已经存在")
 			}
@@ -91,30 +92,42 @@ func AddTSLMode(name string, label string, modelType int) error {
 			luaModel := NewTSLLua(name, label, modelType, plugin)
 			TSLLuaMap[name] = luaModel
 			TSLModels[name] = luaModel
+			TSLModelsName[name] = luaModel
 			WriteTSLLuaParamToJson()
 		}
 	case TSLModelTypeS7:
 		{
-			_, ok := TSLModels[name]
+			_, ok := TSLModelS7Map[name]
 			if ok {
 				return errors.New("模型名称已经存在")
 			}
 			s7Model := NewTSLModelS7(name, label, modelType)
 			TSLModelS7Map[name] = s7Model
 			TSLModels[name] = s7Model
+			TSLModelsName[name] = s7Model
 			WriteTSLModelS7ParamToJson()
 		}
 	case TSLModelTypeModbus:
 		{
+			_, ok := TSLModbusMap[name]
+			if ok {
+				return errors.New("模型名称已经存在")
+			}
 			modbusModel := NewTSLModbus(name, label, modelType)
 			TSLModbusMap[name] = modbusModel
 			//TSLModels[name] = modbusModel
+			TSLModelsName[name] = modbusModel
 			WriteTSLModbusParamToJson()
 		}
 	case TSLModelTypeDLT6452007:
 		{
+			_, ok := TSLDLT6452007Map[name]
+			if ok {
+				return errors.New("模型名称已经存在")
+			}
 			d07Model := NewTSLDLT6452007(name, label, modelType)
 			TSLDLT6452007Map[name] = d07Model
+			TSLModelsName[name] = d07Model
 			WriteTSLDLT6452007ParamToJson()
 		}
 	}

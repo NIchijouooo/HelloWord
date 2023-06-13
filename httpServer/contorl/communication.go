@@ -24,7 +24,7 @@ func ApiAddCommInterface(context *gin.Context) {
 		Param: &Param,
 	}
 
-	emController := controllers.NewCommInterfaceProtocolController()
+	emController := controllers.NewEMController()
 	emController.AddCommInterface(context)
 
 	err := context.ShouldBindBodyWith(&interfaceInfo, binding.JSON)
@@ -562,7 +562,7 @@ func ApiModifyCommInterface(context *gin.Context) {
 		Param: &Param,
 	}
 
-	emController := controllers.NewCommInterfaceProtocolController()
+	emController := controllers.NewEMController()
 	emController.UpdateCommInterface(context)
 
 	err := context.ShouldBindBodyWith(&interfaceInfo, binding.JSON)
@@ -1114,7 +1114,7 @@ func ApiDeleteCommInterface(context *gin.Context) {
 		Name string `json:"name"`
 	}{}
 
-	emController := controllers.NewCommInterfaceProtocolController()
+	emController := controllers.NewEMController()
 	emController.DelComInterface(context)
 
 	err := context.ShouldBindBodyWith(&interfaceInfo, binding.JSON)

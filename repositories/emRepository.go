@@ -86,6 +86,14 @@ func (r *EmRepository) AddCollInterface(emCollInterface *models.EmCollInterface)
 	return r.db.Create(emCollInterface).Error
 }
 
+func (r *EmRepository) UpdateCollInterface(emCollInterface *models.EmCollInterface) error {
+	return r.db.Save(emCollInterface).Error
+}
+
+func (r *EmRepository) DeleteCollInterface(id int) error {
+	return r.db.Delete(&models.EmCollInterface{}, id).Error
+}
+
 func (r *EmRepository) GetCollInterfaceByName(name string) (*models.EmCollInterface, error) {
 	var emCollInterface models.EmCollInterface
 	if err := r.db.Where("name = ?", name).First(&emCollInterface).Error; err != nil {
@@ -115,11 +123,6 @@ func (r *EmRepository) GetEmDeviceById(id int) (*models.EmDevice, error) {
 	return &emDevice, nil
 }
 
-// AddEmDeviceModel EM设备模型
-func (r *EmRepository) AddEmDeviceModel(emDeviceModel *models.EmDeviceModel) error {
-	return r.db.Create(emDeviceModel).Error
-}
-
 func (r *EmRepository) GetEmDeviceByName(name string) (*models.EmDevice, error) {
 	var emDevice models.EmDevice
 	if err := r.db.Where("name = ?", name).First(&emDevice).Error; err != nil {
@@ -128,12 +131,25 @@ func (r *EmRepository) GetEmDeviceByName(name string) (*models.EmDevice, error) 
 	return &emDevice, nil
 }
 
+// AddEmDeviceModel EM设备模型
+func (r *EmRepository) AddEmDeviceModel(emDeviceModel *models.EmDeviceModel) error {
+	return r.db.Create(emDeviceModel).Error
+}
+
 func (r *EmRepository) GetEmDeviceModelByName(name string) (*models.EmDeviceModel, error) {
 	var emDeviceModel models.EmDeviceModel
 	if err := r.db.Where("name = ?", name).First(&emDeviceModel).Error; err != nil {
 		return nil, err
 	}
 	return &emDeviceModel, nil
+}
+
+func (r *EmRepository) UpdateEmDeviceModel(emDeviceModel *models.EmDeviceModel) error {
+	return r.db.Save(emDeviceModel).Error
+}
+
+func (r *EmRepository) DeleteEmDeviceModel(id int) error {
+	return r.db.Delete(&models.EmDeviceModel{}, id).Error
 }
 
 // AddEmDeviceModelCmd EM设备模型命令
@@ -149,6 +165,14 @@ func (r *EmRepository) GetEmDeviceModelCmdByName(name string) (*models.EmDeviceM
 	return &emDeviceModelCmd, nil
 }
 
+func (r *EmRepository) UpdateEmDeviceModelCmd(emDeviceModelCmd *models.EmDeviceModelCmd) error {
+	return r.db.Save(emDeviceModelCmd).Error
+}
+
+func (r *EmRepository) DeleteEmDeviceModelCmd(id int) error {
+	return r.db.Delete(&models.EmDeviceModelCmd{}, id).Error
+}
+
 // AddEmDeviceModelCmdParam EM设备模型命令参数
 func (r *EmRepository) AddEmDeviceModelCmdParam(emDeviceModelCmdParam *models.EmDeviceModelCmdParam) error {
 	return r.db.Create(emDeviceModelCmdParam).Error
@@ -160,4 +184,12 @@ func (r *EmRepository) GetEmDeviceModelCmdParamByName(name string) (*models.EmDe
 		return nil, err
 	}
 	return &emDeviceModelCmdParam, nil
+}
+
+func (r *EmRepository) UpdateEmDeviceModelCmdParam(emDeviceModelCmdParam *models.EmDeviceModelCmdParam) error {
+	return r.db.Save(emDeviceModelCmdParam).Error
+}
+
+func (r *EmRepository) DeleteEmDeviceModelCmdParam(id int) error {
+	return r.db.Delete(&models.EmDeviceModelCmdParam{}, id).Error
 }

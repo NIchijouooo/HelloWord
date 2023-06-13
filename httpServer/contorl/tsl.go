@@ -3,10 +3,12 @@ package contorl
 import (
 	"encoding/json"
 	"fmt"
+	"gateway/controllers"
 	"gateway/device"
 	"gateway/httpServer/model"
 	"gateway/setting"
 	"gateway/utils"
+	"github.com/gin-gonic/gin/binding"
 	"net/http"
 	"net/url"
 	"os"
@@ -27,7 +29,10 @@ func ApiAddDeviceTSL(context *gin.Context) {
 		//Plugin device.TSLLuaPluginTemplate `json:"plugin"` // 插件
 	}{}
 
-	err := context.BindJSON(&tslInfo)
+	emController := controllers.NewEMController()
+	emController.AddEmDeviceModel(context)
+
+	err := context.ShouldBindBodyWith(&tslInfo, binding.JSON)
 	if err != nil {
 		setting.ZAPS.Error("添加物模型模版JSON格式化错误 %v", err)
 		context.JSON(http.StatusOK, model.ResponseData{
@@ -62,7 +67,10 @@ func ApiDeleteDeviceTSL(context *gin.Context) {
 		Type int    `json:"type"` //类型
 	}{}
 
-	err := context.BindJSON(&tsl)
+	emController := controllers.NewEMController()
+	emController.DeleteEmDeviceModel(context)
+
+	err := context.ShouldBindBodyWith(&tsl, binding.JSON)
 	if err != nil {
 		setting.ZAPS.Error("删除物模型模版JSON格式化错误 %v", err)
 		context.JSON(http.StatusOK, model.ResponseData{
@@ -102,7 +110,10 @@ func ApiModifyDeviceTSL(context *gin.Context) {
 		Param: &param,
 	}
 
-	err := context.BindJSON(&tslInfo)
+	emController := controllers.NewEMController()
+	emController.UpdateEmDeviceModel(context)
+
+	err := context.ShouldBindBodyWith(&tslInfo, binding.JSON)
 	if err != nil {
 		setting.ZAPS.Error("修改物模型模版JSON格式化错误 %v", err)
 		context.JSON(http.StatusOK, model.ResponseData{
