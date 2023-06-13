@@ -63,7 +63,7 @@ import variables from 'styles/variables.module.scss'
 import { Expand } from '@element-plus/icons-vue'
 import { userStore } from '@/stores/user.js'
 import setLoginInfo from 'utils/setLoginInfo.js'
-import logoUrl from '@/assets/logo.png'//'@/assets/logo.png'
+import logoUrl from '@/assets/logo2.png'//'@/assets/logo.png'
 
 const user = userStore()
 const ctxData = reactive({
@@ -242,7 +242,7 @@ const activeIndex = computed(() => route.path)
   background-color: #f0f0f0;
 }*/
 :deep(.el-sub-menu .el-menu-item.is-active) {
-  background-color: #f0f0f0;
+  background-color: rgb(187, 187, 187);
 }
 :deep(.el-sub-menu .el-menu-item .menu-icon) {
   height: 18px;

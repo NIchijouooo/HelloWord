@@ -24,21 +24,21 @@
           style="width: 100%"
           stripe
         >
-          <el-table-column prop="name" label="网卡名称" width="auto" min-width="180" align="center"> </el-table-column>
-          <el-table-column label="配置状态" width="auto" min-width="120" align="center">
+          <el-table-column sortable prop="name" label="网卡名称" width="auto" min-width="180" align="center"> </el-table-column>
+          <el-table-column sortable label="配置状态" width="auto" min-width="120" align="center">
             <template #default="scope">
               <el-tag :type="scope.row.configParam.configEnable ? 'success' : 'warning'">{{
                 scope.row.configParam.configEnable ? '已配置' : '未配置'
               }}</el-tag>
             </template>
           </el-table-column>
-          <el-table-column prop="mtu" label="MTU" width="auto" min-width="150" align="center"> </el-table-column>
-          <el-table-column prop="mac" label="MAC地址" width="auto" min-width="200" align="center"> </el-table-column>
-          <el-table-column prop="flags" label="网卡标志" width="auto" min-width="200" align="center"> </el-table-column>
-          <el-table-column prop="ip" label="网络地址" width="auto" min-width="150" align="center"> </el-table-column>
-          <el-table-column prop="netmask" label="子网掩码" width="auto" min-width="150" align="center">
+          <el-table-column sortable prop="mtu" label="MTU" width="auto" min-width="150" align="center"> </el-table-column>
+          <el-table-column sortable prop="mac" label="MAC地址" width="auto" min-width="200" align="center"> </el-table-column>
+          <el-table-column sortable prop="flags" label="网卡标志" width="auto" min-width="200" align="center"> </el-table-column>
+          <el-table-column sortable prop="ip" label="网络地址" width="auto" min-width="150" align="center"> </el-table-column>
+          <el-table-column sortable prop="netmask" label="子网掩码" width="auto" min-width="150" align="center">
           </el-table-column>
-          <el-table-column prop="gateway" label="默认网关" width="auto" min-width="150" align="center">
+          <el-table-column sortable prop="gateway" label="默认网关" width="auto" min-width="150" align="center">
           </el-table-column>
           <el-table-column label="操作" width="auto" min-width="250" align="center" fixed="right">
             <template #default="scope">

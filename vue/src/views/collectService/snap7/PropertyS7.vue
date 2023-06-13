@@ -95,24 +95,24 @@
               </div>
             </template>
           </el-table-column>
-        <el-table-column prop="name" label="属性名称" width="auto" min-width="150" align="center"> </el-table-column>
-        <el-table-column prop="label" label="属性标签" width="auto" min-width="150" align="center"> </el-table-column>
-        <el-table-column label="读写属性" width="auto" min-width="80" align="center">
+        <el-table-column sortable prop="name" label="属性名称" width="auto" min-width="150" align="center"> </el-table-column>
+        <el-table-column sortable prop="label" label="属性标签" width="auto" min-width="150" align="center"> </el-table-column>
+        <el-table-column sortable label="读写属性" width="auto" min-width="80" align="center">
           <template #default="scope">
             {{ ctxData.accessModeNames['am' + scope.row.accessMode] }}
           </template>
         </el-table-column>
-        <el-table-column prop="type" label="属性类型" width="auto" min-width="100" align="center">
+        <el-table-column sortable prop="type" label="属性类型" width="auto" min-width="100" align="center">
           <template #default="scope">
             {{ ctxData.typeNames['t' + scope.row.type] }}
           </template>
         </el-table-column>
-        <el-table-column label="小数位数" width="auto" min-width="80" align="center">
+        <el-table-column sortable label="小数位数" width="auto" min-width="80" align="center">
           <template #default="scope">
             {{ scope.row.decimals === '' ? 0 : scope.row.decimals }}
           </template>
         </el-table-column>
-        <el-table-column prop="unit" label="单位" width="auto" min-width="80" align="center" />
+        <el-table-column sortable prop="unit" label="单位" width="auto" min-width="80" align="center" />
         <el-table-column label="操作" width="auto" min-width="200" align="center" fixed="right">
           <template #default="scope">
             <el-button @click="editDeviceModelProperty(scope.row)" text type="primary">编辑</el-button>

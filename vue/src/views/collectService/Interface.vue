@@ -38,19 +38,19 @@
           stripe
           @row-dblclick="editInterface"
         >
-          <el-table-column prop="collInterfaceName" label="采集接口名称" width="auto" min-width="150" align="center">
+          <el-table-column sortable prop="collInterfaceName" label="采集接口名称" width="auto" min-width="150" align="center">
           </el-table-column>
-          <el-table-column prop="commInterfaceName" label="通讯接口" width="auto" min-width="150" align="center">
+          <el-table-column sortable prop="commInterfaceName" label="通讯接口" width="auto" min-width="150" align="center">
           </el-table-column>
-          <el-table-column prop="protocolTypeName" label="通讯协议" width="auto" min-width="150" align="center">
+          <el-table-column sortable prop="protocolTypeName" label="通讯协议" width="auto" min-width="150" align="center">
           </el-table-column>
-          <el-table-column prop="pollPeriod" label="采集周期(秒)" width="auto" min-width="150" align="center">
+          <el-table-column sortable prop="pollPeriod" label="采集周期(秒)" width="auto" min-width="150" align="center">
           </el-table-column>
-          <el-table-column prop="offlinePeriod" label="离线判断次数" width="auto" min-width="150" align="center">
+          <el-table-column sortable prop="offlinePeriod" label="离线判断次数" width="auto" min-width="150" align="center">
           </el-table-column>
-          <el-table-column prop="deviceNodeCnt" label="设备总数" width="auto" min-width="150" align="center">
+          <el-table-column sortable prop="deviceNodeCnt" label="设备总数" width="auto" min-width="150" align="center">
           </el-table-column>
-          <el-table-column prop="deviceNodeOnlineCnt" label="设备在线数" width="auto" min-width="150" align="center">
+          <el-table-column sortable prop="deviceNodeOnlineCnt" label="设备在线数" width="auto" min-width="150" align="center">
           </el-table-column>
           <el-table-column label="操作" width="auto" min-width="300" align="center" fixed="right">
             <template #default="scope">

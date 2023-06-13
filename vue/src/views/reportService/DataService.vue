@@ -56,15 +56,15 @@
               </div>
             </template>
           </el-table-column>
-          <el-table-column prop="serviceName" label="服务名称" width="auto" min-width="150" align="center">
+          <el-table-column sortable prop="serviceName" label="服务名称" width="auto" min-width="150" align="center">
           </el-table-column>
-          <el-table-column prop="protocol" label="协议名称" width="auto" min-width="150" align="center">
+          <el-table-column sortable prop="protocol" label="协议名称" width="auto" min-width="150" align="center">
           </el-table-column>
-          <el-table-column prop="ip" label="上报地址" width="auto" min-width="150" align="center"> </el-table-column>
-          <el-table-column prop="port" label="上报端口" width="auto" min-width="100" align="center"> </el-table-column>
-          <el-table-column prop="reportTime" label="上报周期（秒）" width="auto" min-width="150" align="center">
+          <el-table-column sortable prop="ip" label="上报地址" width="auto" min-width="150" align="center"> </el-table-column>
+          <el-table-column sortable prop="port" label="上报端口" width="auto" min-width="100" align="center"> </el-table-column>
+          <el-table-column sortable prop="reportTime" label="上报周期（秒）" width="auto" min-width="150" align="center">
           </el-table-column>
-          <el-table-column label="在线状态" width="auto" min-width="100" align="center">
+          <el-table-column sortable label="在线状态" width="auto" min-width="100" align="center">
             <template #default="scope">
               {{ scope.row.reportStatus === 'onLine' ? '在线' : '离线' }}
             </template>

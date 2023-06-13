@@ -36,7 +36,7 @@ import zhCn from 'element-plus/lib/locale/lang/zh-cn'
     bottom: 20px;
     width: 100%;
     height: calc(100%);
-    background-color: #fff;
+    background-color: #f3f3f3;
     border-radius: 4px;
     overflow: hidden;
   }

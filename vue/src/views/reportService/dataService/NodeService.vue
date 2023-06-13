@@ -81,28 +81,28 @@
           @row-dblclick="editNode"
         >
           <el-table-column type="selection" width="55" />
-          <el-table-column prop="deviceName" label="设备名称" width="auto" min-width="180" align="center">
+          <el-table-column sortable prop="deviceName" label="设备名称" width="auto" min-width="180" align="center">
           </el-table-column>
-          <el-table-column prop="deviceLabel" label="设备标签" width="auto" min-width="180" align="center">
+          <el-table-column sortable prop="deviceLabel" label="设备标签" width="auto" min-width="180" align="center">
           </el-table-column>
-          <el-table-column prop="deviceAddr" label="通讯地址" width="auto" min-width="150" align="center">
+          <el-table-column sortable prop="deviceAddr" label="通讯地址" width="auto" min-width="150" align="center">
           </el-table-column>
-          <el-table-column prop="uploadModel" label="上报模型" width="auto" min-width="150" align="center">
+          <el-table-column sortable prop="uploadModel" label="上报模型" width="auto" min-width="150" align="center">
           </el-table-column>
-          <el-table-column prop="collInterfaceName" label="采集接口名称" width="auto" min-width="150" align="center">
+          <el-table-column sortable prop="collInterfaceName" label="采集接口名称" width="auto" min-width="150" align="center">
           </el-table-column>
-          <!-- el-table-column label="通信状态" width="auto" min-width="100" align="center">
+          <!-- el-table-column sortable label="通信状态" width="auto" min-width="100" align="center">
             <template #default="scope">
               {{ scope.row.commStatus === 'onLine' ? '在线' : '离线' }}
             </template>
           </el-table-column -->
 
-          <el-table-column label="上报状态" width="auto" min-width="100" align="center">
+          <el-table-column sortable label="上报状态" width="auto" min-width="100" align="center">
             <template #default="scope">
               {{ scope.row.reportStatus === 'onLine' ? '在线' : '离线' }}
             </template>
           </el-table-column>
-          <el-table-column label="上报参数" width="auto" min-width="180" align="center">
+          <el-table-column sortable label="上报参数" width="auto" min-width="180" align="center">
             <template #default="scope">
               {{ scope.row.param }}
             </template>

@@ -39,9 +39,9 @@
           stripe
           @row-dblclick="editDeviceModel"
         >
-          <el-table-column prop="name" label="采集模型名称" width="auto" min-width="200" align="center">
+          <el-table-column sortable prop="name" label="采集模型名称" width="auto" min-width="200" align="center">
           </el-table-column>
-          <el-table-column prop="label" label="采集模型标签" width="auto" min-width="200" align="center">
+          <el-table-column sortable prop="label" label="采集模型标签" width="auto" min-width="200" align="center">
           </el-table-column>
           <el-table-column label="操作" width="auto" min-width="300" align="center" fixed="right">
             <template #default="scope">

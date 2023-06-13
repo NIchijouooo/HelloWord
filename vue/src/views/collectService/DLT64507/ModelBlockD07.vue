@@ -86,11 +86,11 @@
           @row-dblclick="editDeviceModelBlock"
         >
           <el-table-column type="selection" width="55" />
-          <el-table-column prop="name" label="命令名称" width="auto" min-width="150" align="center"> </el-table-column>
-          <el-table-column prop="label" label="命令标签" width="auto" min-width="150" align="center"> </el-table-column>
-          <el-table-column prop="blockRulerId" label="块数据标识" width="auto" min-width="120" align="center">
+          <el-table-column sortable prop="name" label="命令名称" width="auto" min-width="150" align="center"> </el-table-column>
+          <el-table-column sortable prop="label" label="命令标签" width="auto" min-width="150" align="center"> </el-table-column>
+          <el-table-column sortable prop="blockRulerId" label="块数据标识" width="auto" min-width="120" align="center">
           </el-table-column>
-          <el-table-column label="块读取开关" width="auto" min-width="100" align="center">
+          <el-table-column sortable label="块读取开关" width="auto" min-width="100" align="center">
             <template #default="scope">
               {{ ctxData.SWNames['SW' + scope.row.blockRead] }}
             </template>

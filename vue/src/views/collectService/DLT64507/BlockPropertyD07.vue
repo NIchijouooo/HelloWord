@@ -61,25 +61,25 @@
       @row-dblclick="editDeviceModelProperty"
     >
       <el-table-column type="selection" width="55" />
-      <el-table-column prop="name" label="属性名称" width="auto" min-width="150" align="center"> </el-table-column>
-      <el-table-column prop="label" label="属性标签" width="auto" min-width="150" align="center"> </el-table-column>
+      <el-table-column sortable prop="name" label="属性名称" width="auto" min-width="150" align="center"> </el-table-column>
+      <el-table-column sortable prop="label" label="属性标签" width="auto" min-width="150" align="center"> </el-table-column>
 
-      <el-table-column prop="rulerId" label="数据标识" width="auto" min-width="150" align="center"> </el-table-column>
-      <el-table-column prop="format" label="数据格式" width="auto" min-width="150" align="center"> </el-table-column>
-      <el-table-column prop="len" label="数据长度" width="auto" min-width="150" align="center"> </el-table-column>
-      <el-table-column label="读写属性" width="auto" min-width="80" align="center">
+      <el-table-column sortable prop="rulerId" label="数据标识" width="auto" min-width="150" align="center"> </el-table-column>
+      <el-table-column sortable prop="format" label="数据格式" width="auto" min-width="150" align="center"> </el-table-column>
+      <el-table-column sortable prop="len" label="数据长度" width="auto" min-width="150" align="center"> </el-table-column>
+      <el-table-column sortable label="读写属性" width="auto" min-width="100" align="center">
         <template #default="scope">
           {{ ctxData.accessModeNames['am' + scope.row.accessMode] }}
         </template>
       </el-table-column>
-      <el-table-column prop="type" label="数据类型" width="auto" min-width="100" align="center">
+      <el-table-column sortable prop="type" label="数据类型" width="auto" min-width="100" align="center">
         <template #default="scope">
           {{ ctxData.typeNames['t' + scope.row.type] }}
         </template>
       </el-table-column>
-      <el-table-column prop="unit" label="单位" width="auto" min-width="80" align="center" ></el-table-column>
-      <el-table-column prop="blockAddOffset" label="块偏移地址" width="auto" min-width="150" align="center"> </el-table-column>
-      <el-table-column prop="rulerAddOffset" label="标识偏移地址" width="auto" min-width="150" align="center"> </el-table-column>
+      <el-table-column sortable prop="unit" label="单位" width="auto" min-width="80" align="center" ></el-table-column>
+      <el-table-column sortable prop="blockAddOffset" label="块偏移地址" width="auto" min-width="150" align="center"> </el-table-column>
+      <el-table-column sortable prop="rulerAddOffset" label="标识偏移地址" width="auto" min-width="150" align="center"> </el-table-column>
 
       <el-table-column label="操作" width="auto" min-width="200" align="center" fixed="right">
         <template #default="scope">

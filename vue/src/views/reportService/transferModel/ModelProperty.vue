@@ -92,21 +92,21 @@
             </div>
           </template>
         </el-table-column>
-        <el-table-column prop="name" label="属性名称" width="auto" min-width="180" align="center"> </el-table-column>
-        <el-table-column prop="label" label="属性标签" width="auto" min-width="180" align="center"> </el-table-column>
-        <el-table-column prop="uploadName" label="上报属性名称" width="auto" min-width="180" align="center">
+        <el-table-column sortable prop="name" label="属性名称" width="auto" min-width="180" align="center"> </el-table-column>
+        <el-table-column sortable prop="label" label="属性标签" width="auto" min-width="180" align="center"> </el-table-column>
+        <el-table-column sortable prop="uploadName" label="上报属性名称" width="auto" min-width="180" align="center">
         </el-table-column>
-        <el-table-column label="数据类型" width="auto" min-width="100" align="center">
+        <el-table-column sortable label="数据类型" width="auto" min-width="100" align="center">
           <template #default="scope">
             {{ ctxData.typeNames['t' + scope.row.type] }}
           </template>
         </el-table-column>
-        <el-table-column label="小数位数" width="auto" min-width="80" align="center">
+        <el-table-column sortable label="小数位数" width="auto" min-width="80" align="center">
           <template #default="scope">
             {{ scope.row.decimals === undefined || scope.row.decimals === '' ? 0 : scope.row.decimals }}
           </template>
         </el-table-column>
-        <el-table-column prop="unit" label="单位" width="auto" min-width="80" align="center"> </el-table-column>
+        <el-table-column sortable prop="unit" label="单位" width="auto" min-width="80" align="center"> </el-table-column>
         <el-table-column label="操作" width="auto" min-width="150" align="center" fixed="right">
           <template #default="scope">
             <el-button @click="editProperty(scope.row)" text type="primary">编辑</el-button>

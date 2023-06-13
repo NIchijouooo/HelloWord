@@ -49,13 +49,13 @@
           stripe
         >
           <el-table-column prop="index" label="序号" width="55" />
-          <el-table-column prop="name" label="变量名称" width="auto" min-width="180" align="center"> </el-table-column>
-          <el-table-column prop="label" label="变量标签" width="auto" min-width="180" align="center"> </el-table-column>
-          <el-table-column prop="type" label="变量类型" width="auto" min-width="120" align="center"> </el-table-column>
-          <el-table-column prop="value" label="变量值" width="auto" min-width="200" align="center"> </el-table-column>
-          <el-table-column prop="unit" label="单位" width="auto" min-width="200" align="center"> </el-table-column>
-          <el-table-column prop="explain" label="说明" width="auto" min-width="200" align="center"> </el-table-column>
-          <el-table-column prop="timestamp" label="实测时间" width="auto" min-width="220" align="center">
+          <el-table-column sortable prop="name" label="变量名称" width="auto" min-width="180" align="center"> </el-table-column>
+          <el-table-column sortable prop="label" label="变量标签" width="auto" min-width="180" align="center"> </el-table-column>
+          <el-table-column sortable prop="type" label="变量类型" width="auto" min-width="120" align="center"> </el-table-column>
+          <el-table-column sortable prop="value" label="变量值" width="auto" min-width="200" align="center"> </el-table-column>
+          <el-table-column sortable prop="unit" label="单位" width="auto" min-width="200" align="center"> </el-table-column>
+          <el-table-column sortable prop="explain" label="说明" width="auto" min-width="200" align="center"> </el-table-column>
+          <el-table-column sortable prop="timestamp" label="实测时间" width="auto" min-width="220" align="center">
           </el-table-column>
           <el-table-column label="操作" width="auto" min-width="200" align="center" fixed="right">
             <template #default="scope">
@@ -120,14 +120,14 @@
               stripe
             >
               <el-table-column type="selection" width="55"> </el-table-column>
-              <el-table-column prop="name" label="属性名称" min-width="120" align="center"> </el-table-column>
-              <el-table-column prop="label" label="属性标签" min-width="140" align="center"> </el-table-column>
-              <el-table-column label="写入值" min-width="100" align="center">
+              <el-table-column sortable prop="name" label="属性名称" min-width="120" align="center"> </el-table-column>
+              <el-table-column sortable prop="label" label="属性标签" min-width="140" align="center"> </el-table-column>
+              <el-table-column sortable label="写入值" min-width="100" align="center">
                 <template #default="scope">
                   <el-input placeholder="请输入写入值" v-model="scope.row.sendValue"> </el-input>
                 </template>
               </el-table-column>
-              <el-table-column label="返回结果" min-width="250" align="center">
+              <el-table-column sortable label="返回结果" min-width="250" align="center">
                 <template #default="scope">
                   <el-tag v-show="scope.row.result.Code === '0'" :type="'success'"> 操作成功 </el-tag>
                   <el-tag v-show="scope.row.result.Code === '1'" :type="'danger'"> 操作失败 </el-tag>

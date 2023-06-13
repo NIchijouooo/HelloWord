@@ -81,25 +81,25 @@
           @row-dblclick="editReg"
         >
           <el-table-column type="selection" width="55" />
-          <el-table-column prop="regName" label="寄存器名称" width="auto" min-width="180" align="center">
+          <el-table-column sortable prop="regName" label="寄存器名称" width="auto" min-width="180" align="center">
           </el-table-column>
-          <el-table-column prop="label" label="寄存器标签" width="auto" min-width="180" align="center">
+          <el-table-column sortable prop="label" label="寄存器标签" width="auto" min-width="180" align="center">
           </el-table-column>
-          <el-table-column prop="propertyType" label="属性类型" width="auto" min-width="120" align="center">
+          <el-table-column sortable prop="propertyType" label="属性类型" width="auto" min-width="120" align="center">
           </el-table-column>
-          <el-table-column prop="collName" label="采集接口名称" width="auto" min-width="180" align="center">
+          <el-table-column sortable prop="collName" label="采集接口名称" width="auto" min-width="180" align="center">
           </el-table-column>
-          <el-table-column prop="nodeName" label="设备名称" width="auto" min-width="180" align="center">
+          <el-table-column sortable prop="nodeName" label="设备名称" width="auto" min-width="180" align="center">
           </el-table-column>
-          <el-table-column prop="propertyName" label="设备属性名称" width="auto" min-width="150" align="center">
+          <el-table-column sortable prop="propertyName" label="设备属性名称" width="auto" min-width="150" align="center">
           </el-table-column>
-          <el-table-column prop="regType" label="寄存器类型" width="auto" min-width="100" align="center">
+          <el-table-column sortable prop="regType" label="寄存器类型" width="auto" min-width="100" align="center">
           </el-table-column>
-          <el-table-column prop="regAddr" label="寄存器地址" width="auto" min-width="100" align="center">
+          <el-table-column sortable prop="regAddr" label="寄存器地址" width="auto" min-width="100" align="center">
           </el-table-column>
-          <el-table-column prop="regCnt" label="寄存器数量" width="auto" min-width="100" align="center">
+          <el-table-column sortable prop="regCnt" label="寄存器数量" width="auto" min-width="100" align="center">
           </el-table-column>
-          <el-table-column prop="rule" label="解析规则" width="auto" min-width="100" align="center"> </el-table-column>
+          <el-table-column sortable prop="rule" label="解析规则" width="auto" min-width="100" align="center"> </el-table-column>
           <el-table-column label="操作" width="auto" min-width="120" align="center" fixed="right">
             <template #default="scope">
               <el-button @click="editReg(scope.row)" text type="primary">编辑</el-button>
@@ -307,7 +307,7 @@ console.log('id -> props', props)
 
 const emit = defineEmits(['changeDnFlag'])
 const toDataService = () => {
-  emit('changeDnFlag')
+  emit('changeDnFlag', 'goBack')
 }
 
 const regCnt = /^[0-9]*[1-9][0-9]*$/

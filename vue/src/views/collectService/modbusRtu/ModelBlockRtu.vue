@@ -86,16 +86,16 @@
           @row-dblclick="editDeviceModelBlock"
         >
           <el-table-column type="selection" width="55" />
-          <el-table-column prop="name" label="命令名称" width="auto" min-width="150" align="center"> </el-table-column>
-          <el-table-column prop="label" label="命令标签" width="auto" min-width="150" align="center"> </el-table-column>
-          <el-table-column label="功能码" width="auto" min-width="150" align="center">
+          <el-table-column sortable prop="name" label="命令名称" width="auto" min-width="150" align="center"> </el-table-column>
+          <el-table-column sortable prop="label" label="命令标签" width="auto" min-width="150" align="center"> </el-table-column>
+          <el-table-column sortable label="功能码" width="auto" min-width="150" align="center">
             <template #default="scope">
               {{ ctxData.funCodeNames['f' + scope.row.funCode] }}
             </template>
           </el-table-column>
-          <el-table-column prop="startRegAddr" label="寄存器地址" width="auto" min-width="120" align="center">
+          <el-table-column sortable prop="startRegAddr" label="寄存器地址" width="auto" min-width="120" align="center">
           </el-table-column>
-          <el-table-column prop="regCnt" label="寄存器数量" width="auto" min-width="100" align="center">
+          <el-table-column sortable prop="regCnt" label="寄存器数量" width="auto" min-width="100" align="center">
           </el-table-column>
           <el-table-column label="操作" width="auto" min-width="200" align="center" fixed="right">
             <template #default="scope">

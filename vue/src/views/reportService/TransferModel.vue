@@ -38,11 +38,11 @@
           stripe
           @row-dblclick="editTransferModel"
         >
-          <el-table-column prop="name" label="上报模型名称" width="auto" min-width="200" align="center">
+          <el-table-column sortable prop="name" label="上报模型名称" width="auto" min-width="200" align="center">
           </el-table-column>
-          <el-table-column prop="label" label="上报模型标签" width="auto" min-width="200" align="center">
+          <el-table-column sortable prop="label" label="上报模型标签" width="auto" min-width="200" align="center">
           </el-table-column>
-          <el-table-column prop="code" label="上报模型编号" width="auto" min-width="200" align="center">
+          <el-table-column sortable prop="code" label="上报模型编号" width="auto" min-width="200" align="center">
           </el-table-column>
           <el-table-column label="操作" width="auto" min-width="200" align="center" fixed="right">
             <template #default="scope">

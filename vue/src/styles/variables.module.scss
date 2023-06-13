@@ -3,10 +3,10 @@ $menuText: rgba(0, 0, 0, 0.65);
 $menuActiveText: rgb(24, 144, 255);
 $subMenuActiveText: rgb(24, 144, 255); //https://github.com/ElemeFE/element/issues/12951
 
-$menuBg: #f0f0f0;
+$menuBg: #e6e3e3;
 $menuHover: #f0f0f0;
 
-$subMenuBg: #f0f0f0;
+$subMenuBg: #e6e3e3;
 $subMenuHover: #f0f0f0;
 
 $sideBarWidth: 200px;
@@ -57,4 +57,6 @@ $header-text-color: #333333;
   --system-danger-color: #ee484d;
 
   // --el-border-base: #c0c4cc !important;
+  --el-bg-color: #f3f3f3 !important;
+  --el-fill-color-blank:#f3f3f3 !important;
 }

@@ -119,24 +119,24 @@
           @row-dblclick="editDevice"
         >
           <el-table-column type="selection" width="55" fixed="left" />
-          <el-table-column prop="name" label="设备名称" width="auto" min-width="160" align="center" fixed="left">
+          <el-table-column sortable prop="name" label="设备名称" width="auto" min-width="160" align="center" fixed="left">
           </el-table-column>
-          <el-table-column prop="label" label="设备标签" width="auto" min-width="160" align="center"> </el-table-column>
-          <el-table-column prop="tsl" label="设备模型" width="auto" min-width="160" align="center"> </el-table-column>
-          <el-table-column prop="collInterfaceName" label="采集接口" width="auto" min-width="160" align="center">
+          <el-table-column sortable prop="label" label="设备标签" width="auto" min-width="160" align="center"> </el-table-column>
+          <el-table-column sortable prop="tsl" label="设备模型" width="auto" min-width="160" align="center"> </el-table-column>
+          <el-table-column sortable prop="collInterfaceName" label="采集接口" width="auto" min-width="160" align="center">
           </el-table-column>
-          <el-table-column prop="addr" label="通讯地址" width="auto" min-width="100" align="center"> </el-table-column>
-          <el-table-column label="当前通信状态" width="auto" min-width="150" align="center">
+          <el-table-column sortable prop="addr" label="通讯地址" width="auto" min-width="100" align="center"> </el-table-column>
+          <el-table-column sortable label="当前通信状态" width="auto" min-width="150" align="center">
             <template #default="scope">
               <el-tag v-if="scope.row.commStatus === 'onLine'" type="success">在线</el-tag>
               <el-tag v-else type="danger">离线</el-tag>
             </template>
           </el-table-column>
-          <el-table-column prop="lastCommRTC" label="最后通信时间" width="auto" min-width="200" align="center">
+          <el-table-column sortable prop="lastCommRTC" label="最后通信时间" width="auto" min-width="200" align="center">
           </el-table-column>
-          <el-table-column prop="commTotalCnt" label="通信总次数" width="auto" min-width="150" align="center">
+          <el-table-column sortable prop="commTotalCnt" label="通信总次数" width="auto" min-width="150" align="center">
           </el-table-column>
-          <el-table-column prop="commSuccessCnt" label="通信成功次数" width="auto" min-width="150" align="center">
+          <el-table-column sortable prop="commSuccessCnt" label="通信成功次数" width="auto" min-width="150" align="center">
           </el-table-column>
           <el-table-column label="操作" width="auto" min-width="200" align="center" fixed="right">
             <template #default="scope">

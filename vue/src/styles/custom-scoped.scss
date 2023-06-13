@@ -1,4 +1,5 @@
 // 自定义样式覆写element样式
+// 主体背景色#f9f6f6 ，菜单栏背景色#f3f3f3，当前选中菜单rgb(187, 187, 187)，菜单项#e6e3e3
 .el-button{
   height: 36px;
   padding: 8px 16px;
@@ -15,6 +16,10 @@
 }
 .el-form-item__label {
   line-height: 36px;
+}
+
+:deep(.el-card) {
+  background-color: #f3f3f3 !important;
 }
 
 :deep(.content .el-table__body .el-table__row .el-table__cell:first-child){
