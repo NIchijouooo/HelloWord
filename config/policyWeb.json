@@ -185,6 +185,15 @@
               "icon": "sysLog"
             },
             "children": []
+          },
+          {
+            "path": "/dictType",
+            "name": "DictType",
+            "meta": {
+              "title": "字典管理",
+              "icon": "dictType"
+            },
+            "children": []
           }
         ]
       },
