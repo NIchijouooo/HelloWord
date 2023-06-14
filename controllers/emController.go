@@ -603,6 +603,7 @@ func (c *EmController) AddEmDeviceModelCmdParam(ctx *gin.Context) {
 	}
 	emDeviceModelCmdParam.Name = addEmDeviceModelCmdParam.Name
 	emDeviceModelCmdParam.Label = addEmDeviceModelCmdParam.Label
+	emDeviceModelCmdParam.IotDataType = addEmDeviceModelCmdParam.IotDataType
 	// 判断设备模型是否有重名，有就直接返回
 	emDeviceModelCmdParam.Name = addEmDeviceModelCmdParam.Name
 	emDeviceModelCmdParamByName, _ := c.repo.GetEmDeviceModelCmdParamByName(emDeviceModelCmdParam.Name)
@@ -675,6 +676,7 @@ func (c *EmController) UpdateEmDeviceModelCmdParam(ctx *gin.Context) {
 	var emDeviceModelCmdParam models.EmDeviceModelCmdParam
 	emDeviceModelCmdParam.Name = addEmDeviceModelCmdParam.Name
 	emDeviceModelCmdParam.Label = addEmDeviceModelCmdParam.Label
+	emDeviceModelCmdParam.IotDataType = addEmDeviceModelCmdParam.IotDataType
 	emDeviceModelCmdParamByName, _ := c.repo.GetEmDeviceModelCmdParamByName(addEmDeviceModelCmdParam.Name)
 	emDeviceModelCmdParam.Id = emDeviceModelCmdParamByName.Id
 
