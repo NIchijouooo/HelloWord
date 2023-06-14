@@ -39,9 +39,9 @@
           @selection-change="handleSelectionChange"
         >
           <el-table-column type="selection" width="55" />
-          <el-table-column prop="name" label="虚拟设备名称" width="auto" min-width="150" align="center">
+          <el-table-column sortable prop="name" label="虚拟设备名称" width="auto" min-width="150" align="center">
           </el-table-column>
-          <el-table-column prop="label" label="虚拟设备标签" width="auto" min-width="150" align="center">
+          <el-table-column sortable prop="label" label="虚拟设备标签" width="auto" min-width="150" align="center">
           </el-table-column>
           <el-table-column label="操作" width="auto" min-width="300" align="center" fixed="right">
             <template #default="scope">

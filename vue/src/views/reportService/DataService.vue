@@ -1,73 +1,72 @@
 <template>
   <div class="main-container">
     <div class="main" v-if="ctxData.dnFlag === 1">
-      <div class="title" style="justify-content: space-between">
-        <el-input style="width: 200px" placeholder="请输入上报服务名称" clearable v-model="ctxData.dataServiceName">
-          <template #prefix>
-            <el-icon class="el-input__icon"><search /></el-icon>
-          </template>
-        </el-input>
-        <div>
-          <el-button type="primary" bg class="right-btn" @click="addGateway()">
-            <el-icon class="btn-icon">
-              <Icon name="local-add" size="14px" color="#ffffff" />
-            </el-icon>
-            添加
-          </el-button>
-          <el-button style="color: #fff" color="#2EA554" class="right-btn" @click="refresh()">
-            <el-icon class="btn-icon">
-              <Icon name="local-refresh" size="14px" color="#ffffff" />
-            </el-icon>
-            刷新
-          </el-button>
-        </div>
+      <div class="search-bar">
+        <el-form :inline="true" ref="searchFormRef" status-icon label-width="120px">
+          <el-form-item label="上报服务名称">
+            <el-input style="width: 200px" placeholder="请输入上报服务名称" clearable v-model="ctxData.dataServiceName">
+              <template #prefix>
+                <el-icon class="el-input__icon"><search /></el-icon>
+              </template>
+            </el-input>
+          </el-form-item>
+          <el-form-item>
+            <el-button style="color: #fff; margin-left: 20px" color="#2EA554" class="right-btn" @click="refresh()">
+              <el-icon class="btn-icon">
+                <Icon name="local-refresh" size="14px" color="#ffffff" />
+              </el-icon>
+              刷新
+            </el-button>
+          </el-form-item>
+        </el-form>
+      </div>
+      <div class="tool-bar">
+        <el-button type="primary" bg class="right-btn" @click="addGateway()">
+          <el-icon class="btn-icon">
+            <Icon name="local-add" size="14px" color="#ffffff" />
+          </el-icon>
+          添加
+        </el-button>
       </div>
       <div class="content" ref="contentRef">
         <el-table
           :data="filterTableData"
           :cell-style="ctxData.cellStyle"
           :header-cell-style="ctxData.headerCellStyle"
-          :max-height="ctxData.tableMaxHeight"
           style="width: 100%"
+          :max-height="ctxData.tableMaxHeight"
           stripe
           @row-dblclick="editGateway"
         >
-          <el-table-column prop="serviceName" label="服务名称" width="auto" min-width="150" align="center">
-          </el-table-column>
-          <el-table-column prop="protocol" label="协议名称" width="auto" min-width="150" align="center">
-          </el-table-column>
-          <el-table-column prop="ip" label="上报地址" width="auto" min-width="150" align="center"> </el-table-column>
-          <el-table-column prop="port" label="上报端口" width="auto" min-width="100" align="center"> </el-table-column>
-          <el-table-column prop="reportTime" label="上报周期（秒）" width="auto" min-width="150" align="center">
-          </el-table-column>
-          <el-table-column label="在线状态" width="auto" min-width="100" align="center">
+          <el-table-column type="expand">
             <template #default="scope">
-              {{ scope.row.reportStatus === 'onLine' ? '在线' : '离线' }}
+              <div class="param-content">
+                <div class="pc-title">
+                  <div class="pct-info">
+                    <b> {{ scope.row.serviceName }} </b>
+                    参数详情
+                  </div>
+                </div>
+                <div class="pc-content">
+                  <div class="param-item" v-for="(item, key, index) of scope.row.param" :key="index">
+                    <div class="param-value">{{ ctxData.paramName[key] }}：</div>
+                    <div class="param-name">{{ item || '-' }}</div>
+                  </div>
+                </div>
+              </div>
             </template>
           </el-table-column>
-          <el-table-column label="参数详情" width="auto" min-width="500" align="center">
+          <el-table-column sortable prop="serviceName" label="服务名称" width="auto" min-width="150" align="center">
+          </el-table-column>
+          <el-table-column sortable prop="protocol" label="协议名称" width="auto" min-width="150" align="center">
+          </el-table-column>
+          <el-table-column sortable prop="ip" label="上报地址" width="auto" min-width="150" align="center"> </el-table-column>
+          <el-table-column sortable prop="port" label="上报端口" width="auto" min-width="100" align="center"> </el-table-column>
+          <el-table-column sortable prop="reportTime" label="上报周期（秒）" width="auto" min-width="150" align="center">
+          </el-table-column>
+          <el-table-column sortable label="在线状态" width="auto" min-width="100" align="center">
             <template #default="scope">
-              <el-popover trigger="hover" :show-after="500" :auto-close="500" effect="light" width="auto">
-                <template #default>
-                  <div class="param-content">
-                    <div class="pc-title">
-                      <div class="pct-info">
-                        <b> {{ scope.row.serviceName }} </b>
-                        参数详情
-                      </div>
-                    </div>
-                    <div class="pc-content">
-                      <div class="param-item" v-for="(item, key, index) of scope.row.param" :key="index">
-                        <div class="param-value">{{ ctxData.paramName[key] }}：</div>
-                        <div class="param-name">{{ key === 'cleanSession' ? (item ? '是' : '否') : item }}</div>
-                      </div>
-                    </div>
-                  </div>
-                </template>
-                <template #reference>
-                  <el-tag size="large">{{ scope.row.param }}</el-tag>
-                </template>
-              </el-popover>
+              {{ scope.row.reportStatus === 'onLine' ? '在线' : '离线' }}
             </template>
           </el-table-column>
           <el-table-column label="操作" width="auto" min-width="200" align="center" fixed="right">
@@ -104,10 +103,17 @@
     <NodeService
       v-if="ctxData.dnFlag === 2"
       :curGateway="ctxData.curGateway"
-      @changeDnFlag="changeDnFlag()"
+      @changeDnFlag="changeDnFlag"
+      style="width: 100%; height: 100%;overflow:hidden;"
     ></NodeService>
 
-    <RegInfo v-if="ctxData.dnFlag === 3" :curGateway="ctxData.curGateway" @changeDnFlag="changeDnFlag()"></RegInfo>
+    <RegInfo
+      v-if="ctxData.dnFlag === 3"
+      :curGateway="ctxData.curGateway"
+      @changeDnFlag="changeDnFlag"
+      style="width: 100%; height: 100%;overflow:hidden;"
+    ></RegInfo>
+
     <el-dialog
       v-model="ctxData.dFlag"
       :title="ctxData.dTitle"
@@ -389,6 +395,7 @@ import { Search } from '@element-plus/icons-vue'
 import variables from 'styles/variables.module.scss'
 import ServiceApi from 'api/service.js'
 import { userStore } from 'stores/user'
+import { useRoute } from 'vue-router'
 import NodeService from './dataService/NodeService.vue'
 import RegInfo from './dataService/RegInfo.vue'
 import ProductApi from 'api/product.js'
@@ -473,19 +480,19 @@ const ctxData = reactive({
     reportTime: '上报时间',
     protocol: '协议名称',
     //EMQX.MQTT
-    userName: '用户名',
-    password: '密码',
-    clientID: '客户端名称',
+    UserName: '用户名',
+    Password: '密码',
+    ClientID: '客户端名称',
     keepAlive: '保活时间',
     cleanSession: '是否清除会话',
     deviceName: '通信编码',
     projectCode: '项目编码',
     token: '密钥',
     //gwai add 2023-04-05
-    appKey: 'appKey',
-    productKey: '产品密钥',
-    deviceID: '通讯地址',
-    deviceSecret: '设备密钥',
+    AppKey: 'appKey',
+    ProductKey: '产品密钥',
+    DeviceID: '通讯地址',
+    DeviceSecret: '设备密钥',
     ProductSn: '产品序列号',
     DeviceSn: '设备序列号',
     DevicePwd: '设备密码',
@@ -733,7 +740,14 @@ const ctxData = reactive({
   dnList: ['RT.STLV1', 'RT.STLV2'],
   kaList: ['EMQX.MQTT', 'RT.MQTT', 'RT.STLV2','FSJY.MQTT'],
   dnFlag: 1,
+  serviceName: '',
+  handleFlag: '',//lp update 2023-06-12 首页上报信息查看详情，对点击返回按钮进行操作标识
 })
+
+//接收参数，处理命令详情页面的显示
+const route = useRoute()
+ctxData.serviceName = route.query.serviceName;
+
 // 获取所有上报服务信息
 const getGatewayList = (flag) => {
   const pData = {
@@ -745,6 +759,11 @@ const getGatewayList = (flag) => {
     if (!res) return
     if (res.code === '0') {
       ctxData.gatewayTableData = res.data
+      // 首页传参跳转到列表页面，根据参数自动进入上报节点页面中
+      if (ctxData.serviceName && !ctxData.handleFlag) { //lp update 2023-06-12 返回按钮进行操作标识后，回到列表页面，不再在进行属性页面跳转
+        const detail = ctxData.gatewayTableData.find(item => item.serviceName === ctxData.serviceName)
+        showGateway(detail);
+      }
       if (flag === 1) {
         ElMessage({
           type: 'success',
@@ -873,8 +892,11 @@ const showRegInfo = (row) => {
   ctxData.dnFlag = 3
   ctxData.curGateway = row
 }
-const changeDnFlag = () => {
+const changeDnFlag = (flag) => {
+  //lp update 2023-06-12 首页上报信息查看详情，对点击返回按钮进行操作标识
+  ctxData.handleFlag = flag
   ctxData.dnFlag = 1
+  getGatewayList()
 }
 
 const changeProtocol = (protocol) => {

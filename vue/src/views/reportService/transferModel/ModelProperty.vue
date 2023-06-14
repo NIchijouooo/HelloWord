@@ -1,50 +1,66 @@
 <template>
+<div class="main-container">
   <div class="main">
-    <div class="title" style="justify-content: space-between">
-      <div class="title-left">
-        <el-button type="primary" plain @click="toTransferModel()" style="margin-right: 20px">
-          <el-icon class="el-input__icon"><back /></el-icon>
-          返回上报模型
-        </el-button>
-      </div>
+    <div class="search-bar">
+      <el-form :inline="true" ref="searchFormRef" status-icon label-width="120px">
+        <el-form-item style="margin-left: 20px;">
+          <el-button type="primary" plain @click="toTransferModel()" style="margin-right: 20px">
+            <el-icon class="el-input__icon"><back /></el-icon>
+            返回上报模型
+          </el-button>
+        </el-form-item>
+      </el-form>
     </div>
-    <div class="title" style="top: 60px; height: 76px; padding: 20px 0; justify-content: space-between">
-      <div class="tName">{{ props.curTransferModel.label }}</div>
-      <div style="display: flex; align-items: center">
-        <el-input style="width: 200px" placeholder="请输入属性名称或者标签" clearable v-model="ctxData.PropertyInfo">
-          <template #prefix>
-            <el-icon class="el-input__icon"><search /></el-icon>
-          </template>
-        </el-input>
-        <el-button type="primary" bg class="right-btn" @click="addProperty()">
-          <el-icon class="btn-icon">
-            <Icon name="local-add" size="14px" color="#ffffff" />
-          </el-icon>
-          手动添加
-        </el-button>
-        <el-button type="primary" bg class="right-btn" @click="addProperties()">
-          <el-icon class="btn-icon">
-            <Icon name="local-tongbu" size="14px" color="#ffffff" />
-          </el-icon>
-          同步
-        </el-button>
-        <!-- <el-button type="primary" bg class="right-btn" @click="editProperties()">
-          <el-icon class="btn-icon tianjia"></el-icon>
-          批量修改
-        </el-button> -->
-        <el-button type="danger" bg class="right-btn" @click="deleteProperty()">
-          <el-icon class="btn-icon">
-            <Icon name="local-delete" size="14px" color="#ffffff" />
-          </el-icon>
-          删除
-        </el-button>
-        <el-button style="color: #fff" color="#2EA554" class="right-btn" @click="refresh()">
-          <el-icon class="btn-icon">
-            <Icon name="local-refresh" size="14px" color="#ffffff" />
-          </el-icon>
-          刷新
-        </el-button>
+    
+    <div class="search-bar" style="display: flex;">
+      <div class="title" style="position: relative;margin-right: 40px;height: 40px; padding: 0px 0; justify-content: flex-start">
+        <div class="tName">{{ props.curTransferModel.label }}</div>
       </div>
+      <el-form :inline="true" ref="searchFormRef2" status-icon label-width="90px">
+        <el-form-item label="">
+          <el-input style="width: 200px" placeholder="请输入属性名称或者标签" clearable v-model="ctxData.PropertyInfo">
+            <template #prefix>
+              <el-icon class="el-input__icon"><search /></el-icon>
+            </template>
+          </el-input>
+        </el-form-item>
+        <el-form-item>
+          <el-button type="primary" bg class="right-btn" @click="addProperty()">
+            <el-icon class="btn-icon">
+              <Icon name="local-add" size="14px" color="#ffffff" />
+            </el-icon>
+            手动添加
+          </el-button>
+        </el-form-item>
+        <el-form-item>
+          <el-button type="primary" bg class="right-btn" @click="addProperties()">
+            <el-icon class="btn-icon">
+              <Icon name="local-tongbu" size="14px" color="#ffffff" />
+            </el-icon>
+            同步
+          </el-button>
+        </el-form-item>
+        <el-form-item>
+          <!-- <el-button type="primary" bg class="right-btn" @click="editProperties()">
+            <el-icon class="btn-icon tianjia"></el-icon>
+            批量修改
+          </el-button> -->
+          <el-button type="danger" bg class="right-btn" @click="deleteProperty()">
+            <el-icon class="btn-icon">
+              <Icon name="local-delete" size="14px" color="#ffffff" />
+            </el-icon>
+            删除
+          </el-button>
+        </el-form-item>
+        <el-form-item>
+          <el-button style="color: #fff" color="#2EA554" class="right-btn" @click="refresh()">
+            <el-icon class="btn-icon">
+              <Icon name="local-refresh" size="14px" color="#ffffff" />
+            </el-icon>
+            刷新
+          </el-button>
+        </el-form-item>
+      </el-form>
     </div>
     <div class="content" ref="contentRef" style="top: 136px">
       <el-table
@@ -58,53 +74,39 @@
         @row-dblclick="editProperty"
       >
         <el-table-column type="selection" width="55" />
-        <el-table-column prop="name" label="属性名称" width="auto" min-width="180" align="center"> </el-table-column>
-        <el-table-column prop="label" label="属性标签" width="auto" min-width="180" align="center"> </el-table-column>
-        <el-table-column prop="uploadName" label="上报属性名称" width="auto" min-width="180" align="center">
+        <el-table-column type="expand">
+          <template #default="props">
+            <div class="param-content">
+              <div class="pc-title">
+                <div class="pct-info">
+                  <b> {{ props.row.name }} </b>
+                  {{ '参数详情' }}
+                </div>
+              </div>
+              <div class="pc-content">
+                <div class="param-item" v-for="(item, key, index) of props.row.params" :key="index">
+                  <div class="param-value">{{ ctxData.paramName[key] }}：</div>
+                  <div class="param-name">{{ typeof item === 'boolean' ? (item ? '是' : '否') : item || '-' }}</div>
+                </div>
+              </div>
+            </div>
+          </template>
         </el-table-column>
-        <el-table-column label="数据类型" width="auto" min-width="100" align="center">
+        <el-table-column sortable prop="name" label="属性名称" width="auto" min-width="180" align="center"> </el-table-column>
+        <el-table-column sortable prop="label" label="属性标签" width="auto" min-width="180" align="center"> </el-table-column>
+        <el-table-column sortable prop="uploadName" label="上报属性名称" width="auto" min-width="180" align="center">
+        </el-table-column>
+        <el-table-column sortable label="数据类型" width="auto" min-width="100" align="center">
           <template #default="scope">
             {{ ctxData.typeNames['t' + scope.row.type] }}
           </template>
         </el-table-column>
-        <el-table-column label="小数位数" width="auto" min-width="80" align="center">
+        <el-table-column sortable label="小数位数" width="auto" min-width="80" align="center">
           <template #default="scope">
             {{ scope.row.decimals === undefined || scope.row.decimals === '' ? 0 : scope.row.decimals }}
           </template>
         </el-table-column>
-        <el-table-column prop="unit" label="单位" width="auto" min-width="80" align="center"> </el-table-column>
-        <el-table-column label="参数详情" width="auto" min-width="400" align="center">
-          <template #default="scope">
-            <el-popover
-              trigger="hover"
-              :show-after="500"
-              :auto-close="500"
-              effect="light"
-              width="auto"
-              placement="left"
-            >
-              <template #default>
-                <div class="param-content">
-                  <div class="pc-title">
-                    <div class="pct-info">
-                      <b> {{ scope.row.name }} </b>
-                      {{ '参数详情' }}
-                    </div>
-                  </div>
-                  <div class="pc-content">
-                    <div class="param-item" v-for="(item, key, index) of scope.row.params">
-                      <div class="param-value">{{ ctxData.paramName[key] }}：</div>
-                      <div class="param-name">{{ typeof item === 'boolean' ? (item ? '是' : '否') : item }}</div>
-                    </div>
-                  </div>
-                </div>
-              </template>
-              <template #reference>
-                <el-tag size="large">{{ scope.row.params }}</el-tag>
-              </template>
-            </el-popover>
-          </template>
-        </el-table-column>
+        <el-table-column sortable prop="unit" label="单位" width="auto" min-width="80" align="center"> </el-table-column>
         <el-table-column label="操作" width="auto" min-width="150" align="center" fixed="right">
           <template #default="scope">
             <el-button @click="editProperty(scope.row)" text type="primary">编辑</el-button>
@@ -364,10 +366,11 @@
       </template>
     </el-dialog>
   </div>
+</div>
 </template>
 <script setup>
 import { Search, Back } from '@element-plus/icons-vue'
-import { ElMessage, ElMessageBox } from 'element-plus'
+import { ElMessage, ElMessageBox, ElLoading } from 'element-plus'
 import variables from 'styles/variables.module.scss'
 import TransferModelApi from 'api/transferModel.js'
 import DeviceModelApi from 'api/deviceModel.js'
@@ -531,7 +534,7 @@ const getModelPropertiesList = (flag) => {
       showOneResMsg(res)
     }
     await nextTick(() => {
-      ctxData.tableMaxHeight = contentRef.value.clientHeight - 34 - 36 - 22
+      ctxData.tableMaxHeight = contentRef.value.clientHeight - 34 - 36 - 132
     })
   })
 }
@@ -629,11 +632,16 @@ const selectedProp = (row) => {
   return !ctxData.AllPropertyNameList.includes(row.name)
 }
 const saveProperties = async() => {
+  const loading = ElLoading.service({
+    lock: true,
+    text: 'Loading',
+    background: 'rgba(0, 0, 0, 0.7)',
+  })
   console.log('saveProperties')
 
   if (ctxData.selectList.length > 0) {
-    let count = 0
-    const promises = ctxData.selectList.map( async item => {
+    let properties = [];
+    ctxData.selectList.map(item => {
       let property = {}
       property['name'] = item.name
       property['label'] = item.label
@@ -653,62 +661,42 @@ const saveProperties = async() => {
         params['dataLengthAlarm'] = false
       }
       property['params'] = params
-      console.log('saveProperties -> property', property)
-      const pData = {
-        token: users.token,
-        data: {
-          name: props.curTransferModel.name,
-          property: property,
-        },
-      }
 
-      const res = await TransferModelApi.addProperty(pData)
-      return res
+      properties.push(property)
     })
-    const resultList = await Promise.all(promises)
-    if (resultList.length > 0) {
-      // 操作成功的提示信息，控制在最后一条弹出
-      const res = resultList[resultList.length - 1]
+
+    console.log('saveProperties -> properties', properties)
+
+    const pData = {
+      token: users.token,
+      data: {
+        name: props.curTransferModel.name,
+        property: properties,
+      },
+    }
+    const res = await TransferModelApi.addProperties(pData)
+    const count = properties.length;
+    if (res.data == count) {// 全部操作成功
+      loading.close()
       handleResult(res, getModelPropertiesList)
       cancelProperties() // 添加成功，关闭弹窗
-    }
-    /*
-    ctxData.selectList.forEach((item) => {
-      let property = {}
-      property['name'] = item.name
-      property['label'] = item.label
-      property['uploadName'] = item.name
-      property['type'] = item.type
-      property['decimals'] = item.decimals
-      property['unit'] = item.unit
-      let params = {}
-      if (item.type !== 3) {
-        params['min'] = ''
-        params['max'] = ''
-        params['minMaxAlarm'] = false
-        params['step'] = ''
-        params['stepAlarm'] = false
-      } else {
-        params['dataLength'] = ''
-        params['dataLengthAlarm'] = false
-      }
-      property['params'] = params
-      console.log('saveProperties -> property', property)
-      const pData = {
-        token: users.token,
-        data: {
-          name: props.curTransferModel.name,
-          property: property,
-        },
-      }
-      TransferModelApi.addProperty(pData).then((res) => {
-        count++
-        if (count === ctxData.selectList.length) {
-          handleResult(res, getModelPropertiesList)
-        }
+    } else if (!res.data) { // 操作失败，同时刷新同步属性的弹窗列表
+      loading.close()
+      let message = '添加失败';
+      ElMessage({
+        type: 'error',
+        message: message,
       })
-    })
-    */
+      selectColl()
+    } else { // 部分成功，同时刷新同步属性的弹窗列表
+      loading.close()
+      let message = res.data + '个添加成功，' + (count - res.data) + '个添加失败';
+      ElMessage({
+        type: 'error',
+        message: message,
+      })
+      selectColl()
+    }
   }
 }
 const cancelProperties = () => {

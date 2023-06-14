@@ -1,57 +1,61 @@
 <template>
   <div class="main-container">
     <div class="main">
-      <div class="title" style="justify-content: space-between">
-        <div class="title-left">
-          <el-button type="primary" plain @click="toDevice()" style="margin-right: 20px">
-            <el-icon class="el-input__icon"><back /></el-icon>
-            返回采集设备
-          </el-button>
-          <el-input style="width: 200px" placeholder="请输入 名称/标签 过滤" clearable v-model="ctxData.propertyInfo">
-            <template #prefix>
-              <el-icon class="el-input__icon"><search /></el-icon>
-            </template>
-          </el-input>
-        </div>
-        <div class="title-right">
-          <el-button type="primary" plain class="right-btn" @click="showProperties()">
-            <el-icon class="el-input__icon"><edit /></el-icon>
-            写属性
-          </el-button>
-          <el-button
-            style="color: #fff"
-            color="#2EA554"
-            :loading="ctxData.isLoading"
-            class="right-btn"
-            @click="refresh()"
-          >
-            <el-icon class="btn-icon">
-              <Icon name="local-refresh" size="14px" color="#ffffff" />
-            </el-icon>
-            刷新
-          </el-button>
-        </div>
+      <div class="search-bar">
+        <el-form :inline="true" ref="searchFormRef" status-icon label-width="120px">
+          <el-form-item style="margin-right: 20px;margin-left: 20px;">
+            <el-button type="primary" plain @click="toDevice()">
+              <el-icon class="el-input__icon"><back /></el-icon>
+              返回采集设备
+            </el-button>
+          </el-form-item>
+        </el-form>
       </div>
-      <div class="title" style="top: 60px; height: 76px; padding: 20px 0; justify-content: flex-start">
-        <div class="tName">{{ props.curDevice.name }}({{ props.curDevice.label }})</div>
+      <div class="search-bar" style="display: flex;">
+        <div class="title" style="position: relative;margin-right: 40px;justify-content: flex-start;padding: 0px 0px;height: 40px;">
+          <div class="tName">{{ props.curDevice.name }}({{ props.curDevice.label }})</div>
+        </div>
+        <el-form :inline="true" ref="searchFormRef" status-icon label-width="120px">
+          <el-form-item>
+            <el-input style="width: 200px" placeholder="请输入 名称/标签 过滤" clearable v-model="ctxData.propertyInfo">
+              <template #prefix>
+                <el-icon class="el-input__icon"><search /></el-icon>
+              </template>
+            </el-input>
+          </el-form-item>
+          <el-form-item>
+            <el-button type="primary" plain class="right-btn" @click="showProperties()">
+              <el-icon class="el-input__icon"><edit /></el-icon>
+              写属性
+            </el-button>
+          </el-form-item>
+          <el-form-item>
+            <el-button style="color: #fff; margin-left: 20px" color="#2EA554" class="right-btn" @click="refresh()">
+              <el-icon class="btn-icon">
+                <Icon name="local-refresh" size="14px" color="#ffffff" />
+              </el-icon>
+              刷新
+            </el-button>
+          </el-form-item>
+        </el-form>
       </div>
-      <div class="content" ref="contentRef" style="top: 136px">
+      <div class="content" ref="contentRef">
         <el-table
           :data="filterTableData"
           :cell-style="ctxData.cellStyle"
           :header-cell-style="ctxData.headerCellStyle"
-          :max-height="ctxData.tableMaxHeight"
           style="width: 100%"
+          :max-height="ctxData.tableMaxHeight"
           stripe
         >
           <el-table-column prop="index" label="序号" width="55" />
-          <el-table-column prop="name" label="变量名称" width="auto" min-width="180" align="center"> </el-table-column>
-          <el-table-column prop="label" label="变量标签" width="auto" min-width="180" align="center"> </el-table-column>
-          <el-table-column prop="type" label="变量类型" width="auto" min-width="120" align="center"> </el-table-column>
-          <el-table-column prop="value" label="变量值" width="auto" min-width="200" align="center"> </el-table-column>
-          <el-table-column prop="unit" label="单位" width="auto" min-width="200" align="center"> </el-table-column>
-          <el-table-column prop="explain" label="说明" width="auto" min-width="200" align="center"> </el-table-column>
-          <el-table-column prop="timestamp" label="实测时间" width="auto" min-width="220" align="center">
+          <el-table-column sortable prop="name" label="变量名称" width="auto" min-width="180" align="center"> </el-table-column>
+          <el-table-column sortable prop="label" label="变量标签" width="auto" min-width="180" align="center"> </el-table-column>
+          <el-table-column sortable prop="type" label="变量类型" width="auto" min-width="120" align="center"> </el-table-column>
+          <el-table-column sortable prop="value" label="变量值" width="auto" min-width="200" align="center"> </el-table-column>
+          <el-table-column sortable prop="unit" label="单位" width="auto" min-width="200" align="center"> </el-table-column>
+          <el-table-column sortable prop="explain" label="说明" width="auto" min-width="200" align="center"> </el-table-column>
+          <el-table-column sortable prop="timestamp" label="实测时间" width="auto" min-width="220" align="center">
           </el-table-column>
           <el-table-column label="操作" width="auto" min-width="200" align="center" fixed="right">
             <template #default="scope">
@@ -116,14 +120,14 @@
               stripe
             >
               <el-table-column type="selection" width="55"> </el-table-column>
-              <el-table-column prop="name" label="属性名称" min-width="120" align="center"> </el-table-column>
-              <el-table-column prop="label" label="属性标签" min-width="140" align="center"> </el-table-column>
-              <el-table-column label="写入值" min-width="100" align="center">
+              <el-table-column sortable prop="name" label="属性名称" min-width="120" align="center"> </el-table-column>
+              <el-table-column sortable prop="label" label="属性标签" min-width="140" align="center"> </el-table-column>
+              <el-table-column sortable label="写入值" min-width="100" align="center">
                 <template #default="scope">
                   <el-input placeholder="请输入写入值" v-model="scope.row.sendValue"> </el-input>
                 </template>
               </el-table-column>
-              <el-table-column label="返回结果" min-width="250" align="center">
+              <el-table-column sortable label="返回结果" min-width="250" align="center">
                 <template #default="scope">
                   <el-tag v-show="scope.row.result.Code === '0'" :type="'success'"> 操作成功 </el-tag>
                   <el-tag v-show="scope.row.result.Code === '1'" :type="'danger'"> 操作失败 </el-tag>
@@ -171,6 +175,10 @@ const props = defineProps({
     default: {},
   },
   collInterfaceName: {
+    type: String,
+    default: '',
+  },
+  pageInfo: {
     type: String,
     default: '',
   },
@@ -239,7 +247,11 @@ const getDeviceDataReal = (flag) => {
     ctxData.isLoading = false
     console.log('getDeviceDataReal -> ctxData.propertyTableData', ctxData.propertyTableData)
     await nextTick(() => {
-      ctxData.tableMaxHeight = contentRef.value.clientHeight - 34 - 36 - 22
+      let height = contentRef.value.clientHeight - 34 - 36 - 42
+      if ( props.pageInfo) {
+        height = contentRef.value.clientHeight - 34 - 36 - 132
+      }
+      ctxData.tableMaxHeight = height
     })
   })
 }

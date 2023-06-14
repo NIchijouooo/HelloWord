@@ -1,3 +1,3 @@
 package buildInfo
 
-const BuildTime = "2023-05-31T09:19:33Z"
+const BuildTime = "2023-06-13 08:47:48"

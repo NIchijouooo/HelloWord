@@ -14,8 +14,6 @@ import (
 	"gateway/report/mqttThingsBoard"
 	"gateway/report/mqttZxJs"
 	"gateway/report/reportModel"
-	"strconv"
-
 	"gateway/setting"
 	"gateway/utils"
 	"io/ioutil"
@@ -926,27 +924,20 @@ func ApiAddReportModelPropertyes(context *gin.Context) { //ltg add 2023-05-26
 
 	err := context.BindJSON(&modelInfo)
 	if err != nil {
-		setting.ZAPS.Error("增加上报模型属性JSON格式化错误 %v", err)
+		setting.ZAPS.Error("批量增加上报模型属性JSON格式化错误 %v", err)
 		context.JSON(http.StatusOK, model.ResponseData{
 			Code:    "1",
-			Message: "增加上报模型属性JSON格式化错误",
+			Message: "批量增加上报模型属性JSON格式化错误",
 			Data:    "",
 		})
 		return
 	}
 
-	count := 0
-	for _, v := range modelInfo.Property {
-		err = reportModel.AddReportModelProperty(modelInfo.ModelName, &v)
-		if err != nil {
-			count++
-		}
-	}
-
-	if count != 0 {
+	ok, count := reportModel.AddReportModelPropertys(modelInfo.ModelName, modelInfo.Property)
+	if ok != nil {
 		context.JSON(http.StatusOK, model.ResponseData{
 			Code:    "1",
-			Message: "添加上报模型属性错误 ",
+			Message: "批量添加上报模型属性错误 " + err.Error(),
 			Data:    "",
 		})
 		return
@@ -954,8 +945,8 @@ func ApiAddReportModelPropertyes(context *gin.Context) { //ltg add 2023-05-26
 
 	context.JSON(http.StatusOK, model.ResponseData{
 		Code:    "0",
-		Message: "添加上报模型属性成功",
-		Data:    strconv.Itoa(len(modelInfo.Property) - count),
+		Message: "批量添加上报模型属性成功数量",
+		Data:    count,
 	})
 	return
 }
@@ -2178,5 +2169,4 @@ func ApiSetReportNodeReport(context *gin.Context) {
 			Data:    "",
 		})
 	}
-
 }

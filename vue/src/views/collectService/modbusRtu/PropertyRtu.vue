@@ -1,69 +1,82 @@
 <template>
+<div class="main-container">
   <div class="main">
-    <div class="title" style="justify-content: space-between">
-      <div>
-        <el-button type="primary" plain @click="toDeviceModel()">
-          <el-icon class="el-input__icon"><back /></el-icon>
-          返回设备模型
-        </el-button>
-      </div>
-      <div style="display: flex; align-items: center">
-        <el-button type="primary" plain class="right-btn" @click="exportDPS()">
-          <el-icon class="el-input__icon"><upload /></el-icon>
-          导出模型属性
-        </el-button>
-      </div>
+    <div class="search-bar">
+      <el-form :inline="true" ref="searchFormRef" status-icon label-width="120px">
+        <el-form-item style="margin-left: 20px;">
+          <el-button type="primary" plain @click="toDeviceModel()">
+            <el-icon class="el-input__icon"><back /></el-icon>
+            返回设备模型
+          </el-button>
+        </el-form-item>
+        <el-form-item>
+          <el-button type="primary" plain class="right-btn" @click="exportDPS()">
+            <el-icon class="el-input__icon"><upload /></el-icon>
+            导出模型属性
+          </el-button>
+        </el-form-item>
+      </el-form>
     </div>
-    <div class="title" style="top: 60px; height: 76px; padding: 20px 0; justify-content: space-between">
-      <div class="tName">{{ props.curDeviceModel.label }}：属性列表</div>
-      <div style="display: flex">
-        <el-input style="width: 200px" placeholder="请输入属性名称" v-model="ctxData.deviceModelProperty">
-          <template #prefix>
-            <el-icon class="el-input__icon"><search /></el-icon>
-          </template>
-        </el-input>
-        <el-button style="color: #fff" color="#2EA554" class="right-btn" @click="refresh('deviceModelProperty')">
-          <el-icon class="btn-icon">
-            <Icon name="local-refresh" size="14px" color="#ffffff" />
-          </el-icon>
-          刷新
-        </el-button>
+    <div class="search-bar" style="display: flex;">
+      <div class="title" style="position: relative;margin-right: 40px;height: 40px; padding: 0px 0; justify-content: flex-start">
+        <div class="tName">{{ props.curDeviceModel.label }}：属性列表</div>
       </div>
+      <el-form :inline="true" ref="searchFormRef" status-icon label-width="90px">
+        <el-form-item label="">
+          <el-input style="width: 200px" placeholder="请输入属性名称" v-model="ctxData.deviceModelProperty">
+            <template #prefix>
+              <el-icon class="el-input__icon"><search /></el-icon>
+            </template>
+          </el-input>
+        </el-form-item>
+        <el-form-item>
+          <el-button style="color: #fff" color="#2EA554" class="right-btn" @click="refresh('deviceModelProperty')">
+            <el-icon class="btn-icon">
+              <Icon name="local-refresh" size="14px" color="#ffffff" />
+            </el-icon>
+            刷新
+          </el-button>
+        </el-form-item>
+      </el-form>
     </div>
-    <div class="content" ref="contentRef" style="top: 136px">
+
+    <div class="content" ref="contentRef">
       <el-table
         :data="filterDMPTableData"
         :cell-style="ctxData.cellStyle"
         :header-cell-style="ctxData.headerCellStyle"
-        :max-height="ctxData.tableMaxHeight"
         style="width: 100%"
+        :max-height="ctxData.tableMaxHeight"
         stripe
-      >
+      ><!--  :max-height="ctxData.tableMaxHeight"-->
         <el-table-column type="index" width="60">
           <template #header> 序号 </template>
         </el-table-column>
-        <el-table-column prop="name" label="属性名称" width="auto" min-width="150" align="center"> </el-table-column>
-        <el-table-column prop="label" label="属性标签" width="auto" min-width="150" align="center"> </el-table-column>
-        <el-table-column label="读写属性" width="auto" min-width="80" align="center">
+        <el-table-column sortable prop="name" label="属性名称" width="auto" min-width="150" align="center"> </el-table-column>
+        <el-table-column sortable prop="label" label="属性标签" width="auto" min-width="150" align="center"> </el-table-column>
+        <el-table-column sortable label="读写属性" width="auto" min-width="80" align="center">
           <template #default="scope">
             {{ ctxData.accessModeNames['am' + scope.row.accessMode] }}
           </template>
         </el-table-column>
-        <el-table-column prop="type" label="数据类型" width="auto" min-width="100" align="center">
+        <el-table-column sortable prop="type" label="数据类型" width="auto" min-width="100" align="center">
           <template #default="scope">
             {{ ctxData.typeNames['t' + scope.row.type] }}
           </template>
         </el-table-column>
-        <el-table-column label="小数位数" width="auto" min-width="80" align="center">
+        <el-table-column sortable label="小数位数" width="auto" min-width="80" align="center">
           <template #default="scope">
             {{ scope.row.decimals === '' ? 0 : scope.row.decimals }}
           </template>
         </el-table-column>
-        <el-table-column prop="unit" label="单位" width="auto" min-width="80" align="center" />
+        <el-table-column sortable prop="unit" label="单位" width="auto" min-width="80" align="center" />
 
-        <el-table-column prop="regAddr" label="寄存器地址" width="auto" min-width="120" align="center" />
-        <el-table-column prop="regCnt" label="寄存器数量" width="auto" min-width="120" align="center" />
-        <el-table-column prop="ruleType" label="解析规则" width="auto" min-width="120" align="center" />
+        <el-table-column sortable prop="regAddr" label="寄存器地址" width="auto" min-width="120" align="center" />
+        <el-table-column sortable prop="regCnt" label="寄存器数量" width="auto" min-width="120" align="center" />
+        <el-table-column sortable prop="ruleType" label="解析规则" width="auto" min-width="120" align="center" />
+        <el-table-column sortable prop="formula" label="计算公式" width="auto" min-width="200" align="center" />
+        <el-table-column sortable prop="bitOffset" label="位偏移" width="auto" min-width="120" align="center" />
+        <el-table-column sortable prop="step" label="步长" width="auto" min-width="120" align="center" />
         <template #empty>
           <div>无数据</div>
         </template>
@@ -83,6 +96,7 @@
       </div>
     </div>
   </div>
+</div>
 </template>
 <script setup>
 import { Search, Back, Upload } from '@element-plus/icons-vue'
@@ -102,8 +116,8 @@ console.log('id -> props', props)
 // 返回设备模型
 const emit = defineEmits(['changeShowFlag'])
 const toDeviceModel = () => {
-  console.log('toDeviceModel')
-  emit('changeShowFlag')
+  //lp update 2023-06-12 首页设备模型跳转进入显示命令详情后，对点击返回按钮进行操作标识，防止死循环跳转显示详情页面
+  emit('changeShowFlag', 'goBack')
 }
 
 const contentRef = ref(null)
@@ -178,7 +192,7 @@ const getDeviceModelPropertyList = (flag) => {
       showOneResMsg(res)
     }
     await nextTick(() => {
-      ctxData.tableMaxHeight = contentRef.value.clientHeight - 34 - 36 - 22
+      ctxData.tableMaxHeight = contentRef.value.clientHeight - 34 - 36 - 132
     })
   })
 }

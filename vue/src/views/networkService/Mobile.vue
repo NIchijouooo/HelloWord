@@ -1,40 +1,46 @@
 <template>
   <div class="main-container">
     <div class="main">
-      <div class="title" style="justify-content: space-between">
-        <el-input style="width: 200px" placeholder="请输入模块名称" clearable v-model="ctxData.moduleName">
-          <template #prefix>
-            <el-icon class="el-input__icon"><search /></el-icon>
-          </template>
-        </el-input>
-        <div>
-          <el-button v-show="ctxData.showAddBtn" type="primary" bg class="right-btn" @click="addModule()">
-            <el-icon class="btn-icon">
-              <Icon name="local-add" size="14px" color="#ffffff" />
-            </el-icon>
-            添加
-          </el-button>
-          <el-button style="color: #fff" color="#2EA554" class="right-btn" @click="refresh()">
-            <el-icon class="btn-icon">
-              <Icon name="local-refresh" size="14px" color="#ffffff" />
-            </el-icon>
-            刷新
-          </el-button>
-        </div>
+      <div class="search-bar">
+        <el-form :inline="true" ref="searchFormRef" status-icon label-width="90px">
+          <el-form-item label="模块名称">
+            <el-input style="width: 200px" placeholder="请输入模块名称" clearable v-model="ctxData.moduleName">
+              <template #prefix>
+                <el-icon class="el-input__icon"><search /></el-icon>
+              </template>
+            </el-input>
+          </el-form-item>
+          <el-form-item>
+            <el-button style="color: #fff; margin-left: 20px" color="#2EA554" class="right-btn" @click="refresh()">
+              <el-icon class="btn-icon">
+                <Icon name="local-refresh" size="14px" color="#ffffff" />
+              </el-icon>
+              刷新
+            </el-button>
+          </el-form-item>
+        </el-form>
+      </div>
+      <div class="tool-bar">
+        <el-button type="primary" bg class="right-btn" @click="addModule()">
+          <el-icon class="btn-icon">
+            <Icon name="local-add" size="14px" color="#ffffff" />
+          </el-icon>
+          添加
+        </el-button>
       </div>
       <div class="content" ref="contentRef">
         <el-table
           :data="filterTableData"
           :cell-style="ctxData.cellStyle"
           :header-cell-style="ctxData.headerCellStyle"
-          :max-height="ctxData.tableMaxHeight"
           style="width: 100%"
+          :max-height="ctxData.tableMaxHeight"
           stripe
           @row-dblclick="editModule"
         >
-          <el-table-column prop="name" label="模块名称" width="auto" min-width="120" align="center"> </el-table-column>
-          <el-table-column prop="model" label="模块型号" width="auto" min-width="120" align="center"> </el-table-column>
-          <el-table-column label="sim卡号" width="auto" min-width="180" align="center">
+          <el-table-column sortable prop="name" label="模块名称" width="auto" min-width="120" align="center"> </el-table-column>
+          <el-table-column sortable prop="model" label="模块型号" width="auto" min-width="120" align="center"> </el-table-column>
+          <el-table-column sortable label="sim卡号" width="auto" min-width="180" align="center">
             <template #default="scope">
               <el-tooltip
                 v-if="scope.row.runParam.iccid !== ''"
@@ -49,39 +55,39 @@
               </el-tooltip>
             </template>
           </el-table-column>
-          <el-table-column label="imei" width="auto" min-width="150" align="center">
+          <el-table-column sortable label="imei" width="auto" min-width="150" align="center">
             <template #default="scope">
               {{ scope.row.runParam.imei }}
             </template>
           </el-table-column>
-          <el-table-column label="信号强度" width="auto" min-width="80" align="center">
+          <el-table-column sortable label="信号强度" width="auto" min-width="80" align="center">
             <template #default="scope">
               {{ scope.row.runParam.csq }}
             </template>
           </el-table-column>
-          <el-table-column label="流量（KByte）" width="auto" min-width="150" align="center">
+          <el-table-column sortable label="流量（KByte）" width="auto" min-width="150" align="center">
             <template #default="scope">
               {{ scope.row.runParam.flow }}
             </template>
           </el-table-column>
-          <el-table-column label="基站定位Lac" width="auto" min-width="110" align="center">
+          <el-table-column sortable label="基站定位Lac" width="auto" min-width="110" align="center">
             <template #default="scope">
               {{ scope.row.runParam.lac }}
             </template>
           </el-table-column>
-          <el-table-column label="基站定位Ci" width="auto" min-width="100" align="center">
+          <el-table-column sortable label="基站定位Ci" width="auto" min-width="100" align="center">
             <template #default="scope">
               {{ scope.row.runParam.ci }}
             </template></el-table-column
           >
-          <el-table-column label="sim卡插入状态" width="auto" min-width="120" align="center">
+          <el-table-column sortable label="sim卡插入状态" width="auto" min-width="120" align="center">
             <template #default="scope">
               <el-tag :type="scope.row.runParam.simInsert ? 'success' : 'danger'">{{
                 scope.row.runParam.simInsert ? '是' : '否'
               }}</el-tag>
             </template>
           </el-table-column>
-          <el-table-column label="网络注册状态" width="auto" min-width="120" align="center">
+          <el-table-column sortable label="网络注册状态" width="auto" min-width="120" align="center">
             <template #default="scope">
               <el-tag :type="scope.row.runParam.netRegister ? 'success' : 'danger'">
                 {{ scope.row.runParam.netRegister ? '是' : '否' }}
