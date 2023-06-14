@@ -75,7 +75,7 @@ func processProductCondition(rule models.EmRuleModel, operator string) {
 	fmt.Println("propertyName ： ", propertyName)
 	deviceLabel := utils.GetConditionVariableObjectId(operator)
 	fmt.Println("deviceLabel ： ", deviceLabel)
-
+	//label := repositories.NewDevicePointRepository().GetDeviceByDevLabel(deviceLabel)
 	//for _, deviceId := range deviceIdList {
 	//	key := "device." + strconv.Itoa(deviceId) + "_" + propertyName
 	//	PropertyRuleMap[key] = append(PropertyRuleMap[key], ruleId)
