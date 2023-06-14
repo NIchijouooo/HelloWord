@@ -2,6 +2,7 @@ package models
 
 type ProjectInfo struct {
 	ID             int    `gorm:"primary_key;auto_increment;comment:'主键'" json:"id"`       // 主键
+	Name           string `gorm:"type:varchar(255);comment:'名称'" json:"name"`              // 描述
 	Description    string `gorm:"type:varchar(255);comment:'描述'" json:"description"`       // 描述
 	Avatar         string `gorm:"type:varchar(255);comment:'头像'" json:"avatar"`            // 头像
 	CommissionDate string `gorm:"type:date;comment:'投产时间'" json:"commissionDate"`          // 投产时间
