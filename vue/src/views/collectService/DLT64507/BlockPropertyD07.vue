@@ -80,6 +80,7 @@
       <el-table-column sortable prop="unit" label="单位" width="auto" min-width="80" align="center" ></el-table-column>
       <el-table-column sortable prop="blockAddOffset" label="块偏移地址" width="auto" min-width="150" align="center"> </el-table-column>
       <el-table-column sortable prop="rulerAddOffset" label="标识偏移地址" width="auto" min-width="150" align="center"> </el-table-column>
+      <el-table-column sortable prop="step" label="步长" width="auto" min-width="120" align="center" />
 
       <el-table-column label="操作" width="auto" min-width="200" align="center" fixed="right">
         <template #default="scope">
@@ -279,6 +280,19 @@
           </el-input>
         </el-form-item>
 
+        <el-form-item label="步长" prop="step">
+          <el-tooltip class="item" effect="dark" content="数据变化超过所配步长则变化上送" placement="top">
+            <el-input
+              type="text"
+              style="width: 220px"
+              v-model="ctxData.propertyForm.step"
+              autocomplete="off"
+              placeholder="请输入步长"
+            >
+            </el-input>
+          </el-tooltip>
+        </el-form-item>
+
       </el-form>
     </div>
 
@@ -399,6 +413,14 @@ const validateRegAddr = (rule, value, callback) => {
     callback()
   }
 }
+const regStep = /^[0-9]+(.[0-9]{1,2})?$/
+const validateStep = (rule, value, callback) => {
+  if (!regStep.test(value)) {
+    callback(new Error('只能输入大于等于0,最多两位小数的数字！'))
+  } else {
+    callback()
+  }
+}
 const contentRef = ref(null)
 const ctxData = reactive({
   formulaForm: {},
@@ -482,6 +504,7 @@ const ctxData = reactive({
     len:0,
     blockAddOffset:0,
     rulerAddOffset:0,
+    step: 0, // 步长
   },
 
   //数据类型
@@ -571,6 +594,17 @@ const ctxData = reactive({
         type: 'number',
         message: '标识数据地址只能输入数字',
         trigger: 'blur',
+      },
+    ],
+    step: [
+      {
+        required: true,
+        message: '步长不能为空',
+        trigger: 'blur',
+      },
+      {
+        trigger: 'blur',
+        validator: validateStep,
       },
     ],
 
@@ -768,6 +802,7 @@ const editDeviceModelProperty = (row) => {
   ctxData.propertyForm.type = row.type
   ctxData.propertyForm.blockAddOffset = row.blockAddOffset
   ctxData.propertyForm.rulerAddOffset = row.rulerAddOffset
+  ctxData.propertyForm.step = row.step === undefined || row.step === null ? 0 : row.step
 }
 const propertyFormRef = ref(null)
 const submitPorpertyForm = () => {
@@ -788,6 +823,7 @@ const submitPorpertyForm = () => {
           type:ctxData.propertyForm.type,
           blockAddOffset:ctxData.propertyForm.blockAddOffset,
           rulerAddOffset:ctxData.propertyForm.rulerAddOffset,
+          step: +ctxData.propertyForm.step,
         },
       }
       if (ctxData.pTitle.includes('添加')) {
@@ -866,6 +902,7 @@ const initPropertyForm = () => {
     rulerId:'',
     blockAddOffset:0,
     rulerAddOffset:0,
+    step: 0,
   }
 }
 const getDeviceProperty = () => {

@@ -70,6 +70,7 @@
         <el-table-column sortable prop="unit" label="单位" width="auto" min-width="80" align="center" ></el-table-column>
         <el-table-column sortable prop="blockAddOffset" label="块偏移地址" width="auto" min-width="150" align="center"> </el-table-column>
         <el-table-column sortable prop="rulerAddOffset" label="标识偏移地址" width="auto" min-width="150" align="center"> </el-table-column>
+        <el-table-column sortable prop="step" label="步长" width="auto" min-width="120" align="center" />
         <template #empty>
           <div>无数据</div>
         </template>

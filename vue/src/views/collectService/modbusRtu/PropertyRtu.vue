@@ -39,7 +39,7 @@
         </el-form-item>
       </el-form>
     </div>
-    
+
     <div class="content" ref="contentRef">
       <el-table
         :data="filterDMPTableData"
@@ -74,6 +74,9 @@
         <el-table-column sortable prop="regAddr" label="寄存器地址" width="auto" min-width="120" align="center" />
         <el-table-column sortable prop="regCnt" label="寄存器数量" width="auto" min-width="120" align="center" />
         <el-table-column sortable prop="ruleType" label="解析规则" width="auto" min-width="120" align="center" />
+        <el-table-column sortable prop="formula" label="计算公式" width="auto" min-width="200" align="center" />
+        <el-table-column sortable prop="bitOffset" label="位偏移" width="auto" min-width="120" align="center" />
+        <el-table-column sortable prop="step" label="步长" width="auto" min-width="120" align="center" />
         <template #empty>
           <div>无数据</div>
         </template>
