@@ -3,9 +3,11 @@ package controllers
 import (
 	"encoding/json"
 	"fmt"
+	"gateway/device"
 	"gateway/httpServer/model"
 	"gateway/models"
 	repositories "gateway/repositories"
+
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -41,6 +43,7 @@ func (c *EmController) RegisterRoutes(router *gin.RouterGroup) {
 	router.POST("/api/v2/em/addEmDeviceModelCmd", c.AddEmDeviceModelCmd)
 	router.POST("/api/v2/em/addEmDeviceModelCmdParam", c.AddEmDeviceModelCmdParam)
 	router.POST("/api/v2/em/getEmDeviceModelCmdParamListByName", c.GetEmDeviceModelCmdParamListByName)
+	router.POST("/api/v2/em/getEmDeviceModelCmdParamListByDeviceId", c.GetEmDeviceModelCmdParamListByDeviceId)
 }
 
 func (c *EmController) GetAllCommInterfaceProtocols(ctx *gin.Context) {
@@ -328,6 +331,28 @@ func (c *EmController) AddEmDevice(ctx *gin.Context) {
 	return
 }
 
+func (c *EmController) AddEmDeviceFromXlsx(name string, tsl string, addr string, label string, collInterface string) {
+	var data []byte
+	var emDevice models.EmDevice
+	emDevice.Name = name
+	emDevice.Label = label
+	emDevice.Addr = addr
+
+	// 通过模型名找模型id
+	emDeviceModelByName, err := c.repo.GetEmDeviceModelByName(tsl)
+	emDevice.ModelId = emDeviceModelByName.Id
+	// 通过采集接口名找接口id
+	collInterfaceByName, err := c.repo.GetCollInterfaceByName(collInterface)
+	emDevice.CollInterfaceId = collInterfaceByName.Id
+	data, err = json.Marshal(emDevice)
+	emDevice.Data = string(data)
+	err = c.repo.AddEmDevice(&emDevice)
+	if err != nil {
+		return
+	}
+	return
+}
+
 func (c *EmController) UpdateEmDevice(ctx *gin.Context) {
 	var addEmDevice models.AddEmDevice
 	var data []byte
@@ -519,6 +544,32 @@ func (c *EmController) AddEmDeviceModelCmd(ctx *gin.Context) {
 	return
 }
 
+func (c *EmController) AddEmDeviceModelCmdFromXlsx(cmd interface{}, protocol string, tslName string) {
+	var data []byte
+	switch protocol {
+	case "modbus":
+		var emDeviceModelCmd models.EmDeviceModelCmd
+		tslModbusCmdTemplate := cmd.(device.TSLModbusCmdTemplate)
+		emDeviceModelCmd.Name = tslModbusCmdTemplate.Name
+		emDeviceModelCmd.Label = tslModbusCmdTemplate.Label
+		// 通过模型名找模型id
+		emDeviceModelByName, err := c.repo.GetEmDeviceModelByName(tslName)
+		emDeviceModelCmd.DeviceModelId = emDeviceModelByName.Id
+		data, err = json.Marshal(cmd)
+		emDeviceModelCmd.Data = string(data)
+		err = c.repo.AddEmDeviceModelCmd(&emDeviceModelCmd)
+		if err != nil {
+			return
+		}
+	case "dlt645":
+		emDeviceModelCmd := cmd.(device.TSLDLT6452007CmdTemplate)
+		fmt.Println(emDeviceModelCmd.Name)
+	default:
+		return
+	}
+	return
+}
+
 func (c *EmController) UpdateEmDeviceModelCmd(ctx *gin.Context) {
 	var addEmDeviceModelCmd models.AddEmDeviceModelCmd
 	var data []byte
@@ -576,6 +627,7 @@ func (c *EmController) AddEmDeviceModelCmdParam(ctx *gin.Context) {
 	}
 	emDeviceModelCmdParam.Name = addEmDeviceModelCmdParam.Name
 	emDeviceModelCmdParam.Label = addEmDeviceModelCmdParam.Label
+	emDeviceModelCmdParam.IotDataType = addEmDeviceModelCmdParam.IotDataType
 	// 判断设备模型是否有重名，有就直接返回
 	emDeviceModelCmdParam.Name = addEmDeviceModelCmdParam.Name
 	emDeviceModelCmdParamByName, _ := c.repo.GetEmDeviceModelCmdParamByName(emDeviceModelCmdParam.Name)
@@ -611,6 +663,32 @@ func (c *EmController) AddEmDeviceModelCmdParam(ctx *gin.Context) {
 	return
 }
 
+func (c *EmController) AddEmDeviceModelCmdParamFromXlsx(property interface{}, protocol string, cmdName string) {
+	var data []byte
+	switch protocol {
+	case "modbus":
+		var emDeviceModelCmdParam models.EmDeviceModelCmdParam
+		tslModbusPropertyTemplate := property.(device.TSLModbusPropertyTemplate)
+		emDeviceModelCmdParam.Name = tslModbusPropertyTemplate.Name
+		emDeviceModelCmdParam.Label = tslModbusPropertyTemplate.Label
+		// 通过模型名找模型id
+		emDeviceModelCmdByName, err := c.repo.GetEmDeviceModelCmdByName(cmdName)
+		emDeviceModelCmdParam.DeviceModelCmdId = emDeviceModelCmdByName.Id
+		data, err = json.Marshal(property)
+		emDeviceModelCmdParam.Data = string(data)
+		err = c.repo.AddEmDeviceModelCmdParam(&emDeviceModelCmdParam)
+		if err != nil {
+			return
+		}
+	case "dlt645":
+		emDeviceModelCmdParam := property.(device.TSLDLT6452007PropertyTemplate)
+		fmt.Println(emDeviceModelCmdParam.Name)
+	default:
+		return
+	}
+	return
+}
+
 func (c *EmController) UpdateEmDeviceModelCmdParam(ctx *gin.Context) {
 	var addEmDeviceModelCmdParam models.AddEmDeviceModelCmdParam
 	var data []byte
@@ -622,6 +700,7 @@ func (c *EmController) UpdateEmDeviceModelCmdParam(ctx *gin.Context) {
 	var emDeviceModelCmdParam models.EmDeviceModelCmdParam
 	emDeviceModelCmdParam.Name = addEmDeviceModelCmdParam.Name
 	emDeviceModelCmdParam.Label = addEmDeviceModelCmdParam.Label
+	emDeviceModelCmdParam.IotDataType = addEmDeviceModelCmdParam.IotDataType
 	emDeviceModelCmdParamByName, _ := c.repo.GetEmDeviceModelCmdParamByName(addEmDeviceModelCmdParam.Name)
 	emDeviceModelCmdParam.Id = emDeviceModelCmdParamByName.Id
 
@@ -648,6 +727,9 @@ func (c *EmController) DeleteEmDeviceModelCmdParam(ctx *gin.Context) {
 	}
 	for _, name := range tmp.PropertyNames {
 		emDeviceModelCmdByNameParam, _ := c.repo.GetEmDeviceModelCmdParamByName(name)
+		if emDeviceModelCmdByNameParam == nil {
+			return
+		}
 		c.repo.DeleteEmDeviceModelCmdParam(emDeviceModelCmdByNameParam.Id)
 	}
 	return
@@ -671,7 +753,41 @@ func (c *EmController) GetEmDeviceModelCmdParamListByName(ctx *gin.Context) {
 		})
 	}
 	var retList []models.AddEmDeviceModelCmdParam
-	//deviceCmdParamList
+	for i := 0; i < len(deviceCmdParamList); i++ {
+		//取出data
+		var addEmDeviceModelCmdParam models.AddEmDeviceModelCmdParam
+		if err := json.Unmarshal([]byte(deviceCmdParamList[i].Data), &addEmDeviceModelCmdParam); err != nil {
+			ctx.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			return
+		}
+		retList = append(retList, addEmDeviceModelCmdParam)
+	}
+
+	ctx.JSON(http.StatusOK, model.ResponseData{
+		Code:    "0",
+		Message: "成功",
+		Data:    retList,
+	})
+}
+
+// 根据设备ID获取所有模型
+func (c *EmController) GetEmDeviceModelCmdParamListByDeviceId(ctx *gin.Context) {
+	var tmp struct {
+		DeviceId int `json:"deviceId"`
+	}
+	if err := ctx.ShouldBindBodyWith(&tmp, binding.JSON); err != nil {
+		ctx.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+	var deviceCmdParamList []models.EmDeviceModelCmdParam
+	deviceCmdParamList, _ = c.repo.GetEmDeviceModelCmdParamListByDeviceId(tmp.DeviceId)
+	if deviceCmdParamList == nil {
+		ctx.JSON(http.StatusOK, model.ResponseData{
+			Code:    "1",
+			Message: "无数据",
+		})
+	}
+	var retList []models.AddEmDeviceModelCmdParam
 	for i := 0; i < len(deviceCmdParamList); i++ {
 		//取出data
 		var addEmDeviceModelCmdParam models.AddEmDeviceModelCmdParam
