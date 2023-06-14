@@ -20,16 +20,17 @@ type TSLModbusModelTemplate struct {
 }
 
 type TSLModbusPropertyTemplate struct {
-	Name       string `json:"name"`
-	Label      string `json:"label"`
-	AccessMode int    `json:"accessMode"`
-	Type       int    `json:"type"`
-	Decimals   int    `json:"decimals"`
-	Unit       string `json:"unit"`
-	RegAddr    int    `json:"regAddr"`
-	RegCnt     int    `json:"regCnt"`
-	RuleType   string `json:"ruleType"`
-	Formula    string `json:"formula"`
+	Name        string `json:"name"`
+	Label       string `json:"label"`
+	AccessMode  int    `json:"accessMode"`
+	Type        int    `json:"type"`
+	Decimals    int    `json:"decimals"`
+	Unit        string `json:"unit"`
+	RegAddr     int    `json:"regAddr"`
+	RegCnt      int    `json:"regCnt"`
+	RuleType    string `json:"ruleType"`
+	Formula     string `json:"formula"`
+	IotDataType string `json:"iotDataType"`
 }
 
 type TSLModbusCmdTemplate struct {

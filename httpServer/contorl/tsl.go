@@ -1073,18 +1073,19 @@ func ApiGetTSLD07Cmd(context *gin.Context) {
 func ApiAddTSLModbusCmdProperty(context *gin.Context) {
 
 	propertyParam := &struct {
-		TSLName    string `json:"tslName"` // 名称
-		CmdName    string `json:"cmdName"`
-		Name       string `json:"name"`
-		Label      string `json:"label"`
-		AccessMode int    `json:"accessMode"`
-		Type       int    `json:"type"`
-		Decimals   int    `json:"decimals"`
-		Unit       string `json:"unit"`
-		RegAddr    int    `json:"regAddr"`
-		RegCnt     int    `json:"regCnt"`
-		RuleType   string `json:"ruleType"`
-		Formula    string `json:"formula"`
+		TSLName     string `json:"tslName"` // 名称
+		CmdName     string `json:"cmdName"`
+		Name        string `json:"name"`
+		Label       string `json:"label"`
+		AccessMode  int    `json:"accessMode"`
+		Type        int    `json:"type"`
+		Decimals    int    `json:"decimals"`
+		Unit        string `json:"unit"`
+		RegAddr     int    `json:"regAddr"`
+		RegCnt      int    `json:"regCnt"`
+		RuleType    string `json:"ruleType"`
+		Formula     string `json:"formula"`
+		IotDataType string `json:"iotDataType"`
 	}{}
 
 	emController := controllers.NewEMController()
@@ -1111,16 +1112,17 @@ func ApiAddTSLModbusCmdProperty(context *gin.Context) {
 		return
 	}
 	property := device.TSLModbusPropertyTemplate{
-		Name:       propertyParam.Name,
-		Label:      propertyParam.Label,
-		AccessMode: propertyParam.AccessMode,
-		Type:       propertyParam.Type,
-		Decimals:   propertyParam.Decimals,
-		Unit:       propertyParam.Unit,
-		RegAddr:    propertyParam.RegAddr,
-		RegCnt:     propertyParam.RegCnt,
-		RuleType:   propertyParam.RuleType,
-		Formula:    propertyParam.Formula,
+		Name:        propertyParam.Name,
+		Label:       propertyParam.Label,
+		AccessMode:  propertyParam.AccessMode,
+		Type:        propertyParam.Type,
+		Decimals:    propertyParam.Decimals,
+		Unit:        propertyParam.Unit,
+		RegAddr:     propertyParam.RegAddr,
+		RegCnt:      propertyParam.RegCnt,
+		RuleType:    propertyParam.RuleType,
+		Formula:     propertyParam.Formula,
+		IotDataType: propertyParam.IotDataType,
 	}
 	err = tslModel.TSLModelPropertiesAdd(propertyParam.CmdName, property)
 	if err != nil {
