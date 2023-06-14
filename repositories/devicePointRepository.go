@@ -51,6 +51,17 @@ func (r *DevicePointRepository) GetDeviceByDevLabel(label string) []*models.EmDe
 
 /*
 *
+
+	根据设备id查询设备信息
+*/
+func (r *DevicePointRepository) GetDeviceByDeviceId(deviceId int) *models.EmDevice {
+	var emDevice *models.EmDevice
+	r.sqldb.Where("em_device.id = ?", deviceId).Find(&emDevice)
+	return emDevice
+}
+
+/*
+*
 获取yc
 */
 func (r *DevicePointRepository) GetYcById(deviceId, code int) (models.YcData, error) {

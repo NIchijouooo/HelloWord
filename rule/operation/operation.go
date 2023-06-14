@@ -1,15 +1,21 @@
-package rule
+package operation
 
 import (
 	"bytes"
+	"gateway/models"
 	"gateway/rule/enum"
 	"gateway/utils"
 	"strconv"
 	"strings"
 )
 
+func GetResult(rule models.EmRuleModel, condition string) string {
+	keyword := ProcessKeyword(rule, condition)
+	return parse(keyword)
+}
+
 // Parse 运算类
-func Parse(expression string) string {
+func parse(expression string) string {
 	//操作数栈
 	operands := make([]string, 0)
 	//操作栈
