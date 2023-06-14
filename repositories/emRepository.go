@@ -1,4 +1,4 @@
-package models
+package repositories
 
 import (
 	"gateway/models"
@@ -225,4 +225,18 @@ func (r *EmRepository) GetEmDeviceModelCmdParamListByName(name string) ([]models
 		return nil, err
 	}
 	return emDeviceModelCmdParam, nil
+}
+
+// 根据设备id获取模型列表
+func (r *EmRepository) GetEmDeviceModelCmdParamListByDeviceId(deviceId int) ([]models.EmDeviceModelCmdParam, error) {
+	var emDeviceModelCmdParamList []models.EmDeviceModelCmdParam
+	if err := r.db.Table("em_device_model_cmd_param as param").
+		Select("param.id, param.device_model_cmd_id, param.name, param.label,param.data").
+		Joins("left join em_device_model_cmd as cmd on param.device_model_cmd_id = cmd.id").
+		Joins("left join em_device_model as model on cmd.device_model_id = model.id").
+		Joins("left join em_device as device on device.model_id = model.id").
+		Where("device.id=?", deviceId).Scan(&emDeviceModelCmdParamList).Error; err != nil {
+		return nil, err
+	}
+	return emDeviceModelCmdParamList, nil
 }

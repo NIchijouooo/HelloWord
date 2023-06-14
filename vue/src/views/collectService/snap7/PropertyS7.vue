@@ -76,6 +76,7 @@
           </template>
         </el-table-column>
         <el-table-column prop="unit" label="单位" width="auto" min-width="80" align="center" />
+        <el-table-column prop="iotDataType" label="点位类型" width="auto" min-width="80" align="center" />
         <el-table-column label="参数详情" width="auto" min-width="500" align="center">
           <template #default="scope">
             <el-popover
@@ -227,7 +228,17 @@
             >
             </el-input>
           </el-form-item>
-          <el-form-item label="" prop="" style="width: 220px"> </el-form-item>
+          <el-form-item label="点位类型" prop="iotDataType">
+            <el-select v-model.number="ctxData.propertyForm.iotDataType" style="width: 220px" placeholder="请选择点位类型">
+              <el-option
+                v-for="(item, index) in ctxData.pointTypeOptions"
+                :key="index"
+                :label="item.label"
+                :value="item.value"
+              >
+              </el-option>
+            </el-select>
+          </el-form-item>
           <el-form-item label="PLC地址" prop="startAddr">
             <el-input
               type="text"
@@ -351,6 +362,11 @@ const ctxData = reactive({
     { label: 'double', value: 7 },
     { label: 'bool', value: 8 },
   ],
+  pointTypeOptions: [
+    { label: 'yc', value: 'yc' },
+    { label: 'yx', value: 'yx' },
+    { label: 'setting', value: 'setting' }
+  ],
   typeNames: {
     t0: 'uint32',
     t1: 'int32',
@@ -386,6 +402,7 @@ const ctxData = reactive({
     dataType: 0,
     unit: '', // 单位，只有uint32，int32，double有效
     decimals: 0, // 小数位数，只有double有效
+    iotDataType: 'yc'
   },
   paramName: {
     name: '属性名称',
@@ -628,6 +645,7 @@ const editDeviceModelProperty = (row) => {
   ctxData.propertyForm.dbNumber = row.params.dbNumber
   ctxData.propertyForm.startAddr = row.params.startAddr
   ctxData.propertyForm.dataType = row.params.dataType
+  ctxData.propertyForm.iotDataType = row.iotDataType
   console.log('ctxData.propertyForm', ctxData.propertyForm)
 }
 const propertyFormRef = ref(null)
@@ -648,6 +666,7 @@ const submitPorpertyForm = () => {
         dbNumber: ctxData.propertyForm.dbNumber,
         startAddr: ctxData.propertyForm.startAddr,
         dataType: ctxData.propertyForm.dataType,
+        iotDataType: ctxData.propertyForm.iotDataType
       }
       property['params'] = params
       console.log('submitPorpertyForm -> property', property)

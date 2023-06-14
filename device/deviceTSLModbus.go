@@ -20,16 +20,17 @@ type TSLModbusModelTemplate struct {
 }
 
 type TSLModbusPropertyTemplate struct {
-	Name       string `json:"name"`
-	Label      string `json:"label"`
-	AccessMode int    `json:"accessMode"`
-	Type       int    `json:"type"`
-	Decimals   int    `json:"decimals"`
-	Unit       string `json:"unit"`
-	RegAddr    int    `json:"regAddr"`
-	RegCnt     int    `json:"regCnt"`
-	RuleType   string `json:"ruleType"`
-	Formula    string `json:"formula"`
+	Name        string `json:"name"`
+	Label       string `json:"label"`
+	AccessMode  int    `json:"accessMode"`
+	Type        int    `json:"type"`
+	Decimals    int    `json:"decimals"`
+	Unit        string `json:"unit"`
+	RegAddr     int    `json:"regAddr"`
+	RegCnt      int    `json:"regCnt"`
+	RuleType    string `json:"ruleType"`
+	Formula     string `json:"formula"`
+	IotDataType string `json:"iotDataType"`
 }
 
 type TSLModbusCmdTemplate struct {
@@ -155,12 +156,13 @@ func DeleteTSLModbus(name string) error {
 		}
 	}
 
-	_, ok := TSLModbusMap[name]
+	_, ok := TSLModelsName[name]
 	if !ok {
 		return errors.New("采集模型[Modbus]不存在")
 	}
 
 	delete(TSLModbusMap, name)
+	delete(TSLModelsName, name)
 	WriteTSLModbusParamToJson()
 
 	return nil

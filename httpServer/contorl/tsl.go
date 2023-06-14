@@ -52,7 +52,6 @@ func ApiAddDeviceTSL(context *gin.Context) {
 		})
 		return
 	}
-
 	context.JSON(http.StatusOK, model.ResponseData{
 		Code:    "0",
 		Message: "添加物模型模版成功",
@@ -90,7 +89,6 @@ func ApiDeleteDeviceTSL(context *gin.Context) {
 		})
 		return
 	}
-
 	context.JSON(http.StatusOK, model.ResponseData{
 		Code:    "0",
 		Message: "删除物模型模版成功",
@@ -1075,18 +1073,19 @@ func ApiGetTSLD07Cmd(context *gin.Context) {
 func ApiAddTSLModbusCmdProperty(context *gin.Context) {
 
 	propertyParam := &struct {
-		TSLName    string `json:"tslName"` // 名称
-		CmdName    string `json:"cmdName"`
-		Name       string `json:"name"`
-		Label      string `json:"label"`
-		AccessMode int    `json:"accessMode"`
-		Type       int    `json:"type"`
-		Decimals   int    `json:"decimals"`
-		Unit       string `json:"unit"`
-		RegAddr    int    `json:"regAddr"`
-		RegCnt     int    `json:"regCnt"`
-		RuleType   string `json:"ruleType"`
-		Formula    string `json:"formula"`
+		TSLName     string `json:"tslName"` // 名称
+		CmdName     string `json:"cmdName"`
+		Name        string `json:"name"`
+		Label       string `json:"label"`
+		AccessMode  int    `json:"accessMode"`
+		Type        int    `json:"type"`
+		Decimals    int    `json:"decimals"`
+		Unit        string `json:"unit"`
+		RegAddr     int    `json:"regAddr"`
+		RegCnt      int    `json:"regCnt"`
+		RuleType    string `json:"ruleType"`
+		Formula     string `json:"formula"`
+		IotDataType string `json:"iotDataType"`
 	}{}
 
 	emController := controllers.NewEMController()
@@ -1113,16 +1112,17 @@ func ApiAddTSLModbusCmdProperty(context *gin.Context) {
 		return
 	}
 	property := device.TSLModbusPropertyTemplate{
-		Name:       propertyParam.Name,
-		Label:      propertyParam.Label,
-		AccessMode: propertyParam.AccessMode,
-		Type:       propertyParam.Type,
-		Decimals:   propertyParam.Decimals,
-		Unit:       propertyParam.Unit,
-		RegAddr:    propertyParam.RegAddr,
-		RegCnt:     propertyParam.RegCnt,
-		RuleType:   propertyParam.RuleType,
-		Formula:    propertyParam.Formula,
+		Name:        propertyParam.Name,
+		Label:       propertyParam.Label,
+		AccessMode:  propertyParam.AccessMode,
+		Type:        propertyParam.Type,
+		Decimals:    propertyParam.Decimals,
+		Unit:        propertyParam.Unit,
+		RegAddr:     propertyParam.RegAddr,
+		RegCnt:      propertyParam.RegCnt,
+		RuleType:    propertyParam.RuleType,
+		Formula:     propertyParam.Formula,
+		IotDataType: propertyParam.IotDataType,
 	}
 	err = tslModel.TSLModelPropertiesAdd(propertyParam.CmdName, property)
 	if err != nil {
@@ -1353,6 +1353,10 @@ func ApiAddTSLModbusCmdFromXlsx(context *gin.Context) {
 		}
 
 		err = tslModel.TSLModelCmdAdd(cmd)
+		// 导入cmd写入sqlite
+		emController := controllers.NewEMController()
+		emController.AddEmDeviceModelCmdFromXlsx(cmd, "modbus", tslName)
+
 		if err != nil {
 			context.JSON(http.StatusOK, model.ResponseData{
 				Code:    "1",
@@ -1493,6 +1497,10 @@ func ApiAddTSLModbusCmdPropertyFromXlsx(context *gin.Context) {
 		}
 
 		err = tslModel.TSLModelPropertiesAdd(cmdName, property)
+		// 导入param写入sqlite
+		emController := controllers.NewEMController()
+		emController.AddEmDeviceModelCmdParamFromXlsx(property, "modbus", cmdName)
+
 		if err != nil {
 			context.JSON(http.StatusOK, model.ResponseData{
 				Code:    "1",

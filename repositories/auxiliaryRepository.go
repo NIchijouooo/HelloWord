@@ -1,7 +1,8 @@
-package models
+package repositories
 
 import (
 	"gateway/models"
+
 	"gorm.io/gorm"
 )
 
@@ -20,7 +21,7 @@ func (r *AuxiliaryRepository) GetAuxiliaryDevice(label string) ([]models.EmDevic
 	return deviceList, err
 }
 
-//获取设备的所有标签
+// 获取设备的所有标签
 func (r *AuxiliaryRepository) GetAuxiliaryDeviceType() ([]string, error) {
 	var deviceTypeList []string
 	err := r.db.Model(&models.EmDevice{}).Select("label").Group("label").Find(&deviceTypeList).Error
