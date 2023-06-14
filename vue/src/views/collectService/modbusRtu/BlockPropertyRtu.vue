@@ -211,7 +211,6 @@
             </el-option>
           </el-select>
         </el-form-item>
-        <!-- <el-form-item label="" prop="" style="width: 220px" v-if="props.curModelBlock.funCode != 1"> </el-form-item> -->
         <el-form-item label="寄存器数量" prop="regCnt">
           <el-input
             type="text"

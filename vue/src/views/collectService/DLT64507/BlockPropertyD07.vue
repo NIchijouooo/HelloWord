@@ -64,6 +64,7 @@
         </template>
       </el-table-column>
       <el-table-column prop="unit" label="单位" width="auto" min-width="80" align="center" ></el-table-column>
+      <el-table-column prop="iotDataType" label="点位类型" width="auto" min-width="120" align="center" />
       <el-table-column prop="blockAddOffset" label="块偏移地址" width="auto" min-width="150" align="center"> </el-table-column>
       <el-table-column prop="rulerAddOffset" label="标识偏移地址" width="auto" min-width="150" align="center"> </el-table-column>
 
@@ -162,9 +163,6 @@
             </el-option>
           </el-select>
         </el-form-item>
-
-
-
         <el-form-item label="" prop="" style="width: 220px" v-if="props.curModelBlock.format != 1"> </el-form-item>
         <el-form-item label="数据格式" prop="len">
           <el-input
@@ -239,10 +237,17 @@
           >
           </el-input>
         </el-form-item>
-
-
-        <el-form-item label="" prop="" style="width: 220px" v-if="props.curModelBlock.blockAddOffset != 1"> </el-form-item>
-
+        <el-form-item label="点位类型" prop="iotDataType">
+          <el-select v-model.number="ctxData.propertyForm.iotDataType" style="width: 220px" placeholder="请选择点位类型">
+            <el-option
+              v-for="(item, index) in ctxData.pointTypeOptions"
+              :key="index"
+              :label="item.label"
+              :value="item.value"
+            >
+            </el-option>
+          </el-select>
+        </el-form-item>
         <el-form-item label="块偏移地址" prop="blockAddOffset">
           <el-input
             type="text"
@@ -467,6 +472,7 @@ const ctxData = reactive({
     len:0,
     blockAddOffset:0,
     rulerAddOffset:0,
+    iotDataType: 'yc'
   },
 
   //数据类型
@@ -492,6 +498,11 @@ const ctxData = reactive({
       { label: 'Double_HGFEDCBA', value: 'Double_HGFEDCBA' },
     ],
   },
+  pointTypeOptions: [
+    { label: 'yc', value: 'yc' },
+    { label: 'yx', value: 'yx' },
+    { label: 'setting', value: 'setting' }
+  ],
   paramName: {
     name: '属性名称',
     label: '属性标签',
@@ -773,6 +784,7 @@ const submitPorpertyForm = () => {
           type:ctxData.propertyForm.type,
           blockAddOffset:ctxData.propertyForm.blockAddOffset,
           rulerAddOffset:ctxData.propertyForm.rulerAddOffset,
+          iotDataType: ctxData.propertyForm.iotDataType
         },
       }
       if (ctxData.pTitle.includes('添加')) {
