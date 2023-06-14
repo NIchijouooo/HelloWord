@@ -97,7 +97,7 @@ func (c *RealtimeDataController) GetDeviceByDevLabel(ctx *gin.Context) {
 		return
 	}
 
-	var yx models.EmDevice
+	var yx []*models.EmDevice
 	yx = c.repoPoint.GetDeviceByDevLabel(realtimeData.Lable)
 	//if err != nil {
 	//	ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})

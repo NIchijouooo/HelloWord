@@ -43,8 +43,8 @@ func (r *DevicePointRepository) GetPointsByDeviceId(pointType string, deviceId, 
 
 	根据设备lable查询设备信息
 */
-func (r *DevicePointRepository) GetDeviceByDevLabel(label string) models.EmDevice {
-	var emDevice models.EmDevice
+func (r *DevicePointRepository) GetDeviceByDevLabel(label string) []*models.EmDevice {
+	var emDevice []*models.EmDevice
 	r.sqldb.Where("em_device.label = ?", label).Find(&emDevice)
 	return emDevice
 }
