@@ -32,6 +32,7 @@ func (ctrl *RealtimeDataController) RegisterRoutes(router *gin.RouterGroup) {
 	router.POST("/api/v2/realtimeData/GetRealtimeDataYcListByID", ctrl.GetRealtimeDataYcListByID)
 	router.POST("/api/v2/realtimeData/GetRealtimeDataSettingListByID", ctrl.GetRealtimeDataSettingListByID)
 	router.POST("/api/v2/realtimeData/GetPointsByDeviceId", ctrl.GetPointsByDeviceId)
+	router.POST("/api/v2/realtimeData/GetDeviceByDevLabel", ctrl.GetDeviceByDevLabel)
 	// 注册其他路由...
 }
 
@@ -50,6 +51,7 @@ type ParamRealtimeData struct {
 	EndTime    int64   `form:"endTime"`
 	Interval   string  `form:"interval"`
 	PointType  string  `form:"pointType"`
+	Lable      string  `form:"lable"`
 }
 
 /*
@@ -69,6 +71,34 @@ func (c *RealtimeDataController) GetPointsByDeviceId(ctx *gin.Context) {
 
 	var yx []*models.EmDeviceModelCmdParam
 	yx = c.repoPoint.GetPointsByDeviceId(realtimeData.PointType, realtimeData.DeviceId, realtimeData.Code)
+	//if err != nil {
+	//	ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+	//	return
+	//}
+	ctx.JSON(http.StatusOK, model.ResponseData{
+		"0",
+		"",
+		yx,
+	})
+}
+
+/*
+*
+根据设备id，点位类型获取命令参数属性
+*/
+func (c *RealtimeDataController) GetDeviceByDevLabel(ctx *gin.Context) {
+	var realtimeData ParamRealtimeData
+	if err := ctx.Bind(&realtimeData); err != nil {
+		ctx.JSON(http.StatusOK, model.ResponseData{
+			"1",
+			"error" + err.Error(),
+			"",
+		})
+		return
+	}
+
+	var yx models.EmDevice
+	yx = c.repoPoint.GetDeviceByDevLabel(realtimeData.Lable)
 	//if err != nil {
 	//	ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 	//	return
