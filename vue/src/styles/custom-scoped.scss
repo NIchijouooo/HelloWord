@@ -18,10 +18,6 @@
   line-height: 36px;
 }
 
-:deep(.el-card) {
-  background-color: #f3f3f3 !important;
-}
-
 :deep(.content .el-table__body .el-table__row .el-table__cell:first-child){
   border-left: 1px solid #ebeef5;
 }
@@ -40,7 +36,7 @@
 
 :deep(.el-table .el-table__header-wrapper th) {
   word-break: break-word;
-  background: #f8f8f9 !important;
+  background: #dce2e5 !important;
   color: #515a6e !important;
   height: 40px;
   font-size: 13px;

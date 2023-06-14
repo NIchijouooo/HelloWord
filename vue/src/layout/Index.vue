@@ -34,7 +34,7 @@ import Header from './Header.vue'
     .app_wrap {
       flex: 1;
       height: auto;
-      background-color: #f5f7fa;
+      background-color: #e7ebee;
       overflow: hidden;
       overflow-y: auto;
       .el-main {

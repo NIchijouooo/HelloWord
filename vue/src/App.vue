@@ -36,7 +36,7 @@ import zhCn from 'element-plus/lib/locale/lang/zh-cn'
     bottom: 20px;
     width: 100%;
     height: calc(100%);
-    background-color: #f3f3f3;
+    background-color: #f5f5f5;
     border-radius: 4px;
     overflow: hidden;
   }
@@ -142,7 +142,7 @@ import zhCn from 'element-plus/lib/locale/lang/zh-cn'
   width: 384px;
   top: 20px;
   bottom: 20px;
-  background-color: #fff;
+  background-color: #f5f5f5;
   border-radius: 4px;
 }
 .mcl-content {

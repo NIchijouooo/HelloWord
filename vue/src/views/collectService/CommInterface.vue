@@ -1175,8 +1175,12 @@ const handleResult = (res, doFunction) => {
   box-sizing: border-box;
   padding: 0;
 }
+:deep(.el-collapse-item__header.is-active) {
+  background-color: #f5f5f5 !important;
+}
 :deep(.el-collapse-item__content) {
   padding-bottom: 15px;
+  background-color: #f5f5f5 !important;
 }
 </style>
 <style lang="scss">

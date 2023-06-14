@@ -232,17 +232,23 @@ const activeIndex = computed(() => route.path)
 :deep(.el-menu) {
   background: initial;
 }
+:deep(.el-sub-menu__title:hover) {
+  background: #dce2e5;
+}
+:deep(.el-sub-menu__title.is-active:hover) {
+  background-color: #dce2e5;
+}
 :deep(.el-menu-item:hover) {
-  background-color: #f0f0f0;
+  background-color: #dce2e5;
 }
 :deep(.el-menu-item.is-active:hover) {
-  background-color: #f0f0f0;
+  background-color: #dce2e5;
 }
 /*:deep(.is-active) {
   background-color: #f0f0f0;
 }*/
 :deep(.el-sub-menu .el-menu-item.is-active) {
-  background-color: rgb(187, 187, 187);
+  background-color: #dce2e5;
 }
 :deep(.el-sub-menu .el-menu-item .menu-icon) {
   height: 18px;
