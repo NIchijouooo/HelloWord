@@ -169,6 +169,10 @@ func ApiAddNodesFromXlsx(context *gin.Context) {
 		}
 
 		_ = coll.AddDeviceNode(nodeInfo.Name, nodeInfo.TSL, nodeInfo.Addr, nodeInfo.Label)
+		// 导入cmd写入sqlite
+		emController := controllers.NewEMController()
+		emController.AddEmDeviceFromXlsx(nodeInfo.Name, nodeInfo.TSL, nodeInfo.Addr, nodeInfo.Label, nodeInfo.CollInterface)
+
 	}
 
 	context.JSON(http.StatusOK, model.ResponseData{
