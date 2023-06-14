@@ -645,6 +645,7 @@ const editDeviceModelProperty = (row) => {
   ctxData.propertyForm.dbNumber = row.params.dbNumber
   ctxData.propertyForm.startAddr = row.params.startAddr
   ctxData.propertyForm.dataType = row.params.dataType
+  ctxData.propertyForm.iotDataType = row.iotDataType
   console.log('ctxData.propertyForm', ctxData.propertyForm)
 }
 const propertyFormRef = ref(null)

@@ -764,6 +764,7 @@ const editDeviceModelProperty = (row) => {
   ctxData.propertyForm.type = row.type
   ctxData.propertyForm.blockAddOffset = row.blockAddOffset
   ctxData.propertyForm.rulerAddOffset = row.rulerAddOffset
+  ctxData.propertyForm.iotDataType = row.iotDataType
 }
 const propertyFormRef = ref(null)
 const submitPorpertyForm = () => {

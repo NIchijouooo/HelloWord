@@ -720,6 +720,7 @@ const editDeviceModelProperty = (row) => {
   ctxData.propertyForm.regAddr = row.regAddr
   ctxData.propertyForm.ruleType = row.ruleType
   ctxData.propertyForm.formula = row.formula === undefined || row.formula === null ? '' : row.formula
+  ctxData.propertyForm.iotDataType = row.iotDataType
 }
 const propertyFormRef = ref(null)
 const submitPorpertyForm = () => {
