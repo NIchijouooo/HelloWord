@@ -57,7 +57,7 @@
                       </div>
                     </div>
                     <div class="pc-content">
-                      <div class="param-item" v-for="(item, key, index) of scope.row.param">
+                      <div class="param-item" v-for="(item, key, index) of scope.row.param" :key="index">
                         <div class="param-value">{{ ctxData.paramName[key] }}：</div>
                         <div class="param-name">{{ key === 'cleanSession' ? (item ? '是' : '否') : item }}</div>
                       </div>
@@ -177,16 +177,16 @@
             </el-input>
           </el-form-item>
 
-          <el-form-item v-if="ctxData.gatewayForm.protocol.includes('MQTT')" label="用户名" prop="userName">
+          <el-form-item v-if="ctxData.gatewayForm.protocol.includes('MQTT') && !ctxData.gatewayForm.protocol.includes('ZXJS')" label="用户名" prop="userName">
             <el-input type="text" v-model="ctxData.gatewayForm.userName" autocomplete="off" placeholder="请输入用户名">
             </el-input>
           </el-form-item>
 
-          <el-form-item v-if="ctxData.gatewayForm.protocol.includes('MQTT')" label="密码" prop="password">
+          <el-form-item v-if="ctxData.gatewayForm.protocol.includes('MQTT') && !ctxData.gatewayForm.protocol.includes('ZXJS')" label="密码" prop="password">
             <el-input type="text" v-model="ctxData.gatewayForm.password" autocomplete="off" placeholder="请输入密码">
             </el-input>
           </el-form-item>
-          <el-form-item v-if="ctxData.gatewayForm.protocol.includes('MQTT')" label="客户端名称" prop="clientID">
+          <el-form-item v-if="ctxData.gatewayForm.protocol.includes('MQTT') && !ctxData.gatewayForm.protocol.includes('ZXJS')" label="客户端名称" prop="clientID">
             <el-input
               type="text"
               v-model="ctxData.gatewayForm.clientID"
@@ -244,7 +244,7 @@
               <template #append>单位秒</template>
             </el-input>
           </el-form-item>
-          <el-form-item v-if="ctxData.gatewayForm.protocol.includes('MQTT')" label="是否清除会话" prop="cleanSession">
+          <el-form-item v-if="ctxData.gatewayForm.protocol.includes('MQTT') && !ctxData.gatewayForm.protocol.includes('ZXJS')" label="是否清除会话" prop="cleanSession">
             <el-switch v-model="ctxData.gatewayForm.cleanSession" inline-prompt active-text="是" inactive-text="否" />
           </el-form-item>
           <el-form-item v-if="ctxData.gatewayForm.protocol === 'RT.STLV2'" label="秘钥" prop="token">
@@ -346,6 +346,33 @@
             >
             </el-input>
           </el-form-item>
+          <el-form-item v-if="ctxData.gatewayForm.protocol === 'ZXJS.MQTT'" label="产品序列号" prop="productSn">
+            <el-input
+              type="text"
+              v-model="ctxData.gatewayForm.productSn"
+              autocomplete="off"
+              placeholder="请输入产品序列号"
+            >
+            </el-input>
+          </el-form-item>
+          <el-form-item v-if="ctxData.gatewayForm.protocol === 'ZXJS.MQTT'" label="设备序列号" prop="deviceSn">
+            <el-input
+              type="text"
+              v-model="ctxData.gatewayForm.deviceSn"
+              autocomplete="off"
+              placeholder="请输入设备序列号"
+            >
+            </el-input>
+          </el-form-item>
+          <el-form-item v-if="ctxData.gatewayForm.protocol === 'ZXJS.MQTT'" label="设备密码" prop="devicePwd">
+            <el-input
+              type="text"
+              v-model="ctxData.gatewayForm.devicePwd"
+              autocomplete="off"
+              placeholder="请输入设备密码"
+            >
+            </el-input>
+          </el-form-item>
         </el-form>
       </div>
       <template #footer>
@@ -435,6 +462,9 @@ const ctxData = reactive({
     productKey: '',
     deviceID: '',
     deviceSecret: '',
+    productSn: '',
+    deviceSn: '',
+    devicePwd: '',
   },
   paramName: {
     serviceName: '服务名称',
@@ -456,6 +486,9 @@ const ctxData = reactive({
     productKey: '产品密钥',
     deviceID: '通讯地址',
     deviceSecret: '设备密钥',
+    ProductSn: '产品序列号',
+    DeviceSn: '设备序列号',
+    DevicePwd: '设备密码',
   },
   gatewayRules: {
     serviceName: [
@@ -644,7 +677,28 @@ const ctxData = reactive({
     deviceSecret: [
       {
         required: true,
-        message: '产品密钥不能为空',
+        message: '设备密钥不能为空',
+        trigger: 'blur',
+      },
+    ],
+    productSn: [
+      {
+        required: true,
+        message: '产品序列号不能为空',
+        trigger: 'blur',
+      },
+    ],
+    deviceSn: [
+      {
+        required: true,
+        message: '设备序列号不能为空',
+        trigger: 'blur',
+      },
+    ],
+    devicePwd: [
+      {
+        required: true,
+        message: '设备密码不能为空',
         trigger: 'blur',
       },
     ],
@@ -777,7 +831,11 @@ const editGateway = (row) => {
     ctxData.gatewayForm['productKey'] = row.param.ProductKey
     ctxData.gatewayForm['deviceID'] = row.param.DeviceID
     ctxData.gatewayForm['deviceSecret'] = row.param.DeviceSecret
-  }else if (row.protocol.includes('MQTT')) {
+  }else if (row.protocol == 'ZXJS.MQTT') {
+    ctxData.gatewayForm['productSn'] = row.param.ProductSn
+    ctxData.gatewayForm['deviceSn'] = row.param.DeviceSn
+    ctxData.gatewayForm['devicePwd'] = row.param.DevicePwd
+  } else if (row.protocol.includes('MQTT')) {
     ctxData.gatewayForm['userName'] = row.param.userName
     ctxData.gatewayForm['password'] = row.param.password
     ctxData.gatewayForm['clientID'] = row.param.clientID
@@ -865,7 +923,9 @@ const initGatewayForm = () => {
     productKey: '',
     deviceID: '',
     deviceSecret: '',
-
+    productSn: '',
+    deviceSn: '',
+    devicePwd: '',
   }
 }
 const gatewayFormRef = ref(null)
@@ -892,6 +952,10 @@ const submitGatewayForm = () => {
         param['productKey'] = ctxData.gatewayForm.productKey
         param['deviceID'] = ctxData.gatewayForm.deviceID
         param['deviceSecret'] = ctxData.gatewayForm.deviceSecret
+      } else if (ctxData.gatewayForm.protocol === 'ZXJS.MQTT') {
+        param['productSn'] = ctxData.gatewayForm.productSn
+        param['deviceSn'] = ctxData.gatewayForm.deviceSn
+        param['devicePwd'] = ctxData.gatewayForm.devicePwd
       } else if (ctxData.gatewayForm.protocol.includes('MQTT')) {
         param['userName'] = ctxData.gatewayForm.userName
         param['password'] = ctxData.gatewayForm.password
