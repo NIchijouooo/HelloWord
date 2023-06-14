@@ -11,7 +11,7 @@ import (
 
 // 定义字典类型管理的存储库
 type DevicePointRepository struct {
-	sqldb     *gorm.DB
+	sqldb  *gorm.DB
 	taosDb *sql.DB
 }
 
@@ -19,25 +19,23 @@ func NewDevicePointRepository() *DevicePointRepository {
 	return &DevicePointRepository{sqldb: models.DB, taosDb: models.TaosDB}
 }
 
-/**
-	设备去查模型，模型查命令，有多个命令，命令查参数既点位，一个命令数据对应一条参数表数据？还是多条
- */
-func (r *DevicePointRepository) GetYxById(deviceId, code int) (models.YxData, error) {
-	var realtime models.YxData
-	//tableName := fmt.Sprintf("%v%d%v%d", "realtimedatatest.yx_", deviceId, "_", code)
-	//sql := fmt.Sprintf("select last(*) from ? ", tableName)
-	sql := fmt.Sprint("select Last(ts), val, device_id, code from realtimedatatest.yx where device_id =", deviceId, "and code =", code)
-	fmt.Println(sql)
-	rows, err := r.sqldb.First(sql)
-	defer rows.Close()
+/*
+*
 
-	for rows.Next() {
-		err := rows.Scan(&realtime.Ts, &realtime.Value, &realtime.DeviceId, &realtime.Code)
-		if err != nil {
-			log.Printf("Request params:%v", err)
-		}
+	根据设备id，点位类型获取命令参数属性
+	设备去查模型，模型查命令，有多个命令，命令查参数既点位，一个命令数据对应多条参数表数据
+	pointType:yx/yc/setting/all
+*/
+func (r *DevicePointRepository) GetPointsByDeviceId(pointType string, deviceId, code int) []*models.EmDeviceModelCmdParam {
+	//var pointParams []*models.PointParam
+	var pointParams []*models.EmDeviceModelCmdParam
+	//.Joins("left join em_device_model on em_device_model.id = em_device.model_id")
+	if len(pointType) == 0 {
+		r.sqldb.Joins("LEFT JOIN em_device_model_cmd ON em_device_model_cmd.id = em_device_model_cmd_param.device_model_cmd_id").Joins("LEFT JOIN em_device ON em_device.id = em_device_model_cmd.device_model_id").Where("em_device.id = ?", deviceId).Find(&pointParams).Statement.SQL.String()
+	} else {
+		r.sqldb.Joins("LEFT JOIN em_device_model_cmd ON em_device_model_cmd.id = em_device_model_cmd_param.device_model_cmd_id").Joins("LEFT JOIN em_device ON em_device.id = em_device_model_cmd.device_model_id").Where("em_device.id = ?", deviceId).Where("em_device_model_cmd_param.iot_data_type = ?", pointType).Find(&pointParams).Statement.SQL.String()
 	}
-	return realtime, err
+	return pointParams
 }
 
 /*

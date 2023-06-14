@@ -105,8 +105,6 @@ func ApiDeleteCollectInterface(context *gin.Context) {
 	interfaceInfo := struct {
 		Name string `json:"name"` // 采集接口名字
 	}{}
-	emController := controllers.NewEMController()
-	emController.DeleteCollInterface(context)
 
 	err := context.ShouldBindBodyWith(&interfaceInfo, binding.JSON)
 	if err != nil {
@@ -120,6 +118,11 @@ func ApiDeleteCollectInterface(context *gin.Context) {
 	}
 
 	err = device.DeleteCollectInterface(interfaceInfo.Name)
+	if err == nil {
+		emController := controllers.NewEMController()
+		emController.DeleteCollInterface(context)
+	}
+
 	if err != nil {
 		context.JSON(http.StatusOK, model.ResponseData{
 			Code:    "1",

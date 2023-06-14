@@ -7,6 +7,7 @@ import (
 	"gateway/httpServer/model"
 	"gateway/models"
 	repositories "gateway/repositories"
+
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -327,6 +328,28 @@ func (c *EmController) AddEmDevice(ctx *gin.Context) {
 	//	Code:    "1",
 	//	Message: "添加设备成功",
 	//})
+	return
+}
+
+func (c *EmController) AddEmDeviceFromXlsx(name string, tsl string, addr string, label string, collInterface string) {
+	var data []byte
+	var emDevice models.EmDevice
+	emDevice.Name = name
+	emDevice.Label = label
+	emDevice.Addr = addr
+
+	// 通过模型名找模型id
+	emDeviceModelByName, err := c.repo.GetEmDeviceModelByName(tsl)
+	emDevice.ModelId = emDeviceModelByName.Id
+	// 通过采集接口名找接口id
+	collInterfaceByName, err := c.repo.GetCollInterfaceByName(collInterface)
+	emDevice.CollInterfaceId = collInterfaceByName.Id
+	data, err = json.Marshal(emDevice)
+	emDevice.Data = string(data)
+	err = c.repo.AddEmDevice(&emDevice)
+	if err != nil {
+		return
+	}
 	return
 }
 
@@ -712,7 +735,7 @@ func (c *EmController) DeleteEmDeviceModelCmdParam(ctx *gin.Context) {
 	return
 }
 
-//根据设备名称获取所有模型
+// 根据设备名称获取所有模型
 func (c *EmController) GetEmDeviceModelCmdParamListByName(ctx *gin.Context) {
 	var tmp struct {
 		Name string `json:"name"`
@@ -747,7 +770,7 @@ func (c *EmController) GetEmDeviceModelCmdParamListByName(ctx *gin.Context) {
 	})
 }
 
-//根据设备ID获取所有模型
+// 根据设备ID获取所有模型
 func (c *EmController) GetEmDeviceModelCmdParamListByDeviceId(ctx *gin.Context) {
 	var tmp struct {
 		DeviceId int `json:"deviceId"`
