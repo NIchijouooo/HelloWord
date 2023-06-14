@@ -86,7 +86,7 @@ func (c *RealtimeDataController) GetRealtimeDataYxListByID(ctx *gin.Context) {
 	fmt.Println(realtimeData.StartTime)
 	fmt.Println(realtimeData.EndTime)
 
-	var yxList []*models.DeviceParam
+	var yxList []*models.PointParam
 	yxList, err := c.repoHis.GetYxLogByDeviceIdsCodes(realtimeData.DeviceIds, realtimeData.Codes, realtimeData.Interval, realtimeData.StartTime, realtimeData.EndTime)
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
@@ -112,7 +112,7 @@ func (c *RealtimeDataController) GetRealtimeDataYcListByID(ctx *gin.Context) {
 	fmt.Println(realtimeData.StartTime)
 	fmt.Println(realtimeData.EndTime)
 
-	var yxList []*models.DeviceParam
+	var yxList []*models.PointParam
 	yxList, err := c.repoHis.GetYcLogByDeviceIdsCodes(realtimeData.DeviceIds, realtimeData.Codes, realtimeData.Interval, realtimeData.StartTime, realtimeData.EndTime)
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})

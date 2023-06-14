@@ -1,4 +1,4 @@
-package models
+package repositories
 
 import (
 	sqlt "database/sql"
@@ -26,8 +26,8 @@ func NewHistoryDataRepository() *HistoryDataRepository {
 	startTime，endTime为时间戳
 	interval按语法传参
 */
-func (r *HistoryDataRepository) GetYxLogByDeviceIdsCodes(deviceIds, codes, interval string, startTime, endTime int64) ([]*models.DeviceParam, error) {
-	var realtimeList []*models.DeviceParam
+func (r *HistoryDataRepository) GetYxLogByDeviceIdsCodes(deviceIds, codes, interval string, startTime, endTime int64) ([]*models.PointParam, error) {
+	var realtimeList []*models.PointParam
 	tableName := "realtimedatatest.yx"
 	var err error
 	var sql = ""
@@ -43,7 +43,7 @@ func (r *HistoryDataRepository) GetYxLogByDeviceIdsCodes(deviceIds, codes, inter
 		}
 		defer rows.Close()
 		for rows.Next() {
-			realtime := &models.DeviceParam{}
+			realtime := &models.PointParam{}
 			var value sqlt.NullString
 			err := rows.Scan(&realtime.Ts, &value, &realtime.DeviceId, &realtime.Code)
 			if err != nil {
@@ -64,7 +64,7 @@ func (r *HistoryDataRepository) GetYxLogByDeviceIdsCodes(deviceIds, codes, inter
 		}
 		defer rows.Close()
 		for rows.Next() {
-			realtime := &models.DeviceParam{}
+			realtime := &models.PointParam{}
 			var value sqlt.NullString
 			err := rows.Scan(&value, &realtime.DeviceId, &realtime.Code)
 			if err != nil {
@@ -86,8 +86,8 @@ func (r *HistoryDataRepository) GetYxLogByDeviceIdsCodes(deviceIds, codes, inter
 	startTime，endTime为时间戳
 	interval按语法传参
 */
-func (r *HistoryDataRepository) GetYcLogByDeviceIdsCodes(deviceIds, codes, interval string, startTime, endTime int64) ([]*models.DeviceParam, error) {
-	var realtimeList []*models.DeviceParam
+func (r *HistoryDataRepository) GetYcLogByDeviceIdsCodes(deviceIds, codes, interval string, startTime, endTime int64) ([]*models.PointParam, error) {
+	var realtimeList []*models.PointParam
 	tableName := "realtimedatatest.yc"
 	var err error
 	var sql = ""
@@ -102,7 +102,7 @@ func (r *HistoryDataRepository) GetYcLogByDeviceIdsCodes(deviceIds, codes, inter
 		}
 		defer rows.Close()
 		for rows.Next() {
-			realtime := &models.DeviceParam{}
+			realtime := &models.PointParam{}
 			var value sqlt.NullString
 			err := rows.Scan(&realtime.Ts, &value, &realtime.DeviceId, &realtime.Code)
 			if err != nil {
@@ -122,7 +122,7 @@ func (r *HistoryDataRepository) GetYcLogByDeviceIdsCodes(deviceIds, codes, inter
 		}
 		defer rows.Close()
 		for rows.Next() {
-			realtime := &models.DeviceParam{}
+			realtime := &models.PointParam{}
 			var value sqlt.NullString
 			err := rows.Scan(&value, &realtime.DeviceId, &realtime.Code)
 			if err != nil {

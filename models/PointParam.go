@@ -2,7 +2,7 @@ package models
 
 import "time"
 
-type DeviceParam struct {
+type PointParam struct {
 	DeviceId int       `json:"deviceId"    description:"设备id"`
 	Code     int       `json:"code"    description:"遥信/遥测/参数编码"`
 	Name     string    `json:"name"    description:"遥信/遥测/参数名称"`
