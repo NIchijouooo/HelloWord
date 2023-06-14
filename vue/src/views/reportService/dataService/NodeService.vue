@@ -81,6 +81,24 @@
           @row-dblclick="editNode"
         >
           <el-table-column type="selection" width="55" />
+          <el-table-column type="expand">
+            <template #default="scope">
+              <div class="param-content">
+                <div class="pc-title">
+                  <div class="pct-info">
+                    <b> {{ scope.row.deviceName }} </b>
+                    上报参数
+                  </div>
+                </div>
+                <div class="pc-content">
+                  <div class="param-item" v-for="(item, key, index) of scope.row.param" :key="index">
+                    <div class="param-value">{{ ctxData.paramName[key] }}：</div>
+                    <div class="param-name">{{ item || '-' }}</div>
+                  </div>
+                </div>
+              </div>
+            </template>
+          </el-table-column>
           <el-table-column sortable prop="deviceName" label="设备名称" width="auto" min-width="180" align="center">
           </el-table-column>
           <el-table-column sortable prop="deviceLabel" label="设备标签" width="auto" min-width="180" align="center">
@@ -100,11 +118,6 @@
           <el-table-column sortable label="上报状态" width="auto" min-width="100" align="center">
             <template #default="scope">
               {{ scope.row.reportStatus === 'onLine' ? '在线' : '离线' }}
-            </template>
-          </el-table-column>
-          <el-table-column sortable label="上报参数" width="auto" min-width="180" align="center">
-            <template #default="scope">
-              {{ scope.row.param }}
             </template>
           </el-table-column>
           <el-table-column label="操作" width="auto" min-width="120" align="center" fixed="right">
@@ -352,6 +365,11 @@ const ctxData = reactive({
     background: variables.primaryColor,
     color: variables.fontWhiteColor,
     height: '54px',
+  },
+  paramName: {
+    ProductKey: '产品密钥',
+    DeviceID: '通讯地址',
+    DeviceSecret: '设备密钥',
   },
   cellStyle: {
     height: '48px',
