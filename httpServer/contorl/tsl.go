@@ -52,7 +52,6 @@ func ApiAddDeviceTSL(context *gin.Context) {
 		})
 		return
 	}
-
 	context.JSON(http.StatusOK, model.ResponseData{
 		Code:    "0",
 		Message: "添加物模型模版成功",
@@ -90,7 +89,6 @@ func ApiDeleteDeviceTSL(context *gin.Context) {
 		})
 		return
 	}
-
 	context.JSON(http.StatusOK, model.ResponseData{
 		Code:    "0",
 		Message: "删除物模型模版成功",

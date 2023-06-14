@@ -9,7 +9,7 @@ import (
 	"time"
 )
 
-//物模型 Thing Specification Language
+// 物模型 Thing Specification Language
 type TSLModelS7Template struct {
 	Index      int                           `json:"index"`
 	Name       string                        `json:"name"`       //名称，只可以是字母和数字的组合
@@ -150,12 +150,13 @@ func DeleteTSLModelS7(name string) error {
 		}
 	}
 
-	_, ok := TSLModelS7Map[name]
+	_, ok := TSLModelsName[name]
 	if !ok {
 		return errors.New("物模型不存在")
 	}
 
 	delete(TSLModelS7Map, name)
+	delete(TSLModelsName, name)
 	WriteTSLModelS7ParamToJson()
 
 	return nil
