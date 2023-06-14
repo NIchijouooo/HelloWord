@@ -15,7 +15,7 @@ import (
 	"time"
 )
 
-//物模型 Thing Specification Language
+// 物模型 Thing Specification Language
 type TSLLuaModelTemplate struct {
 	Index      int                       `json:"index"`
 	Name       string                    `json:"name"`  //名称，只可以是字母和数字的组合
@@ -170,12 +170,13 @@ func DeleteTSLModelLua(name string) error {
 		}
 	}
 
-	_, ok := TSLLuaMap[name]
+	_, ok := TSLModelsName[name]
 	if !ok {
 		return errors.New("物模型不存在")
 	}
 
 	delete(TSLLuaMap, name)
+	delete(TSLModelsName, name)
 	WriteTSLLuaParamToJson()
 
 	return nil
@@ -209,7 +210,7 @@ func ModifyTSLModelLua(name string, label string, plugin json.RawMessage) error 
 	return nil
 }
 
-//遍历plugin
+// 遍历plugin
 func DeviceTSLTraversePlugin(path string, fileName []string) ([]string, error) {
 
 	rd, err := ioutil.ReadDir(path)

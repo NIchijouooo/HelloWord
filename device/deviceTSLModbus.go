@@ -155,12 +155,13 @@ func DeleteTSLModbus(name string) error {
 		}
 	}
 
-	_, ok := TSLModbusMap[name]
+	_, ok := TSLModelsName[name]
 	if !ok {
 		return errors.New("采集模型[Modbus]不存在")
 	}
 
 	delete(TSLModbusMap, name)
+	delete(TSLModelsName, name)
 	WriteTSLModbusParamToJson()
 
 	return nil

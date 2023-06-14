@@ -648,6 +648,9 @@ func (c *EmController) DeleteEmDeviceModelCmdParam(ctx *gin.Context) {
 	}
 	for _, name := range tmp.PropertyNames {
 		emDeviceModelCmdByNameParam, _ := c.repo.GetEmDeviceModelCmdParamByName(name)
+		if emDeviceModelCmdByNameParam == nil {
+			return
+		}
 		c.repo.DeleteEmDeviceModelCmdParam(emDeviceModelCmdByNameParam.Id)
 	}
 	return

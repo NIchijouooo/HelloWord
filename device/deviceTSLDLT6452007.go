@@ -153,12 +153,13 @@ func DeleteTSLDLT6452007(name string) error {
 		}
 	}
 
-	_, ok := TSLDLT6452007Map[name]
+	_, ok := TSLModelsName[name]
 	if !ok {
 		return errors.New("采集模型[DLT645-2007]不存在")
 	}
 
 	delete(TSLDLT6452007Map, name)
+	delete(TSLModelsName, name)
 	WriteTSLDLT6452007ParamToJson()
 
 	return nil

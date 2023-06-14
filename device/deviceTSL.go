@@ -147,7 +147,7 @@ func DeleteTSLMode(name string, modelType int) error {
 
 	switch modelType {
 	case TSLModelTypeLua:
-		_, ok := TSLModels[name]
+		_, ok := TSLModelsName[name]
 		if !ok {
 			return errors.New("模型名称不存在")
 		}
@@ -156,7 +156,7 @@ func DeleteTSLMode(name string, modelType int) error {
 			return err
 		}
 	case TSLModelTypeS7:
-		_, ok := TSLModels[name]
+		_, ok := TSLModelsName[name]
 		if !ok {
 			return errors.New("模型名称不存在")
 		}
@@ -165,11 +165,19 @@ func DeleteTSLMode(name string, modelType int) error {
 			return err
 		}
 	case TSLModelTypeModbus:
+		_, ok := TSLModelsName[name]
+		if !ok {
+			return errors.New("模型名称不存在")
+		}
 		err := DeleteTSLModbus(name)
 		if err != nil {
 			return err
 		}
 	case TSLModelTypeDLT6452007:
+		_, ok := TSLModelsName[name]
+		if !ok {
+			return errors.New("模型名称不存在")
+		}
 		err := DeleteTSLDLT6452007(name)
 		if err != nil {
 			return err
