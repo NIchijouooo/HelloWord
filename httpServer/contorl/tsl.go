@@ -1351,6 +1351,10 @@ func ApiAddTSLModbusCmdFromXlsx(context *gin.Context) {
 		}
 
 		err = tslModel.TSLModelCmdAdd(cmd)
+		// 导入cmd写入sqlite
+		emController := controllers.NewEMController()
+		emController.AddEmDeviceModelCmdFromXlsx(cmd, "modbus", tslName)
+
 		if err != nil {
 			context.JSON(http.StatusOK, model.ResponseData{
 				Code:    "1",
@@ -1491,6 +1495,10 @@ func ApiAddTSLModbusCmdPropertyFromXlsx(context *gin.Context) {
 		}
 
 		err = tslModel.TSLModelPropertiesAdd(cmdName, property)
+		// 导入param写入sqlite
+		emController := controllers.NewEMController()
+		emController.AddEmDeviceModelCmdParamFromXlsx(property, "modbus", cmdName)
+
 		if err != nil {
 			context.JSON(http.StatusOK, model.ResponseData{
 				Code:    "1",
