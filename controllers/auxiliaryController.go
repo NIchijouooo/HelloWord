@@ -2,12 +2,12 @@ package controllers
 
 import (
 	"gateway/httpServer/model"
-	repositories "gateway/repositories"
+	"gateway/repositories"
 	"github.com/gin-gonic/gin"
 	"net/http"
 )
 
-//定义辅控管理的控制器
+// 定义辅控管理的控制器
 type AuxiliaryController struct {
 	repo *repositories.AuxiliaryRepository
 }
@@ -21,7 +21,7 @@ func (ctrl *AuxiliaryController) RegisterRoutes(router *gin.RouterGroup) {
 	router.GET("/api/v2/auxiliary/getDeviceType", ctrl.GetAuxiliaryDeviceType)
 }
 
-///获取设备类型下的所有设备数据
+// /获取设备类型下的所有设备数据
 func (c *AuxiliaryController) GetDeviceListByDeviceType(ctx *gin.Context) {
 	label := ctx.Query("label")
 	deviceList, err := c.repo.GetAuxiliaryDevice(label)
@@ -37,7 +37,7 @@ func (c *AuxiliaryController) GetDeviceListByDeviceType(ctx *gin.Context) {
 	return
 }
 
-//获取所有设备类型
+// 获取所有设备类型
 func (c *AuxiliaryController) GetAuxiliaryDeviceType(ctx *gin.Context) {
 	deviceTypeList, err := c.repo.GetAuxiliaryDeviceType()
 	if err != nil {

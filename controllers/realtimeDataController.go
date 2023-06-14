@@ -7,7 +7,7 @@ import (
 	"fmt"
 	"gateway/httpServer/model"
 	"gateway/models"
-	repositories "gateway/repositories"
+	"gateway/repositories"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -15,12 +15,13 @@ import (
 
 // 定义字典类型管理的控制器
 type RealtimeDataController struct {
-	repo    *repositories.RealtimeDataRepository
-	repoHis *repositories.HistoryDataRepository
+	repo      *repositories.RealtimeDataRepository
+	repoHis   *repositories.HistoryDataRepository
+	repoPoint *repositories.DevicePointRepository
 }
 
 func NewRealtimeDataController() *RealtimeDataController {
-	return &RealtimeDataController{repo: repositories.NewRealtimeDataRepository(), repoHis: repositories.NewHistoryDataRepository()}
+	return &RealtimeDataController{repo: repositories.NewRealtimeDataRepository(), repoHis: repositories.NewHistoryDataRepository(), repoPoint: repositories.NewDevicePointRepository()}
 }
 
 func (ctrl *RealtimeDataController) RegisterRoutes(router *gin.RouterGroup) {
@@ -30,6 +31,7 @@ func (ctrl *RealtimeDataController) RegisterRoutes(router *gin.RouterGroup) {
 	router.POST("/api/v2/realtimeData/GetRealtimeDataYxListByID", ctrl.GetRealtimeDataYxListByID)
 	router.POST("/api/v2/realtimeData/GetRealtimeDataYcListByID", ctrl.GetRealtimeDataYcListByID)
 	router.POST("/api/v2/realtimeData/GetRealtimeDataSettingListByID", ctrl.GetRealtimeDataSettingListByID)
+	router.POST("/api/v2/realtimeData/GetPointsByDeviceId", ctrl.GetPointsByDeviceId)
 	// 注册其他路由...
 }
 
@@ -47,8 +49,36 @@ type ParamRealtimeData struct {
 	StartTime  int64   `form:"startTime"`
 	EndTime    int64   `form:"endTime"`
 	Interval   string  `form:"interval"`
+	PointType  string  `form:"pointType"`
 }
 
+/*
+*
+根据设备id，点位类型获取命令参数属性
+*/
+func (c *RealtimeDataController) GetPointsByDeviceId(ctx *gin.Context) {
+	var realtimeData ParamRealtimeData
+	if err := ctx.Bind(&realtimeData); err != nil {
+		ctx.JSON(http.StatusOK, model.ResponseData{
+			"1",
+			"error" + err.Error(),
+			"",
+		})
+		return
+	}
+
+	var yx []*models.EmDeviceModelCmdParam
+	yx = c.repoPoint.GetPointsByDeviceId(realtimeData.PointType, realtimeData.DeviceId, realtimeData.Code)
+	//if err != nil {
+	//	ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+	//	return
+	//}
+	ctx.JSON(http.StatusOK, model.ResponseData{
+		"0",
+		"",
+		yx,
+	})
+}
 func (c *RealtimeDataController) GetRealtimeDataYxByID(ctx *gin.Context) {
 	var realtimeData ParamRealtimeData
 	if err := ctx.Bind(&realtimeData); err != nil {

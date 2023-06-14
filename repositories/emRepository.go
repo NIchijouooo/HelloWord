@@ -1,4 +1,4 @@
-package models
+package repositories
 
 import (
 	"gateway/models"
@@ -227,7 +227,7 @@ func (r *EmRepository) GetEmDeviceModelCmdParamListByName(name string) ([]models
 	return emDeviceModelCmdParam, nil
 }
 
-//根据设备id获取模型列表
+// 根据设备id获取模型列表
 func (r *EmRepository) GetEmDeviceModelCmdParamListByDeviceId(deviceId int) ([]models.EmDeviceModelCmdParam, error) {
 	var emDeviceModelCmdParamList []models.EmDeviceModelCmdParam
 	if err := r.db.Table("em_device_model_cmd_param as param").
