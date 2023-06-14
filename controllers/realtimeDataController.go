@@ -8,8 +8,9 @@ import (
 	"gateway/httpServer/model"
 	"gateway/models"
 	repositories "gateway/repositories"
-	"github.com/gin-gonic/gin"
 	"net/http"
+
+	"github.com/gin-gonic/gin"
 )
 
 // 定义字典类型管理的控制器
@@ -37,13 +38,15 @@ type ParamRealtimeData struct {
 	Code       int     `form:"code"`
 	Codes      string  `form:"codes"`
 	DeviceName string  `form:"deviceName"`
-	DeviceID   int     `form:"deviceID"`
+	DeviceId   int     `form:"DeviceId"`
+	DeviceIds  string  `form:"deviceIds"`
 	Value      float64 `form:"value"`
-	ChannelID  uint64  `form:"channelID"`
+	ChannelId  uint64  `form:"channelId"`
 	Type       string  `form:"type"`
 	Date       string  `form:"date"`
 	StartTime  int64   `form:"startTime"`
 	EndTime    int64   `form:"endTime"`
+	Interval   string  `form:"interval"`
 }
 
 func (c *RealtimeDataController) GetRealtimeDataYxByID(ctx *gin.Context) {
@@ -58,7 +61,7 @@ func (c *RealtimeDataController) GetRealtimeDataYxByID(ctx *gin.Context) {
 	}
 
 	var yx models.YxData
-	yx, err := c.repo.GetYxById(realtimeData.DeviceID, realtimeData.Code)
+	yx, err := c.repo.GetYxById(realtimeData.DeviceId, realtimeData.Code)
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -83,8 +86,8 @@ func (c *RealtimeDataController) GetRealtimeDataYxListByID(ctx *gin.Context) {
 	fmt.Println(realtimeData.StartTime)
 	fmt.Println(realtimeData.EndTime)
 
-	var yxList []*models.YxData
-	yxList, err := c.repoHis.GetYxLogById(realtimeData.DeviceID, realtimeData.Codes, realtimeData.StartTime, realtimeData.EndTime)
+	var yxList []*models.DeviceParam
+	yxList, err := c.repoHis.GetYxLogByDeviceIdsCodes(realtimeData.DeviceIds, realtimeData.Codes, realtimeData.Interval, realtimeData.StartTime, realtimeData.EndTime)
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -109,8 +112,8 @@ func (c *RealtimeDataController) GetRealtimeDataYcListByID(ctx *gin.Context) {
 	fmt.Println(realtimeData.StartTime)
 	fmt.Println(realtimeData.EndTime)
 
-	var yxList []*models.YcData
-	yxList, err := c.repoHis.GetYcLogById(realtimeData.DeviceID, realtimeData.Codes, realtimeData.StartTime, realtimeData.EndTime)
+	var yxList []*models.DeviceParam
+	yxList, err := c.repoHis.GetYcLogByDeviceIdsCodes(realtimeData.DeviceIds, realtimeData.Codes, realtimeData.Interval, realtimeData.StartTime, realtimeData.EndTime)
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -135,7 +138,7 @@ func (c *RealtimeDataController) GetRealtimeDataSettingListByID(ctx *gin.Context
 	fmt.Println(realtimeData.EndTime)
 
 	var yxList []*models.SettingData
-	yxList, err := c.repoHis.GetSettingLogById(realtimeData.DeviceID, realtimeData.Codes, realtimeData.StartTime, realtimeData.EndTime)
+	yxList, err := c.repoHis.GetSettingLogByDeviceIdsCodes(realtimeData.DeviceIds, realtimeData.Codes, realtimeData.Interval, realtimeData.StartTime, realtimeData.EndTime)
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -158,7 +161,7 @@ func (c *RealtimeDataController) GetRealtimeDataYcByID(ctx *gin.Context) {
 	}
 
 	var yx models.YcData
-	yx, err := c.repo.GetYcById(realtimeData.DeviceID, realtimeData.Code)
+	yx, err := c.repo.GetYcById(realtimeData.DeviceId, realtimeData.Code)
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -181,7 +184,7 @@ func (c *RealtimeDataController) GetRealtimeDataSettingByID(ctx *gin.Context) {
 	}
 
 	var yx models.SettingData
-	yx, err := c.repo.GetSettingById(realtimeData.DeviceID, realtimeData.Code)
+	yx, err := c.repo.GetSettingById(realtimeData.DeviceId, realtimeData.Code)
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
