@@ -65,7 +65,7 @@
         </template>
       </el-table-column>
       <el-table-column prop="unit" label="单位" width="auto" min-width="80" align="center" />
-
+      <el-table-column prop="iotDataType" label="点位类型" width="auto" min-width="120" align="center" />
       <el-table-column prop="regAddr" label="寄存器地址" width="auto" min-width="120" align="center" />
       <el-table-column prop="regCnt" label="寄存器数量" width="auto" min-width="120" align="center" />
       <el-table-column prop="ruleType" label="解析规则" width="auto" min-width="120" align="center" />
@@ -200,7 +200,18 @@
           >
           </el-input>
         </el-form-item>
-        <el-form-item label="" prop="" style="width: 220px" v-if="props.curModelBlock.funCode != 1"> </el-form-item>
+        <el-form-item label="点位类型" prop="iotDataType">
+          <el-select v-model.number="ctxData.propertyForm.iotDataType" style="width: 220px" placeholder="请选择点位类型">
+            <el-option
+              v-for="(item, index) in ctxData.pointTypeOptions"
+              :key="index"
+              :label="item.label"
+              :value="item.value"
+            >
+            </el-option>
+          </el-select>
+        </el-form-item>
+        <!-- <el-form-item label="" prop="" style="width: 220px" v-if="props.curModelBlock.funCode != 1"> </el-form-item> -->
         <el-form-item label="寄存器数量" prop="regCnt">
           <el-input
             type="text"
@@ -403,6 +414,11 @@ const ctxData = reactive({
     { label: 2, value: 2 },
     { label: 4, value: 4 },
   ],
+  pointTypeOptions: [
+    { label: 'yc', value: 'yc' },
+    { label: 'yx', value: 'yx' },
+    { label: 'setting', value: 'setting' }
+  ],
   pFlag: false, //属性对话框标识
   pTitle: '添加属性', //属性对话框titleName
   propertyForm: {
@@ -417,6 +433,7 @@ const ctxData = reactive({
     unit: '', // 单位，只有uint32，int32，double有效
     decimals: 0, // 小数位数，只有double有效
     formula: '', // 计算公式
+    iotDataType: 'yc'
   },
 
   //数据类型
@@ -724,6 +741,7 @@ const submitPorpertyForm = () => {
           regAddr: ctxData.propertyForm.regAddr,
           ruleType: ctxData.propertyForm.ruleType,
           formula: ctxData.propertyForm.formula,
+          iotDataType: ctxData.propertyForm.iotDataType
         },
       }
       if (ctxData.pTitle.includes('添加')) {
