@@ -17,8 +17,8 @@ func NewAuxiliaryController() *AuxiliaryController {
 }
 
 func (ctrl *AuxiliaryController) RegisterRoutes(router *gin.RouterGroup) {
-	router.GET("/api/v2/Auxiliary/GetDeviceListByDeviceType", ctrl.GetDeviceListByDeviceType)
-	router.GET("/api/v2/Auxiliary/GetDeviceType", ctrl.GetAuxiliaryDeviceType)
+	router.GET("/api/v2/auxiliary/getDeviceListByDeviceType", ctrl.GetDeviceListByDeviceType)
+	router.GET("/api/v2/auxiliary/getDeviceType", ctrl.GetAuxiliaryDeviceType)
 }
 
 ///获取设备类型下的所有设备数据
