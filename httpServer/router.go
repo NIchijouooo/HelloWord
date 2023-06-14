@@ -66,6 +66,8 @@ func RouterWeb(port string) {
 		/**
 		字典
 		*/
+		realtimeDataController := controllers.NewRealtimeDataController()
+		realtimeDataController.RegisterRoutes(&router.RouterGroup)
 		dictTypeController := controllers.NewDictTypeController()
 		dictTypeController.RegisterRoutes(&router.RouterGroup)
 		dictDataController := controllers.NewDictDataController()
