@@ -416,7 +416,10 @@ func ApiAddTSLProperty(context *gin.Context) {
 		Property: &properties,
 	}
 
-	err := context.BindJSON(&tslInfo)
+	emController := controllers.NewEMController()
+	emController.AddEmDeviceModelCmd(context)
+
+	err := context.ShouldBindBodyWith(&tslInfo, binding.JSON)
 	if err != nil {
 		setting.ZAPS.Error("增加物模型属性JSON格式化错误 %v", err)
 		context.JSON(http.StatusOK, model.ResponseData{
@@ -768,7 +771,10 @@ func ApiAddTSLD07Cmd(context *gin.Context) {
 		BlockRead    byte   `json:"blockRead"`
 	}{}
 
-	err := context.BindJSON(&cmdParam)
+	emController := controllers.NewEMController()
+	emController.AddEmDeviceModelCmd(context)
+
+	err := context.ShouldBindBodyWith(&cmdParam, binding.JSON)
 	if err != nil {
 		setting.ZAPS.Error("增加采集模型[DLT645-2007]命令JSON格式化错误 %v", err)
 		context.JSON(http.StatusOK, model.ResponseData{
@@ -881,7 +887,10 @@ func ApiModifyTSLD07Cmd(context *gin.Context) {
 		BlockRead    byte   `json:"blockRead"`
 	}{}
 
-	err := context.BindJSON(&cmdParam)
+	emController := controllers.NewEMController()
+	emController.UpdateEmDeviceModelCmd(context)
+
+	err := context.ShouldBindBodyWith(&cmdParam, binding.JSON)
 	if err != nil {
 		setting.ZAPS.Error("修改采集模型[DLT645-2007]命令JSON格式化错误 %v", err)
 		context.JSON(http.StatusOK, model.ResponseData{
@@ -980,7 +989,10 @@ func ApiDeleteTSLD07Cmd(context *gin.Context) {
 		CmdNames []string `json:"names"`   //
 	}{}
 
-	err := context.BindJSON(&cmdParam)
+	emController := controllers.NewEMController()
+	emController.DeleteEmDeviceModelCmd(context)
+
+	err := context.ShouldBindBodyWith(&cmdParam, binding.JSON)
 	if err != nil {
 		setting.ZAPS.Error("删除物模型属性JSON格式化错误 %v", err)
 		context.JSON(http.StatusOK, model.ResponseData{
@@ -1157,9 +1169,13 @@ func ApiAddTSLD07CmdProperty(context *gin.Context) {
 		BlockAddOffset int    `json:"blockAddOffset"` //当前数据在块数据域内的偏移地址
 		RulerAddOffset int    `json:"rulerAddOffset"` //当前变量在当前ID数据地址中的偏移地址
 		Type           int    `json:"type"`           //float,uint32...
+		IotDataType    string `json:"iotDataType"`
 	}{}
 
-	err := context.BindJSON(propertyParam)
+	emController := controllers.NewEMController()
+	emController.AddEmDeviceModelCmdParam(context)
+
+	err := context.ShouldBindBodyWith(propertyParam, binding.JSON)
 	if err != nil {
 		setting.ZAPS.Error("增加采集模型[modbus]属性JSON格式化错误 %v", err)
 		context.JSON(http.StatusOK, model.ResponseData{
@@ -1190,6 +1206,7 @@ func ApiAddTSLD07CmdProperty(context *gin.Context) {
 		BlockAddOffset: propertyParam.BlockAddOffset,
 		RulerAddOffset: propertyParam.RulerAddOffset,
 		Type:           propertyParam.Type,
+		IotDataType:    propertyParam.IotDataType,
 	}
 	err = tslModel.TSLModelPropertiesAdd(propertyParam.CmdName, property)
 	if err != nil {
@@ -1460,15 +1477,16 @@ func ApiAddTSLModbusCmdPropertyFromXlsx(context *gin.Context) {
 		}
 
 		property := device.TSLModbusPropertyTemplate{
-			Name:       setting.GetString(cell[0]),
-			Label:      setting.GetString(cell[1]),
-			AccessMode: setting.GetInt(cell[2]),
-			Type:       setting.GetInt(cell[3]),
-			Decimals:   setting.GetInt(cell[4]),
-			Unit:       setting.GetString(cell[5]),
-			RegAddr:    setting.GetInt(cell[6]),
-			RegCnt:     setting.GetInt(cell[7]),
-			RuleType:   setting.GetString(cell[8]),
+			Name:        setting.GetString(cell[0]),
+			Label:       setting.GetString(cell[1]),
+			AccessMode:  setting.GetInt(cell[2]),
+			Type:        setting.GetInt(cell[3]),
+			Decimals:    setting.GetInt(cell[4]),
+			Unit:        setting.GetString(cell[5]),
+			RegAddr:     setting.GetInt(cell[6]),
+			RegCnt:      setting.GetInt(cell[7]),
+			RuleType:    setting.GetString(cell[8]),
+			IotDataType: setting.GetString(cell[10]),
 		}
 		if setting.GetString(cell[2]) == "R" {
 			property.AccessMode = 0
@@ -1494,6 +1512,9 @@ func ApiAddTSLModbusCmdPropertyFromXlsx(context *gin.Context) {
 			property.Formula = ""
 		} else {
 			property.Formula = setting.GetString(cell[9])
+		}
+		if setting.GetString(cell[10]) == "-" {
+			property.Formula = ""
 		}
 
 		err = tslModel.TSLModelPropertiesAdd(cmdName, property)
@@ -1614,6 +1635,7 @@ func ApiAddTSLD07CmdPropertyFromXlsx(context *gin.Context) {
 			Unit:           setting.GetString(cell[7]),
 			BlockAddOffset: setting.GetInt(cell[8]),
 			RulerAddOffset: setting.GetInt(cell[9]),
+			IotDataType:    setting.GetString(cell[10]),
 		}
 		if setting.GetString(cell[5]) == "R" {
 			property.AccessMode = 0
@@ -1636,6 +1658,11 @@ func ApiAddTSLD07CmdPropertyFromXlsx(context *gin.Context) {
 		}
 
 		err = tslModel.TSLModelPropertiesAdd(cmdName, property)
+
+		// 导入param写入sqlite
+		emController := controllers.NewEMController()
+		emController.AddEmDeviceModelCmdParamFromXlsx(property, "dlt645", cmdName)
+
 		if err != nil {
 			context.JSON(http.StatusOK, model.ResponseData{
 				Code:    "1",
@@ -1658,18 +1685,19 @@ func ApiAddTSLD07CmdPropertyFromXlsx(context *gin.Context) {
 func ApiModifyTSLModbusCmdProperty(context *gin.Context) {
 
 	propertyParam := &struct {
-		TSLName    string `json:"tslName"` // 名称
-		CmdName    string `json:"cmdName"`
-		Name       string `json:"name"`
-		Label      string `json:"label"`
-		AccessMode int    `json:"accessMode"`
-		Type       int    `json:"type"`
-		Decimals   int    `json:"decimals"`
-		Unit       string `json:"unit"`
-		RegAddr    int    `json:"regAddr"`
-		RegCnt     int    `json:"regCnt"`
-		RuleType   string `json:"ruleType"`
-		Formula    string `json:"formula"`
+		TSLName     string `json:"tslName"` // 名称
+		CmdName     string `json:"cmdName"`
+		Name        string `json:"name"`
+		Label       string `json:"label"`
+		AccessMode  int    `json:"accessMode"`
+		Type        int    `json:"type"`
+		Decimals    int    `json:"decimals"`
+		Unit        string `json:"unit"`
+		RegAddr     int    `json:"regAddr"`
+		RegCnt      int    `json:"regCnt"`
+		RuleType    string `json:"ruleType"`
+		Formula     string `json:"formula"`
+		IotDataType string `json:"iotDataType"`
 	}{}
 
 	emController := controllers.NewEMController()
@@ -1697,16 +1725,17 @@ func ApiModifyTSLModbusCmdProperty(context *gin.Context) {
 	}
 
 	property := device.TSLModbusPropertyTemplate{
-		Name:       propertyParam.Name,
-		Label:      propertyParam.Label,
-		AccessMode: propertyParam.AccessMode,
-		Type:       propertyParam.Type,
-		Decimals:   propertyParam.Decimals,
-		Unit:       propertyParam.Unit,
-		RegAddr:    propertyParam.RegAddr,
-		RegCnt:     propertyParam.RegCnt,
-		RuleType:   propertyParam.RuleType,
-		Formula:    propertyParam.Formula,
+		Name:        propertyParam.Name,
+		Label:       propertyParam.Label,
+		AccessMode:  propertyParam.AccessMode,
+		Type:        propertyParam.Type,
+		Decimals:    propertyParam.Decimals,
+		Unit:        propertyParam.Unit,
+		RegAddr:     propertyParam.RegAddr,
+		RegCnt:      propertyParam.RegCnt,
+		RuleType:    propertyParam.RuleType,
+		Formula:     propertyParam.Formula,
+		IotDataType: propertyParam.IotDataType,
 	}
 	err = tslModel.TSLModelPropertiesModify(propertyParam.CmdName, property)
 	if err != nil {
@@ -1741,9 +1770,13 @@ func ApiModifyTSLD07CmdProperty(context *gin.Context) {
 		BlockAddOffset int    `json:"blockAddOffset"` //当前数据在块数据域内的偏移地址
 		RulerAddOffset int    `json:"rulerAddOffset"` //当前变量在当前ID数据地址中的偏移地址
 		Type           int    `json:"type"`           //float,uint32...
+		IotDataType    string `json:"iotDataType"`
 	}{}
 
-	err := context.BindJSON(propertyParam)
+	emController := controllers.NewEMController()
+	emController.UpdateEmDeviceModelCmdParam(context)
+
+	err := context.ShouldBindBodyWith(propertyParam, binding.JSON)
 	if err != nil {
 		setting.ZAPS.Error("修改采集模型[modbus]属性JSON格式化错误 %v", err)
 		context.JSON(http.StatusOK, model.ResponseData{
@@ -1775,6 +1808,7 @@ func ApiModifyTSLD07CmdProperty(context *gin.Context) {
 		BlockAddOffset: propertyParam.BlockAddOffset,
 		RulerAddOffset: propertyParam.RulerAddOffset,
 		Type:           propertyParam.Type,
+		IotDataType:    propertyParam.IotDataType,
 	}
 	err = tslModel.TSLModelPropertiesModify(propertyParam.CmdName, property)
 	if err != nil {
@@ -1850,7 +1884,10 @@ func ApiDeleteTSLD07CmdProperties(context *gin.Context) {
 		PropertyNames []string `json:"propertyNames"` //
 	}{}
 
-	err := context.BindJSON(&tslInfo)
+	emController := controllers.NewEMController()
+	emController.DeleteEmDeviceModelCmdParam(context)
+
+	err := context.ShouldBindBodyWith(&tslInfo, binding.JSON)
 	if err != nil {
 		setting.ZAPS.Error("删除采集模型[DLT645-2007]属性JSON格式化错误 %v", err)
 		context.JSON(http.StatusOK, model.ResponseData{
@@ -2037,8 +2074,8 @@ func ApiExportTSLModbusCmdPropertiesToXlsx(context *gin.Context) {
 	csvRecords := make([][]string, 0)
 
 	csvRecords = [][]string{
-		{"属性名称", "属性标识符", "读写类型", "数据类型", "小数位", "单位", "寄存器地址", "寄存器数量", "解析规则", "公式"},
-		{"Name", "Label", "AccessMode", "Type", "Decimals", "Unit", "RegAddr", "RegCnt", "RuleType", "Formula"},
+		{"属性名称", "属性标识符", "读写类型", "数据类型", "小数位", "单位", "寄存器地址", "寄存器数量", "解析规则", "公式", "点位类型"},
+		{"Name", "Label", "AccessMode", "Type", "Decimals", "Unit", "RegAddr", "RegCnt", "RuleType", "Formula", "IotDataType"},
 	}
 
 	for _, v := range cmd.Registers {
@@ -2071,7 +2108,7 @@ func ApiExportTSLModbusCmdPropertiesToXlsx(context *gin.Context) {
 		} else {
 			record = append(record, v.Formula)
 		}
-
+		record = append(record, v.IotDataType)
 		csvRecords = append(csvRecords, record)
 	}
 
@@ -2126,8 +2163,8 @@ func ApiExportTSLD07CmdPropertiesToXlsx(context *gin.Context) {
 	//创建一个新的写入文件流
 	csvRecords := make([][]string, 0)
 	csvRecords = [][]string{
-		{"属性名称", "属性标识符", "数据标识", "数据格式", "数据长度", "读写类型", "数据类型", "单位", "数据块偏移地址", "数据标识偏移地址"},
-		{"Name", "Label", "RulerId", "Format", "Len", "AccessMode", "Type", "Unit", "BlockAddOffset", "RulerAddOffset"},
+		{"属性名称", "属性标识符", "数据标识", "数据格式", "数据长度", "读写类型", "数据类型", "单位", "数据块偏移地址", "数据标识偏移地址", "点位类型"},
+		{"Name", "Label", "RulerId", "Format", "Len", "AccessMode", "Type", "Unit", "BlockAddOffset", "RulerAddOffset", "iotDataType"},
 	}
 
 	for _, v := range cmd.Properties {
@@ -2157,6 +2194,7 @@ func ApiExportTSLD07CmdPropertiesToXlsx(context *gin.Context) {
 		} else if v.Type == 3 {
 			record = append(record, "string")
 		}
+		record = append(record, v.IotDataType)
 
 		csvRecords = append(csvRecords, record)
 	}
@@ -2329,6 +2367,10 @@ func ApiAddTSLD07CmdFromXlsx(context *gin.Context) {
 		}
 
 		err = tslModel.TSLModelCmdAdd(cmd)
+		// 导入cmd写入sqlite
+		emController := controllers.NewEMController()
+		emController.AddEmDeviceModelCmdFromXlsx(cmd, "dlt645", tslName)
+
 		if err != nil {
 			context.JSON(http.StatusOK, model.ResponseData{
 				Code:    "1",

@@ -29,6 +29,7 @@ type TSLDLT6452007PropertyTemplate struct {
 	BlockAddOffset int    `json:"blockAddOffset"` //当前数据在块数据域内的偏移地址
 	RulerAddOffset int    `json:"rulerAddOffset"` //当前变量在当前ID数据地址中的偏移地址
 	Type           int    `json:"type"`           //float,uint32...
+	IotDataType    string `json:"iotDataType"`
 }
 
 type TSLDLT6452007CmdTemplate struct {

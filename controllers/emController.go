@@ -546,9 +546,9 @@ func (c *EmController) AddEmDeviceModelCmd(ctx *gin.Context) {
 
 func (c *EmController) AddEmDeviceModelCmdFromXlsx(cmd interface{}, protocol string, tslName string) {
 	var data []byte
+	var emDeviceModelCmd models.EmDeviceModelCmd
 	switch protocol {
 	case "modbus":
-		var emDeviceModelCmd models.EmDeviceModelCmd
 		tslModbusCmdTemplate := cmd.(device.TSLModbusCmdTemplate)
 		emDeviceModelCmd.Name = tslModbusCmdTemplate.Name
 		emDeviceModelCmd.Label = tslModbusCmdTemplate.Label
@@ -562,8 +562,18 @@ func (c *EmController) AddEmDeviceModelCmdFromXlsx(cmd interface{}, protocol str
 			return
 		}
 	case "dlt645":
-		emDeviceModelCmd := cmd.(device.TSLDLT6452007CmdTemplate)
-		fmt.Println(emDeviceModelCmd.Name)
+		tslDLT6452007CmdTemplate := cmd.(device.TSLDLT6452007CmdTemplate)
+		emDeviceModelCmd.Name = tslDLT6452007CmdTemplate.Name
+		emDeviceModelCmd.Label = tslDLT6452007CmdTemplate.Label
+		// 通过模型名找模型id
+		emDeviceModelByName, err := c.repo.GetEmDeviceModelByName(tslName)
+		emDeviceModelCmd.DeviceModelId = emDeviceModelByName.Id
+		data, err = json.Marshal(cmd)
+		emDeviceModelCmd.Data = string(data)
+		err = c.repo.AddEmDeviceModelCmd(&emDeviceModelCmd)
+		if err != nil {
+			return
+		}
 	default:
 		return
 	}
@@ -665,25 +675,28 @@ func (c *EmController) AddEmDeviceModelCmdParam(ctx *gin.Context) {
 
 func (c *EmController) AddEmDeviceModelCmdParamFromXlsx(property interface{}, protocol string, cmdName string) {
 	var data []byte
+	var emDeviceModelCmdParam models.EmDeviceModelCmdParam
 	switch protocol {
 	case "modbus":
-		var emDeviceModelCmdParam models.EmDeviceModelCmdParam
 		tslModbusPropertyTemplate := property.(device.TSLModbusPropertyTemplate)
 		emDeviceModelCmdParam.Name = tslModbusPropertyTemplate.Name
 		emDeviceModelCmdParam.Label = tslModbusPropertyTemplate.Label
-		// 通过模型名找模型id
-		emDeviceModelCmdByName, err := c.repo.GetEmDeviceModelCmdByName(cmdName)
-		emDeviceModelCmdParam.DeviceModelCmdId = emDeviceModelCmdByName.Id
-		data, err = json.Marshal(property)
-		emDeviceModelCmdParam.Data = string(data)
-		err = c.repo.AddEmDeviceModelCmdParam(&emDeviceModelCmdParam)
-		if err != nil {
-			return
-		}
+		emDeviceModelCmdParam.IotDataType = tslModbusPropertyTemplate.IotDataType
 	case "dlt645":
-		emDeviceModelCmdParam := property.(device.TSLDLT6452007PropertyTemplate)
-		fmt.Println(emDeviceModelCmdParam.Name)
+		tslDLT6452007PropertyTemplate := property.(device.TSLDLT6452007PropertyTemplate)
+		emDeviceModelCmdParam.Name = tslDLT6452007PropertyTemplate.Name
+		emDeviceModelCmdParam.Label = tslDLT6452007PropertyTemplate.Label
+		emDeviceModelCmdParam.IotDataType = tslDLT6452007PropertyTemplate.IotDataType
 	default:
+		return
+	}
+	// 通过模型名找模型id
+	emDeviceModelCmdByName, err := c.repo.GetEmDeviceModelCmdByName(cmdName)
+	emDeviceModelCmdParam.DeviceModelCmdId = emDeviceModelCmdByName.Id
+	data, err = json.Marshal(property)
+	emDeviceModelCmdParam.Data = string(data)
+	err = c.repo.AddEmDeviceModelCmdParam(&emDeviceModelCmdParam)
+	if err != nil {
 		return
 	}
 	return
