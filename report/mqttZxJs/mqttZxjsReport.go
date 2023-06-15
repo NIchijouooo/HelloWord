@@ -4,8 +4,9 @@ import (
 	"encoding/json"
 	"fmt"
 	"gateway/device"
+	mqttEmqx "gateway/report/mqttEMQX"
+	"gateway/report/mqttFeisjy"
 	"gateway/setting"
-	"strconv"
 	"time"
 )
 
@@ -14,37 +15,25 @@ type MQTTZxjsReportFrameTemplate struct {
 	Payload interface{}
 }
 
-type MQTTZxjsReportDataTemplate struct {
-	ID    int         `json:"id"`
-	Name  string      `json:"name,omitempty"`
+type MQTTZxjsReportPropertyTemplate struct {
+	Seq      int //设备类型，"gw" "node"
+	DeviceSN string
+}
+
+type MQTTZxjsReportValueTemplate struct {
+	ID    string      `json:"id"`
 	Value interface{} `json:"value"`
 }
 
-type MQTTZxjsReportYxTemplate struct {
-	Time       string                       `json:"time"`
-	CommStatus string                       `json:"commStatus,omitempty"`
-	YxList     []MQTTZxjsReportDataTemplate `json:"yxList"`
+type MQTTZxjsReportDataTemplate struct {
+	DeviceSN string `json:"deviceSN"`
+	Seq      int    `json:"seq"`
+	Ts       int64  `json:"ts"`
+	Type     string `json:"type"`
 }
 
-type MQTTZxjsReportYcTemplate struct {
-	Time       string                       `json:"time"`
-	CommStatus string                       `json:"commStatus,omitempty"`
-	YcList     []MQTTZxjsReportDataTemplate `json:"ycList"`
-}
-
-type MQTTZxjsReportSettingTemplate struct {
-	Time        string                       `json:"time"`
-	CommStatus  string                       `json:"commStatus,omitempty"`
-	SettingList []MQTTZxjsReportDataTemplate `json:"settingList"`
-}
-type MQTTZxjsReportGPSTemplate struct {
-	Time      string `json:"time"`
-	Longitude string `json:"longitude"`
-	Latitude  string `json:"latitude"`
-}
-type MQTTZxjsReportPropertyTemplate struct {
-	DeviceType string //设备类型，"gw" "node"
-	DeviceName []string
+type CACKTemplate struct {
+	Seq int `json:"seq"`
 }
 
 func (r *ReportServiceParamZxjsTemplate) ZxjsPublishData(msg *MQTTZxjsReportFrameTemplate) bool {
@@ -63,143 +52,171 @@ func (r *ReportServiceParamZxjsTemplate) ZxjsPublishData(msg *MQTTZxjsReportFram
 	return status
 }
 
-func (r *ReportServiceParamZxjsTemplate) ZxjsPublishYcData(msg *MQTTZxjsReportYcTemplate, id string) bool {
-	status := false
+func (r *ReportServiceParamZxjsTemplate) ZxjsPublishYcData(msg *MQTTZxjsReportDataTemplate, ycList []MQTTZxjsReportValueTemplate, id string) bool {
+	ycLength := len(ycList)
+	setting.ZAPS.Infof("zxjs report data length = [%v]", ycLength)
+	if ycLength == 0 {
+		return false
+	}
+	// 每包上送数量
+	index := 1000
+	// 模与余数
+	remainder := ycLength % index
+	// 需要上送次数
+	count := 0
+	if remainder == 0 {
+		count = ycLength / index
+	} else {
+		count = ycLength/index + 1
+	}
+	// 防止一包数据过大,分包上送
+	for i := 0; i < count; i++ {
+		start := i * index
+		end := start + index
+		if i == count-1 {
+			end = ycLength
+		}
+		list := ycList[start:end]
+		sendData := make(map[string]interface{}, index)
+		sendData["deviceSN"] = msg.DeviceSN
+		sendData["seq"] = msg.Seq
+		sendData["ts"] = msg.Ts
+		sendData["type"] = msg.Type
+		for _, v := range list {
+			sendData[v.ID] = v.Value
+		}
+		//propertyPostTopic := "/" + ProductSn + "/" + id + "/upload"
+		propertyPostTopic := fmt.Sprintf(ZxjsMQTTTopicRxFormat, r.GWParam.Param.ProductSn, id, "upload")
+		sJson, _ := json.Marshal(sendData)
 
-	//propertyPostTopic := "iot/rx/" + r.GWParam.Param.AppKey + "/" + id + "/resultYc"
-	propertyPostTopic := fmt.Sprintf(ZxjsMQTTTopicRxFormat, r.GWParam.Param.ProductSn, id, "resultYc")
-	sJson, _ := json.Marshal(msg)
+		data := &MQTTZxjsReportFrameTemplate{
+			Topic:   propertyPostTopic,
+			Payload: sJson,
+		}
 
-	data := &MQTTZxjsReportFrameTemplate{
-		Topic:   propertyPostTopic,
-		Payload: sJson,
+		publish := r.ZxjsPublishData(data)
+		setting.ZAPS.Infof("zxjs report data index[%v] size[%v] result[%v]", i, len(list), publish)
 	}
 
-	status = r.ZxjsPublishData(data)
-
-	return status
-}
-
-func (r *ReportServiceParamZxjsTemplate) ZxjsPublishdeviceControlResult(sJson []byte, id string) bool {
-	status := false
-
-	//propertyPostTopic := "iot/rx/" + r.GWParam.Param.AppKey + "/" + id + "/resultYc"
-	propertyPostTopic := fmt.Sprintf(ZxjsMQTTTopicRxFormat, r.GWParam.Param.ProductSn, id, "/upload/cack")
-	//sJson, _ := json.Marshal(msg)
-
-	data := &MQTTZxjsReportFrameTemplate{
-		Topic:   propertyPostTopic,
-		Payload: sJson,
-	}
-
-	status = r.ZxjsPublishData(data)
-
-	return status
-}
-
-func (r *ReportServiceParamZxjsTemplate) ZxjsPublishSettingData(msg *MQTTZxjsReportSettingTemplate, id string) bool {
-	status := false
-
-	//propertyPostTopic := "iot/rx/" + r.GWParam.Param.AppKey + "/" + id + "/setting"
-	propertyPostTopic := fmt.Sprintf(ZxjsMQTTTopicRxFormat, r.GWParam.Param.ProductSn, id, "setting")
-	sJson, _ := json.Marshal(msg)
-
-	data := &MQTTZxjsReportFrameTemplate{
-		Topic:   propertyPostTopic,
-		Payload: sJson,
-	}
-
-	status = r.ZxjsPublishData(data)
-
-	return status
-}
-
-func (r *ReportServiceParamZxjsTemplate) ZxjsPublishLocationData(msg *MQTTZxjsReportGPSTemplate, id string) bool {
-	status := false
-
-	propertyPostTopic := fmt.Sprintf(ZxjsMQTTTopicRxFormat, r.GWParam.Param.ProductSn, id, "location")
-	sJson, _ := json.Marshal(msg)
-
-	data := &MQTTZxjsReportFrameTemplate{
-		Topic:   propertyPostTopic,
-		Payload: sJson,
-	}
-
-	status = r.ZxjsPublishData(data)
-
-	return status
+	return true
 }
 
 // 上传网关属性
 var count uint32 = 0
 
 // 指定设备上传属性，可以是多个设备
-func (r *ReportServiceParamZxjsTemplate) NodePropertyPost(name []string) {
+func (r *ReportServiceParamZxjsTemplate) NodePropertyPost(property MQTTZxjsReportPropertyTemplate) {
+	seq := property.Seq
+	if seq != 0 {
+		r.ZxjsPublishCallCack(seq)
+	}
 
-	for _, n := range name {
-		for k, v := range r.NodeList {
-			if n == v.Name {
-				r.NodeList[k].ReportErrCnt++ //上报故障计数值先加，收到正确回应后清0
+	ycPropertyPostParam := MQTTZxjsReportDataTemplate{
+		DeviceSN: property.DeviceSN,
+		Seq:      seq,
+		Ts:       time.Now().Unix(),
+		Type:     "rtg",
+	}
 
-				ycPropertyMap := make([]MQTTZxjsReportDataTemplate, 0)
-				ycPropertyPostParam := MQTTZxjsReportYcTemplate{
-					Time:       time.Now().Format("2006-01-02 15:04:05"),
-					CommStatus: "onLink",
-				}
+	ycList := make([]MQTTZxjsReportValueTemplate, 0)
 
-				//获取采集接口数据
-				coll, collErr := device.CollectInterfaceMap.Coll[v.CollInterfaceName]
-				if !collErr {
-					ycPropertyPostParam.CommStatus = fmt.Sprintf("coll接口[%s]不存在", v.CollInterfaceName)
-					if true == r.ZxjsPublishYcData(&ycPropertyPostParam, v.Param.DeviceSn) {
-						r.NodeList[k].HeartBeatMark = true
-						r.NodeList[k].ReportErrCnt = 0
-					}
-					continue
-				}
-
-				//获取节点数据
-				node, nodeErr := coll.DeviceNodeMap[v.Name]
-				if !nodeErr {
-					ycPropertyPostParam.CommStatus = fmt.Sprintf("coll接口[%s]下的设备[%s]不存在", v.CollInterfaceName, v.Name)
-					if true == r.ZxjsPublishYcData(&ycPropertyPostParam, v.Param.DeviceSn) {
-						r.NodeList[k].HeartBeatMark = true
-						r.NodeList[k].ReportErrCnt = 0
-					}
-					continue
-				}
-
-				//获取节点属性数据
-				if node.CommStatus == "offLine" {
-					ycPropertyPostParam.CommStatus = "offLine"
-					r.NodeList[k].CommStatus = "offLine"
-				} else {
-					r.NodeList[k].CommStatus = "onLink"
-					for _, v := range node.Properties {
-						if num, err := strconv.Atoi(v.Name); err == nil {
-							ycProperty := MQTTZxjsReportDataTemplate{
-								ID: num,
-								// QJH Delect 2023/6/6 去掉name上报，解决数据包上报流量过大
-								//Name: v.Label,
-							}
-							if len(v.Value) >= 1 { //当前属性有数据
-								ycProperty.Value = v.Value[len(v.Value)-1].Value
-							} else {
-								ycProperty.Value = "当前属性无数据"
-							}
-
-							ycPropertyMap = append(ycPropertyMap, ycProperty)
-						}
-					}
-
-					ycPropertyPostParam.YcList = ycPropertyMap
-				}
-
-				if true == r.ZxjsPublishYcData(&ycPropertyPostParam, v.Param.DeviceSn) {
-					r.NodeList[k].HeartBeatMark = true
-					r.NodeList[k].ReportErrCnt = 0
-				}
-			}
+	for _, v := range mqttFeisjy.ReportServiceParamListFeisjy.ServiceList {
+		for _, d := range v.NodeList {
+			initYcList(&ycList, d.CollInterfaceName, d.Name)
 		}
 	}
+
+	for _, v := range mqttEmqx.ReportServiceParamListEmqx.ServiceList {
+		for _, d := range v.NodeList {
+			initYcList(&ycList, d.CollInterfaceName, d.Name)
+		}
+	}
+	for _, v := range r.NodeList {
+		initYcList(&ycList, v.CollInterfaceName, v.Name)
+	}
+	r.ZxjsPublishYcData(&ycPropertyPostParam, ycList, property.DeviceSN)
+}
+
+/*
+*
+初始化要上报的点位集合
+*/
+func initYcList(ycList *[]MQTTZxjsReportValueTemplate, collInterfaceName string, nodeName string) {
+	//获取采集接口数据
+	coll, collErr := device.CollectInterfaceMap.Coll[collInterfaceName]
+	if !collErr {
+		setting.ZAPS.Infof("coll接口[%s]不存在", collInterfaceName)
+		return
+	}
+
+	//获取节点数据
+	node, nodeErr := coll.DeviceNodeMap[nodeName]
+	if !nodeErr {
+		setting.ZAPS.Infof("coll接口[%s]下的设备[%s]不存在", collInterfaceName, nodeName)
+		return
+	}
+	if len(node.Properties) == 0 || node.CommStatus == "offLine" {
+		setting.ZAPS.Infof("节点数据为空或通信状态离线,coll接口[%s],设备[%s]", collInterfaceName, nodeName)
+		return
+	}
+	// 判断节点唯一标识和数据不为空则上报
+	for _, v := range node.Properties {
+		if len(v.Identity) == 0 || len(v.Value) == 0 {
+			continue
+		}
+		val := MQTTZxjsReportValueTemplate{
+			ID:    v.Identity,
+			Value: v.Value[len(v.Value)-1].Value,
+		}
+		*ycList = append(*ycList, val)
+		// 本地测试
+		//if len(v.Identity) == 0 {
+		//	continue
+		//}
+		//val := MQTTZxjsReportValueTemplate{
+		//	ID: v.Identity,
+		//}
+		//if len(v.Value) == 0 {
+		//	val.Value = 0
+		//	*ycList = append(*ycList, val)
+		//} else {
+		//	val.Value = v.Value[len(v.Value)-1].Value
+		//	*ycList = append(*ycList, val)
+		//}
+	}
+}
+
+/*
+*召读响应
+ */
+func (r *ReportServiceParamZxjsTemplate) ZxjsPublishCallCack(seq int) {
+	msg := CACKTemplate{
+		Seq: seq,
+	}
+	//propertyPostTopic := "/" + r.GWParam.Param.ProductSn + "/" + r.GWParam.Param.DeviceSn + "/upload/cack"
+	propertyPostTopic := fmt.Sprintf(ZxjsMQTTTopicRxFormat, r.GWParam.Param.ProductSn, r.GWParam.Param.DeviceSn, "upload/cack")
+	sJson, _ := json.Marshal(msg)
+
+	data := &MQTTZxjsReportFrameTemplate{
+		Topic:   propertyPostTopic,
+		Payload: sJson,
+	}
+
+	r.ZxjsPublishData(data)
+}
+
+/*
+*控制响应
+ */
+func (r *ReportServiceParamZxjsTemplate) ZxjsPublishSetCack(ctrlInfo MQTTZxjsControlTemplate, valid int) {
+	ctrlInfo.Data.Valid = valid
+	//propertyPostTopic := "/" + r.GWParam.Param.ProductSn + "/" + r.GWParam.Param.DeviceSn + "/set/cack"
+	sJson, _ := json.Marshal(ctrlInfo)
+	propertyPostTopic := fmt.Sprintf(ZxjsMQTTTopicRxFormat, r.GWParam.Param.ProductSn, r.GWParam.Param.DeviceSn, "set/cack")
+	data := &MQTTZxjsReportFrameTemplate{
+		Topic:   propertyPostTopic,
+		Payload: sJson,
+	}
+
+	r.ZxjsPublishData(data)
 }

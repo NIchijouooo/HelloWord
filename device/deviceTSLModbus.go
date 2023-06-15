@@ -30,6 +30,7 @@ type TSLModbusPropertyTemplate struct {
 	RegCnt     int    `json:"regCnt"`
 	RuleType   string `json:"ruleType"`
 	Formula    string `json:"formula"`
+	Identity   string `json:"identity"` //唯一标识
 }
 
 type TSLModbusCmdTemplate struct {

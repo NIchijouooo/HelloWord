@@ -1128,6 +1128,24 @@ func ApiAddReportNodeWParam(context *gin.Context) {
 	//		}
 	//	}
 	//	setting.ZAPS.Debugf("ParamListAliyun %v", mqttAliyun.ReportServiceParamListAliyun.ServiceList)
+	case "ZXJS.MQTT": //wt add 2023-06-13
+		ReportServiceNodeParamFeisjy := mqttZxJs.ReportServiceNodeParamZxjsTemplate{}
+		err := context.ShouldBindJSON(&ReportServiceNodeParamFeisjy)
+		if err != nil {
+			setting.ZAPS.Errorf("增加上报服务ZXJS.MQTT设备JSON格式化错误[%v]", err)
+			context.JSON(http.StatusOK, model.ResponseData{
+				Code:    "1",
+				Message: "增加上报服务[ZXJS.MQTT]设备参数JSON格式化错误",
+				Data:    "",
+			})
+			return
+		}
+		for _, v := range mqttZxJs.ReportServiceParamListZxjs.ServiceList {
+			if v.GWParam.ServiceName == param.ServiceName {
+				v.AddReportNode(ReportServiceNodeParamFeisjy)
+			}
+		}
+		setting.ZAPS.Debugf("ParamListEmqx %+v", mqttEmqx.ReportServiceParamListEmqx.ServiceList)
 	case "FSJY.MQTT": //gwai add 2023-04-05
 		ReportServiceNodeParamFeisjy := mqttFeisjy.ReportServiceNodeParamFeisjyTemplate{}
 		err := context.ShouldBindJSON(&ReportServiceNodeParamFeisjy)
@@ -1287,6 +1305,32 @@ func ApiModifyReportNodeWParam(context *gin.Context) {
 	//		}
 	//	}
 	//	setting.ZAPS.Debugf("ParamListAliyun %v", mqttAliyun.ReportServiceParamListAliyun.ServiceList)
+	case "ZXJS.MQTT": //wt add 2023-06-14
+		ReportServiceNodeParamFeisjy := mqttZxJs.ReportServiceNodeParamZxjsTemplate{}
+		err := context.ShouldBindJSON(&ReportServiceNodeParamFeisjy)
+		if err != nil {
+			setting.ZAPS.Errorf("修改上报服务ZXJS.MQTT设备JSON格式化错误[%v]", err)
+			context.JSON(http.StatusOK, model.ResponseData{
+				Code:    "1",
+				Message: "修改上报服务[ZXJS.MQTT]设备参数JSON格式化错误",
+				Data:    "",
+			})
+			return
+		}
+		for _, v := range mqttZxJs.ReportServiceParamListZxjs.ServiceList {
+			if v.GWParam.ServiceName == param.ServiceName {
+				err := v.ModifyReportNode(ReportServiceNodeParamFeisjy)
+				if err != nil {
+					context.JSON(http.StatusOK, model.ResponseData{
+						Code:    "1",
+						Message: fmt.Sprintf("修改上报服务[ZXJS.MQTT]设备错误[%v]", err.Error()),
+						Data:    "",
+					})
+					return
+				}
+			}
+		}
+		setting.ZAPS.Debugf("ParamListFeisjy %v", mqttZxJs.ReportServiceParamListZxjs.ServiceList)
 	case "FSJY.MQTT": //gwai add 2023-04-05
 		ReportServiceNodeParamFeisjy := mqttFeisjy.ReportServiceNodeParamFeisjyTemplate{}
 		err := context.ShouldBindJSON(&ReportServiceNodeParamFeisjy)
@@ -1475,6 +1519,22 @@ func ApiBatchAddReportNodeParam(context *gin.Context) {
 		//			}
 		//		}
 		//	}
+		case "ZXJS.MQTT":
+			{
+				ReportServiceNodeParamFeisjy := mqttZxJs.ReportServiceNodeParamZxjsTemplate{}
+				ReportServiceNodeParamFeisjy.ServiceName = record.GetString("ServiceName")
+				ReportServiceNodeParamFeisjy.CollInterfaceName = record.GetString("CollInterfaceName")
+				ReportServiceNodeParamFeisjy.Name = record.GetString("Name")
+				ReportServiceNodeParamFeisjy.Addr = record.GetString("Addr")
+				ReportServiceNodeParamFeisjy.UploadModel = record.GetString("UploadModel")
+				ReportServiceNodeParamFeisjy.Protocol = record.GetString("Protocol")
+
+				for _, v := range mqttZxJs.ReportServiceParamListZxjs.ServiceList {
+					if v.GWParam.ServiceName == ReportServiceNodeParamFeisjy.ServiceName {
+						v.AddReportNode(ReportServiceNodeParamFeisjy)
+					}
+				}
+			}
 		case "FSJY.MQTT":
 			{
 				ReportServiceNodeParamFeisjy := mqttFeisjy.ReportServiceNodeParamFeisjyTemplate{}
@@ -1604,6 +1664,22 @@ func ApiBatchAddReportNodeParamFromXlsx(context *gin.Context) {
 		//			}
 		//		}
 		//	}
+		case "ZXJS.MQTT": //wt add 2023-06-14
+			{
+				ReportServiceNodeParamFeisjy := mqttZxJs.ReportServiceNodeParamZxjsTemplate{}
+				ReportServiceNodeParamFeisjy.ServiceName = setting.GetString(cell[0])
+				ReportServiceNodeParamFeisjy.CollInterfaceName = setting.GetString(cell[1])
+				ReportServiceNodeParamFeisjy.Name = setting.GetString(cell[2])
+				ReportServiceNodeParamFeisjy.Addr = setting.GetString(cell[3])
+				ReportServiceNodeParamFeisjy.UploadModel = setting.GetString(cell[4])
+				ReportServiceNodeParamFeisjy.Protocol = setting.GetString(cell[5])
+
+				for _, v := range mqttZxJs.ReportServiceParamListZxjs.ServiceList {
+					if v.GWParam.ServiceName == ReportServiceNodeParamFeisjy.ServiceName {
+						v.AddReportNode(ReportServiceNodeParamFeisjy)
+					}
+				}
+			}
 		case "FSJY.MQTT": //gwai add 2023-04-05
 			{
 				ReportServiceNodeParamFeisjy := mqttFeisjy.ReportServiceNodeParamFeisjyTemplate{}
@@ -1702,6 +1778,24 @@ func ApiGetReportNodeWParam(context *gin.Context) {
 	//	}
 	//}
 
+	//wt add 2023-06-14
+	for _, v := range mqttZxJs.ReportServiceParamListZxjs.ServiceList {
+		if v.GWParam.ServiceName == ServiceName {
+			ReportServiceNode := ReportServiceNodeTemplate{}
+			for _, d := range v.NodeList {
+				ReportServiceNode.ServiceName = d.ServiceName
+				ReportServiceNode.CollInterfaceName = d.CollInterfaceName
+				ReportServiceNode.DeviceName = d.Name
+				ReportServiceNode.DeviceAddr = d.Addr
+				ReportServiceNode.UploadModel = d.UploadModel
+				ReportServiceNode.Protocol = d.Protocol
+				ReportServiceNode.CommStatus = d.CommStatus
+				ReportServiceNode.ReportStatus = d.ReportStatus
+				ReportServiceNode.Param = d.Param
+				nodes = append(nodes, ReportServiceNode)
+			}
+		}
+	}
 	//gwai add 2023-04-05
 	for _, v := range mqttFeisjy.ReportServiceParamListFeisjy.ServiceList {
 		if v.GWParam.ServiceName == ServiceName {
@@ -1873,6 +1967,32 @@ func ApiBatchExportReportNodeWParamToXlsx(context *gin.Context) {
 	ServiceName := context.Query("serviceName")
 	setting.ZAPS.Debugf("ServiceName %v", ServiceName)
 
+	//wt add 2023-06-14
+	for _, v := range mqttZxJs.ReportServiceParamListZxjs.ServiceList {
+		if v.GWParam.ServiceName == ServiceName {
+			status, name := v.ExportParamToXlsx()
+			if status == true {
+				//返回文件流
+				context.Writer.Header().Add("Content-Disposition",
+					fmt.Sprintf("attachment;filename=%s", url.QueryEscape(filepath.Base(name))))
+				context.File(name) //返回文件路径，自动调用http.ServeFile方法
+				return
+			} else {
+				aParam := struct {
+					Code    string
+					Message string
+					Data    string
+				}{
+					Code:    "1",
+					Message: "",
+					Data:    "",
+				}
+				sJson, _ := json.Marshal(aParam)
+				context.String(http.StatusOK, string(sJson))
+				return
+			}
+		}
+	}
 	//gwai add 2023-04-05
 	for _, v := range mqttFeisjy.ReportServiceParamListFeisjy.ServiceList {
 		if v.GWParam.ServiceName == ServiceName {
@@ -1999,6 +2119,21 @@ func ApiDeleteReportNodeWParam(context *gin.Context) {
 	//	}
 	//}
 
+	//查看zxjs  wt add 2023-06-14
+	for _, name := range param.DeviceNames {
+		for _, v := range mqttZxJs.ReportServiceParamListZxjs.ServiceList {
+			for _, n := range v.NodeList {
+				if n.ServiceName == param.ServiceName {
+					if name == n.Name {
+						index = v.DeleteReportNode(n.Name)
+						if index == -1 {
+							errDeviceList = append(errDeviceList, name)
+						}
+					}
+				}
+			}
+		}
+	}
 	//查看Feisjy  gwai add 2023-04-05
 	for _, name := range param.DeviceNames {
 		for _, v := range mqttFeisjy.ReportServiceParamListFeisjy.ServiceList {
@@ -2113,6 +2248,20 @@ func ApiSetReportNodeReport(context *gin.Context) {
 
 	status := false
 
+	//查看zxjs wt add 2023-06-14
+	for _, name := range param.DeviceNames {
+		for _, v := range mqttZxJs.ReportServiceParamListZxjs.ServiceList {
+			for _, n := range v.NodeList {
+				if n.ServiceName == param.ServiceName {
+					if name == n.Name {
+						//v.ReportNode(n.Name)   //gwai
+						status = true
+
+					}
+				}
+			}
+		}
+	}
 	//查看Feisjy gwai add 2023-04-05
 	for _, name := range param.DeviceNames {
 		for _, v := range mqttFeisjy.ReportServiceParamListFeisjy.ServiceList {

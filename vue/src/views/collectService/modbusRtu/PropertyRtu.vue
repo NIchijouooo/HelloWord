@@ -77,6 +77,7 @@
         <el-table-column sortable prop="formula" label="计算公式" width="auto" min-width="200" align="center" />
         <el-table-column sortable prop="bitOffset" label="位偏移" width="auto" min-width="120" align="center" />
         <el-table-column sortable prop="step" label="步长" width="auto" min-width="120" align="center" />
+        <el-table-column sortable prop="identity" label="唯一标识" width="auto" min-width="120" align="center" />
         <template #empty>
           <div>无数据</div>
         </template>

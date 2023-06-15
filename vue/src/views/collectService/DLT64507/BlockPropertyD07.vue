@@ -81,6 +81,7 @@
       <el-table-column sortable prop="blockAddOffset" label="块偏移地址" width="auto" min-width="150" align="center"> </el-table-column>
       <el-table-column sortable prop="rulerAddOffset" label="标识偏移地址" width="auto" min-width="150" align="center"> </el-table-column>
       <el-table-column sortable prop="step" label="步长" width="auto" min-width="120" align="center" />
+      <el-table-column sortable prop="identity" label="唯一标识" width="auto" min-width="120" align="center" />
 
       <el-table-column label="操作" width="auto" min-width="200" align="center" fixed="right">
         <template #default="scope">
@@ -291,6 +292,17 @@
             >
             </el-input>
           </el-tooltip>
+        </el-form-item>
+
+        <el-form-item label="唯一标识">
+            <el-input
+              type="text"
+              style="width: 220px"
+              v-model="ctxData.propertyForm.identity"
+              autocomplete="off"
+              placeholder="请输入唯一标识"
+            >
+            </el-input>
         </el-form-item>
 
       </el-form>
@@ -505,6 +517,7 @@ const ctxData = reactive({
     blockAddOffset:0,
     rulerAddOffset:0,
     step: 0, // 步长
+    identity: '', // 唯一标识
   },
 
   //数据类型
@@ -803,6 +816,7 @@ const editDeviceModelProperty = (row) => {
   ctxData.propertyForm.blockAddOffset = row.blockAddOffset
   ctxData.propertyForm.rulerAddOffset = row.rulerAddOffset
   ctxData.propertyForm.step = row.step === undefined || row.step === null ? 0 : row.step
+  ctxData.propertyForm.identity = row.identity === undefined || row.identity === null ? '' : row.identity
 }
 const propertyFormRef = ref(null)
 const submitPorpertyForm = () => {
@@ -824,6 +838,7 @@ const submitPorpertyForm = () => {
           blockAddOffset:ctxData.propertyForm.blockAddOffset,
           rulerAddOffset:ctxData.propertyForm.rulerAddOffset,
           step: +ctxData.propertyForm.step,
+          identity: ctxData.propertyForm.identity,
         },
       }
       if (ctxData.pTitle.includes('添加')) {
@@ -903,6 +918,7 @@ const initPropertyForm = () => {
     blockAddOffset:0,
     rulerAddOffset:0,
     step: 0,
+    identity: '',
   }
 }
 const getDeviceProperty = () => {

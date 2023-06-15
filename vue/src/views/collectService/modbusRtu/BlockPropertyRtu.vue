@@ -86,6 +86,7 @@
       <el-table-column sortable prop="formula" label="计算公式" width="auto" min-width="200" align="center" />
       <el-table-column sortable prop="bitOffset" label="位偏移" width="auto" min-width="120" align="center" />
       <el-table-column sortable prop="step" label="步长" width="auto" min-width="120" align="center" />
+      <el-table-column sortable prop="identity" label="唯一标识" width="auto" min-width="120" align="center" />
       <el-table-column label="操作" width="auto" min-width="200" align="center" fixed="right">
         <template #default="scope">
           <el-button @click="editDeviceModelProperty(scope.row)" text type="primary">编辑</el-button>
@@ -283,6 +284,16 @@
             >
             </el-input>
           </el-tooltip>
+        </el-form-item>
+        <el-form-item label="唯一标识">
+            <el-input
+              type="text"
+              style="width: 220px"
+              v-model="ctxData.propertyForm.identity"
+              autocomplete="off"
+              placeholder="请输入唯一标识"
+            >
+            </el-input>
         </el-form-item>
       </el-form>
     </div>
@@ -482,6 +493,7 @@ const ctxData = reactive({
     bitSwitch: false, // 按位解析
     bitOffset: 0, // 位偏移
     step: 0, // 步长
+    identity: '', // 唯一标识
   },
 
   //数据类型
@@ -795,6 +807,7 @@ const editDeviceModelProperty = (row) => {
   ctxData.propertyForm.bitSwitch = row.bitSwitch === undefined || row.bitSwitch === null ? false : row.bitSwitch
   ctxData.propertyForm.bitOffset = row.bitOffset === undefined || row.bitOffset === null ? 0 : row.bitOffset
   ctxData.propertyForm.step = row.step === undefined || row.step === null ? 0 : row.step
+  ctxData.propertyForm.identity = row.identity === undefined || row.identity === null ? '' : row.identity
 }
 const propertyFormRef = ref(null)
 const submitPorpertyForm = () => {
@@ -818,6 +831,7 @@ const submitPorpertyForm = () => {
           bitSwitch: ctxData.propertyForm.bitSwitch,
           bitOffset: ctxData.propertyForm.bitSwitch ? ctxData.propertyForm.bitOffset : -1,
           step: +ctxData.propertyForm.step,
+          identity: ctxData.propertyForm.identity,
         },
       }
       if (ctxData.pTitle.includes('添加')) {
@@ -900,6 +914,7 @@ const initPropertyForm = () => {
     bitSwitch: false,
     bitOffset: 0,
     step: 0,
+    identity: '',
   }
 }
 const getDeviceProperty = () => {

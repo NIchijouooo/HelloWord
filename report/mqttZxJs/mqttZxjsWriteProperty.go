@@ -6,76 +6,79 @@ import (
 	"gateway/setting"
 )
 
-type MQTTZxjsWritePropertyRequestParamPropertyTemplate struct {
-	Code  string      `json:"code"`
-	Value interface{} `json:"value"`
+/*
+*
+设备控制对象
+*/
+type MQTTZxjsControlTemplate struct {
+	DeviceSN string   `json:"deviceSN"`
+	Seq      int      `json:"seq"`
+	Ts       int64    `json:"ts"`
+	Data     DataInfo `json:"data"`
+	Type     string   `json:"type"`
 }
 
-type MQTTZxjsWritePropertyTemplate struct {
-	CmdType    string                                              `json:"cmdType"`
-	Uuid       string                                              `json:"uuid"`
-	DeviceAddr string                                              `json:"deviceAddr"`
-	Properties []MQTTZxjsWritePropertyRequestParamPropertyTemplate `json:"properties"`
+type DataInfo struct {
+	Valid   int                    `json:"valid"`
+	Model   int                    `json:"model"`
+	Content map[string]interface{} `json:"content"`
 }
 
-func (r *ReportServiceParamZxjsTemplate) ReportServiceZxjsProcessWriteProperty(reqFrame MQTTZxjsWritePropertyTemplate) {
+func (r *ReportServiceParamZxjsTemplate) ReportServiceZxjsProcessWriteProperty(serviceInfo MQTTZxjsControlTemplate) {
 
-	serviceInfo := struct {
-		CollInterfaceName string                 `json:"collInterfaceName"`
-		DeviceName        string                 `json:"deviceName"`
-		ServiceName       string                 `json:"serviceName"`
-		ServiceParam      map[string]interface{} `json:"serviceParam"`
-	}{}
+	content := serviceInfo.Data.Content
+	if len(content) == 0 {
+		setting.ZAPS.Infof("set content is empty serviceInfo = %v", serviceInfo)
+		return
+	}
 
-	serviceInfo.ServiceParam = make(map[string]interface{}, 1)
-	for _, node := range r.NodeList {
-		if node.Param.DeviceSn == reqFrame.DeviceAddr {
-			serviceInfo.CollInterfaceName = node.CollInterfaceName
-			serviceInfo.DeviceName = node.Name
-			serviceInfo.ServiceName = node.ServiceName
-			for _, properties := range reqFrame.Properties {
-				serviceInfo.ServiceParam[properties.Code] = properties.Value
+	param := make(map[string]interface{}, 1)
+	var collName, deviceName string
+	for _, v := range r.NodeList {
+		//获取采集接口数据
+		coll, collErr := device.CollectInterfaceMap.Coll[v.CollInterfaceName]
+		if !collErr {
+			setting.ZAPS.Debugf("coll接口[%s]不存在", v.CollInterfaceName)
+			continue
+		}
+
+		//获取节点数据
+		node, nodeErr := coll.DeviceNodeMap[v.Name]
+		if !nodeErr {
+			setting.ZAPS.Debugf("coll接口[%s]下的设备[%s]不存在", v.CollInterfaceName, v.Name)
+			continue
+		}
+		for _, properties := range node.Properties {
+			val, ok := content[properties.Identity]
+			if !ok {
+				continue
 			}
+			collName = v.CollInterfaceName
+			deviceName = v.Name
+			param[properties.Label] = val
 		}
 	}
 
 	cmd := device.CommunicationCmdTemplate{}
-	cmd.CollInterfaceName = serviceInfo.CollInterfaceName
-	cmd.DeviceName = serviceInfo.DeviceName
+	cmd.CollInterfaceName = collName
+	cmd.DeviceName = deviceName
 	cmd.FunName = "SetVariables"
-	paramStr, _ := json.Marshal(serviceInfo.ServiceParam)
+	paramStr, _ := json.Marshal(param)
 	cmd.FunPara = string(paramStr)
 
-	setting.ZAPS.Infof("[%s]数据解析完毕，即将修改属性。FunName [%s] 设备名[%s] 采集接口名称[%s] 属性参数 %v", reqFrame.CmdType, cmd.FunPara, cmd.DeviceName, cmd.CollInterfaceName, cmd.FunPara)
-	coll, ok := device.CollectInterfaceMap.Coll[serviceInfo.CollInterfaceName]
+	setting.ZAPS.Infof("数据解析完毕，即将修改属性。FunName [%s] 设备名[%s] 采集接口名称[%s] 属性参数 %v", cmd.FunPara, cmd.DeviceName, cmd.CollInterfaceName, cmd.FunPara)
+	coll, ok := device.CollectInterfaceMap.Coll[collName]
 	if !ok {
-		setting.ZAPS.Errorf("ReportServiceZxjsProcessWriteProperty eer")
+		setting.ZAPS.Errorf("ReportServiceFeisjyProcessWriteProperty eer")
 		return
 	}
 	cmdRX := coll.CommQueueManage.CommunicationManageAddEmergency(cmd)
+	valid := 0
 	if cmdRX.Status == true {
-		setting.ZAPS.Infof("[%s] 修改属性成功 DevName [%s]", reqFrame.CmdType, cmd.DeviceName)
-		r.ReportServiceZxjsWritePropertyAck(reqFrame, 1)
+		setting.ZAPS.Infof("修改属性成功 DevName [%s]", cmd.DeviceName)
+		valid = 1
 	} else {
-		setting.ZAPS.Infof("[%s] 修改属性失败 DevName [%s]", reqFrame.CmdType, cmd.DeviceName)
-		r.ReportServiceZxjsWritePropertyAck(reqFrame, 0)
+		setting.ZAPS.Infof("修改属性失败 DevName [%s]", cmd.DeviceName)
 	}
-}
-
-func (r *ReportServiceParamZxjsTemplate) ReportServiceZxjsWritePropertyAck(reqFrame MQTTZxjsWritePropertyTemplate, status int) {
-
-	type deviceControlResult struct {
-		Uuid   string `json:"uuid"`
-		Status int    `json:"status"`
-	}
-
-	v := deviceControlResult{
-		Uuid:   reqFrame.Uuid,
-		Status: status,
-	}
-	sJson, _ := json.Marshal(v)
-
-	setting.ZAPS.Info(v)
-
-	r.ZxjsPublishdeviceControlResult(sJson, reqFrame.DeviceAddr)
+	r.ZxjsPublishSetCack(serviceInfo, valid)
 }

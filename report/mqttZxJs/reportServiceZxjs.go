@@ -6,8 +6,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"gateway/device"
-	"gateway/device/eventBus"
 	"gateway/report/reportModel"
 	"gateway/setting"
 	"gateway/utils"
@@ -33,9 +31,9 @@ type ReportServiceNodeParamZxjsTemplate struct {
 	Protocol          string                                              `json:"protocol"`
 	Properties        map[string]*reportModel.ReportModelPropertyTemplate `json:"properties"`
 	Param             struct {
-		ProductSn    string
-		DeviceSn     string
-		DeviceSecret string
+		ProductSn string
+		DeviceSn  string
+		DevicePwd string
 	}
 }
 
@@ -65,8 +63,8 @@ type ReportServiceParamZxjsTemplate struct {
 	GWParam                        ReportServiceGWParamZxjsTemplate
 	NodeList                       []ReportServiceNodeParamZxjsTemplate
 	ReceiveFrameChan               chan MQTTZxjsReceiveFrameTemplate   `json:"-"`
-	ReceiveLogInAckFrameChan       chan MQTTZxjsLogInAckTemplate       `json:"-"` //平台下发的登陆确认报文
 	ReportPropertyRequestFrameChan chan MQTTZxjsReportPropertyTemplate `json:"-"`
+	ReportPropertyCtrlFrameChan    chan MQTTZxjsControlTemplate        `json:"-"`
 	CancelFunc                     context.CancelFunc                  `json:"-"`
 }
 
@@ -86,8 +84,8 @@ func NewReportServiceParamZxjs(gw ReportServiceGWParamZxjsTemplate, nodeList []R
 		GWParam:                        gw,
 		NodeList:                       nodeList,
 		ReceiveFrameChan:               make(chan MQTTZxjsReceiveFrameTemplate, 100),
-		ReceiveLogInAckFrameChan:       make(chan MQTTZxjsLogInAckTemplate, 2),
 		ReportPropertyRequestFrameChan: make(chan MQTTZxjsReportPropertyTemplate, 50),
+		ReportPropertyCtrlFrameChan:    make(chan MQTTZxjsControlTemplate, 50),
 	}
 
 	ctx, cancel := context.WithCancel(context.Background())
@@ -108,15 +106,15 @@ func ReportServiceZxjsPoll(ctx context.Context, r *ReportServiceParamZxjsTemplat
 	cronProcess.AddFunc(reportTime, r.ReportTimeFun)
 
 	//订阅采集接口消息
-	device.CollectInterfaceMap.Lock.Lock()
-	for _, coll := range device.CollectInterfaceMap.Coll {
-		sub := eventBus.NewSub()
-		coll.CollEventBus.Subscribe("onLine", sub)
-		coll.CollEventBus.Subscribe("offLine", sub)
-		coll.CollEventBus.Subscribe("update", sub)
-		go r.ProcessCollEvent(ctx, sub)
-	}
-	device.CollectInterfaceMap.Lock.Unlock()
+	//device.CollectInterfaceMap.Lock.Lock()
+	//for _, coll := range device.CollectInterfaceMap.Coll {
+	//	sub := eventBus.NewSub()
+	//	coll.CollEventBus.Subscribe("onLine", sub)
+	//	coll.CollEventBus.Subscribe("offLine", sub)
+	//	coll.CollEventBus.Subscribe("update", sub)
+	//	go r.ProcessCollEvent(ctx, sub)
+	//}
+	//device.CollectInterfaceMap.Lock.Unlock()
 
 	go r.ProcessUpLinkFrame(ctx)
 	go r.ProcessDownLinkFrame(ctx)
@@ -129,53 +127,12 @@ func (r *ReportServiceParamZxjsTemplate) ReportTimeFun() {
 	if r.GWParam.ReportStatus == "offLine" {
 		return
 	}
-
-}
-
-func (r *ReportServiceParamZxjsTemplate) ProcessCollEvent(ctx context.Context, sub eventBus.Sub) {
-	for {
-		select {
-		case <-ctx.Done():
-			{
-				return
-			}
-		case msg := <-sub.Out():
-			{
-				subMsg := msg.(device.CollectInterfaceEventTemplate)
-				//判断设备在该上报服务中
-				index := -1
-				for k, v := range r.NodeList {
-					if v.Name == subMsg.NodeName {
-						index = k
-					}
-				}
-				if index == -1 {
-					continue
-				}
-				setting.ZAPS.Debugf("上报服务[%s] 采集接口[%s] 设备[%s] 主题[%s] 消息内容[%v]",
-					r.GWParam.ServiceName,
-					subMsg.CollName,
-					subMsg.NodeName,
-					subMsg.Topic,
-					subMsg.Content)
-
-				nodeName := make([]string, 0)
-
-				if subMsg.Topic == "onLine" || subMsg.Topic == "offLine" || subMsg.Topic == "update" {
-					{
-						nodeName = append(nodeName, subMsg.NodeName)
-						if r.NodeList[index].CommStatus == "onLine" {
-							reportNodeProperty := MQTTZxjsReportPropertyTemplate{
-								DeviceType: "node",
-								DeviceName: nodeName,
-							}
-							r.ReportPropertyRequestFrameChan <- reportNodeProperty
-						}
-					}
-				}
-			}
-		}
+	reportNodeProperty := MQTTZxjsReportPropertyTemplate{
+		Seq:      0,
+		DeviceSN: r.GWParam.Param.DeviceSn,
 	}
+	r.ReportPropertyRequestFrameChan <- reportNodeProperty
+
 }
 
 func (r *ReportServiceParamZxjsTemplate) ProcessUpLinkFrame(ctx context.Context) {
@@ -188,9 +145,11 @@ func (r *ReportServiceParamZxjsTemplate) ProcessUpLinkFrame(ctx context.Context)
 			}
 		case reqFrame := <-r.ReportPropertyRequestFrameChan:
 			{
-				if reqFrame.DeviceType == "node" {
-					r.NodePropertyPost(reqFrame.DeviceName)
-				}
+				r.NodePropertyPost(reqFrame)
+			}
+		case reqFrame := <-r.ReportPropertyCtrlFrameChan:
+			{
+				r.ReportServiceZxjsProcessWriteProperty(reqFrame)
 			}
 		}
 	}
@@ -207,75 +166,46 @@ func (r *ReportServiceParamZxjsTemplate) ProcessDownLinkFrame(ctx context.Contex
 		case frame := <-r.ReceiveFrameChan:
 			{
 				parts := strings.Split(frame.Topic, "/") //字符串按照指定的分隔符进行分割
-				if len(parts) < 5 {
+				if len(parts) < 3 {
 					continue
 				}
 
-				ID := parts[3]
-				Command := parts[4]
+				ID := parts[2]
+				Command := frame.Topic[strings.LastIndex(frame.Topic, ID)+len(ID)+1:]
 				setting.ZAPS.Infof("DownLinkFrame ID[%s] Command[%s]", ID, Command)
 
 				switch Command {
-				case "deviceControl": //平台下发的deviceControl报文
+				case "upload/call": // 云端召读实时数据
 					{
-						type CmdItemsZxjsTemplate struct {
-							Code  int         `json:"code"`
-							Value interface{} `json:"value"`
-						}
 
-						var deviceControlData struct {
-							Uuid       string                 `json:"uuid"`
-							DeviceAddr string                 `json:"deviceAddr"`
-							CmdType    string                 `json:"cmdType"`
-							Time       int64                  `json:"time"`
-							CmdItems   []CmdItemsZxjsTemplate `json:"cmdItems"`
+						var allData struct {
+							DeviceSN string `json:"deviceSN"`
+							Seq      int    `json:"seq"`
+							Type     string `json:"type"`
 						}
 
 						setting.ZAPS.Infof("%s", frame.Payload)
-						err := json.Unmarshal(frame.Payload, &deviceControlData)
+						err := json.Unmarshal(frame.Payload, &allData)
 						if err != nil {
-							setting.ZAPS.Error("Unmarshal deviceControl err", err)
+							setting.ZAPS.Error("Unmarshal call err", err)
 							continue
 						}
-
-						reqFrame := MQTTZxjsWritePropertyTemplate{
-							CmdType:    deviceControlData.CmdType,
-							Uuid:       deviceControlData.Uuid,
-							DeviceAddr: deviceControlData.DeviceAddr,
-							Properties: nil,
+						reportNodeProperty := MQTTZxjsReportPropertyTemplate{
+							Seq:      allData.Seq,
+							DeviceSN: allData.DeviceSN,
 						}
-
-						for _, v := range deviceControlData.CmdItems {
-							reqFrame.Properties = append(reqFrame.Properties, MQTTZxjsWritePropertyRequestParamPropertyTemplate{fmt.Sprintf("%d", v.Code), v.Value})
-						}
-
-						r.ZxjsDeviceControlMachine(reqFrame)
+						r.ReportPropertyRequestFrameChan <- reportNodeProperty
 					}
-
-				case "resultMsg":
+				case "set": //平台下发的deviceControl报文
 					{
-						var resultMsgData struct {
-							Topic string `json:"topic"`
-							Data  string `json:"data"`
-							Msg   string `json:"msg"`
-						}
-						err := json.Unmarshal(frame.Payload, &resultMsgData)
+
+						serviceInfo := MQTTZxjsControlTemplate{}
+						err := json.Unmarshal(frame.Payload, &serviceInfo)
 						if err != nil {
-							setting.ZAPS.Error("Unmarshal deviceControl err", err)
+							setting.ZAPS.Infof("set json Unmarshal err %v", err)
 							continue
 						}
-
-						if resultMsgData.Msg == "no_login" || resultMsgData.Msg == "no_login_confirm" {
-							if ID == r.GWParam.Param.DeviceSn {
-								r.GWLogin()
-							} else {
-								for k, v := range r.NodeList {
-									if v.Param.DeviceSn == ID {
-										r.NodeList[k].ReportStatus = "offLine"
-									}
-								}
-							}
-						}
+						r.ReportPropertyCtrlFrameChan <- serviceInfo
 					}
 				}
 			}
@@ -475,7 +405,7 @@ func (r *ReportServiceParamZxjsTemplate) ExportParamToCsv() (bool, string) {
 	w := csv.NewWriter(fs)
 	csvData := [][]string{
 		{"上报服务名称", "采集接口名称", "设备名称", "设备通信地址", "上报模型", "上报服务协议", "产品序列号", "设备序列号", "设备密码"},
-		{"ServiceName", "CollInterfaceName", "Name", "Addr", "UploadModel", "Protocol", "ProductSn", "DeviceSn", "DeviceSecret"},
+		{"ServiceName", "CollInterfaceName", "Name", "Addr", "UploadModel", "Protocol", "ProductSn", "DeviceSn", "DevicePwd"},
 	}
 
 	for _, n := range r.NodeList {
@@ -488,7 +418,7 @@ func (r *ReportServiceParamZxjsTemplate) ExportParamToCsv() (bool, string) {
 		param = append(param, n.Protocol)
 		param = append(param, n.Param.ProductSn)
 		param = append(param, n.Param.DeviceSn)
-		param = append(param, n.Param.DeviceSecret)
+		param = append(param, n.Param.DevicePwd)
 		csvData = append(csvData, param)
 	}
 
@@ -511,7 +441,7 @@ func (r *ReportServiceParamZxjsTemplate) ExportParamToXlsx() (bool, string) {
 
 	cellData := [][]string{
 		{"上报服务名称", "采集接口名称", "设备名称", "设备通信地址", "上报模型", "上报服务协议", "产品序列号", "设备序列号", "设备密码"},
-		{"ServiceName", "CollInterfaceName", "Name", "Addr", "UploadModel", "Protocol", "ProductSn", "DeviceSn", "DeviceSecret"},
+		{"ServiceName", "CollInterfaceName", "Name", "Addr", "UploadModel", "Protocol", "ProductSn", "DeviceSn", "DevicePwd"},
 	}
 
 	for _, n := range r.NodeList {
@@ -524,7 +454,7 @@ func (r *ReportServiceParamZxjsTemplate) ExportParamToXlsx() (bool, string) {
 		param = append(param, n.Protocol)
 		param = append(param, n.Param.ProductSn)
 		param = append(param, n.Param.DeviceSn)
-		param = append(param, n.Param.DeviceSecret)
+		param = append(param, n.Param.DevicePwd)
 		cellData = append(cellData, param)
 	}
 
