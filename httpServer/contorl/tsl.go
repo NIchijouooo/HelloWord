@@ -417,7 +417,7 @@ func ApiAddTSLProperty(context *gin.Context) {
 	}
 
 	emController := controllers.NewEMController()
-	emController.AddEmDeviceModelCmd(context)
+	emController.AddEmDevicePlcModelCmd(context)
 
 	err := context.ShouldBindBodyWith(&tslInfo, binding.JSON)
 	if err != nil {
@@ -468,7 +468,10 @@ func ApiModifyTSLProperty(context *gin.Context) {
 		Property: &property,
 	}
 
-	err := context.BindJSON(&tslInfo)
+	emController := controllers.NewEMController()
+	emController.UpdateEmDevicePlcModelCmd(context)
+
+	err := context.ShouldBindBodyWith(&tslInfo, binding.JSON)
 	if err != nil {
 		setting.ZAPS.Error("修改物模型属性JSON格式化错误 %v", err)
 		context.JSON(http.StatusOK, model.ResponseData{
@@ -513,7 +516,10 @@ func ApiDeleteTSLProperties(context *gin.Context) {
 		Properties []string `json:"properties"` //
 	}{}
 
-	err := context.BindJSON(&tslInfo)
+	emController := controllers.NewEMController()
+	emController.DeleteEmDevicePlcModelCmd(context)
+
+	err := context.ShouldBindBodyWith(&tslInfo, binding.JSON)
 	if err != nil {
 		setting.ZAPS.Error("删除物模型属性JSON格式化错误 %v", err)
 		context.JSON(http.StatusOK, model.ResponseData{
