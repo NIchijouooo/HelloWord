@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"gateway/buildInfo"
 	"gateway/device"
+	"gateway/repositories"
 	"gateway/setting"
 	"net"
 	"strconv"
@@ -302,6 +303,11 @@ func (r *ReportServiceParamFeisjyTemplate) NodePropertyPost(name []string) {
 					r.NodeList[k].HeartBeatMark = true
 					r.NodeList[k].ReportErrCnt = 0
 				}
+
+				/**
+				20230615实时值更新taos
+				*/
+				repositories.NewRealtimeDataRepository().SaveRealtimeDataList(v.Name, v.CollInterfaceName, ycPropertyPostParam)
 			}
 		}
 	}

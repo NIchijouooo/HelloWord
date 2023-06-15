@@ -2,10 +2,7 @@ package repositories
 
 import (
 	"database/sql"
-	"fmt"
 	"gateway/models"
-	"log"
-
 	"gorm.io/gorm"
 )
 
@@ -64,38 +61,38 @@ func (r *DevicePointRepository) GetDeviceByDeviceId(deviceId int) *models.EmDevi
 *
 获取yc
 */
-func (r *DevicePointRepository) GetYcById(deviceId, code int) (models.YcData, error) {
-	var realtime models.YcData
-	//tableName := fmt.Sprintf("%v%d%v%d", "realtimedatatest.yc_", deviceId, "_", code)
-	sql := fmt.Sprint("select Last(ts), val, device_id, code from realtimedatatest.yc where device_id =", deviceId, "and code =", code)
-	rows, err := r.taosDb.Query(sql)
-	defer rows.Close()
-
-	for rows.Next() {
-		err := rows.Scan(&realtime.Ts, &realtime.Value, &realtime.DeviceId, &realtime.Code)
-		if err != nil {
-			log.Printf("Request params:%v", err)
-		}
-	}
-	return realtime, err
-}
+//func (r *DevicePointRepository) GetYcById(deviceId, code int) (models.YcData, error) {
+//	var realtime models.YcData
+//	//tableName := fmt.Sprintf("%v%d%v%d", "realtimedatatest.yc_", deviceId, "_", code)
+//	sql := fmt.Sprint("select Last(ts), val, device_id, code from realtimedatatest.yc where device_id =", deviceId, "and code =", code)
+//	rows, err := r.taosDb.Query(sql)
+//	defer rows.Close()
+//
+//	for rows.Next() {
+//		err := rows.Scan(&realtime.Ts, &realtime.Value, &realtime.DeviceId, &realtime.Code)
+//		if err != nil {
+//			log.Printf("Request params:%v", err)
+//		}
+//	}
+//	return realtime, err
+//}
 
 /*
 *
 获取setting
 */
-func (r *DevicePointRepository) GetSettingById(deviceId, code int) (models.SettingData, error) {
-	var realtime models.SettingData
-	//tableName := fmt.Sprintf("%v%d%v%d", "realtimedatatest.setting_", deviceId, "_", code)
-	sql := fmt.Sprint("select Last(ts), val, device_id, code from realtimedatatest.setting where device_id =", deviceId, "and code =", code)
-	rows, err := r.taosDb.Query(sql)
-	defer rows.Close()
-
-	for rows.Next() {
-		err := rows.Scan(&realtime.Ts, &realtime.Value, &realtime.DeviceId, &realtime.Code)
-		if err != nil {
-			log.Printf("Request params:%v", err)
-		}
-	}
-	return realtime, err
-}
+//func (r *DevicePointRepository) GetSettingById(deviceId, code int) (models.SettingData, error) {
+//	var realtime models.SettingData
+//	//tableName := fmt.Sprintf("%v%d%v%d", "realtimedatatest.setting_", deviceId, "_", code)
+//	sql := fmt.Sprint("select Last(ts), val, device_id, code from realtimedatatest.setting where device_id =", deviceId, "and code =", code)
+//	rows, err := r.taosDb.Query(sql)
+//	defer rows.Close()
+//
+//	for rows.Next() {
+//		err := rows.Scan(&realtime.Ts, &realtime.Value, &realtime.DeviceId, &realtime.Code)
+//		if err != nil {
+//			log.Printf("Request params:%v", err)
+//		}
+//	}
+//	return realtime, err
+//}

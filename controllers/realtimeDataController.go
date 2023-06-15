@@ -21,7 +21,9 @@ type RealtimeDataController struct {
 }
 
 func NewRealtimeDataController() *RealtimeDataController {
-	return &RealtimeDataController{repo: repositories.NewRealtimeDataRepository(), repoHis: repositories.NewHistoryDataRepository(), repoPoint: repositories.NewDevicePointRepository()}
+	return &RealtimeDataController{repo: repositories.NewRealtimeDataRepository(),
+		repoHis:   repositories.NewHistoryDataRepository(),
+		repoPoint: repositories.NewDevicePointRepository()}
 }
 
 func (ctrl *RealtimeDataController) RegisterRoutes(router *gin.RouterGroup) {
