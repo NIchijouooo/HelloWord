@@ -218,6 +218,40 @@
             >
             </el-input>
           </el-form-item>
+          
+          <!-- lp add 2023-06-15-->
+          <div>
+            <el-form-item v-if="ctxData.propertyForm.type !== 3" label="范围报警" prop="minMaxAlarm">
+            <el-switch v-model="ctxData.propertyForm.minMaxAlarm" inline-prompt active-text="是" inactive-text="否" />
+          </el-form-item>
+          </div>
+          <div>
+          <el-form-item v-if="ctxData.propertyForm.type !== 3 && ctxData.propertyForm.minMaxAlarm" label="最小值" prop="min">
+            <el-input type="text" v-model="ctxData.propertyForm.min" autocomplete="off" placeholder="请输入最小值"></el-input>
+          </el-form-item>
+          </div>
+          <el-form-item v-if="ctxData.propertyForm.type !== 3 && ctxData.propertyForm.minMaxAlarm" label="最大值"  prop="max">
+            <el-input type="text" v-model="ctxData.propertyForm.max" autocomplete="off" placeholder="请输入最大值"></el-input>
+          </el-form-item>
+
+          <div>
+          <el-form-item v-if="ctxData.propertyForm.type !== 3" label="步长报警" prop="stepAlarm">
+            <el-switch v-model="ctxData.propertyForm.stepAlarm" inline-prompt active-text="是" inactive-text="否" />
+          </el-form-item>
+          </div>
+          <el-form-item v-if="ctxData.propertyForm.type !== 3 && ctxData.propertyForm.stepAlarm" label="步长" prop="step">
+            <el-input type="text" v-model="ctxData.propertyForm.step" autocomplete="off" placeholder="请输入步长"></el-input>
+          </el-form-item>
+
+          <div>
+          <el-form-item v-if="ctxData.propertyForm.type === 3" label="字符串长度报警" prop="dataLengthAlarm">
+            <el-switch v-model="ctxData.propertyForm.dataLengthAlarm" inline-prompt active-text="是" inactive-text="否" />
+          </el-form-item>
+          </div>
+          <el-form-item v-if="ctxData.propertyForm.type === 3 && ctxData.propertyForm.dataLengthAlarm" label="字符串长度" prop="dataLength">
+            <el-input type="text" v-model="ctxData.propertyForm.dataLength" autocomplete="off" placeholder="请输入字符串长度" ></el-input>
+          </el-form-item>
+
           <div class="form-title"><div class="tName">配置参数</div></div>
           <el-form-item label="数据块号" prop="dbNumber">
             <el-input
@@ -389,6 +423,14 @@ const ctxData = reactive({
     dataType: 0,
     unit: '', // 单位，只有uint32，int32，double有效
     decimals: 0, // 小数位数，只有double有效
+
+    min: '', // 属性最小值，只有uint32，int32，double有效
+    max: '', // 属性最大值，只有uint32，int32，double有效
+    minMaxAlarm: false, // 范围报警，只有uint32，int32，double有效
+    step: '', // 步长，只有uint32，int32，double有效
+    stepAlarm: false, // 步长报警，只有uint32，int32，double有效
+    dataLength: '', // 字符串长度，只有string有效
+    dataLengthAlarm: false, // 字符串长度报警，只有string有效
   },
   paramName: {
     name: '属性名称',
@@ -399,6 +441,13 @@ const ctxData = reactive({
     dbNumber: '数据块号',
     dataType: '数据类型',
     startAddr: 'PLC地址',
+    min: '最小值',
+    max: '最大值',
+    minMaxAlarm: '范围报警',
+    step: '步长',
+    stepAlarm: '步长报警',
+    dataLength: '字符串长度',
+    dataLengthAlarm: '字符串长度报警',
   },
   propertyRules: {
     name: [
@@ -627,6 +676,16 @@ const editDeviceModelProperty = (row) => {
   ctxData.propertyForm.type = row.type
   ctxData.propertyForm.decimals = row.decimals
   ctxData.propertyForm.unit = row.unit
+  if (row.type !== 3) {
+    ctxData.propertyForm['min'] = row.params.min
+    ctxData.propertyForm['max'] = row.params.max
+    ctxData.propertyForm['minMaxAlarm'] = row.params.minMaxAlarm
+    ctxData.propertyForm['step'] = row.params.step
+    ctxData.propertyForm['stepAlarm'] = row.params.stepAlarm
+  } else {
+    ctxData.propertyForm['dataLength'] = row.params.dataLength
+    ctxData.propertyForm['dataLengthAlarm'] = row.params.dataLengthAlarm
+  }
   // s7
   ctxData.propertyForm.dbNumber = row.params.dbNumber
   ctxData.propertyForm.startAddr = row.params.startAddr
@@ -651,6 +710,16 @@ const submitPorpertyForm = () => {
         dbNumber: ctxData.propertyForm.dbNumber,
         startAddr: ctxData.propertyForm.startAddr,
         dataType: ctxData.propertyForm.dataType,
+      }
+      if (ctxData.propertyForm.type !== 3) {
+        params['min'] = ctxData.propertyForm.min
+        params['max'] = ctxData.propertyForm.max
+        params['minMaxAlarm'] = ctxData.propertyForm.minMaxAlarm
+        params['step'] = ctxData.propertyForm.step
+        params['stepAlarm'] = ctxData.propertyForm.stepAlarm
+      } else {
+        params['dataLength'] = ctxData.propertyForm.dataLength
+        params['dataLengthAlarm'] = ctxData.propertyForm.dataLengthAlarm
       }
       property['params'] = params
       console.log('submitPorpertyForm -> property', property)

@@ -297,7 +297,7 @@
               inactive-text="否"
             />
           </el-form-item>
-          <el-form-item v-if="ctxData.propertyForm.type !== 3" label="布长报警" prop="stepAlarm">
+          <el-form-item v-if="ctxData.propertyForm.type !== 3" label="步长报警" prop="stepAlarm">
             <el-switch
               style="width: 220px"
               v-model="ctxData.propertyForm.stepAlarm"
@@ -336,7 +336,7 @@
           </el-form-item>
           <el-form-item
             v-if="ctxData.propertyForm.type !== 3 && ctxData.propertyForm.stepAlarm"
-            label="布长"
+            label="步长"
             prop="step"
           >
             <el-input
@@ -344,7 +344,7 @@
               type="text"
               v-model="ctxData.propertyForm.step"
               autocomplete="off"
-              placeholder="请输入布长"
+              placeholder="请输入步长"
             >
             </el-input>
           </el-form-item>
@@ -566,8 +566,8 @@ const ctxData = reactive({
     min: '', // 属性最小值，只有uint32，int32，double有效
     max: '', // 属性最大值，只有uint32，int32，double有效
     minMaxAlarm: false, // 范围报警，只有uint32，int32，double有效
-    step: '', // 布长，只有uint32，int32，double有效
-    stepAlarm: false, // 布长报警，只有uint32，int32，double有效
+    step: '', // 步长，只有uint32，int32，double有效
+    stepAlarm: false, // 步长报警，只有uint32，int32，double有效
     dataLength: '', // 字符串长度，只有string有效
     dataLengthAlarm: false, // 字符串长度报警，只有string有效
   },
@@ -591,8 +591,8 @@ const ctxData = reactive({
     min: '最小值',
     max: '最大值',
     minMaxAlarm: '范围报警',
-    step: '布长',
-    stepAlarm: '布长报警',
+    step: '步长',
+    stepAlarm: '步长报警',
     unit: '单位',
     decimals: '小数位数',
     dataLength: '字符串长度',
@@ -908,8 +908,8 @@ const initPropertyForm = () => {
     min: '', // 属性最小值，只有uint32，int32，double有效
     max: '', // 属性最大值，只有uint32，int32，double有效
     minMaxAlarm: false, // 范围报警，只有uint32，int32，double有效
-    step: '', // 布长，只有uint32，int32，double有效
-    stepAlarm: false, // 布长报警，只有uint32，int32，double有效
+    step: '', // 步长，只有uint32，int32，double有效
+    stepAlarm: false, // 步长报警，只有uint32，int32，double有效
     dataLength: '', // 字符串长度，只有string有效
     dataLengthAlarm: false, // 字符串长度报警，只有string有效
   }
