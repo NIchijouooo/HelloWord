@@ -22,17 +22,17 @@ func NewProjectInfoController() *ProjectInfoController {
 }
 
 func (ctrl *ProjectInfoController) RegisterRoutes(router *gin.RouterGroup) {
-	router.POST("/api/v2/procjet/createProcjet", ctrl.CreateProcjet)
-	router.GET("/api/v2/procjet/getProcjetByID", ctrl.GetProcjetByID)
-	router.GET("/api/v2/procjets/getAllProcjets", ctrl.GetAllProcjets)
-	router.POST("/api/v2/procjet/updateProcjet", ctrl.UpdateProcjet)
-	router.DELETE("/api/v2/procjet/deleteProcjet", ctrl.DeleteProcjet)
+	router.POST("/api/v2/project/createProject", ctrl.CreateProject)
+	router.POST("/api/v2/project/getProjectByID", ctrl.GetProjectByID)
+	router.GET("/api/v2/project/getAllProjects", ctrl.GetAllProjects)
+	router.POST("/api/v2/project/updateProject", ctrl.UpdateProject)
+	router.DELETE("/api/v2/project/deleteProject", ctrl.DeleteProject)
 	// 注册其他路由...
 }
 
-func (c *ProjectInfoController) CreateProcjet(ctx *gin.Context) {
-	var procjet models.ProjectInfo
-	if err := ctx.ShouldBindJSON(&procjet); err != nil {
+func (c *ProjectInfoController) CreateProject(ctx *gin.Context) {
+	var project models.ProjectInfo
+	if err := ctx.ShouldBindJSON(&project); err != nil {
 		ctx.JSON(http.StatusOK, model.ResponseData{
 			"0",
 			"error" + err.Error(),
@@ -40,7 +40,7 @@ func (c *ProjectInfoController) CreateProcjet(ctx *gin.Context) {
 		})
 		return
 	}
-	if err := c.repo.Create(&procjet); err != nil {
+	if err := c.repo.Create(&project); err != nil {
 		ctx.JSON(http.StatusOK, model.ResponseData{
 			"0",
 			"error" + err.Error(),
@@ -51,13 +51,13 @@ func (c *ProjectInfoController) CreateProcjet(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, model.ResponseData{
 		"0",
 		"",
-		procjet,
+		project,
 	})
 }
 
-func (c *ProjectInfoController) GetProcjetByID(ctx *gin.Context) {
-	var procjet models.ProjectInfo
-	if err := ctx.Bind(&procjet); err != nil {
+func (c *ProjectInfoController) GetProjectByID(ctx *gin.Context) {
+	var project models.ProjectInfo
+	if err := ctx.Bind(&project); err != nil {
 		ctx.JSON(http.StatusOK, model.ResponseData{
 			"1",
 			"error" + err.Error(),
@@ -65,7 +65,7 @@ func (c *ProjectInfoController) GetProcjetByID(ctx *gin.Context) {
 		})
 		return
 	}
-	procjet, err := c.repo.GetById(procjet.ID)
+	project, err := c.repo.GetById(project.ID)
 	if err != nil {
 		ctx.JSON(http.StatusOK, model.ResponseData{
 			"0",
@@ -77,11 +77,11 @@ func (c *ProjectInfoController) GetProcjetByID(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, model.ResponseData{
 		"0",
 		"",
-		procjet,
+		project,
 	})
 }
 
-func (c *ProjectInfoController) GetAllProcjets(ctx *gin.Context) {
+func (c *ProjectInfoController) GetAllProjects(ctx *gin.Context) {
 	projectName := ctx.Query("projectName")
 	createTimeStart := ctx.Query("createTimeStart")
 	createTimeEnd := ctx.Query("createTimeEnd")
@@ -102,9 +102,9 @@ func (c *ProjectInfoController) GetAllProcjets(ctx *gin.Context) {
 	})
 }
 
-func (c *ProjectInfoController) UpdateProcjet(ctx *gin.Context) {
-	var procjet models.ProjectInfo
-	if err := ctx.ShouldBindJSON(&procjet); err != nil {
+func (c *ProjectInfoController) UpdateProject(ctx *gin.Context) {
+	var project models.ProjectInfo
+	if err := ctx.ShouldBindJSON(&project); err != nil {
 		ctx.JSON(http.StatusOK, model.ResponseData{
 			"0",
 			"error" + err.Error(),
@@ -112,7 +112,7 @@ func (c *ProjectInfoController) UpdateProcjet(ctx *gin.Context) {
 		})
 		return
 	}
-	if err := c.repo.Update(&procjet); err != nil {
+	if err := c.repo.Update(&project); err != nil {
 		ctx.JSON(http.StatusOK, model.ResponseData{
 			"0",
 			"error" + err.Error(),
@@ -123,13 +123,13 @@ func (c *ProjectInfoController) UpdateProcjet(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, model.ResponseData{
 		"0",
 		"",
-		procjet,
+		project,
 	})
 }
 
-func (c *ProjectInfoController) DeleteProcjet(ctx *gin.Context) {
-	var procjet models.ProjectInfo
-	if err := ctx.Bind(&procjet); err != nil {
+func (c *ProjectInfoController) DeleteProject(ctx *gin.Context) {
+	var project models.ProjectInfo
+	if err := ctx.Bind(&project); err != nil {
 		ctx.JSON(http.StatusOK, model.ResponseData{
 			"1",
 			"error" + err.Error(),
@@ -137,7 +137,7 @@ func (c *ProjectInfoController) DeleteProcjet(ctx *gin.Context) {
 		})
 		return
 	}
-	if err := c.repo.Delete(procjet.ID); err != nil {
+	if err := c.repo.Delete(project.ID); err != nil {
 		ctx.JSON(http.StatusOK, model.ResponseData{
 			"0",
 			"error" + err.Error(),
