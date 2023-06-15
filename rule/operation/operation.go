@@ -9,7 +9,7 @@ import (
 	"strings"
 )
 
-func GetResult(rule models.EmRuleModel, condition string) string {
+func GetResult(rule models.EmRuleVo, condition string) string {
 	keyword := ProcessKeyword(rule, condition)
 	return parse(keyword)
 }

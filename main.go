@@ -9,6 +9,7 @@ import (
 	"gateway/httpServer"
 	"gateway/models"
 	"gateway/report"
+	"gateway/rule"
 	"gateway/setting"
 	"gateway/utils"
 	"gateway/virtual"
@@ -91,5 +92,7 @@ func main() {
 	/**************Http服务初始化****************/
 	httpServer.RouterWeb(setting.HttpPort)
 	setting.ZAPS.Infof("gateway 初始化成功!")
+	/**************rule服务初始化****************/
+	rule.Init()
 	//**************应用程序监听退出****************/
 }

@@ -11,7 +11,7 @@ import (
 )
 
 // 将关键字替换为实际值
-func ProcessKeyword(rule models.EmRuleModel, condition string) string {
+func ProcessKeyword(rule models.EmRuleVo, condition string) string {
 	var result bytes.Buffer
 	var sb bytes.Buffer
 
@@ -58,7 +58,7 @@ func ProcessKeyword(rule models.EmRuleModel, condition string) string {
 }
 
 // 获取属性值
-func getPropertyValue(operand string, rule models.EmRuleModel) string {
+func getPropertyValue(operand string, rule models.EmRuleVo) string {
 	// product.${10016:”逆变器”}.${0_1:”日发电量”}
 	split := strings.Split(operand, ".")
 	if len(split) != 3 {

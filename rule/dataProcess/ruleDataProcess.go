@@ -52,7 +52,9 @@ func processLogicRule(rule models.EmRuleModel, condition string) {
 		length := len(operators)
 		for i := 0; i < length; i++ {
 			operator := operators[i]
-			processProductCondition(rule, operator)
+			if strings.Contains(operator, "product.${") {
+				processProductCondition(rule, operator)
+			}
 		}
 	}
 

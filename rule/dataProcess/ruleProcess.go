@@ -2,10 +2,11 @@ package dataProcess
 
 import (
 	"gateway/models"
+	"gateway/rule/operation"
 	"strings"
 )
 
-func processRule(rule models.EmRuleModel) {
+func ProcessRule(rule models.EmRuleVo) {
 	content := rule.Content
 	split := strings.Split(content, "\\n")
 	action := make([]string, 0)
@@ -29,14 +30,17 @@ func processRule(rule models.EmRuleModel) {
 			condition.WriteString(str)
 		}
 
-		if previous == "then" && ruleType == "calculate" && strings.Contains(str, "assign.${") {
+		if previous == "then" {
 			action = append(action, str)
 		}
 
 	}
 	if ruleType == "logic" {
-		if ProcessRecover(action, rule, condition.String()) {
-
+		if !ProcessRecover(action, rule, condition.String()) {
+			result := operation.GetResult(rule, condition.String())
+			if result == "true" {
+				ProcessAction(action, rule, condition.String())
+			}
 		}
 	}
 }
