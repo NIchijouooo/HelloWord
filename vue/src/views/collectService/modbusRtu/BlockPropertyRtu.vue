@@ -317,10 +317,10 @@
         <el-row>
             <el-form-item v-if="props.curModelBlock.funCode == 3 || props.curModelBlock.funCode == 4" label="按位解析">
               <el-tooltip class="item" effect="dark" content="开启后按字节位解析数据,位偏移从0开始" placement="top">
-              <el-switch style="width: 220px" v-model="ctxData.propertyForm.bitSwitch" inline-prompt active-text="是" inactive-text="否" />
+              <el-switch style="width: 220px" v-model="ctxData.propertyForm.bitOffsetSw" inline-prompt active-text="是" inactive-text="否" />
               </el-tooltip>
             </el-form-item>
-            <el-form-item label="位偏移" v-if="ctxData.propertyForm.bitSwitch" prop="bitOffset">
+            <el-form-item label="位偏移" v-if="ctxData.propertyForm.bitOffsetSw" prop="bitOffset">
               <el-input
                 type="text"
                 style="width: 220px"
@@ -538,7 +538,7 @@ const ctxData = reactive({
     unit: '', // 单位，只有uint32，int32，double有效
     decimals: 0, // 小数位数，只有double有效
     formula: '', // 计算公式
-    bitSwitch: false, // 按位解析
+    bitOffsetSw: false, // 按位解析
     bitOffset: 0, // 位偏移
 
 
@@ -866,7 +866,7 @@ const editDeviceModelProperty = (row) => {
   ctxData.propertyForm.regAddr = row.regAddr
   ctxData.propertyForm.ruleType = row.ruleType
   ctxData.propertyForm.formula = row.formula === undefined || row.formula === null ? '' : row.formula
-  ctxData.propertyForm.bitSwitch = row.bitSwitch === undefined || row.bitSwitch === null ? false : row.bitSwitch
+  ctxData.propertyForm.bitOffsetSw = row.bitOffsetSw === undefined || row.bitOffsetSw === null ? false : row.bitOffsetSw
   ctxData.propertyForm.bitOffset = row.bitOffset === undefined || row.bitOffset === null ? 0 : row.bitOffset
   // ctxData.propertyForm.step = row.step === undefined || row.step === null ? 0 : row.step
 
@@ -900,8 +900,8 @@ const submitPorpertyForm = () => {
           regAddr: ctxData.propertyForm.regAddr,
           ruleType: ctxData.propertyForm.ruleType,
           formula: ctxData.propertyForm.formula,
-          bitSwitch: ctxData.propertyForm.bitSwitch,
-          bitOffset: ctxData.propertyForm.bitSwitch ? ctxData.propertyForm.bitOffset : -1,
+          bitOffsetSw: ctxData.propertyForm.bitOffsetSw,
+          bitOffset: ctxData.propertyForm.bitOffsetSw ? ctxData.propertyForm.bitOffset : -1,
           // step: +ctxData.propertyForm.step,
         },
       }
@@ -995,7 +995,7 @@ const initPropertyForm = () => {
     regAddr: null,
     ruleType: 'Int_AB',
     formula: '',
-    bitSwitch: false,
+    bitOffsetSw: false,
     bitOffset: 0,
     step: 0,
   }
