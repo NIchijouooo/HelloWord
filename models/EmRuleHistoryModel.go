@@ -2,8 +2,8 @@ package models
 
 type EmRuleHistoryModel struct {
 	Id                 int    `json:"id" gorm:"primary_key"`
-	EventId            int    `json:"eventId"`
-	EventName          string `json:"eventName"`
+	RuleId             int    `json:"ruleId"`
+	RuleName           string `json:"ruleName"`
 	Description        string `json:"description"`
 	Level              int    `json:"level"`
 	TypeClassification int    `json:"typeClassification"`
