@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"gateway/device"
-	mqttEmqx "gateway/report/mqttEMQX"
 	"gateway/report/mqttFeisjy"
 	"gateway/setting"
 	"time"
@@ -121,12 +120,6 @@ func (r *ReportServiceParamZxjsTemplate) NodePropertyPost(property MQTTZxjsRepor
 	ycList := make([]MQTTZxjsReportValueTemplate, 0)
 
 	for _, v := range mqttFeisjy.ReportServiceParamListFeisjy.ServiceList {
-		for _, d := range v.NodeList {
-			initYcList(&ycList, d.CollInterfaceName, d.Name)
-		}
-	}
-
-	for _, v := range mqttEmqx.ReportServiceParamListEmqx.ServiceList {
 		for _, d := range v.NodeList {
 			initYcList(&ycList, d.CollInterfaceName, d.Name)
 		}
