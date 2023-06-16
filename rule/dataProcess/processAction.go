@@ -121,7 +121,7 @@ func insertHistory(actionList []string, rule models.EmRuleVo) {
 						EventHistoryId: ruleHistory.Id,
 						DeviceId:       key,
 						PropertyCode:   value,
-						CreateTime:     time.DateTime,
+						//CreateTime:     time.DateTime,
 					}
 					ruleHistoryDevice = append(ruleHistoryDevice, ruleHistoryDeviceItem)
 				}
