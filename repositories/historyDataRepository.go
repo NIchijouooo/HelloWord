@@ -275,7 +275,7 @@ func (r *HistoryDataRepository) GetLastYcListByCode(codes string) ([]*models.YcD
 	defer rows.Close()
 	for rows.Next() {
 		realtime := &models.YcData{}
-		err := rows.Scan(&realtime.Ts, &realtime.Value, &realtime.DeviceID, &realtime.Code)
+		err := rows.Scan(&realtime.Ts, &realtime.Value, &realtime.DeviceId, &realtime.Code)
 		if err != nil {
 			return nil, err
 		}
@@ -297,7 +297,7 @@ func (r *HistoryDataRepository) GetLastYcHistoryByDeviceIdAndCodeList(deviceId i
 	defer rows.Close()
 	for rows.Next() {
 		realtime := &models.YcData{}
-		err := rows.Scan(&realtime.Ts, &realtime.Value, &realtime.DeviceID, &realtime.Code)
+		err := rows.Scan(&realtime.Ts, &realtime.Value, &realtime.DeviceId, &realtime.Code)
 		if err != nil {
 			return nil, err
 		}

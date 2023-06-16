@@ -80,11 +80,13 @@ func (c *AuxiliaryController) GetYcLogById(ctx *gin.Context) {
 		return
 	}
 	//查询历史数据
-	ycLog, err := c.hisRepo.GetYcLogById(ycQuery.DeviceId, ycQuery.Codes, ycQuery.StartTime, ycQuery.EndTime)
-	if err != nil {
-		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-		return
-	}
+
+	var ycLog []map[string]interface{} //这里需要解开
+	//ycLog, err := c.hisRepo.GetLastYcListByCode(ycQuery.DeviceId, ycQuery.Codes, ycQuery.StartTime, ycQuery.EndTime)
+	//if err != nil {
+	//	ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+	//	return
+	//}
 	ctx.JSON(http.StatusOK, model.ResponseData{
 		"0",
 		"获取信息成功！",
