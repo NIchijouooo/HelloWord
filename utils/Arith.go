@@ -4,7 +4,6 @@ import (
 	"gateway/models"
 	"math/big"
 	"reflect"
-	"strconv"
 	"time"
 )
 
@@ -25,9 +24,8 @@ func YcValueSum(ycModelList interface{}) float64 {
 
 		switch obj := obj.(type) {
 		case models.YcData:
-			value, err := strconv.ParseFloat(obj.Value, 64)
-			if err == nil && value != 0 {
-				zero.Add(zero, big.NewFloat(value))
+			if obj.Value != 0 {
+				zero.Add(zero, big.NewFloat(obj.Value))
 			}
 		}
 	}
@@ -53,9 +51,8 @@ func YcValueMax(ycModelList interface{}) float64 {
 
 		switch obj := obj.(type) {
 		case models.YcData:
-			value, err := strconv.ParseFloat(obj.Value, 64)
-			if err == nil && obj.Ts.After(calendar) { //如果当日期大于calendar日期就可以重新赋值
-				zero = big.NewFloat(value) //重新赋值zero
+			if obj.Ts.After(calendar) { //如果当日期大于calendar日期就可以重新赋值
+				zero = big.NewFloat(obj.Value) //重新赋值zero
 				calendar = obj.Ts
 			}
 		}
