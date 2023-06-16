@@ -481,6 +481,7 @@ func (r *ReportServiceParamFeisjyTemplate) ProcessAlarmEvent(index int, collName
 
 	//4、满足报警条件,推送信息
 	if reportStatus == true {
+		ycPropertyPostParam.YcList = ycPropertyMap
 		if true == r.FeisjyPublishYcData(&ycPropertyPostParam, r.NodeList[index].Param.DeviceID) {
 			r.NodeList[index].HeartBeatMark = true
 			r.NodeList[index].ReportErrCnt = 0

@@ -1638,7 +1638,12 @@ func (c *CommunicationManageTemplate) CommunicationStateMachineModbusTCP(cmd Com
 
 											if true == r.BitOffsetSw {
 												if _, ok := d.Value.(float64); ok {
-													value.Value = uint32(d.Value.(float64)) & (0x01 << r.BitOffset)
+													if uint32(d.Value.(float64))&(0x01<<r.BitOffset) != 0 {
+														value.Value = 1
+													} else {
+														value.Value = 0
+													}
+													//value.Value = uint32(d.Value.(float64)) & (0x01 << r.BitOffset)
 												} else {
 													value.Value = -1
 												}
@@ -1707,10 +1712,10 @@ func (c *CommunicationManageTemplate) CommunicationStateMachineModbusTCP(cmd Com
 												node.Properties[k].Value = append(node.Properties[k].Value, value)
 											}
 											mutex.Unlock()
-											//break
+											break
 										}
 									}
-									break
+									//break
 								}
 							}
 						}
