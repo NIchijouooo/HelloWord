@@ -166,6 +166,39 @@ func AddReportModelProperty(modelName string, property *ReportModelPropertyTempl
 	return nil
 }
 
+func AddReportModelPropertys(modelName string, property []ReportModelPropertyTemplate) (error, int) { //ltg add 2023-06-12
+	model, ok := ReportModels[modelName]
+
+	if !ok {
+		setting.ZAPS.Error("上报模型名称不存在")
+		return errors.New("上报模型名称不存在"), 0
+	}
+
+	count := 0
+	Index := len(model.Properties)
+
+	for k, v := range property {
+		_, ok = model.Properties[v.Name]
+		if ok {
+			setting.ZAPS.Errorf("上报模型属性名称[%s]已经存在", v.Name)
+		} else {
+			property[k].Index = Index
+			Index++
+			model.Properties[v.Name] = &property[k]
+			count++
+		}
+	}
+
+	if 0 == count {
+		setting.ZAPS.Error("批量上报模型属性添加成功0个")
+		return errors.New("批量上报模型属性添加成功0个"), 0
+	}
+
+	setting.ZAPS.Info("批量上报上报模型属性添加成功")
+	writeTimer.Reset(time.Second)
+	return nil, count
+}
+
 func ModifyReportModelProperty(modelName string, property *ReportModelPropertyTemplate) error {
 	model, ok := ReportModels[modelName]
 	if !ok {

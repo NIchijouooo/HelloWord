@@ -1,55 +1,73 @@
 <template>
   <div class="main-container">
     <div class="main">
-      <div class="title" style="justify-content: space-between">
-        <div class="title-left">
-          <el-button type="primary" plain @click="toDataService()" style="margin-right: 20px">
-            <el-icon class="el-input__icon"><back /></el-icon>
-            返回上报服务
-          </el-button>
-          <el-input style="width: 200px" placeholder="请输入 地址/名称 过滤" clearable v-model="ctxData.nodeInfo">
-            <template #prefix>
-              <el-icon class="el-input__icon"><search /></el-icon>
-            </template>
-          </el-input>
-        </div>
-        <div>
-          <el-button type="primary" plain class="right-btn" @click="importDevice()">
-            <el-icon class="el-input__icon"><download /></el-icon>
-            导入设备
-          </el-button>
-          <el-button type="primary" plain class="right-btn" @click="exportDevice">
-            <el-icon class="el-input__icon"><upload /></el-icon>
-            导出设备
-          </el-button>
-          <el-button type="primary" bg class="right-btn" @click="reportNode()">
-            <el-icon class="btn-icon">
-              <Icon name="local-report" size="14px" color="#ffffff" />
-            </el-icon>
-            主动上报
-          </el-button>
-          <el-button type="primary" bg class="right-btn" @click="addNode()">
-            <el-icon class="btn-icon">
-              <Icon name="local-add" size="14px" color="#ffffff" />
-            </el-icon>
-            添加
-          </el-button>
-          <el-button type="danger" bg class="right-btn" @click="deleteNode()">
-            <el-icon class="btn-icon">
-              <Icon name="local-delete" size="14px" color="#ffffff" />
-            </el-icon>
-            删除
-          </el-button>
-          <el-button style="color: #fff" color="#2EA554" class="right-btn" @click="refresh()">
-            <el-icon class="btn-icon">
-              <Icon name="local-refresh" size="14px" color="#ffffff" />
-            </el-icon>
-            刷新
-          </el-button>
-        </div>
+      <div class="search-bar">
+        <el-form :inline="true" ref="searchFormRef" status-icon label-width="120px">
+          <el-form-item style="margin-left: 20px;">
+            <el-button type="primary" plain @click="toDataService()" style="margin-right: 20px">
+              <el-icon class="el-input__icon"><back /></el-icon>
+              返回上报服务
+            </el-button>
+          </el-form-item>
+          <el-form-item>
+            <el-button type="primary" plain class="right-btn" @click="importDevice()">
+              <el-icon class="el-input__icon"><download /></el-icon>
+              导入设备
+            </el-button>
+          </el-form-item>
+          <el-form-item>
+            <el-button type="primary" plain class="right-btn" @click="exportDevice">
+              <el-icon class="el-input__icon"><upload /></el-icon>
+              导出设备
+            </el-button>
+          </el-form-item>
+        </el-form>
       </div>
-      <div class="title" style="top: 60px; height: 76px; padding: 20px 0; justify-content: flex-start">
-        <div class="tName">{{ props.curGateway.serviceName }}</div>
+      <div class="search-bar" style="display: flex;">
+        <div class="title" style="position: relative;margin-right: 40px;height: 40px; padding: 0px 0; justify-content: flex-start">
+          <div class="tName">{{ props.curGateway.serviceName }}</div>
+        </div>
+        <el-form :inline="true" ref="searchFormRef2" status-icon label-width="90px">
+          <el-form-item label="">
+            <el-input style="width: 200px" placeholder="请输入 地址/名称 过滤" clearable v-model="ctxData.nodeInfo">
+              <template #prefix>
+                <el-icon class="el-input__icon"><search /></el-icon>
+              </template>
+            </el-input>
+          </el-form-item>
+          <el-form-item>
+            <el-button type="primary" bg class="right-btn" @click="reportNode()">
+              <el-icon class="btn-icon">
+                <Icon name="local-report" size="14px" color="#ffffff" />
+              </el-icon>
+              主动上报
+            </el-button>
+          </el-form-item>
+          <el-form-item>
+            <el-button type="primary" bg class="right-btn" @click="addNode()">
+              <el-icon class="btn-icon">
+                <Icon name="local-add" size="14px" color="#ffffff" />
+              </el-icon>
+              添加
+            </el-button>
+          </el-form-item>
+          <el-form-item>
+            <el-button type="danger" bg class="right-btn" @click="deleteNode()">
+              <el-icon class="btn-icon">
+                <Icon name="local-delete" size="14px" color="#ffffff" />
+              </el-icon>
+              删除
+            </el-button>
+          </el-form-item>
+          <el-form-item>
+            <el-button style="color: #fff" color="#2EA554" class="right-btn" @click="refresh()">
+              <el-icon class="btn-icon">
+                <Icon name="local-refresh" size="14px" color="#ffffff" />
+              </el-icon>
+              刷新
+            </el-button>
+          </el-form-item>
+        </el-form>
       </div>
       <div class="content" ref="contentRef" style="top: 136px">
         <el-table
@@ -63,30 +81,43 @@
           @row-dblclick="editNode"
         >
           <el-table-column type="selection" width="55" />
-          <el-table-column prop="deviceName" label="设备名称" width="auto" min-width="180" align="center">
+          <el-table-column type="expand">
+            <template #default="scope">
+              <div class="param-content">
+                <div class="pc-title">
+                  <div class="pct-info">
+                    <b> {{ scope.row.deviceName }} </b>
+                    上报参数
+                  </div>
+                </div>
+                <div class="pc-content">
+                  <div class="param-item" v-for="(item, key, index) of scope.row.param" :key="index">
+                    <div class="param-value">{{ ctxData.paramName[key] }}：</div>
+                    <div class="param-name">{{ item || '-' }}</div>
+                  </div>
+                </div>
+              </div>
+            </template>
           </el-table-column>
-          <el-table-column prop="deviceLabel" label="设备标签" width="auto" min-width="180" align="center">
+          <el-table-column sortable prop="deviceName" label="设备名称" width="auto" min-width="180" align="center">
           </el-table-column>
-          <el-table-column prop="deviceAddr" label="通讯地址" width="auto" min-width="150" align="center">
+          <el-table-column sortable prop="deviceLabel" label="设备标签" width="auto" min-width="180" align="center">
           </el-table-column>
-          <el-table-column prop="uploadModel" label="上报模型" width="auto" min-width="150" align="center">
+          <el-table-column sortable prop="deviceAddr" label="通讯地址" width="auto" min-width="150" align="center">
           </el-table-column>
-          <el-table-column prop="collInterfaceName" label="采集接口名称" width="auto" min-width="150" align="center">
+          <el-table-column sortable prop="uploadModel" label="上报模型" width="auto" min-width="150" align="center">
           </el-table-column>
-          <!-- el-table-column label="通信状态" width="auto" min-width="100" align="center">
+          <el-table-column sortable prop="collInterfaceName" label="采集接口名称" width="auto" min-width="150" align="center">
+          </el-table-column>
+          <!-- el-table-column sortable label="通信状态" width="auto" min-width="100" align="center">
             <template #default="scope">
               {{ scope.row.commStatus === 'onLine' ? '在线' : '离线' }}
             </template>
           </el-table-column -->
 
-          <el-table-column label="上报状态" width="auto" min-width="100" align="center">
+          <el-table-column sortable label="上报状态" width="auto" min-width="100" align="center">
             <template #default="scope">
               {{ scope.row.reportStatus === 'onLine' ? '在线' : '离线' }}
-            </template>
-          </el-table-column>
-          <el-table-column label="上报参数" width="auto" min-width="180" align="center">
-            <template #default="scope">
-              {{ scope.row.param }}
             </template>
           </el-table-column>
           <el-table-column label="操作" width="auto" min-width="120" align="center" fixed="right">
@@ -320,18 +351,25 @@ const props = defineProps({
     type: Object,
     default: {},
   },
+  pageInfo: String,
 })
 console.log('id -> props', props)
 
 const emit = defineEmits(['changeDnFlag'])
 const toDataService = () => {
-  emit('changeDnFlag')
+  //lp update 2023-06-12 首页上报信息查看详情，对点击返回按钮进行操作标识，防止死循环跳转显示详情页面
+  emit('changeDnFlag', 'goBack')
 }
 const ctxData = reactive({
   headerCellStyle: {
     background: variables.primaryColor,
     color: variables.fontWhiteColor,
     height: '54px',
+  },
+  paramName: {
+    ProductKey: '产品密钥',
+    DeviceID: '通讯地址',
+    DeviceSecret: '设备密钥',
   },
   cellStyle: {
     height: '48px',
@@ -465,7 +503,7 @@ const getNodeList = (flag) => {
       showOneResMsg(res)
     }
     await nextTick(() => {
-      ctxData.tableMaxHeight = contentRef.value.clientHeight - 34 - 36 - 22
+      ctxData.tableMaxHeight = contentRef.value.clientHeight - 34 - 36 - 132
     })
   })
 }

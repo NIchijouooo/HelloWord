@@ -1,0 +1,40 @@
+kind: pipeline
+type: docker
+name: default
+
+platform:
+  os: linux
+  arch: amd64
+
+steps:
+  - name: 构建后端镜像
+    image: plugins/docker
+    volumes:
+      - name: docker
+        path: /var/run/docker.sock
+    settings:
+      insecure: true
+      username: veryrui@gmail.com
+      password: Heimu198612
+      registry: registry.cn-hangzhou.aliyuncs.com
+      repo: registry.cn-hangzhou.aliyuncs.com/feisjy/em-go
+      tags: 1
+
+  - name: 发布
+    image: appleboy/drone-ssh
+    settings:
+      host: 192.168.31.162
+      username: root
+      password:
+        from_secret: ssh_password
+      port: 22
+      script:
+        - docker rm em-go -f
+        - docker rmi registry.cn-hangzhou.aliyuncs.com/feisjy/em-go:1 -f
+        - docker run -d -p 9090:7070 --name em-go registry.cn-hangzhou.aliyuncs.com/feisjy/em-go:1
+
+volumes:
+  - name: docker
+    host:
+      path: /var/run/docker.sock
+
