@@ -1,6 +1,8 @@
 package mqttFeisjy
 
 import (
+	"bytes"
+	"compress/gzip"
 	"encoding/json"
 	"fmt"
 	"gateway/buildInfo"
@@ -8,6 +10,7 @@ import (
 	"gateway/setting"
 	"math"
 	"net"
+	"os"
 	"strconv"
 	"time"
 )
@@ -52,6 +55,28 @@ type MQTTFeisjyReportPropertyTemplate struct {
 
 func (r *ReportServiceParamFeisjyTemplate) FeisjyPublishData(msg *MQTTFeisjyReportFrameTemplate) bool {
 	status := false
+
+	// QJHui ADD 2023/6/16 新增了上报数据压缩
+	payloadByte, ok := msg.Payload.([]byte)
+	if ok {
+
+		//fmt.Println("压缩前 ************************************* json >", len(msg.Payload.([]byte)))
+
+		var b bytes.Buffer
+		gz := gzip.NewWriter(&b)
+		if _, err := gz.Write(payloadByte); err != nil {
+			fmt.Println("Error compressing JSON data:", err)
+			os.Exit(1)
+		}
+		if err := gz.Close(); err != nil {
+			fmt.Println("Error closing gzip writer:", err)
+			os.Exit(1)
+		}
+		compressedData := b.Bytes()
+		msg.Payload = compressedData
+
+		//fmt.Println("压缩后 ************************************* compressed Data >", len(msg.Payload.([]byte)))
+	}
 
 	if r.GWParam.MQTTClient != nil {
 		if token := r.GWParam.MQTTClient.Publish(msg.Topic, 0, false, msg.Payload); token.WaitTimeout(2000*time.Millisecond) && token.Error() != nil {
