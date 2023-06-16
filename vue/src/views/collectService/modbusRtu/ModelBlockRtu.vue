@@ -1,4 +1,6 @@
 <template>
+<div class="main-container">
+  <div class="main">
   <div class="mc-left">
     <div class="title">
       <el-button type="primary" style="width: 100%" plain @click="toDeviceModel()">
@@ -22,39 +24,56 @@
   </div>
   <div class="mc-right">
     <div class="mcr-top">
-      <div class="title" style="justify-content: space-between">
-        <div class="tName">{{ ctxData.curDeviceModel.label }}：命令列表</div>
-        <div style="display: flex">
-          <el-input style="width: 200px" placeholder="请输入命令名称" v-model="ctxData.deviceModelBlock">
-            <template #prefix>
-              <el-icon class="el-input__icon"><search /></el-icon>
-            </template>
-          </el-input>
-          <el-button type="primary" plain class="right-btn" @click="importDPS()">
-            <el-icon class="el-input__icon"><download /></el-icon>
-            导入命令
-          </el-button>
-          <el-button type="primary" plain class="right-btn" @click="exportDPS()">
-            <el-icon class="el-input__icon"><upload /></el-icon>
-            导出命令
-          </el-button>
-          <el-button type="primary" bg class="right-btn" @click="addDeviceModelBlock()">
-            <el-icon class="btn-icon"> <Icon name="local-add" size="14px" color="#ffffff" /> </el-icon> 添加
-          </el-button>
-          <el-button style="color: #fff" color="#2EA554" class="right-btn" @click="refresh()">
-            <el-icon class="btn-icon">
-              <Icon name="local-refresh" size="14px" color="#ffffff" />
-            </el-icon>
-            刷新
-          </el-button>
-          <el-button type="danger" bg class="right-btn" @click="deleteDeviceModelBlock()">
-            <el-icon class="btn-icon">
-              <Icon name="local-delete" size="14px" color="#ffffff" />
-            </el-icon>
-            删除
-          </el-button>
+      <div style="display: flex; justify-content: space-between;">
+        <div class="title" style="position: relative;width: 40%;justify-content: flex-start;">
+          <div class="tName">{{ ctxData.curDeviceModel.label }}：命令列表</div>
+        </div>
+        <div class="search-bar" style="text-align:right;">
+          <el-form :inline="true" ref="searchFormRef" status-icon label-width="90px">
+            <el-form-item style="margin-left: 20px;">
+              <el-input style="width: 200px" placeholder="请输入命令名称" v-model="ctxData.deviceModelBlock">
+                <template #prefix>
+                  <el-icon class="el-input__icon"><search /></el-icon>
+                </template>
+              </el-input>
+            </el-form-item>
+            <el-form-item>
+              <el-button type="primary" plain class="right-btn" @click="importDPS()">
+                <el-icon class="el-input__icon"><download /></el-icon>
+                导入命令
+              </el-button>
+            </el-form-item>
+            <el-form-item>
+              <el-button type="primary" plain class="right-btn" @click="exportDPS()">
+                <el-icon class="el-input__icon"><upload /></el-icon>
+                导出命令
+              </el-button>
+            </el-form-item>
+            <el-form-item>
+              <el-button type="primary" bg class="right-btn" @click="addDeviceModelBlock()">
+                <el-icon class="btn-icon"> <Icon name="local-add" size="14px" color="#ffffff" /> </el-icon> 添加
+              </el-button>
+            </el-form-item>
+            <el-form-item>
+              <el-button style="color: #fff" color="#2EA554" class="right-btn" @click="refresh()">
+                <el-icon class="btn-icon">
+                  <Icon name="local-refresh" size="14px" color="#ffffff" />
+                </el-icon>
+                刷新
+              </el-button>
+            </el-form-item>
+            <el-form-item>
+              <el-button type="danger" bg class="right-btn" @click="deleteDeviceModelBlock()">
+                <el-icon class="btn-icon">
+                  <Icon name="local-delete" size="14px" color="#ffffff" />
+                </el-icon>
+                删除
+              </el-button>
+            </el-form-item>
+          </el-form>
         </div>
       </div>
+
       <div class="content" ref="contentRef">
         <el-table
           :data="filterDMPTableData"
@@ -67,16 +86,16 @@
           @row-dblclick="editDeviceModelBlock"
         >
           <el-table-column type="selection" width="55" />
-          <el-table-column prop="name" label="命令名称" width="auto" min-width="150" align="center"> </el-table-column>
-          <el-table-column prop="label" label="命令标签" width="auto" min-width="150" align="center"> </el-table-column>
-          <el-table-column label="功能码" width="auto" min-width="150" align="center">
+          <el-table-column sortable prop="name" label="命令名称" width="auto" min-width="150" align="center"> </el-table-column>
+          <el-table-column sortable prop="label" label="命令标签" width="auto" min-width="150" align="center"> </el-table-column>
+          <el-table-column sortable label="功能码" width="auto" min-width="150" align="center">
             <template #default="scope">
               {{ ctxData.funCodeNames['f' + scope.row.funCode] }}
             </template>
           </el-table-column>
-          <el-table-column prop="startRegAddr" label="寄存器地址" width="auto" min-width="120" align="center">
+          <el-table-column sortable prop="startRegAddr" label="寄存器地址" width="auto" min-width="120" align="center">
           </el-table-column>
-          <el-table-column prop="regCnt" label="寄存器数量" width="auto" min-width="100" align="center">
+          <el-table-column sortable prop="regCnt" label="寄存器数量" width="auto" min-width="100" align="center">
           </el-table-column>
           <el-table-column label="操作" width="auto" min-width="200" align="center" fixed="right">
             <template #default="scope">
@@ -206,6 +225,8 @@
       </span>
     </template>
   </el-dialog>
+  </div>
+</div>
 </template>
 <script setup>
 import { Search, Back, Download, Upload } from '@element-plus/icons-vue'
@@ -229,7 +250,8 @@ console.log('id -> props', props)
 // 返回设备模型
 const emit = defineEmits(['changeShowFlag'])
 const toDeviceModel = () => {
-  emit('changeShowFlag')
+  //lp update 2023-06-12 首页设备模型跳转进入显示命令详情后，对点击返回按钮进行操作标识，防止死循环跳转显示详情页面
+  emit('changeShowFlag', 'goBack')
 }
 const regCnt = /^[0-9]*[1-9][0-9]*$/
 const validateRegCnt = (rule, value, callback) => {
@@ -414,7 +436,7 @@ const getDeviceModelBlock = (flag) => {
       showOneResMsg(res)
     }
     await nextTick(() => {
-      ctxData.tableMaxHeight = contentRef.value.clientHeight - 34 - 22
+      ctxData.tableMaxHeight = contentRef.value.clientHeight - 34 - 22 - 82
       if (flag === 2) showModelPropertyBlock(ctxData.curModelBlock, 1)
     })
   })
@@ -714,7 +736,7 @@ const handleResult = (res, doFunction) => {
   height: calc(50% - 10px);
   left: 0;
   right: 0;
-  background-color: #fff;
+  background-color: #f5f5f5;
   border-radius: 4px;
 }
 .mcr-bottom {
@@ -723,7 +745,7 @@ const handleResult = (res, doFunction) => {
   height: calc(50% - 10px);
   left: 0;
   right: 0;
-  background-color: #fff;
+  background-color: #f5f5f5;
   border-radius: 4px;
 }
 .activeModel {

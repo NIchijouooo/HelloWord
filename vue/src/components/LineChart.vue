@@ -1,6 +1,6 @@
 <template>
   <div class="lineChart">
-    <v-chart :option="lineChartOption" />
+    <v-chart :option="lineChartOption" :auto-resize="true" style="height: 400px;width: 800px;" />
   </div>
 </template>
 <script setup>

@@ -1,55 +1,73 @@
 <template>
   <div class="main-container">
     <div class="main">
-      <div class="title" style="justify-content: space-between">
-        <div class="title-left">
-          <el-button type="primary" plain @click="toDataService()" style="margin-right: 20px">
-            <el-icon class="el-input__icon"><back /></el-icon>
-            返回上报服务
-          </el-button>
-          <el-input style="width: 200px" placeholder="请输入 地址/名称 过滤" clearable v-model="ctxData.regInfo">
-            <template #prefix>
-              <el-icon class="el-input__icon"><search /></el-icon>
-            </template>
-          </el-input>
-        </div>
-        <div>
-          <el-button type="primary" plain class="right-btn" @click="importReg()">
-            <el-icon class="el-input__icon"><download /></el-icon>
-            导入寄存器
-          </el-button>
-          <el-button type="primary" plain class="right-btn" @click="exportReg">
-            <el-icon class="el-input__icon"><upload /></el-icon>
-            导出寄存器
-          </el-button>
-          <el-button type="primary" bg class="right-btn" @click="reportNode()">
-            <el-icon class="btn-icon">
-              <Icon name="local-report" size="14px" color="#ffffff" />
-            </el-icon>
-            主动上报
-          </el-button>
-          <el-button type="primary" bg class="right-btn" @click="addReg()">
-            <el-icon class="btn-icon">
-              <Icon name="local-add" size="14px" color="#ffffff" />
-            </el-icon>
-            添加
-          </el-button>
-          <el-button type="danger" bg class="right-btn" @click="deleteReg()">
-            <el-icon class="btn-icon">
-              <Icon name="local-delete" size="14px" color="#ffffff" />
-            </el-icon>
-            删除
-          </el-button>
-          <el-button style="color: #fff" color="#2EA554" class="right-btn" @click="refresh()">
-            <el-icon class="btn-icon">
-              <Icon name="local-refresh" size="14px" color="#ffffff" />
-            </el-icon>
-            刷新
-          </el-button>
-        </div>
+      <div class="search-bar">
+        <el-form :inline="true" ref="searchFormRef" status-icon label-width="90px">
+          <el-form-item style="margin-left: 20px;">
+            <el-button type="primary" plain @click="toDataService()" style="margin-right: 20px">
+              <el-icon class="el-input__icon"><back /></el-icon>
+              返回上报服务
+            </el-button>
+          </el-form-item>
+          <el-form-item>
+            <el-button type="primary" plain class="right-btn" @click="importReg()">
+              <el-icon class="el-input__icon"><download /></el-icon>
+              导入寄存器
+            </el-button>
+          </el-form-item>
+          <el-form-item>
+            <el-button type="primary" plain class="right-btn" @click="exportReg()">
+              <el-icon class="el-input__icon"><upload /></el-icon>
+              导出寄存器
+            </el-button>
+          </el-form-item>
+        </el-form>
       </div>
-      <div class="title" style="top: 60px; height: 76px; padding: 20px 0; justify-content: flex-start">
-        <div class="tName">{{ props.curGateway.serviceName }}</div>
+      <div class="search-bar" style="display: flex;">
+        <div class="title" style="position: relative;margin-right: 40px;justify-content: flex-start;padding: 0px 0px;height: 40px;">
+          <div class="tName">{{ props.curGateway.serviceName }}</div>
+        </div>
+        <el-form :inline="true" ref="searchFormRef2" status-icon label-width="90px">
+          <el-form-item label="">
+            <el-input style="width: 200px" placeholder="请输入 地址/名称 过滤" clearable v-model="ctxData.regInfo">
+              <template #prefix>
+                <el-icon class="el-input__icon"><search /></el-icon>
+              </template>
+            </el-input>
+          </el-form-item>
+          <el-form-item>
+            <el-button type="primary" bg class="right-btn" @click="reportNode()">
+              <el-icon class="btn-icon">
+                <Icon name="local-report" size="14px" color="#ffffff" />
+              </el-icon>
+              主动上报
+            </el-button>
+          </el-form-item>
+          <el-form-item>
+            <el-button type="primary" bg class="right-btn" @click="addReg()">
+              <el-icon class="btn-icon">
+                <Icon name="local-add" size="14px" color="#ffffff" />
+              </el-icon>
+              添加
+            </el-button>
+          </el-form-item>
+          <el-form-item>
+            <el-button type="danger" bg class="right-btn" @click="deleteReg()">
+              <el-icon class="btn-icon">
+                <Icon name="local-delete" size="14px" color="#ffffff" />
+              </el-icon>
+              删除
+            </el-button>
+          </el-form-item>
+          <el-form-item>
+            <el-button style="color: #fff" color="#2EA554" class="right-btn" @click="refresh()">
+              <el-icon class="btn-icon">
+                <Icon name="local-refresh" size="14px" color="#ffffff" />
+              </el-icon>
+              刷新
+            </el-button>
+          </el-form-item>
+        </el-form>
       </div>
       <div class="content" ref="contentRef" style="top: 136px">
         <el-table
@@ -63,25 +81,25 @@
           @row-dblclick="editReg"
         >
           <el-table-column type="selection" width="55" />
-          <el-table-column prop="regName" label="寄存器名称" width="auto" min-width="180" align="center">
+          <el-table-column sortable prop="regName" label="寄存器名称" width="auto" min-width="180" align="center">
           </el-table-column>
-          <el-table-column prop="label" label="寄存器标签" width="auto" min-width="180" align="center">
+          <el-table-column sortable prop="label" label="寄存器标签" width="auto" min-width="180" align="center">
           </el-table-column>
-          <el-table-column prop="propertyType" label="属性类型" width="auto" min-width="120" align="center">
+          <el-table-column sortable prop="propertyType" label="属性类型" width="auto" min-width="120" align="center">
           </el-table-column>
-          <el-table-column prop="collName" label="采集接口名称" width="auto" min-width="180" align="center">
+          <el-table-column sortable prop="collName" label="采集接口名称" width="auto" min-width="180" align="center">
           </el-table-column>
-          <el-table-column prop="nodeName" label="设备名称" width="auto" min-width="180" align="center">
+          <el-table-column sortable prop="nodeName" label="设备名称" width="auto" min-width="180" align="center">
           </el-table-column>
-          <el-table-column prop="propertyName" label="设备属性名称" width="auto" min-width="150" align="center">
+          <el-table-column sortable prop="propertyName" label="设备属性名称" width="auto" min-width="150" align="center">
           </el-table-column>
-          <el-table-column prop="regType" label="寄存器类型" width="auto" min-width="100" align="center">
+          <el-table-column sortable prop="regType" label="寄存器类型" width="auto" min-width="100" align="center">
           </el-table-column>
-          <el-table-column prop="regAddr" label="寄存器地址" width="auto" min-width="100" align="center">
+          <el-table-column sortable prop="regAddr" label="寄存器地址" width="auto" min-width="100" align="center">
           </el-table-column>
-          <el-table-column prop="regCnt" label="寄存器数量" width="auto" min-width="100" align="center">
+          <el-table-column sortable prop="regCnt" label="寄存器数量" width="auto" min-width="100" align="center">
           </el-table-column>
-          <el-table-column prop="rule" label="解析规则" width="auto" min-width="100" align="center"> </el-table-column>
+          <el-table-column sortable prop="rule" label="解析规则" width="auto" min-width="100" align="center"> </el-table-column>
           <el-table-column label="操作" width="auto" min-width="120" align="center" fixed="right">
             <template #default="scope">
               <el-button @click="editReg(scope.row)" text type="primary">编辑</el-button>
@@ -289,7 +307,7 @@ console.log('id -> props', props)
 
 const emit = defineEmits(['changeDnFlag'])
 const toDataService = () => {
-  emit('changeDnFlag')
+  emit('changeDnFlag', 'goBack')
 }
 
 const regCnt = /^[0-9]*[1-9][0-9]*$/
@@ -464,7 +482,7 @@ const getRegList = (flag) => {
       showOneResMsg(res)
     }
     await nextTick(() => {
-      ctxData.tableMaxHeight = contentRef.value.clientHeight - 34 - 36 - 22
+      ctxData.tableMaxHeight = contentRef.value.clientHeight - 34 - 36 - 132
     })
   })
 }

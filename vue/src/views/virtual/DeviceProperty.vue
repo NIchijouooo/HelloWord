@@ -48,20 +48,20 @@
         @row-dblclick="editProperty"
       >
         <el-table-column type="selection" width="55" />
-        <el-table-column prop="name" label="属性名称" width="auto" min-width="180" align="center"> </el-table-column>
-        <el-table-column prop="label" label="属性标签" width="auto" min-width="180" align="center"> </el-table-column>
-        <el-table-column label="数据类型" width="auto" min-width="100" align="center">
+        <el-table-column sortable prop="name" label="属性名称" width="auto" min-width="180" align="center"> </el-table-column>
+        <el-table-column sortable prop="label" label="属性标签" width="auto" min-width="180" align="center"> </el-table-column>
+        <el-table-column sortable label="数据类型" width="auto" min-width="100" align="center">
           <template #default="scope">
             {{ ctxData.typeNames['t' + scope.row.type] }}
           </template>
         </el-table-column>
-        <el-table-column label="小数位数" width="auto" min-width="80" align="center">
+        <el-table-column sortable label="小数位数" width="auto" min-width="80" align="center">
           <template #default="scope">
             {{ scope.row.decimals === undefined || scope.row.decimals === '' ? 0 : scope.row.decimals }}
           </template>
         </el-table-column>
-        <el-table-column prop="unit" label="单位" width="auto" min-width="80" align="center"> </el-table-column>
-        <el-table-column label="映射参数详情" width="auto" min-width="300" align="center">
+        <el-table-column sortable prop="unit" label="单位" width="auto" min-width="80" align="center"> </el-table-column>
+        <el-table-column sortable label="映射参数详情" width="auto" min-width="300" align="center">
           <template #default="scope">
             <el-popover
               trigger="hover"
@@ -80,7 +80,7 @@
                     </div>
                   </div>
                   <div class="pc-content">
-                    <div class="param-item" v-for="(item, key, index) of scope.row.params">
+                    <div class="param-item" v-for="(item, key, index) of scope.row.params" :key="index">
                       <div class="param-value">{{ ctxData.paramName[key] }}：</div>
                       <div class="param-name">{{ typeof item === 'boolean' ? (item ? '是' : '否') : item }}</div>
                     </div>
@@ -112,7 +112,7 @@
                     </div>
                   </div>
                   <div class="pc-content">
-                    <div class="param-item" v-for="(item, key, index) of scope.row.alarmParams">
+                    <div class="param-item" v-for="(item, key, index) of scope.row.alarmParams" :key="index">
                       <div class="param-value">{{ ctxData.paramName[key] }}：</div>
                       <div class="param-name">{{ typeof item === 'boolean' ? (item ? '是' : '否') : item }}</div>
                     </div>
@@ -297,7 +297,7 @@
               inactive-text="否"
             />
           </el-form-item>
-          <el-form-item v-if="ctxData.propertyForm.type !== 3" label="布长报警" prop="stepAlarm">
+          <el-form-item v-if="ctxData.propertyForm.type !== 3" label="步长报警" prop="stepAlarm">
             <el-switch
               style="width: 220px"
               v-model="ctxData.propertyForm.stepAlarm"
@@ -336,7 +336,7 @@
           </el-form-item>
           <el-form-item
             v-if="ctxData.propertyForm.type !== 3 && ctxData.propertyForm.stepAlarm"
-            label="布长"
+            label="步长"
             prop="step"
           >
             <el-input
@@ -344,7 +344,7 @@
               type="text"
               v-model="ctxData.propertyForm.step"
               autocomplete="off"
-              placeholder="请输入布长"
+              placeholder="请输入步长"
             >
             </el-input>
           </el-form-item>
@@ -416,7 +416,7 @@
         <el-form :model="ctxData.formulaForm" label-position="right" label-width="120px">
           <el-form-item label="运算符号">
             <div style="width: 100%">
-              <div v-for="item in ctxData.operationList" class="operation">
+              <div v-for="item in ctxData.operationList" class="operation" :key="item.name">
                 <div style="padding-right: 10px">
                   <el-button style="width: 100%" @click="setOperation(item)">{{ item.label }}</el-button>
                 </div>
@@ -566,8 +566,8 @@ const ctxData = reactive({
     min: '', // 属性最小值，只有uint32，int32，double有效
     max: '', // 属性最大值，只有uint32，int32，double有效
     minMaxAlarm: false, // 范围报警，只有uint32，int32，double有效
-    step: '', // 布长，只有uint32，int32，double有效
-    stepAlarm: false, // 布长报警，只有uint32，int32，double有效
+    step: '', // 步长，只有uint32，int32，double有效
+    stepAlarm: false, // 步长报警，只有uint32，int32，double有效
     dataLength: '', // 字符串长度，只有string有效
     dataLengthAlarm: false, // 字符串长度报警，只有string有效
   },
@@ -591,8 +591,8 @@ const ctxData = reactive({
     min: '最小值',
     max: '最大值',
     minMaxAlarm: '范围报警',
-    step: '布长',
-    stepAlarm: '布长报警',
+    step: '步长',
+    stepAlarm: '步长报警',
     unit: '单位',
     decimals: '小数位数',
     dataLength: '字符串长度',
@@ -908,8 +908,8 @@ const initPropertyForm = () => {
     min: '', // 属性最小值，只有uint32，int32，double有效
     max: '', // 属性最大值，只有uint32，int32，double有效
     minMaxAlarm: false, // 范围报警，只有uint32，int32，double有效
-    step: '', // 布长，只有uint32，int32，double有效
-    stepAlarm: false, // 布长报警，只有uint32，int32，double有效
+    step: '', // 步长，只有uint32，int32，double有效
+    stepAlarm: false, // 步长报警，只有uint32，int32，double有效
     dataLength: '', // 字符串长度，只有string有效
     dataLengthAlarm: false, // 字符串长度报警，只有string有效
   }

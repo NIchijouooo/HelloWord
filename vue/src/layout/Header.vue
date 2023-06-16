@@ -1,11 +1,26 @@
 <template>
-  <el-header height="56px">
+  <el-header height="66px">
     <div class="header_right">
       <span>
         {{ ctxData.configInfo.name }}
         <b>{{ ctxData.configInfo.version }}</b>
       </span>
       <div style="display: flex; align-items: center">
+        <el-tooltip :content="'CPU使用率：' + ctxData.sysParams.cpuUse + '%'">
+          <el-image @click="changeIndex(0)" class="header-item" :src="dbIcon00" fit="cover" />
+        </el-tooltip>
+        <el-tooltip :content="'内存使用率：'+ctxData.sysParams.memUse + '%'">
+          <el-image @click="changeIndex(1)" class="header-item" :src="dbIcon04" fit="cover" />
+        </el-tooltip>
+        <el-tooltip :content="'硬盘使用率：'+ctxData.sysParams.diskUse + '%'">
+          <el-image @click="changeIndex(2)" class="header-item" :src="dbIcon03" fit="cover" />
+        </el-tooltip>
+        <el-tooltip :content="'设备在线率：'+ctxData.sysParams.deviceOnline + '%'">
+          <el-image @click="changeIndex(3)" class="header-item" :src="dbIcon01" fit="cover" />
+        </el-tooltip>
+        <el-tooltip :content="'通讯丢包率：'+ctxData.sysParams.devicePacketLoss + '%'">
+          <el-image @click="changeIndex(4)" class="header-item" :src="dbIcon02" fit="cover" />
+        </el-tooltip>
         <el-tooltip :content="ctxData.isFullScreen ? '退出全屏' : '全屏'">
           <el-icon @click="handleFullScreen">
             <full-screen></full-screen>
@@ -90,15 +105,28 @@
       <template #footer>
         <span class="dialog-footer">
           <el-button type="primary" @click="submitPwdForm()">保存</el-button>
-          <el-button @click="closetPwdFormDialog()">取消</el-button>
+          <el-button @click="handleClose()">取消</el-button>
         </span>
       </template>
+    </el-dialog>
+    <!-- 查看使用率 -->
+    <el-dialog 
+      v-model="ctxData.bFlag" 
+      :title="ctxData.headItemName['hin' + ctxData.activeIndex]" 
+      :before-close="handleFlagClose" 
+      :close-on-click-modal="false"
+      width="45%"
+    >
+      <div class="dialog-content-chart">
+        <line-chart :chart-data="ctxData.curChartData" :key="ctxData.curChartData" :style="ctxData.bFlag ? 'width: 100%;height: 100%;':''"></line-chart>
+      </div>
     </el-dialog>
   </el-header>
 </template>
 
 <script setup>
 import { userStore } from '@/stores/user.js'
+import { useRouter } from 'vue-router'
 import { configStore } from '@/stores/app.js'
 import { User, CircleClose, SwitchButton } from '@element-plus/icons-vue'
 import screenfull from 'screenfull'
@@ -107,7 +135,15 @@ import setLoginInfo from 'utils/setLoginInfo.js'
 import { reactive } from 'vue'
 import LoginApi from 'api/login.js'
 import SystemApi from 'api/sysMaintenance.js'
+import LineChart from 'comps/LineChart.vue'
+import DashboardApi from 'api/dashboard.js'
 import { ElMessage, ElLoading } from 'element-plus'
+import dbIcon00 from '@/assets/images/icon/db-icon00.png'
+import dbIcon01 from '@/assets/images/icon/db-icon01.png'
+import dbIcon02 from '@/assets/images/icon/db-icon02.png'
+import dbIcon03 from '@/assets/images/icon/db-icon03.png'
+import dbIcon04 from '@/assets/images/icon/db-icon04.png'
+
 const router = useRouter()
 const users = userStore()
 const config = configStore()
@@ -134,6 +170,24 @@ const validatePass2 = (rule, value, callback) => {
   }
 }
 const ctxData = reactive({
+  activeIndex: 0,
+  headItemName: {
+    hin0: 'CPU占用率',
+    hin1: '内存使用率',
+    hin2: '硬盘使用率',
+    hin3: '设备在线率',
+    hin4: '通讯丢包率',
+  },
+  curChartData: [],
+  bFlag: false,
+  sysParams: {
+    cpuUse: '',
+    memUse: '',
+    diskUse: '',
+    deviceOnline: '',
+    devicePacketLoss: '',
+  },
+
   configInfo: config.configInfo,
   isFullScreen: false,
   userName: '',
@@ -172,6 +226,76 @@ if (!users.userInfo) {
 } else {
   ctxData.userName = users.userInfo.userName
 }
+
+// 获取系统参数
+const getSysParams = () => {
+  const pData = {
+    token: users.token,
+    data: {},
+  }
+  DashboardApi.getSysParams(pData).then((res) => {
+    console.log('getSysParams -> res', res)
+    if (res.code === '0') {
+      ctxData.sysParams = res.data
+    }
+  })
+}
+getSysParams()
+const changeIndex = (indexValue) => {
+  ctxData.activeIndex = indexValue
+  const legend = ctxData.headItemName['hin' + indexValue]
+  const pData = {
+    token: users.token,
+    data: {},
+  }
+  if (indexValue === 0) {
+    DashboardApi.getCpuList(pData).then((res) => {
+      handleDatas(res, legend)
+    })
+  } else if (indexValue === 1) {
+    DashboardApi.getMemoryList(pData).then((res) => {
+      handleDatas(res, legend)
+    })
+  } else if (indexValue === 2) {
+    DashboardApi.getDiskList(pData).then((res) => {
+      handleDatas(res, legend)
+    })
+  } else if (indexValue === 3) {
+    DashboardApi.getDeviceOnlineList(pData).then((res) => {
+      handleDatas(res, legend)
+    })
+  } else if (indexValue === 4) {
+    DashboardApi.getDevicePacketLossList(pData).then((res) => {
+      handleDatas(res, legend)
+    })
+  }
+}
+// 处理请求返回的数据
+const handleDatas = (res, legend) => {
+  if (res.code === '0') {
+    const dataPoint = res.data
+    var data = []
+    var time = []
+    for (var i = 0; i < dataPoint.length; i++) {
+      const currentPoint = dataPoint[i]
+      data.push(parseFloat(currentPoint.value))
+      time.push(currentPoint.time)
+    }
+    nextTick(() => {})
+    ctxData.curChartData = { data, time, legend }
+    ctxData.bFlag = true
+  }
+}
+
+const cancelDialog = () => {
+  ctxData.curChartData = []
+  ctxData.bFlag = false
+}
+//处理弹出框右上角关闭图标
+const handleFlagClose = (done) => {
+  cancelDialog()
+}
+
 const handleCommand = (command) => {
   if (command === 'user') {
     ctxData.pwdForm = {
@@ -280,6 +404,25 @@ const showOneResMsg = (res) => {
     overflow: hidden;
     white-space: nowrap;
     text-overflow: ellipsis;
+  }
+
+  .header-item {
+    width: 20px; 
+    height: 20px;
+    margin-right: 20px;
+    cursor: pointer;
+
+    &:hover {
+      color: #409EFF;
+    }
+  }
+  
+  .dialog-content-chart {
+    position: relative;
+    width: 100%;
+    min-height: 400px;
+    max-height: 550px;
+    overflow: auto;
   }
 
   .header_right {
