@@ -31,9 +31,10 @@ type TSLModelS7PropertyTemplate struct {
 }
 
 type TSLModelS7PropertyParamTemplate struct {
-	DBNumber  string `json:"dbNumber"`  //数据块
-	DataType  int    `json:"dataType"`  //数据类型
-	StartAddr string `json:"startAddr"` //起始地址
+	DBNumber    string `json:"dbNumber"`  //数据块
+	DataType    int    `json:"dataType"`  //数据类型
+	StartAddr   string `json:"startAddr"` //起始地址
+	IotDataType string `json:"IotDataType"`
 }
 
 type TSLModelS7PropertyValueTemplate struct {

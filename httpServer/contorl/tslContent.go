@@ -4,6 +4,7 @@ import (
 	"encoding/csv"
 	"encoding/json"
 	"fmt"
+	"gateway/controllers"
 	"gateway/device"
 	"gateway/httpServer/model"
 	"gateway/setting"
@@ -406,6 +407,7 @@ func ApiImportDeviceTSLContentsFromXlsx(context *gin.Context) {
 					DBNumber:  setting.GetString(cell[8]),
 					DataType:  setting.GetInt(cell[9]),
 					StartAddr: setting.GetString(cell[10]),
+					IotDataType: setting.GetString(cell[11]),
 				}
 				property := device.TSLModelS7PropertyTemplate{
 					Name:       setting.GetString(cell[2]),
@@ -427,6 +429,9 @@ func ApiImportDeviceTSLContentsFromXlsx(context *gin.Context) {
 					return
 				}
 				_ = tslS7.TSLModelPropertiesAdd(propertyJson)
+				// 写sqlite
+				emController := controllers.NewEMController()
+				emController.AddEmDeviceModelCmdFromXlsx(property, "plc", tslName)
 			}
 		}
 		//else if record.GetString("ContentType") == "service" {
@@ -820,9 +825,9 @@ func ApiExportDeviceTSLContentsToXlsx(context *gin.Context) {
 	} else if tslType == 1 {
 		csvRecords = [][]string{
 			{"模型名称", "功能类型", "功能名称", "标识符", "读写类型", "数据类型", "小数位",
-				"单位", "数据块", "数据类型", "数据地址"},
+				"单位", "数据块", "数据类型", "数据地址", "点位类型"},
 			{"TSLName", "ContentType", "Name", "Label", "AccessMode", "Type", "Decimals",
-				"Unit", "DBNumber", "DataType", "StartAddr"},
+				"Unit", "DBNumber", "DataType", "StartAddr", "IotDataType"},
 		}
 
 		for _, v := range tslS7.Properties {
@@ -838,6 +843,7 @@ func ApiExportDeviceTSLContentsToXlsx(context *gin.Context) {
 			record = append(record, v.Params.DBNumber)
 			record = append(record, fmt.Sprintf("%d", v.Params.DataType))
 			record = append(record, v.Params.StartAddr)
+			record = append(record, v.Params.IotDataType)
 
 			csvRecords = append(csvRecords, record)
 		}

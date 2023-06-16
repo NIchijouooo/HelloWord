@@ -6,21 +6,23 @@ type EmDeviceModelCmdParam struct {
 	Name             string `json:"name"`
 	Label            string `json:"label"`
 	Data             string `json:"data"`
+	IotDataType      string `json:"iotDataType"`
 }
 
 type AddEmDeviceModelCmdParam struct {
-	TslName    string `json:"tslName"`
-	CmdName    string `json:"cmdName"`
-	Name       string `json:"name"`
-	Label      string `json:"label"`
-	AccessMode int    `json:"accessMode"`
-	Type       int    `json:"type"`
-	Decimals   int    `json:"decimals"`
-	Unit       string `json:"unit"`
-	RegCnt     int    `json:"regCnt"`
-	RegAddr    int    `json:"regAddr"`
-	RuleType   string `json:"ruleType"`
-	Formula    string `json:"formula"`
+	TslName     string `json:"tslName"`
+	CmdName     string `json:"cmdName"`
+	Name        string `json:"name"`
+	Label       string `json:"label"`
+	AccessMode  int    `json:"accessMode"`
+	Type        int    `json:"type"`
+	Decimals    int    `json:"decimals"`
+	Unit        string `json:"unit"`
+	RegCnt      int    `json:"regCnt"`
+	RegAddr     int    `json:"regAddr"`
+	RuleType    string `json:"ruleType"`
+	Formula     string `json:"formula"`
+	IotDataType string `json:"IotDataType"`
 }
 
 func (u *EmDeviceModelCmdParam) TableName() string {

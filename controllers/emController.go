@@ -7,6 +7,7 @@ import (
 	"gateway/httpServer/model"
 	"gateway/models"
 	repositories "gateway/repositories"
+
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -330,6 +331,28 @@ func (c *EmController) AddEmDevice(ctx *gin.Context) {
 	return
 }
 
+func (c *EmController) AddEmDeviceFromXlsx(name string, tsl string, addr string, label string, collInterface string) {
+	var data []byte
+	var emDevice models.EmDevice
+	emDevice.Name = name
+	emDevice.Label = label
+	emDevice.Addr = addr
+
+	// 通过模型名找模型id
+	emDeviceModelByName, err := c.repo.GetEmDeviceModelByName(tsl)
+	emDevice.ModelId = emDeviceModelByName.Id
+	// 通过采集接口名找接口id
+	collInterfaceByName, err := c.repo.GetCollInterfaceByName(collInterface)
+	emDevice.CollInterfaceId = collInterfaceByName.Id
+	data, err = json.Marshal(emDevice)
+	emDevice.Data = string(data)
+	err = c.repo.AddEmDevice(&emDevice)
+	if err != nil {
+		return
+	}
+	return
+}
+
 func (c *EmController) UpdateEmDevice(ctx *gin.Context) {
 	var addEmDevice models.AddEmDevice
 	var data []byte
@@ -476,6 +499,57 @@ func (c *EmController) DeleteEmDeviceModel(ctx *gin.Context) {
 	return
 }
 
+func (c *EmController) AddEmDevicePlcModelCmd(ctx *gin.Context) {
+	var emDeviceModelCmd models.EmDeviceModelCmd
+	var addEmDeviceModelPlcCmd models.AddEmDevicePlcModelCmd
+	var data []byte
+
+	if err := ctx.ShouldBindBodyWith(&addEmDeviceModelPlcCmd, binding.JSON); err != nil {
+		ctx.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+	emDeviceModelCmd.Name = addEmDeviceModelPlcCmd.Property.Name
+	emDeviceModelCmd.Label = addEmDeviceModelPlcCmd.Property.Label
+	// 判断设备模型命令是否有重名，有就直接返回
+	emDeviceModelCmdByName, _ := c.repo.GetEmDeviceModelCmdByName(emDeviceModelCmd.Name)
+	if emDeviceModelCmdByName != nil {
+		//ctx.JSON(http.StatusOK, model.ResponseData{
+		//	Code:    "0",
+		//	Message: "设备模型命令已存在，添加失败",
+		//})
+		return
+	}
+	// 查询对应的模型
+	emDeviceModelByName, _ := c.repo.GetEmDeviceModelByName(addEmDeviceModelPlcCmd.Name)
+	if emDeviceModelByName == nil {
+		//ctx.JSON(http.StatusOK, model.ResponseData{
+		//	Code:    "0",
+		//	Message: "设备模型不存在，添加失败",
+		//})
+		return
+	}
+	data, _ = json.Marshal(addEmDeviceModelPlcCmd)
+	emDeviceModelCmd.Data = string(data)
+	emDeviceModelCmd.DeviceModelId = emDeviceModelByName.Id
+
+	err := c.repo.AddEmDeviceModelCmd(&emDeviceModelCmd)
+	if err != nil {
+		ctx.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+	}
+	// PLC在配置文件json中不存在param,在这一步中直接插入到sqlite的param
+	var emDeviceModelCmdParam models.EmDeviceModelCmdParam
+	emDeviceModelCmdParam.DeviceModelCmdId = emDeviceModelCmd.Id
+	emDeviceModelCmdParam.Name = addEmDeviceModelPlcCmd.Property.Name
+	emDeviceModelCmdParam.Label = addEmDeviceModelPlcCmd.Property.Label
+	emDeviceModelCmdParam.IotDataType = addEmDeviceModelPlcCmd.Property.Params.IotDataType
+	emDeviceModelCmdParam.Data = emDeviceModelCmd.Data
+	err = c.repo.AddEmDeviceModelCmdParam(&emDeviceModelCmdParam)
+	if err != nil {
+		return
+	}
+	return
+}
+
 func (c *EmController) AddEmDeviceModelCmd(ctx *gin.Context) {
 	var emDeviceModelCmd models.EmDeviceModelCmd
 	var addEmDeviceModelCmd models.AddEmDeviceModelCmd
@@ -523,9 +597,9 @@ func (c *EmController) AddEmDeviceModelCmd(ctx *gin.Context) {
 
 func (c *EmController) AddEmDeviceModelCmdFromXlsx(cmd interface{}, protocol string, tslName string) {
 	var data []byte
+	var emDeviceModelCmd models.EmDeviceModelCmd
 	switch protocol {
 	case "modbus":
-		var emDeviceModelCmd models.EmDeviceModelCmd
 		tslModbusCmdTemplate := cmd.(device.TSLModbusCmdTemplate)
 		emDeviceModelCmd.Name = tslModbusCmdTemplate.Name
 		emDeviceModelCmd.Label = tslModbusCmdTemplate.Label
@@ -539,8 +613,61 @@ func (c *EmController) AddEmDeviceModelCmdFromXlsx(cmd interface{}, protocol str
 			return
 		}
 	case "dlt645":
-		emDeviceModelCmd := cmd.(device.TSLDLT6452007CmdTemplate)
-		fmt.Println(emDeviceModelCmd.Name)
+		tslDLT6452007CmdTemplate := cmd.(device.TSLDLT6452007CmdTemplate)
+		emDeviceModelCmd.Name = tslDLT6452007CmdTemplate.Name
+		emDeviceModelCmd.Label = tslDLT6452007CmdTemplate.Label
+		// 通过模型名找模型id
+		emDeviceModelByName, err := c.repo.GetEmDeviceModelByName(tslName)
+		emDeviceModelCmd.DeviceModelId = emDeviceModelByName.Id
+		data, err = json.Marshal(cmd)
+		emDeviceModelCmd.Data = string(data)
+		err = c.repo.AddEmDeviceModelCmd(&emDeviceModelCmd)
+		if err != nil {
+			return
+		}
+	case "plc":
+		tslModelS7PropertyTemplate := cmd.(device.TSLModelS7PropertyTemplate)
+		var emDeviceModelCmd models.EmDeviceModelCmd
+		var data []byte
+		emDeviceModelCmd.Name = tslModelS7PropertyTemplate.Name
+		emDeviceModelCmd.Label = tslModelS7PropertyTemplate.Label
+		// 判断设备模型命令是否有重名，有就直接返回
+		emDeviceModelCmdByName, _ := c.repo.GetEmDeviceModelCmdByName(emDeviceModelCmd.Name)
+		if emDeviceModelCmdByName != nil {
+			//ctx.JSON(http.StatusOK, model.ResponseData{
+			//	Code:    "0",
+			//	Message: "设备模型命令已存在，添加失败",
+			//})
+			return
+		}
+		// 查询对应的模型
+		emDeviceModelByName, _ := c.repo.GetEmDeviceModelByName(tslName)
+		if emDeviceModelByName == nil {
+			//ctx.JSON(http.StatusOK, model.ResponseData{
+			//	Code:    "0",
+			//	Message: "设备模型不存在，添加失败",
+			//})
+			return
+		}
+		data, _ = json.Marshal(tslModelS7PropertyTemplate)
+		emDeviceModelCmd.Data = string(data)
+		emDeviceModelCmd.DeviceModelId = emDeviceModelByName.Id
+
+		err := c.repo.AddEmDeviceModelCmd(&emDeviceModelCmd)
+		if err != nil {
+			return
+		}
+		// PLC在配置文件json中不存在param,在这一步中直接插入到sqlite的param
+		var emDeviceModelCmdParam models.EmDeviceModelCmdParam
+		emDeviceModelCmdParam.DeviceModelCmdId = emDeviceModelCmd.Id
+		emDeviceModelCmdParam.Name = tslModelS7PropertyTemplate.Name
+		emDeviceModelCmdParam.Label = tslModelS7PropertyTemplate.Label
+		emDeviceModelCmdParam.IotDataType = tslModelS7PropertyTemplate.Params.IotDataType
+		emDeviceModelCmdParam.Data = emDeviceModelCmd.Data
+		err = c.repo.AddEmDeviceModelCmdParam(&emDeviceModelCmdParam)
+		if err != nil {
+			return
+		}
 	default:
 		return
 	}
@@ -572,6 +699,44 @@ func (c *EmController) UpdateEmDeviceModelCmd(ctx *gin.Context) {
 	return
 }
 
+func (c *EmController) UpdateEmDevicePlcModelCmd(ctx *gin.Context) {
+	var addEmDevicePlcModelCmd models.AddEmDevicePlcModelCmd
+	var emDeviceModelCmdParam models.EmDeviceModelCmdParam
+	var data []byte
+	err := ctx.ShouldBindBodyWith(&addEmDevicePlcModelCmd, binding.JSON)
+	if err != nil {
+		return
+	}
+	// 查名字获取id
+	var emDeviceModelCmd models.EmDeviceModelCmd
+	emDeviceModelCmd.Name = addEmDevicePlcModelCmd.Property.Name
+	emDeviceModelCmd.Label = addEmDevicePlcModelCmd.Property.Label
+	emDeviceModelCmdByName, _ := c.repo.GetEmDeviceModelCmdByName(emDeviceModelCmd.Name)
+
+	emDeviceModelByName, _ := c.repo.GetEmDeviceModelByName(addEmDevicePlcModelCmd.Name)
+	emDeviceModelCmd.DeviceModelId = emDeviceModelByName.Id
+	emDeviceModelCmd.Id = emDeviceModelCmdByName.Id
+	data, _ = json.Marshal(addEmDevicePlcModelCmd)
+	emDeviceModelCmd.Data = string(data)
+	err = c.repo.UpdateEmDeviceModelCmd(&emDeviceModelCmd)
+	if err != nil {
+		return
+	}
+	// 修改param
+	emDeviceModelCmdParamByName, _ := c.repo.GetEmDeviceModelCmdParamByName(emDeviceModelCmdByName.Name)
+	emDeviceModelCmdParam.DeviceModelCmdId = emDeviceModelCmdByName.Id
+	emDeviceModelCmdParam.Id = emDeviceModelCmdParamByName.Id
+	emDeviceModelCmdParam.Name = addEmDevicePlcModelCmd.Property.Name
+	emDeviceModelCmdParam.Label = addEmDevicePlcModelCmd.Property.Label
+	emDeviceModelCmdParam.IotDataType = addEmDevicePlcModelCmd.Property.Params.IotDataType
+	emDeviceModelCmdParam.Data = emDeviceModelCmd.Data
+	err = c.repo.UpdateEmDeviceModelCmdParam(&emDeviceModelCmdParam)
+	if err != nil {
+		return
+	}
+	return
+}
+
 func (c *EmController) DeleteEmDeviceModelCmd(ctx *gin.Context) {
 	var tmp = struct {
 		TSLName string   `json:"tslName"`
@@ -593,6 +758,27 @@ func (c *EmController) DeleteEmDeviceModelCmd(ctx *gin.Context) {
 	return
 }
 
+func (c *EmController) DeleteEmDevicePlcModelCmd(ctx *gin.Context) {
+	var tmp = struct {
+		TSLName    string   `json:"property"`
+		Properties []string `json:"properties"`
+	}{}
+	if err := ctx.ShouldBindBodyWith(&tmp, binding.JSON); err != nil {
+		ctx.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+	for _, property := range tmp.Properties {
+		emDeviceModelCmdByName, _ := c.repo.GetEmDeviceModelCmdByName(property)
+		c.repo.DeleteEmDeviceModelCmd(emDeviceModelCmdByName.Id)
+		// 删除cmd下的param
+		paramList, _ := c.repo.GetEmDeviceModelCmdParamByCmdId(emDeviceModelCmdByName.Id)
+		for _, param := range paramList {
+			c.repo.DeleteEmDeviceModelCmdParam(param.Id)
+		}
+	}
+	return
+}
+
 func (c *EmController) AddEmDeviceModelCmdParam(ctx *gin.Context) {
 	var emDeviceModelCmdParam models.EmDeviceModelCmdParam
 	var addEmDeviceModelCmdParam models.AddEmDeviceModelCmdParam
@@ -604,6 +790,7 @@ func (c *EmController) AddEmDeviceModelCmdParam(ctx *gin.Context) {
 	}
 	emDeviceModelCmdParam.Name = addEmDeviceModelCmdParam.Name
 	emDeviceModelCmdParam.Label = addEmDeviceModelCmdParam.Label
+	emDeviceModelCmdParam.IotDataType = addEmDeviceModelCmdParam.IotDataType
 	// 判断设备模型是否有重名，有就直接返回
 	emDeviceModelCmdParam.Name = addEmDeviceModelCmdParam.Name
 	emDeviceModelCmdParamByName, _ := c.repo.GetEmDeviceModelCmdParamByName(emDeviceModelCmdParam.Name)
@@ -641,25 +828,28 @@ func (c *EmController) AddEmDeviceModelCmdParam(ctx *gin.Context) {
 
 func (c *EmController) AddEmDeviceModelCmdParamFromXlsx(property interface{}, protocol string, cmdName string) {
 	var data []byte
+	var emDeviceModelCmdParam models.EmDeviceModelCmdParam
 	switch protocol {
 	case "modbus":
-		var emDeviceModelCmdParam models.EmDeviceModelCmdParam
 		tslModbusPropertyTemplate := property.(device.TSLModbusPropertyTemplate)
 		emDeviceModelCmdParam.Name = tslModbusPropertyTemplate.Name
 		emDeviceModelCmdParam.Label = tslModbusPropertyTemplate.Label
-		// 通过模型名找模型id
-		emDeviceModelCmdByName, err := c.repo.GetEmDeviceModelCmdByName(cmdName)
-		emDeviceModelCmdParam.DeviceModelCmdId = emDeviceModelCmdByName.Id
-		data, err = json.Marshal(property)
-		emDeviceModelCmdParam.Data = string(data)
-		err = c.repo.AddEmDeviceModelCmdParam(&emDeviceModelCmdParam)
-		if err != nil {
-			return
-		}
+		emDeviceModelCmdParam.IotDataType = tslModbusPropertyTemplate.IotDataType
 	case "dlt645":
-		emDeviceModelCmdParam := property.(device.TSLDLT6452007PropertyTemplate)
-		fmt.Println(emDeviceModelCmdParam.Name)
+		tslDLT6452007PropertyTemplate := property.(device.TSLDLT6452007PropertyTemplate)
+		emDeviceModelCmdParam.Name = tslDLT6452007PropertyTemplate.Name
+		emDeviceModelCmdParam.Label = tslDLT6452007PropertyTemplate.Label
+		emDeviceModelCmdParam.IotDataType = tslDLT6452007PropertyTemplate.IotDataType
 	default:
+		return
+	}
+	// 通过模型名找模型id
+	emDeviceModelCmdByName, err := c.repo.GetEmDeviceModelCmdByName(cmdName)
+	emDeviceModelCmdParam.DeviceModelCmdId = emDeviceModelCmdByName.Id
+	data, err = json.Marshal(property)
+	emDeviceModelCmdParam.Data = string(data)
+	err = c.repo.AddEmDeviceModelCmdParam(&emDeviceModelCmdParam)
+	if err != nil {
 		return
 	}
 	return
@@ -676,6 +866,7 @@ func (c *EmController) UpdateEmDeviceModelCmdParam(ctx *gin.Context) {
 	var emDeviceModelCmdParam models.EmDeviceModelCmdParam
 	emDeviceModelCmdParam.Name = addEmDeviceModelCmdParam.Name
 	emDeviceModelCmdParam.Label = addEmDeviceModelCmdParam.Label
+	emDeviceModelCmdParam.IotDataType = addEmDeviceModelCmdParam.IotDataType
 	emDeviceModelCmdParamByName, _ := c.repo.GetEmDeviceModelCmdParamByName(addEmDeviceModelCmdParam.Name)
 	emDeviceModelCmdParam.Id = emDeviceModelCmdParamByName.Id
 
@@ -710,7 +901,7 @@ func (c *EmController) DeleteEmDeviceModelCmdParam(ctx *gin.Context) {
 	return
 }
 
-//根据设备名称获取所有模型
+// 根据设备名称获取所有模型
 func (c *EmController) GetEmDeviceModelCmdParamListByName(ctx *gin.Context) {
 	var tmp struct {
 		Name string `json:"name"`
@@ -745,7 +936,7 @@ func (c *EmController) GetEmDeviceModelCmdParamListByName(ctx *gin.Context) {
 	})
 }
 
-//根据设备ID获取所有模型
+// 根据设备ID获取所有模型
 func (c *EmController) GetEmDeviceModelCmdParamListByDeviceId(ctx *gin.Context) {
 	var tmp struct {
 		DeviceId int `json:"deviceId"`
