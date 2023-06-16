@@ -181,7 +181,7 @@
             </el-option>
           </el-select>
         </el-form-item>
-        
+
         <el-form-item label="计算公式" prop="formula">
           <el-input
             style="width: 220px"
@@ -219,7 +219,7 @@
         <el-form-item v-if="ctxData.propertyForm.type !== 3 && ctxData.propertyForm.minMaxAlarm" label="最大值"  prop="max">
           <el-input type="text" v-model="ctxData.propertyForm.max" autocomplete="off" placeholder="请输入最大值"></el-input>
         </el-form-item>
-        
+
         <div>
         <el-form-item v-if="ctxData.propertyForm.type !== 3" label="步长报警" prop="stepAlarm">
           <el-switch v-model="ctxData.propertyForm.stepAlarm" inline-prompt active-text="是" inactive-text="否" />
@@ -516,7 +516,7 @@ const ctxData = reactive({
     bitSwitch: false, // 按位解析
     bitOffset: 0, // 位偏移
 
-    
+
     min: '', // 属性最小值，只有uint32，int32，double有效
     max: '', // 属性最大值，只有uint32，int32，double有效
     minMaxAlarm: false, // 范围报警，只有uint32，int32，double有效
@@ -844,7 +844,7 @@ const editDeviceModelProperty = (row) => {
   ctxData.propertyForm.bitSwitch = row.bitSwitch === undefined || row.bitSwitch === null ? false : row.bitSwitch
   ctxData.propertyForm.bitOffset = row.bitOffset === undefined || row.bitOffset === null ? 0 : row.bitOffset
   // ctxData.propertyForm.step = row.step === undefined || row.step === null ? 0 : row.step
-  
+
   if (row.type !== 3) {
     ctxData.propertyForm['min'] = row.params.min
     ctxData.propertyForm['max'] = row.params.max
@@ -885,7 +885,8 @@ const submitPorpertyForm = () => {
         params['min'] = ctxData.propertyForm.min
         params['max'] = ctxData.propertyForm.max
         params['minMaxAlarm'] = ctxData.propertyForm.minMaxAlarm
-        params['step'] = +ctxData.propertyForm.step
+        //params['step'] = +ctxData.propertyForm.step
+        params['step'] = ctxData.propertyForm.step   //ltg del 2023-06-15
         params['stepAlarm'] = ctxData.propertyForm.stepAlarm
       } else {
         params['dataLength'] = ctxData.propertyForm.dataLength

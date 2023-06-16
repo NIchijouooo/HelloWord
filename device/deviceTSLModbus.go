@@ -19,17 +19,31 @@ type TSLModbusModelTemplate struct {
 	Event eventBus.Bus                     `json:"-"` //事件队列
 }
 
+type TSLModbusPropertyParamTemplate struct {
+	Min             string `json:"min"`             //最小
+	Max             string `json:"max"`             //最大
+	MinMaxAlarm     bool   `json:"minMaxAlarm"`     //范围报警
+	Step            string `json:"step"`            //步长
+	StepAlarm       bool   `json:"stepAlarm"`       //阶跃报警
+	DataLength      string `json:"dataLength"`      //字符串长度
+	DataLengthAlarm bool   `json:"dataLengthAlarm"` //字符长度报警
+}
+
 type TSLModbusPropertyTemplate struct {
-	Name       string `json:"name"`
-	Label      string `json:"label"`
-	AccessMode int    `json:"accessMode"`
-	Type       int    `json:"type"`
-	Decimals   int    `json:"decimals"`
-	Unit       string `json:"unit"`
-	RegAddr    int    `json:"regAddr"`
-	RegCnt     int    `json:"regCnt"`
-	RuleType   string `json:"ruleType"`
-	Formula    string `json:"formula"`
+	Name       string                         `json:"name"`
+	Label      string                         `json:"label"`
+	AccessMode int                            `json:"accessMode"`
+	Type       int                            `json:"type"`
+	Decimals   int                            `json:"decimals"`
+	Unit       string                         `json:"unit"`
+	RegAddr    int                            `json:"regAddr"`
+	RegCnt     int                            `json:"regCnt"`
+	RuleType   string                         `json:"ruleType"`
+	Formula    string                         `json:"formula"`
+	Params     TSLModbusPropertyParamTemplate `json:"params"`
+
+	BitOffsetSw bool `json:"bitOffsetSw"` // 位偏移开关
+	BitOffset   int  `json:"bitOffset"`   // 位偏移数量
 }
 
 type TSLModbusCmdTemplate struct {

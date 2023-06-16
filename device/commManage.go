@@ -11,6 +11,7 @@ import (
 	"math"
 	"strconv"
 	"strings"
+	"sync"
 	"time"
 
 	lua "github.com/yuin/gopher-lua"
@@ -1520,6 +1521,11 @@ func (c *CommunicationManageTemplate) CommunicationStateMachineModbusTCP(cmd Com
 		Value interface{} `json:"value"`
 	}
 
+	//now := time.Now()
+	//var next time.Time
+	//var sub time.Duration
+	//count := 0
+
 	rxBuf := make([]byte, 0)
 	if cmd.FunName == "GetDeviceRealVariables" || cmd.FunName == "GetRealVariables" {
 		model, ok := TSLModbusMap[node.TSL]
@@ -1527,7 +1533,10 @@ func (c *CommunicationManageTemplate) CommunicationStateMachineModbusTCP(cmd Com
 			setting.ZAPS.Errorf("采集服务[%s]采集模型不存在", collName)
 			return rxResult
 		}
+
 		for _, v := range model.Cmd {
+			//now = time.Now()
+			//setting.ZAPS.Error("1 ----->", now.Format("2006-01-02 15:04:05"))
 			addr, _ := strconv.Atoi(node.Addr)
 			mbTCPParam := commInterface.MBTCPInterfaceParamTemplate{
 				SlaveID:      byte(addr),
@@ -1550,6 +1559,7 @@ func (c *CommunicationManageTemplate) CommunicationStateMachineModbusTCP(cmd Com
 			}
 			txBuf := make([]byte, 0)
 			txBuf = append(txBuf, buf...)
+
 			rxBuf, err = comm.ReadData(txBuf)
 			if err != nil {
 				setting.ZAPS.Errorf("采集服务[%s]读数据失败 %v", collName, err)
@@ -1561,6 +1571,8 @@ func (c *CommunicationManageTemplate) CommunicationStateMachineModbusTCP(cmd Com
 				continue
 			}
 
+			//next = time.Now()
+			//setting.ZAPS.Error("2 ----->", next.Format("2006-01-02 15:04:05"), "  ", next.Sub(now))
 			aData := make([]commInterface.MBTCPParamTemplate, 0)
 			err = json.Unmarshal(rxBuf, &aData)
 			if err != nil {
@@ -1568,82 +1580,133 @@ func (c *CommunicationManageTemplate) CommunicationStateMachineModbusTCP(cmd Com
 				rxStatus = false
 				continue
 			} else {
+				//next = time.Now()
+				//setting.ZAPS.Error("3 ----->", next.Format("2006-01-02 15:04:05"), "  ", next.Sub(now))
 				rxStatus = true
-				value := TSLPropertyValueTemplate{}
-				for _, d := range aData {
-					for _, r := range v.Registers {
-						if r.RegAddr == d.RegAddr {
-							for k, p := range node.Properties {
-								if r.Name == p.Name {
-									//setting.ZAPS.Debugf("pName %v", p.Name)
-									//setting.ZAPS.Debugf("type %T,value %v", d.Value, d)
+				//value := TSLPropertyValueTemplate{}
+				aDtaLen := len(aData)
+				aDataCount := aDtaLen / 20
+				A1 := 0
+				A2 := 0
+				//fmt.Println("------> go Count ", aDataCount)
 
-									var fValue float64
-									if r.Formula != "" {
-										fStr := r.Formula
-										if strings.Contains(fStr, "t") {
-											switch d.Value.(type) {
-											case uint32:
-												fStr = strings.ReplaceAll(fStr, "t", fmt.Sprintf("%d", d.Value.(uint32)))
-											case int32:
-												fStr = strings.ReplaceAll(fStr, "t", fmt.Sprintf("%d", d.Value.(int32)))
-											case float64:
-												fStr = strings.ReplaceAll(fStr, "t", fmt.Sprintf("%f", d.Value.(float64)))
-											case string:
-											}
-										}
-										err, value := setting.FormulaRun(fStr)
-										if err != nil {
-											fValue = d.Value.(float64)
-										} else {
-											fValue = value
-										}
-									} else {
-										switch d.Value.(type) {
-										case uint32:
-											fValue = float64(d.Value.(uint32))
-										case int32:
-											fValue = float64(d.Value.(int32))
-										case float64:
-											fValue = d.Value.(float64)
-										case string:
-										}
-									}
+				var wg sync.WaitGroup
+				var mutex sync.Mutex
 
-									switch p.Type {
-									case PropertyTypeInt32:
-										value.Value = (int32)(fValue)
-									case PropertyTypeUInt32:
-										value.Value = (uint32)(fValue)
-									case PropertyTypeDouble:
-										//判断modbus通信接口返回的数据是否已经是float，如果是则保留精度,不是则换算
-										if strings.Contains(r.RuleType, "Float") {
-											value.Value, _ = strconv.ParseFloat(fmt.Sprintf("%."+strconv.Itoa(r.Decimals)+"f", fValue), 64)
-										} else {
-											if r.Decimals > 0 {
-												value.Value = fValue / math.Pow10(r.Decimals)
+				for i := 0; i <= aDataCount; i++ {
+					if 0 == aDataCount {
+						A1 = 0
+						A2 = aDtaLen
+					} else if i == aDataCount {
+						A1 = i * 20
+						A2 = aDtaLen
+					} else {
+						A1 = i * 20
+						A2 = i*20 + 20
+					}
+
+					wg.Add(1) // 添加一个计数器
+
+					go func(a1, a2 int) {
+						defer wg.Done() // goroutine 结束时计数器减 1
+
+						value := TSLPropertyValueTemplate{}
+						for _, d := range aData[a1:a2] {
+							for _, r := range v.Registers {
+								if r.RegAddr == d.RegAddr {
+									for k, p := range node.Properties {
+										if r.Name == p.Name {
+											//setting.ZAPS.Debugf("pName %v", p.Name)
+											//setting.ZAPS.Debugf("type %T,value %v", d.Value, d)
+
+											if true == r.BitOffsetSw {
+												if _, ok := d.Value.(float64); ok {
+													value.Value = uint32(d.Value.(float64)) & (0x01 << r.BitOffset)
+												} else {
+													value.Value = -1
+												}
+
 											} else {
-												value.Value = fValue
+												var fValue float64
+												if r.Formula != "" {
+													fStr := r.Formula
+													if strings.Contains(fStr, "t") {
+														switch d.Value.(type) {
+														case uint32:
+															fStr = strings.ReplaceAll(fStr, "t", fmt.Sprintf("%d", d.Value.(uint32)))
+														case int32:
+															fStr = strings.ReplaceAll(fStr, "t", fmt.Sprintf("%d", d.Value.(int32)))
+														case float64:
+															fStr = strings.ReplaceAll(fStr, "t", fmt.Sprintf("%f", d.Value.(float64)))
+														case string:
+														}
+													}
+													err, value := setting.FormulaRun(fStr)
+													if err != nil {
+														fValue = d.Value.(float64)
+													} else {
+														fValue = value
+													}
+												} else {
+													switch d.Value.(type) {
+													case uint32:
+														fValue = float64(d.Value.(uint32))
+													case int32:
+														fValue = float64(d.Value.(int32))
+													case float64:
+														fValue = d.Value.(float64)
+													case string:
+													}
+												}
+
+												switch p.Type {
+												case PropertyTypeInt32:
+													value.Value = (int32)(fValue)
+												case PropertyTypeUInt32:
+													value.Value = (uint32)(fValue)
+												case PropertyTypeDouble:
+													//判断modbus通信接口返回的数据是否已经是float，如果是则保留精度,不是则换算
+													if strings.Contains(r.RuleType, "Float") {
+														value.Value, _ = strconv.ParseFloat(fmt.Sprintf("%."+strconv.Itoa(r.Decimals)+"f", fValue), 64)
+													} else {
+														if r.Decimals > 0 {
+															value.Value = fValue / math.Pow10(r.Decimals)
+														} else {
+															value.Value = fValue
+														}
+													}
+												case PropertyTypeString:
+													value.Value = d.Value.(string)
+												}
 											}
+											value.Explain = ""
+											value.TimeStamp = time.Now()
+
+											mutex.Lock()
+											if len(node.Properties[k].Value) < VariableMaxCnt {
+												node.Properties[k].Value = append(node.Properties[k].Value, value)
+											} else {
+												node.Properties[k].Value = node.Properties[k].Value[1:]
+												node.Properties[k].Value = append(node.Properties[k].Value, value)
+											}
+											mutex.Unlock()
+											//break
 										}
-									case PropertyTypeString:
-										value.Value = d.Value.(string)
 									}
-
-									value.Explain = ""
-									value.TimeStamp = time.Now()
-
-									if len(node.Properties[k].Value) < VariableMaxCnt {
-										node.Properties[k].Value = append(node.Properties[k].Value, value)
-									} else {
-										node.Properties[k].Value = node.Properties[k].Value[1:]
-										node.Properties[k].Value = append(node.Properties[k].Value, value)
-									}
+									break
 								}
 							}
 						}
-					}
+					}(A1, A2)
 				}
+
+				// 等待所有的 goroutine 都结束
+				wg.Wait()
+
+				//next = time.Now()
+				//count++
+				//sub = next.Sub(now)
+				//setting.ZAPS.Error("4 ----->", count, "  ", next.Format("2006-01-02 15:04:05"), "  ", sub)
 			}
 			if rxStatus == true {
 				//setting.ZAPS.Debugf("采集服务[%s]节点[%s]接收成功 接收数据[%d:%X]", collName, node.Name, rxBufCnt, rxBuf[:rxBufCnt])

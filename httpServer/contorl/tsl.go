@@ -1067,6 +1067,10 @@ func ApiAddTSLModbusCmdProperty(context *gin.Context) {
 		RegCnt     int    `json:"regCnt"`
 		RuleType   string `json:"ruleType"`
 		Formula    string `json:"formula"`
+
+		BitOffsetSw bool                                  `json:"bitSwitch"` // 位偏移开关
+		BitOffset   int                                   `json:"bitOffset"` // 位偏移数量
+		Params      device.TSLModbusPropertyParamTemplate `json:"params"`    //ltg add 2023-06-15
 	}{}
 
 	err := context.BindJSON(propertyParam)
@@ -1089,17 +1093,32 @@ func ApiAddTSLModbusCmdProperty(context *gin.Context) {
 		})
 		return
 	}
+
+	//ltg add 2023-06-15
+	param := device.TSLModbusPropertyParamTemplate{
+		Min:             propertyParam.Params.Min,
+		Max:             propertyParam.Params.Max,
+		MinMaxAlarm:     propertyParam.Params.MinMaxAlarm,
+		Step:            propertyParam.Params.Step,
+		StepAlarm:       propertyParam.Params.StepAlarm,
+		DataLength:      propertyParam.Params.DataLength,
+		DataLengthAlarm: propertyParam.Params.DataLengthAlarm,
+	}
+
 	property := device.TSLModbusPropertyTemplate{
-		Name:       propertyParam.Name,
-		Label:      propertyParam.Label,
-		AccessMode: propertyParam.AccessMode,
-		Type:       propertyParam.Type,
-		Decimals:   propertyParam.Decimals,
-		Unit:       propertyParam.Unit,
-		RegAddr:    propertyParam.RegAddr,
-		RegCnt:     propertyParam.RegCnt,
-		RuleType:   propertyParam.RuleType,
-		Formula:    propertyParam.Formula,
+		Name:        propertyParam.Name,
+		Label:       propertyParam.Label,
+		AccessMode:  propertyParam.AccessMode,
+		Type:        propertyParam.Type,
+		Decimals:    propertyParam.Decimals,
+		Unit:        propertyParam.Unit,
+		RegAddr:     propertyParam.RegAddr,
+		RegCnt:      propertyParam.RegCnt,
+		RuleType:    propertyParam.RuleType,
+		Formula:     propertyParam.Formula,
+		BitOffsetSw: propertyParam.BitOffsetSw,
+		BitOffset:   propertyParam.BitOffset,
+		Params:      param,
 	}
 	err = tslModel.TSLModelPropertiesAdd(propertyParam.CmdName, property)
 	if err != nil {
@@ -1134,6 +1153,8 @@ func ApiAddTSLD07CmdProperty(context *gin.Context) {
 		BlockAddOffset int    `json:"blockAddOffset"` //当前数据在块数据域内的偏移地址
 		RulerAddOffset int    `json:"rulerAddOffset"` //当前变量在当前ID数据地址中的偏移地址
 		Type           int    `json:"type"`           //float,uint32...
+
+		Params device.TSLDLT6452007PropertyParamTemplate `json:"params"` //ltg add 2023-06-15
 	}{}
 
 	err := context.BindJSON(propertyParam)
@@ -1156,6 +1177,18 @@ func ApiAddTSLD07CmdProperty(context *gin.Context) {
 		})
 		return
 	}
+
+	//ltg add 2023-06-15
+	param := device.TSLDLT6452007PropertyParamTemplate{
+		Min:             propertyParam.Params.Min,
+		Max:             propertyParam.Params.Max,
+		MinMaxAlarm:     propertyParam.Params.MinMaxAlarm,
+		Step:            propertyParam.Params.Step,
+		StepAlarm:       propertyParam.Params.StepAlarm,
+		DataLength:      propertyParam.Params.DataLength,
+		DataLengthAlarm: propertyParam.Params.DataLengthAlarm,
+	}
+
 	property := device.TSLDLT6452007PropertyTemplate{
 		Name:           propertyParam.Name,
 		Label:          propertyParam.Label,
@@ -1167,6 +1200,7 @@ func ApiAddTSLD07CmdProperty(context *gin.Context) {
 		BlockAddOffset: propertyParam.BlockAddOffset,
 		RulerAddOffset: propertyParam.RulerAddOffset,
 		Type:           propertyParam.Type,
+		Params:         param,
 	}
 	err = tslModel.TSLModelPropertiesAdd(propertyParam.CmdName, property)
 	if err != nil {
@@ -1639,6 +1673,10 @@ func ApiModifyTSLModbusCmdProperty(context *gin.Context) {
 		RegCnt     int    `json:"regCnt"`
 		RuleType   string `json:"ruleType"`
 		Formula    string `json:"formula"`
+
+		BitOffsetSw bool                                  `json:"bitSwitch"` // 位偏移开关
+		BitOffset   int                                   `json:"bitOffset"` // 位偏移数量
+		Params      device.TSLModbusPropertyParamTemplate `json:"params"`    //ltg add 2023-06-15
 	}{}
 
 	err := context.BindJSON(propertyParam)
@@ -1662,17 +1700,31 @@ func ApiModifyTSLModbusCmdProperty(context *gin.Context) {
 		return
 	}
 
+	//ltg add 2023-06-15
+	param := device.TSLModbusPropertyParamTemplate{
+		Min:             propertyParam.Params.Min,
+		Max:             propertyParam.Params.Max,
+		MinMaxAlarm:     propertyParam.Params.MinMaxAlarm,
+		Step:            propertyParam.Params.Step,
+		StepAlarm:       propertyParam.Params.StepAlarm,
+		DataLength:      propertyParam.Params.DataLength,
+		DataLengthAlarm: propertyParam.Params.DataLengthAlarm,
+	}
+
 	property := device.TSLModbusPropertyTemplate{
-		Name:       propertyParam.Name,
-		Label:      propertyParam.Label,
-		AccessMode: propertyParam.AccessMode,
-		Type:       propertyParam.Type,
-		Decimals:   propertyParam.Decimals,
-		Unit:       propertyParam.Unit,
-		RegAddr:    propertyParam.RegAddr,
-		RegCnt:     propertyParam.RegCnt,
-		RuleType:   propertyParam.RuleType,
-		Formula:    propertyParam.Formula,
+		Name:        propertyParam.Name,
+		Label:       propertyParam.Label,
+		AccessMode:  propertyParam.AccessMode,
+		Type:        propertyParam.Type,
+		Decimals:    propertyParam.Decimals,
+		Unit:        propertyParam.Unit,
+		RegAddr:     propertyParam.RegAddr,
+		RegCnt:      propertyParam.RegCnt,
+		RuleType:    propertyParam.RuleType,
+		Formula:     propertyParam.Formula,
+		BitOffsetSw: propertyParam.BitOffsetSw,
+		BitOffset:   propertyParam.BitOffset,
+		Params:      param,
 	}
 	err = tslModel.TSLModelPropertiesModify(propertyParam.CmdName, property)
 	if err != nil {
@@ -1695,18 +1747,19 @@ func ApiModifyTSLModbusCmdProperty(context *gin.Context) {
 func ApiModifyTSLD07CmdProperty(context *gin.Context) {
 
 	propertyParam := &struct {
-		TSLName        string `json:"tslName"` // 名称
-		CmdName        string `json:"cmdName"`
-		Name           string `json:"name"`
-		Label          string `json:"label"`
-		RulerId        string `json:"rulerId"` //数据标识
-		Format         string `json:"format"`  //数据格式YYMMDDhhmm,XXXXXX.XX,XX.XXXX...
-		Len            int    `json:"len"`     //数据长度
-		Unit           string `json:"unit"`
-		AccessMode     int    `json:"accessMode"`
-		BlockAddOffset int    `json:"blockAddOffset"` //当前数据在块数据域内的偏移地址
-		RulerAddOffset int    `json:"rulerAddOffset"` //当前变量在当前ID数据地址中的偏移地址
-		Type           int    `json:"type"`           //float,uint32...
+		TSLName        string                                    `json:"tslName"` // 名称
+		CmdName        string                                    `json:"cmdName"`
+		Name           string                                    `json:"name"`
+		Label          string                                    `json:"label"`
+		RulerId        string                                    `json:"rulerId"` //数据标识
+		Format         string                                    `json:"format"`  //数据格式YYMMDDhhmm,XXXXXX.XX,XX.XXXX...
+		Len            int                                       `json:"len"`     //数据长度
+		Unit           string                                    `json:"unit"`
+		AccessMode     int                                       `json:"accessMode"`
+		BlockAddOffset int                                       `json:"blockAddOffset"` //当前数据在块数据域内的偏移地址
+		RulerAddOffset int                                       `json:"rulerAddOffset"` //当前变量在当前ID数据地址中的偏移地址
+		Type           int                                       `json:"type"`           //float,uint32...
+		Params         device.TSLDLT6452007PropertyParamTemplate `json:"params"`         //ltg add 2023-06-15
 	}{}
 
 	err := context.BindJSON(propertyParam)
@@ -1730,6 +1783,17 @@ func ApiModifyTSLD07CmdProperty(context *gin.Context) {
 		return
 	}
 
+	//ltg add 2023-06-15
+	param := device.TSLDLT6452007PropertyParamTemplate{
+		Min:             propertyParam.Params.Min,
+		Max:             propertyParam.Params.Max,
+		MinMaxAlarm:     propertyParam.Params.MinMaxAlarm,
+		Step:            propertyParam.Params.Step,
+		StepAlarm:       propertyParam.Params.StepAlarm,
+		DataLength:      propertyParam.Params.DataLength,
+		DataLengthAlarm: propertyParam.Params.DataLengthAlarm,
+	}
+
 	property := device.TSLDLT6452007PropertyTemplate{
 		Name:           propertyParam.Name,
 		Label:          propertyParam.Label,
@@ -1741,6 +1805,7 @@ func ApiModifyTSLD07CmdProperty(context *gin.Context) {
 		BlockAddOffset: propertyParam.BlockAddOffset,
 		RulerAddOffset: propertyParam.RulerAddOffset,
 		Type:           propertyParam.Type,
+		Params:         param,
 	}
 	err = tslModel.TSLModelPropertiesModify(propertyParam.CmdName, property)
 	if err != nil {
