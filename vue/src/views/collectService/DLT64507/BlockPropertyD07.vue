@@ -903,7 +903,7 @@ const submitPorpertyForm = () => {
         params['max'] = ctxData.propertyForm.max
         params['minMaxAlarm'] = ctxData.propertyForm.minMaxAlarm
         //params['step'] = +ctxData.propertyForm.step  //ltg del 2023-06-15
-        params['step'] = ctxData.propertyForm.step
+        params['step'] = ctxData.propertyForm.step.toString()
         params['stepAlarm'] = ctxData.propertyForm.stepAlarm
       } else {
         params['dataLength'] = ctxData.propertyForm.dataLength
