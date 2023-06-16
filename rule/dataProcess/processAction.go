@@ -41,8 +41,8 @@ func ProcessAction(actionList []string, rule models.EmRuleVo, ruleType string) {
 
 func insertHistory(actionList []string, rule models.EmRuleVo) {
 	ruleHistory := models.EmRuleHistoryModel{
-		EventId:            rule.Id,
-		EventName:          rule.Name,
+		RuleId:             rule.Id,
+		RuleName:           rule.Name,
 		Description:        "[" + rule.Name + "]规则触发",
 		Level:              rule.Level,
 		TypeClassification: rule.TypeClassification,
@@ -54,7 +54,7 @@ func insertHistory(actionList []string, rule models.EmRuleVo) {
 		if strings.Contains(action, "record.name") {
 			split := strings.Split(action, "=")
 			if len(split) >= 2 {
-				ruleHistory.EventName = split[1]
+				ruleHistory.RuleName = split[1]
 			}
 		}
 		if strings.Contains(action, "record.content") {
@@ -118,10 +118,10 @@ func insertHistory(actionList []string, rule models.EmRuleVo) {
 				ruleHistoryDevice := make([]models.EmRuleHistoryDeviceModel, 0)
 				for key, value := range deviceMap {
 					ruleHistoryDeviceItem := models.EmRuleHistoryDeviceModel{
-						EventHistoryId: ruleHistory.Id,
-						DeviceId:       key,
-						PropertyCode:   value,
-						//CreateTime:     time.DateTime,
+						RuleHistoryId: ruleHistory.Id,
+						DeviceId:      key,
+						PropertyCode:  value,
+						CreateTime:    time.DateTime,
 					}
 					ruleHistoryDevice = append(ruleHistoryDevice, ruleHistoryDeviceItem)
 				}

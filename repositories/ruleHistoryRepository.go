@@ -16,9 +16,9 @@ func NewRuleHistoryRepository() *RuleHistoryRepository {
 }
 
 // GetLastRuleHistory 获取最新一条告警
-func (r *RuleHistoryRepository) GetLastRuleHistory(eventId int, deviceId int) (*models.EmRuleHistoryModel, error) {
+func (r *RuleHistoryRepository) GetLastRuleHistory(ruleId int, deviceId int) (*models.EmRuleHistoryModel, error) {
 	var emRuleHistoryModel *models.EmRuleHistoryModel
-	if err := r.db.Joins("join rule_history_device on event_history_id = rule_history.id").Where("tag = ?", 0).Where("del_flag = ?", 0).Where("event_id", eventId).Where("device_id", deviceId).Order("rule_history.id desc").Limit(1).Find(&emRuleHistoryModel).Error; err != nil {
+	if err := r.db.Joins("join rule_history_device on rule_history_id = rule_history.id").Where("tag = ?", 0).Where("del_flag = ?", 0).Where("rule_id", ruleId).Where("device_id", deviceId).Order("rule_history.id desc").Limit(1).Find(&emRuleHistoryModel).Error; err != nil {
 		return nil, err
 	}
 	return emRuleHistoryModel, nil
