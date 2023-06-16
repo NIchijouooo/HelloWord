@@ -178,6 +178,7 @@ const showOneResMsg = (res) => {
     text-align: left;
     color: #f0f7ff;
     letter-spacing: 1px;
+    text-align: center;
   }
   .el-input__icon {
     width: 40px;
