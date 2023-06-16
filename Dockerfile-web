@@ -1,7 +1,7 @@
 FROM nginx:stable-alpine3.17-slim
 MAINTAINER feisjy/ChenHongRui <veryrui@gmail.com>
 
-ADD ./vue/dist/ /usr/share/nginx/html
+ADD ./webroot/ /usr/share/nginx/html
 ADD ./default.conf /etc/nginx/conf.d/default.conf
 
 EXPOSE 80
