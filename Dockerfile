@@ -1,5 +1,5 @@
 # 基础镜像
-FROM golang:1.19 As build
+FROM golang:1.19 As goBuild
 
 # 工作目录
 WORKDIR /app
@@ -14,12 +14,29 @@ RUN go env -w GOPROXY=https://goproxy.cn,direct
 RUN go mod tidy
 RUN go build -o app .
 
+
+FROM node:14.12.0 As nodeBuild
+
+# 工作目录
+WORKDIR /app
+
+COPY --from=goBuild /app/vue /app
+
+RUN ls
+RUN npm config set registry https://registry.npm.taobao.org/
+RUN npm config set sass_binary_site https://npm.taobao.org/mirrors/node-sass/
+RUN npm install
+RUN ls
+RUN npm run build
+RUN ls
+
 FROM ubuntu:latest
 
 RUN apt-get update && apt-get install -y sqlite3 libsqlite3-dev
 
-COPY --from=build /app/app /app
-COPY --from=build /app/config /config
+COPY --from=goBuild /app/app /app
+COPY --from=goBuild /app/config /config
+COPY --from=nodeBuild /app/webroot /webroot
 
 # 暴露端口
 EXPOSE 7070
