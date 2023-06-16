@@ -92,11 +92,28 @@ func NewCommunicationManageTemplate() *CommunicationManageTemplate {
 	return template
 }
 
-func (c *CommunicationManageTemplate) CommunicationManageMessageAdd(collName string, dir int, buf []byte) {
+//ltg add 2023-06-16
+func addSpaceBetweenHex(hexStr string) string {
+	var spacedHex []string
+	for i := 0; i < len(hexStr); i += 2 {
+		spacedHex = append(spacedHex, hexStr[i:i+2])
+	}
+	return strings.Join(spacedHex, " ")
+}
+
+func (c *CommunicationManageTemplate) CommunicationManageMessageAdd(collName string, dir int, buf []byte, bufType string) {
 	CommunicationMessage := CommunicationMessageTemplate{
 		TimeStamp: time.Now().Format("2006-01-02 15:04:05.1234"),
 		Direction: dir,
-		Content:   fmt.Sprintf("%X", buf),
+		//Content:   fmt.Sprintf("%X", buf),
+	}
+
+	//ltg add 2023-06-16 采集日志发布增加一个bufType参数，当为”json“时，直接打印字符串上送，如果是”hex“转成HEX并在每个HEX间加个空格上报
+	if "json" == bufType {
+		CommunicationMessage.Content = fmt.Sprintf("%s", buf)
+	} else {
+		hexStr := fmt.Sprintf("%X", buf)
+		CommunicationMessage.Content = addSpaceBetweenHex(hexStr)
 	}
 
 	CollectInterfaceMap.Lock.Lock()
@@ -285,7 +302,7 @@ func (c *CommunicationManageTemplate) CommunicationStateMachine(cmd Communicatio
 					_, _ = commInterface.WriteData(txBuf)
 					node.CommTotalCnt++
 					setting.ZAPS.Infof("采集接口[%s]设备[%s]发送数据[%d:%X]", collName, node.Name, len(txBuf), txBuf)
-					c.CommunicationManageMessageAdd(collName, MessageDirection_TX, txBuf)
+					c.CommunicationManageMessageAdd(collName, MessageDirection_TX, txBuf, "hex")
 					commState = CommunicationState_Wait
 				}
 			case CommunicationState_Wait:
@@ -320,7 +337,7 @@ func (c *CommunicationManageTemplate) CommunicationStateMachine(cmd Communicatio
 								{
 									timerOut.Stop()
 									if len(rxTotalBuf) > 0 {
-										c.CommunicationManageMessageAdd(collName, MessageDirection_RX, rxTotalBuf)
+										c.CommunicationManageMessageAdd(collName, MessageDirection_RX, rxTotalBuf, "hex")
 									}
 									setting.ZAPS.Infof("采集接口[%s]设备[%s]接收超时 接收数据[%d:%X]", collName, node.Name, len(rxTotalBuf), rxTotalBuf)
 
@@ -358,7 +375,7 @@ func (c *CommunicationManageTemplate) CommunicationStateMachine(cmd Communicatio
 									rxResult.Status = rxStatus.Status
 									rxResult.Properties = rxStatus.Properties
 
-									c.CommunicationManageMessageAdd(collName, MessageDirection_RX, rxTotalBuf)
+									c.CommunicationManageMessageAdd(collName, MessageDirection_RX, rxTotalBuf, "hex")
 
 									//设备从离线变成上线
 									if node.CommStatus == "offLine" {
@@ -646,7 +663,7 @@ func (c *CommunicationManageTemplate) CommunicationStateMachineHTTP(cmd Communic
 			}
 			if rxStatus == true {
 				//setting.ZAPS.Debugf("采集服务[%s]节点[%s]接收成功 接收数据[%d:%v]", collName, node.Name, rxBufCnt, string(rxBuf[:rxBufCnt]))
-				c.CommunicationManageMessageAdd(collName, MessageDirection_RX, rxBuf[:rxBufCnt])
+				c.CommunicationManageMessageAdd(collName, MessageDirection_RX, rxBuf[:rxBufCnt], "hex")
 			}
 		} else if cmd.FunName == "SetVariables" {
 			wVariables := make(map[string]interface{})
@@ -760,7 +777,7 @@ func (c *CommunicationManageTemplate) CommunicationStateMachineHTTP(cmd Communic
 			}
 			if rxStatus == true {
 				//setting.ZAPS.Debugf("采集服务[%s]节点[%s]接收成功 接收数据[%d:%v]", collName, node.Name, rxBufCnt, string(rxBuf[:rxBufCnt]))
-				c.CommunicationManageMessageAdd(collName, MessageDirection_RX, rxBuf[:rxBufCnt])
+				c.CommunicationManageMessageAdd(collName, MessageDirection_RX, rxBuf[:rxBufCnt], "hex")
 			}
 		}
 
@@ -798,7 +815,7 @@ func (c *CommunicationManageTemplate) CommunicationStateMachineHTTP(cmd Communic
 			}
 			txBuf = append(txBuf, buf...)
 		}
-		c.CommunicationManageMessageAdd(collName, MessageDirection_TX, txBuf)
+		c.CommunicationManageMessageAdd(collName, MessageDirection_TX, txBuf, "hex")
 		rxBuf, err := comm.ReadData(txBuf)
 		if err != nil {
 			return rxResult
@@ -851,7 +868,7 @@ func (c *CommunicationManageTemplate) CommunicationStateMachineHTTP(cmd Communic
 		}
 		if rxStatus == true {
 			setting.ZAPS.Debugf("采集服务[%s]节点[%s]接收成功 接收数据[%d:%v]", collName, node.Name, rxBufCnt, string(rxBuf[:rxBufCnt]))
-			c.CommunicationManageMessageAdd(collName, MessageDirection_RX, rxBuf[:rxBufCnt])
+			c.CommunicationManageMessageAdd(collName, MessageDirection_RX, rxBuf[:rxBufCnt], "hex")
 		}
 		rxResult.Status = rxStatus
 		//rxResult.RxBuf = rxBuf
@@ -984,7 +1001,7 @@ func (c *CommunicationManageTemplate) CommunicationStateMachineS7(cmd Communicat
 			}
 			if rxStatus == true {
 				//setting.ZAPS.Debugf("采集服务[%s]节点[%s]接收成功 接收数据[%d:%X]", collName, node.Name, rxBufCnt, rxBuf[:rxBufCnt])
-				c.CommunicationManageMessageAdd(collName, MessageDirection_RX, rxBuf[:rxBufCnt])
+				c.CommunicationManageMessageAdd(collName, MessageDirection_RX, rxBuf[:rxBufCnt], "hex")
 			}
 		}
 	} else if cmd.FunName == "SetVariables" {
@@ -1093,7 +1110,7 @@ func (c *CommunicationManageTemplate) CommunicationStateMachineS7(cmd Communicat
 			}
 			if rxStatus == true {
 				setting.ZAPS.Debugf("采集服务[%s]节点[%s]接收成功 接收数据[%d:%X]", collName, node.Name, rxBufCnt, rxBuf[:rxBufCnt])
-				c.CommunicationManageMessageAdd(collName, MessageDirection_RX, rxBuf[:rxBufCnt])
+				c.CommunicationManageMessageAdd(collName, MessageDirection_RX, rxBuf[:rxBufCnt], "hex")
 			}
 		}
 	}
@@ -1230,7 +1247,7 @@ func (c *CommunicationManageTemplate) CommunicationStateMachineSAC009(cmd Commun
 		}
 		if rxStatus == true {
 			setting.ZAPS.Debugf("采集服务[%s]节点[%s]接收成功 接收数据[%d]", collName, node.Name, rxBufCnt)
-			c.CommunicationManageMessageAdd(collName, MessageDirection_RX, rxBuf[:rxBufCnt])
+			c.CommunicationManageMessageAdd(collName, MessageDirection_RX, rxBuf[:rxBufCnt], "hex")
 		}
 	} else if cmd.FunName == "SetVariables" {
 		wVariables := make(map[string]interface{})
@@ -1362,7 +1379,7 @@ func (c *CommunicationManageTemplate) CommunicationStateMachineDR504(cmd Communi
 					commInterface.WriteData(cmdData)
 					node.CommTotalCnt++
 					setting.ZAPS.Infof("采集接口[%s]设备[%s]发送数据[%d:%X]", collName, node.Name, len(txBuf), txBuf)
-					c.CommunicationManageMessageAdd(collName, MessageDirection_TX, txBuf)
+					c.CommunicationManageMessageAdd(collName, MessageDirection_TX, txBuf, "hex")
 					commState = CommunicationState_Wait
 				}
 			case CommunicationState_Wait:
@@ -1396,7 +1413,7 @@ func (c *CommunicationManageTemplate) CommunicationStateMachineDR504(cmd Communi
 								{
 									timerOut.Stop()
 									if len(rxTotalBuf) > 0 {
-										c.CommunicationManageMessageAdd(collName, MessageDirection_RX, rxTotalBuf)
+										c.CommunicationManageMessageAdd(collName, MessageDirection_RX, rxTotalBuf, "hex")
 									}
 									setting.ZAPS.Infof("采集接口[%s]设备[%s]接收超时 接收数据[%d:%X]", collName, node.Name, len(rxTotalBuf), rxTotalBuf)
 
@@ -1434,7 +1451,7 @@ func (c *CommunicationManageTemplate) CommunicationStateMachineDR504(cmd Communi
 									rxResult.Status = rxStatus.Status
 									rxResult.Properties = rxStatus.Properties
 
-									c.CommunicationManageMessageAdd(collName, MessageDirection_RX, rxTotalBuf)
+									c.CommunicationManageMessageAdd(collName, MessageDirection_RX, rxTotalBuf, "hex")
 
 									//设备从离线变成上线
 									if node.CommStatus == "offLine" {
@@ -1710,7 +1727,7 @@ func (c *CommunicationManageTemplate) CommunicationStateMachineModbusTCP(cmd Com
 			}
 			if rxStatus == true {
 				//setting.ZAPS.Debugf("采集服务[%s]节点[%s]接收成功 接收数据[%d:%X]", collName, node.Name, rxBufCnt, rxBuf[:rxBufCnt])
-				c.CommunicationManageMessageAdd(collName, MessageDirection_RX, rxBuf[:rxBufCnt])
+				c.CommunicationManageMessageAdd(collName, MessageDirection_RX, rxBuf[:rxBufCnt], "json")
 			}
 		}
 	} else if cmd.FunName == "SetVariables" {
@@ -1794,7 +1811,7 @@ func (c *CommunicationManageTemplate) CommunicationStateMachineModbusTCP(cmd Com
 				}
 				if rxStatus == true {
 					//setting.ZAPS.Debugf("采集服务[%s]节点[%s]接收成功 接收数据[%d:%X]", collName, node.Name, rxBufCnt, rxBuf[:rxBufCnt])
-					c.CommunicationManageMessageAdd(collName, MessageDirection_RX, rxBuf[:rxBufCnt])
+					c.CommunicationManageMessageAdd(collName, MessageDirection_RX, rxBuf[:rxBufCnt], "json")
 				}
 			}
 		}
@@ -1930,7 +1947,7 @@ func (c *CommunicationManageTemplate) CommunicationStateMachineHDKJ(cmd Communic
 		}
 		if rxStatus == true {
 			setting.ZAPS.Debugf("采集服务[%s]节点[%s]接收成功 接收数据[%d]", collName, node.Name, rxBufCnt)
-			c.CommunicationManageMessageAdd(collName, MessageDirection_RX, rxBuf[:rxBufCnt])
+			c.CommunicationManageMessageAdd(collName, MessageDirection_RX, rxBuf[:rxBufCnt], "hex")
 		}
 	} else if cmd.FunName == "SetVariables" {
 		rxStatus = true
@@ -2030,7 +2047,7 @@ func (c *CommunicationManageTemplate) CommunicationStateMachineDLT64507(cmd Comm
 								if unpackFrame, ok := dlt645.UnpackD07Frame(rxTotalBuf); ok == nil {
 									timerOut.Stop()
 									setting.ZAPS.Infof("采集服务[%s]设备[%s]接收成功 接收数据[%d:%X]", collName, node.Name, len(rxTotalBuf), rxTotalBuf)
-									c.CommunicationManageMessageAdd(collName, MessageDirection_RX, rxTotalBuf)
+									c.CommunicationManageMessageAdd(collName, MessageDirection_RX, rxTotalBuf, "hex")
 									rxStatus = true
 
 									var d07Data dlt645.TransD07DataTemplate
@@ -2085,7 +2102,7 @@ func (c *CommunicationManageTemplate) CommunicationStateMachineDLT64507(cmd Comm
 						{
 							timerOut.Stop()
 							if len(rxTotalBuf) > 0 {
-								c.CommunicationManageMessageAdd(collName, MessageDirection_RX, rxTotalBuf)
+								c.CommunicationManageMessageAdd(collName, MessageDirection_RX, rxTotalBuf, "hex")
 							}
 							setting.ZAPS.Infof("采集接口[%s]设备[%s]接收超时 接收数据[%d:%X]", collName, node.Name, len(rxTotalBuf), rxTotalBuf)
 							rxStatus = false

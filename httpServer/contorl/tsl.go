@@ -1503,6 +1503,36 @@ func ApiAddTSLModbusCmdPropertyFromXlsx(context *gin.Context) {
 			property.Formula = setting.GetString(cell[9])
 		}
 
+		//ltg add 2023-06-16
+		if setting.GetString(cell[10]) == "ture" {
+			property.BitOffsetSw = true
+		} else {
+			property.BitOffsetSw = false
+		}
+		property.BitOffset = setting.GetInt(cell[11])
+
+		if setting.GetString(cell[12]) == "ture" {
+			property.Params.MinMaxAlarm = true
+		} else {
+			property.Params.MinMaxAlarm = false
+		}
+		property.Params.Min = setting.GetString(cell[13])
+		property.Params.Max = setting.GetString(cell[14])
+
+		if setting.GetString(cell[15]) == "ture" {
+			property.Params.StepAlarm = true
+		} else {
+			property.Params.StepAlarm = false
+		}
+		property.Params.Step = setting.GetString(cell[16])
+
+		if setting.GetString(cell[17]) == "ture" {
+			property.Params.DataLengthAlarm = true
+		} else {
+			property.Params.DataLengthAlarm = false
+		}
+		property.Params.DataLength = setting.GetString(cell[18])
+
 		err = tslModel.TSLModelPropertiesAdd(cmdName, property)
 		if err != nil {
 			context.JSON(http.StatusOK, model.ResponseData{
@@ -1637,6 +1667,29 @@ func ApiAddTSLD07CmdPropertyFromXlsx(context *gin.Context) {
 		} else {
 			property.Type = 2
 		}
+
+		//ltg add 2023-06-16
+		if setting.GetString(cell[10]) == "ture" {
+			property.Params.MinMaxAlarm = true
+		} else {
+			property.Params.MinMaxAlarm = false
+		}
+		property.Params.Min = setting.GetString(cell[11])
+		property.Params.Max = setting.GetString(cell[12])
+
+		if setting.GetString(cell[13]) == "ture" {
+			property.Params.StepAlarm = true
+		} else {
+			property.Params.StepAlarm = false
+		}
+		property.Params.Step = setting.GetString(cell[14])
+
+		if setting.GetString(cell[15]) == "ture" {
+			property.Params.DataLengthAlarm = true
+		} else {
+			property.Params.DataLengthAlarm = false
+		}
+		property.Params.DataLength = setting.GetString(cell[16])
 
 		err = tslModel.TSLModelPropertiesAdd(cmdName, property)
 		if err != nil {
@@ -2065,8 +2118,8 @@ func ApiExportTSLModbusCmdPropertiesToXlsx(context *gin.Context) {
 	csvRecords := make([][]string, 0)
 
 	csvRecords = [][]string{
-		{"属性名称", "属性标识符", "读写类型", "数据类型", "小数位", "单位", "寄存器地址", "寄存器数量", "解析规则", "公式"},
-		{"Name", "Label", "AccessMode", "Type", "Decimals", "Unit", "RegAddr", "RegCnt", "RuleType", "Formula"},
+		{"属性名称", "属性标识符", "读写类型", "数据类型", "小数位", "单位", "寄存器地址", "寄存器数量", "解析规则", "计算公式", "位解析开关", "位偏移", "范围报警", "最小值", "最大值", "步长报警", "步长", "字符串长度报警", "字符串长度"},
+		{"Name", "Label", "AccessMode", "Type", "Decimals", "Unit", "RegAddr", "RegCnt", "RuleType", "Formula", "BitOffsetSw", "BitOffset", "MinMaxAlarm", "Min", "Max", "StepAlarm", "Step", "DataLengthAlarm", "DataLength"},
 	}
 
 	for _, v := range cmd.Registers {
@@ -2099,6 +2152,40 @@ func ApiExportTSLModbusCmdPropertiesToXlsx(context *gin.Context) {
 		} else {
 			record = append(record, v.Formula)
 		}
+
+		//ltg add 2023-06-16
+		if v.BitOffsetSw == true {
+			record = append(record, "true")
+		} else {
+			record = append(record, "false")
+		}
+
+		record = append(record, fmt.Sprintf("%d", v.BitOffset))
+
+		if v.Params.MinMaxAlarm == true {
+			record = append(record, "true")
+		} else {
+			record = append(record, "false")
+		}
+
+		record = append(record, v.Params.Min)
+		record = append(record, v.Params.Max)
+
+		if v.Params.StepAlarm == true {
+			record = append(record, "true")
+		} else {
+			record = append(record, "false")
+		}
+
+		record = append(record, v.Params.Step)
+
+		if v.Params.DataLengthAlarm == true {
+			record = append(record, "true")
+		} else {
+			record = append(record, "false")
+		}
+
+		record = append(record, v.Params.DataLength)
 
 		csvRecords = append(csvRecords, record)
 	}
@@ -2154,8 +2241,8 @@ func ApiExportTSLD07CmdPropertiesToXlsx(context *gin.Context) {
 	//创建一个新的写入文件流
 	csvRecords := make([][]string, 0)
 	csvRecords = [][]string{
-		{"属性名称", "属性标识符", "数据标识", "数据格式", "数据长度", "读写类型", "数据类型", "单位", "数据块偏移地址", "数据标识偏移地址"},
-		{"Name", "Label", "RulerId", "Format", "Len", "AccessMode", "Type", "Unit", "BlockAddOffset", "RulerAddOffset"},
+		{"属性名称", "属性标识符", "数据标识", "数据格式", "数据长度", "读写类型", "数据类型", "单位", "数据块偏移地址", "数据标识偏移地址", "范围报警", "最小值", "最大值", "步长报警", "步长", "字符串长度报警", "字符串长度"},
+		{"Name", "Label", "RulerId", "Format", "Len", "AccessMode", "Type", "Unit", "BlockAddOffset", "RulerAddOffset", "MinMaxAlarm", "Min", "Max", "StepAlarm", "Step", "DataLengthAlarm", "DataLength"},
 	}
 
 	for _, v := range cmd.Properties {
@@ -2185,6 +2272,32 @@ func ApiExportTSLD07CmdPropertiesToXlsx(context *gin.Context) {
 		} else if v.Type == 3 {
 			record = append(record, "string")
 		}
+
+		//ltg add 2023-06-16
+		if v.Params.MinMaxAlarm == true {
+			record = append(record, "true")
+		} else {
+			record = append(record, "false")
+		}
+
+		record = append(record, v.Params.Min)
+		record = append(record, v.Params.Max)
+
+		if v.Params.StepAlarm == true {
+			record = append(record, "true")
+		} else {
+			record = append(record, "false")
+		}
+
+		record = append(record, v.Params.Step)
+
+		if v.Params.DataLengthAlarm == true {
+			record = append(record, "true")
+		} else {
+			record = append(record, "false")
+		}
+
+		record = append(record, v.Params.DataLength)
 
 		csvRecords = append(csvRecords, record)
 	}

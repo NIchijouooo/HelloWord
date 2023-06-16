@@ -43,6 +43,9 @@ func MQTTFeisjyOnConnectHandler(client MQTT.Client) {
 	for _, v := range ReportServiceParamListFeisjy.ServiceList {
 		if v.GWParam.MQTTClient == client {
 			v.MQTTFeisjySubTopicList(client, v.GWParam)
+			for _, node := range v.NodeList {
+				v.MQTTFeisjySubNodeTopic(node.Param.DeviceID)
+			}
 		}
 	}
 }

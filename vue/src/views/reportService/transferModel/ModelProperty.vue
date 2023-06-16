@@ -11,7 +11,7 @@
         </el-form-item>
       </el-form>
     </div>
-    
+
     <div class="search-bar" style="display: flex;">
       <div class="title" style="position: relative;margin-right: 40px;height: 40px; padding: 0px 0; justify-content: flex-start">
         <div class="tName">{{ props.curTransferModel.label }}</div>
@@ -651,14 +651,14 @@ const saveProperties = async() => {
       property['unit'] = item.unit
       let params = {}
       if (item.type !== 3) {
-        params['min'] = ''
-        params['max'] = ''
-        params['minMaxAlarm'] = false
-        params['step'] = ''
-        params['stepAlarm'] = false
+        params['min'] = item.params.min
+        params['max'] = item.params.max
+        params['minMaxAlarm'] = item.params.minMaxAlarm
+        params['step'] = item.params.step
+        params['stepAlarm'] = item.params.stepAlarm
       } else {
-        params['dataLength'] = ''
-        params['dataLengthAlarm'] = false
+        params['dataLength'] = item.params.dataLength
+        params['dataLengthAlarm'] = item.params.dataLengthAlarm
       }
       property['params'] = params
 

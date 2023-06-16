@@ -240,18 +240,40 @@ func (r *ReportServiceParamFeisjyTemplate) ProcessCollEvent(ctx context.Context,
 
 				nodeName := make([]string, 0)
 
-				if subMsg.Topic == "onLine" || subMsg.Topic == "offLine" || subMsg.Topic == "update" {
+				switch subMsg.Topic {
+				case "onLine":
 					{
 						nodeName = append(nodeName, subMsg.NodeName)
-						if r.NodeList[index].CommStatus == "onLine" {
-							reportNodeProperty := MQTTFeisjyReportPropertyTemplate{
-								DeviceType: "node",
-								DeviceName: nodeName,
-							}
-							r.ReportPropertyRequestFrameChan <- reportNodeProperty
-						}
+						r.NodeList[index].CommStatus = "onLine"
+						//判断告警
+						r.ProcessAlarmEvent(index, subMsg.CollName, subMsg.NodeName)
+					}
+				case "offLine":
+					{
+						nodeName = append(nodeName, subMsg.NodeName)
+						r.NodeList[index].CommStatus = "offLine"
+					}
+				case "update":
+					{
+						//更新设备的通信状态
+						r.NodeList[index].CommStatus = "onLine"
+						//判断告警
+						r.ProcessAlarmEvent(index, subMsg.CollName, subMsg.NodeName)
 					}
 				}
+
+				//if subMsg.Topic == "onLine" || subMsg.Topic == "offLine" || subMsg.Topic == "update" {
+				//	{
+				//		nodeName = append(nodeName, subMsg.NodeName)
+				//		if r.NodeList[index].CommStatus == "onLine" {
+				//			reportNodeProperty := MQTTFeisjyReportPropertyTemplate{
+				//				DeviceType: "node",
+				//				DeviceName: nodeName,
+				//			}
+				//			r.ReportPropertyRequestFrameChan <- reportNodeProperty
+				//		}
+				//	}
+				//}
 			}
 		}
 	}
