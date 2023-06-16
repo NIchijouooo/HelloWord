@@ -62,7 +62,7 @@ export default defineConfig(({ command, mode }) => {
     // 打包配置
     build: {
       target: 'modules',
-      outDir: '../webroot', // 指定输出路径
+      outDir: './webroot', // 指定输出路径
       emptyOutDir: true,
       assetsDir: 'assets', // 指定生成静态资源的存放路径
       minify: 'terser', // 混淆器，terser构建后文件体积更小
@@ -89,8 +89,8 @@ export default defineConfig(({ command, mode }) => {
           changeOrigin: true,
           //target: 'http://192.168.4.162:80', // 代理地址 测试环境
           //target: ' http://192.168.4.196:8080', // 代理地址 测试环境
-          target: 'http://127.0.0.1:8080', // 代理地址 本地环境
-          //target: 'http://192.168.1.7:8080', // 代理地址 本地环境
+           target: 'http://127.0.0.1:7070', // 代理地址 本地环境
+          // target: 'http://120.78.181.76/gw', // 代理地址 本地环境
           rewrite: (path) => path.replace(/^\/api/, '/api'),
         },
       },

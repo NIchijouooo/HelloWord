@@ -9,7 +9,6 @@ import (
 	"gateway/device"
 	"gateway/device/eventBus"
 	"gateway/report/reportModel"
-	"gateway/repositories"
 	"gateway/setting"
 	"gateway/utils"
 	MQTT "github.com/eclipse/paho.mqtt.golang"
@@ -160,8 +159,8 @@ func ReportServiceFeisjyPoll(ctx context.Context, r *ReportServiceParamFeisjyTem
 						/**
 						todo20230615网关设备上线更新sqlite
 						*/
-						repo := &repositories.RealtimeDataRepository{}
-						repo.UpdateGatewayDeviceConnetStatus(r.GWParam)
+						//repo := &repositories.RealtimeDataRepository{}
+						//repo.UpdateGatewayDeviceConnetStatus(r.GWParam)
 
 					} else {
 						time.Sleep(10 * time.Second)
@@ -178,8 +177,8 @@ func ReportServiceFeisjyPoll(ctx context.Context, r *ReportServiceParamFeisjyTem
 									/**
 									todo20230615设备上线更新sqlite
 									*/
-									repo := &repositories.RealtimeDataRepository{}
-									repo.UpdateDeviceConnetStatus(r.NodeList[i])
+									//repo := &repositories.RealtimeDataRepository{}
+									//repo.UpdateDeviceConnetStatus(r.NodeList[i])
 
 								}
 							}
@@ -413,8 +412,8 @@ func (r *ReportServiceParamFeisjyTemplate) ProcessDownLinkFrame(ctx context.Cont
 										/**
 										todo20230615设备离线更新sqlite
 										*/
-										repo := &repositories.RealtimeDataRepository{}
-										repo.UpdateDeviceConnetStatus(r.NodeList[k])
+										//repo := &repositories.RealtimeDataRepository{}
+										//repo.UpdateDeviceConnetStatus(r.NodeList[k])
 									}
 								}
 							}
@@ -429,8 +428,8 @@ func (r *ReportServiceParamFeisjyTemplate) ProcessDownLinkFrame(ctx context.Cont
 										/**
 										todo20230615设备离线更新sqlite
 										*/
-										repo := &repositories.RealtimeDataRepository{}
-										repo.UpdateDeviceConnetStatus(r.NodeList[k])
+										//repo := &repositories.RealtimeDataRepository{}
+										//repo.UpdateDeviceConnetStatus(r.NodeList[k])
 
 									}
 								}

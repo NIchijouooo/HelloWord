@@ -39,6 +39,8 @@
                 </template>
                 <div class="item">
                   <div>请选择您要恢复的配置文件。</div>
+                  <div>&nbsp;</div>
+                  <div>&nbsp;</div>
                   <br />
                   <br />
                   <br />

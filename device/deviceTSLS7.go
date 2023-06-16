@@ -31,9 +31,17 @@ type TSLModelS7PropertyTemplate struct {
 }
 
 type TSLModelS7PropertyParamTemplate struct {
-	DBNumber    string `json:"dbNumber"`  //数据块
-	DataType    int    `json:"dataType"`  //数据类型
-	StartAddr   string `json:"startAddr"` //起始地址
+	DBNumber  string `json:"dbNumber"`  //数据块
+	DataType  int    `json:"dataType"`  //数据类型
+	StartAddr string `json:"startAddr"` //起始地址
+
+	Min             string `json:"min"`             //最小
+	Max             string `json:"max"`             //最大
+	MinMaxAlarm     bool   `json:"minMaxAlarm"`     //范围报警
+	Step            string `json:"step"`            //步长
+	StepAlarm       bool   `json:"stepAlarm"`       //阶跃报警
+	DataLength      string `json:"dataLength"`      //字符串长度
+	DataLengthAlarm bool   `json:"dataLengthAlarm"` //字符长度报警
 	IotDataType string `json:"IotDataType"`
 }
 
