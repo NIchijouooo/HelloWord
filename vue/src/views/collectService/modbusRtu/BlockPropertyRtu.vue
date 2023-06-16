@@ -61,6 +61,24 @@
       @row-dblclick="editDeviceModelProperty"
     >
       <el-table-column type="selection" width="55" />
+      <el-table-column type="expand" width="60">
+        <template #default="scope">
+          <div class="param-content">
+            <div class="pc-title">
+              <div class="pct-info">
+                <b> {{ scope.row.name }} </b>
+                参数详情
+              </div>
+            </div>
+            <div class="pc-content">
+              <div class="param-item" v-for="(item, key, index) of scope.row.params" :key="index">
+                <div class="param-value">{{ ctxData.paramName[key] }}：</div>
+                <div class="param-name">{{ item || '-' }}</div>
+              </div>
+            </div>
+          </div>
+        </template>
+      </el-table-column>
       <el-table-column sortable prop="name" label="属性名称" width="auto" min-width="150" align="center"> </el-table-column>
       <el-table-column sortable prop="label" label="属性标签" width="auto" min-width="150" align="center"> </el-table-column>
       <el-table-column sortable label="读写属性" width="auto" min-width="100" align="center">
@@ -79,13 +97,20 @@
         </template>
       </el-table-column>
       <el-table-column sortable prop="unit" label="单位" width="auto" min-width="80" align="center" />
-
       <el-table-column sortable prop="regAddr" label="寄存器地址" width="auto" min-width="120" align="center" />
       <el-table-column sortable prop="regCnt" label="寄存器数量" width="auto" min-width="120" align="center" />
       <el-table-column sortable prop="ruleType" label="解析规则" width="auto" min-width="120" align="center" />
       <el-table-column sortable prop="formula" label="计算公式" width="auto" min-width="200" align="center" />
-      <el-table-column sortable prop="bitOffset" label="位偏移" width="auto" min-width="120" align="center" />
-      <el-table-column sortable prop="step" label="步长" width="auto" min-width="120" align="center" />
+      <el-table-column sortable label="按位解析" width="auto" min-width="100" align="center">
+          <template #default="scope">
+            {{ scope.row.bitOffsetSw === false ? '否' : '是' }}
+          </template>
+        </el-table-column>
+        <el-table-column sortable prop="bitOffset" label="位偏移" width="auto" min-width="120" align="center">
+          <template #default="scope">
+            {{ scope.row.bitOffsetSw === false ? '-' : scope.row.bitOffset }}
+          </template>
+        </el-table-column>
       <el-table-column label="操作" width="auto" min-width="200" align="center" fixed="right">
         <template #default="scope">
           <el-button @click="editDeviceModelProperty(scope.row)" text type="primary">编辑</el-button>
@@ -635,7 +660,7 @@ const ctxData = reactive({
         validator: validateBitOffset,
       },
     ],
-    step: [
+    /*step: [
       {
         required: true,
         message: '步长不能为空',
@@ -645,7 +670,7 @@ const ctxData = reactive({
         trigger: 'blur',
         validator: validateStep,
       },
-    ],
+    ],*/
   },
   psFlag: false,
   selectedProperties: [],

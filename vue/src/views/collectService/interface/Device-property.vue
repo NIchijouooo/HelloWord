@@ -54,7 +54,9 @@
         style="width: 100%"
         stripe
       >
-        <el-table-column prop="index" label="序号" width="55" />
+        <el-table-column type="index" width="60">
+          <template #header> 序号 </template>
+        </el-table-column>
         <el-table-column sortable prop="name" label="变量名称" width="auto" min-width="180" align="center"> </el-table-column>
         <el-table-column sortable prop="label" label="变量标签" width="auto" min-width="180" align="center"> </el-table-column>
         <el-table-column sortable prop="type" label="变量类型" width="auto" min-width="120" align="center"> </el-table-column>

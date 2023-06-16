@@ -49,12 +49,30 @@
         :max-height="ctxData.tableMaxHeight"
         stripe
       ><!--  :max-height="ctxData.tableMaxHeight"-->
+        <el-table-column type="expand" width="60">
+          <template #default="scope">
+            <div class="param-content">
+              <div class="pc-title">
+                <div class="pct-info">
+                  <b> {{ scope.row.name }} </b>
+                  参数详情
+                </div>
+              </div>
+              <div class="pc-content">
+                <div class="param-item" v-for="(item, key, index) of scope.row.params" :key="index">
+                  <div class="param-value">{{ ctxData.paramName[key] }}：</div>
+                  <div class="param-name">{{ item || '-' }}</div>
+                </div>
+              </div>
+            </div>
+          </template>
+        </el-table-column>
         <el-table-column type="index" width="60">
           <template #header> 序号 </template>
         </el-table-column>
         <el-table-column sortable prop="name" label="属性名称" width="auto" min-width="150" align="center"> </el-table-column>
         <el-table-column sortable prop="label" label="属性标签" width="auto" min-width="150" align="center"> </el-table-column>
-        <el-table-column sortable label="读写属性" width="auto" min-width="80" align="center">
+        <el-table-column sortable label="读写属性" width="auto" min-width="100" align="center">
           <template #default="scope">
             {{ ctxData.accessModeNames['am' + scope.row.accessMode] }}
           </template>
@@ -64,7 +82,7 @@
             {{ ctxData.typeNames['t' + scope.row.type] }}
           </template>
         </el-table-column>
-        <el-table-column sortable label="小数位数" width="auto" min-width="80" align="center">
+        <el-table-column sortable label="小数位数" width="auto" min-width="100" align="center">
           <template #default="scope">
             {{ scope.row.decimals === '' ? 0 : scope.row.decimals }}
           </template>
@@ -75,8 +93,16 @@
         <el-table-column sortable prop="regCnt" label="寄存器数量" width="auto" min-width="120" align="center" />
         <el-table-column sortable prop="ruleType" label="解析规则" width="auto" min-width="120" align="center" />
         <el-table-column sortable prop="formula" label="计算公式" width="auto" min-width="200" align="center" />
-        <el-table-column sortable prop="bitOffset" label="位偏移" width="auto" min-width="120" align="center" />
-        <el-table-column sortable prop="step" label="步长" width="auto" min-width="120" align="center" />
+        <el-table-column sortable label="按位解析" width="auto" min-width="100" align="center">
+          <template #default="scope">
+            {{ scope.row.bitOffsetSw === false ? '否' : '是' }}
+          </template>
+        </el-table-column>
+        <el-table-column sortable prop="bitOffset" label="位偏移" width="auto" min-width="120" align="center">
+          <template #default="scope">
+            {{ scope.row.bitOffsetSw === false ? '-' : scope.row.bitOffset }}
+          </template>
+        </el-table-column>
         <template #empty>
           <div>无数据</div>
         </template>
@@ -151,6 +177,24 @@ const ctxData = reactive({
     am0: '只读',
     am1: '只写',
     am2: '读写',
+  },
+  paramName: {
+    name: '属性名称',
+    label: '属性标签',
+    accessMode: '读写模式',
+    type: '属性类型',
+    decimals: '小数位数',
+    regCnt: '寄存器数量',
+    ruleType: '解析规则',
+    regAddr: '寄存器地址',
+    formula: '计算公式',
+    min: '最小值',
+    max: '最大值',
+    minMaxAlarm: '范围报警',
+    step: '步长',
+    stepAlarm: '步长报警',
+    dataLength: '字符串长度',
+    dataLengthAlarm: '字符串长度报警',
   },
   pFlag: false, //属性对话框标识
   pTitle: '添加属性', //属性对话框titleName
