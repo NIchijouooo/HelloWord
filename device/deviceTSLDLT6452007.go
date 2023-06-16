@@ -18,17 +18,28 @@ type TSLDLT6452007ModelTemplate struct {
 	Event eventBus.Bus                         `json:"-"` //事件队列
 }
 
+type TSLDLT6452007PropertyParamTemplate struct {
+	Min             string `json:"min"`             //最小
+	Max             string `json:"max"`             //最大
+	MinMaxAlarm     bool   `json:"minMaxAlarm"`     //范围报警
+	Step            string `json:"step"`            //步长
+	StepAlarm       bool   `json:"stepAlarm"`       //阶跃报警
+	DataLength      string `json:"dataLength"`      //字符串长度
+	DataLengthAlarm bool   `json:"dataLengthAlarm"` //字符长度报警
+}
+
 type TSLDLT6452007PropertyTemplate struct {
-	Name           string `json:"name"`
-	Label          string `json:"label"`
-	RulerId        string `json:"rulerId"` //数据标识
-	Format         string `json:"format"`  //数据格式YYMMDDhhmm,XXXXXX.XX,XX.XXXX...
-	Len            int    `json:"len"`     //数据长度
-	Unit           string `json:"unit"`
-	AccessMode     int    `json:"accessMode"`
-	BlockAddOffset int    `json:"blockAddOffset"` //当前数据在块数据域内的偏移地址
-	RulerAddOffset int    `json:"rulerAddOffset"` //当前变量在当前ID数据地址中的偏移地址
-	Type           int    `json:"type"`           //float,uint32...
+	Name           string                             `json:"name"`
+	Label          string                             `json:"label"`
+	RulerId        string                             `json:"rulerId"` //数据标识
+	Format         string                             `json:"format"`  //数据格式YYMMDDhhmm,XXXXXX.XX,XX.XXXX...
+	Len            int                                `json:"len"`     //数据长度
+	Unit           string                             `json:"unit"`
+	AccessMode     int                                `json:"accessMode"`
+	BlockAddOffset int                                `json:"blockAddOffset"` //当前数据在块数据域内的偏移地址
+	RulerAddOffset int                                `json:"rulerAddOffset"` //当前变量在当前ID数据地址中的偏移地址
+	Type           int                                `json:"type"`           //float,uint32...
+	Params         TSLDLT6452007PropertyParamTemplate `json:"params"`
 }
 
 type TSLDLT6452007CmdTemplate struct {

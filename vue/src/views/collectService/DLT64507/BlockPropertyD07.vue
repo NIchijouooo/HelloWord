@@ -192,7 +192,7 @@
         <el-form-item v-if="ctxData.propertyForm.type !== 3 && ctxData.propertyForm.minMaxAlarm" label="最大值"  prop="max">
           <el-input type="text" v-model="ctxData.propertyForm.max" autocomplete="off" placeholder="请输入最大值"></el-input>
         </el-form-item>
-        
+
         <div>
         <el-form-item v-if="ctxData.propertyForm.type !== 3" label="步长报警" prop="stepAlarm">
           <el-switch v-model="ctxData.propertyForm.stepAlarm" inline-prompt active-text="是" inactive-text="否" />
@@ -886,7 +886,8 @@ const submitPorpertyForm = () => {
         params['min'] = ctxData.propertyForm.min
         params['max'] = ctxData.propertyForm.max
         params['minMaxAlarm'] = ctxData.propertyForm.minMaxAlarm
-        params['step'] = +ctxData.propertyForm.step
+        //params['step'] = +ctxData.propertyForm.step  //ltg del 2023-06-15
+        params['step'] = ctxData.propertyForm.step
         params['stepAlarm'] = ctxData.propertyForm.stepAlarm
       } else {
         params['dataLength'] = ctxData.propertyForm.dataLength
