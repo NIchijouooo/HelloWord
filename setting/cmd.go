@@ -39,8 +39,9 @@ func Exec_shell(s_cmd string) (string, bool) {
 		if err2 != nil || io.EOF == err2 {
 			break
 		}
-		end_line = line
+		end_line += line
 	}
 
+	cmd.Wait()
 	return end_line, true
 }
