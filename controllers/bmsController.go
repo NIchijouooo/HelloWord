@@ -32,18 +32,18 @@ func (c *BmsController) GetYcLastByDeviceIdAndDict(ctx *gin.Context) {
 	deviceId := ctx.Value("deviceId")
 	//codes := ctx.Value("codes")
 	print(deviceId)
-	codes := "2005,2002"
+	//codes := "2005,2002"
 	//3.然后查询涛思数据库
-	ycList, err := c.hisRepo.GetLastYcListByCode(codes)
-	if err != nil {
-		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-		return
-	}
-	ctx.JSON(http.StatusOK, model.ResponseData{
-		"0",
-		"获取信息成功！",
-		ycList,
-	})
+	//ycList, err := c.hisRepo.GetLastYcListByCode(codes)
+	//if err != nil {
+	//	ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+	//	return
+	//}
+	//ctx.JSON(http.StatusOK, model.ResponseData{
+	//	"0",
+	//	"获取信息成功！",
+	//	ycList,
+	//})
 }
 
 //批量获取遥信息GetYcLogById,用于·历史数据

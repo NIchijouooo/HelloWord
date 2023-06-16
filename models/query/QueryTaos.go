@@ -3,6 +3,7 @@ package query
 //定义涛思查询模型
 type QueryTaoData struct {
 	DeviceId     int    `form:"deviceId"`
+	DeviceIds    []int  `form:"deviceIds"`
 	CodeList     []int  `form:"codeList"`
 	Codes        string `form:"codes"`
 	StartTime    int64  `form:"startTime"`

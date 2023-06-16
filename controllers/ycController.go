@@ -3,68 +3,37 @@ package controllers
 import (
 	"gateway/httpServer/model"
 	"gateway/models/query"
-	repositories "gateway/repositories"
+	"gateway/repositories"
 	"gateway/service"
 	"gateway/utils"
 	"github.com/gin-gonic/gin"
 	"github.com/gin-gonic/gin/binding"
 	"net/http"
 	"strconv"
-	"strings"
 )
 
 //定义辅控管理的控制器
-type AuxiliaryController struct {
-	repo    *repositories.AuxiliaryRepository
+type YcController struct {
 	hisRepo *repositories.HistoryDataRepository
 }
 
-func NewAuxiliaryController() *AuxiliaryController {
-	return &AuxiliaryController{repo: repositories.NewAuxiliaryRepository(),
+func NewYcController() *YcController {
+	return &YcController{
 		hisRepo: repositories.NewHistoryDataRepository()}
 }
-
-func (ctrl *AuxiliaryController) RegisterRoutes(router *gin.RouterGroup) {
-	router.GET("/api/v2/auxiliary/getDeviceListByDeviceType", ctrl.GetDeviceListByDeviceType)
-	router.GET("/api/v2/auxiliary/getDeviceType", ctrl.GetAuxiliaryDeviceType)
-	router.POST("/api/v2/auxiliary/getLastYcByDeviceIdAndCodes", ctrl.GetLastYcByDeviceIdAndCodes)
-	router.POST("/api/v2/auxiliary/getHistoryYcByDeviceIdCodes", ctrl.GetHistoryYcByDeviceIdCodes)
-}
-
-///获取设备类型下的所有设备数据
-func (c *AuxiliaryController) GetDeviceListByDeviceType(ctx *gin.Context) {
-	label := ctx.Query("label")
-	deviceList, err := c.repo.GetAuxiliaryDevice(label)
-	if err != nil {
-		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-		return
-	}
-	ctx.JSON(http.StatusOK, model.ResponseData{
-		"0",
-		"获取信息成功！",
-		deviceList,
-	})
-	return
-}
-
-//获取所有设备类型
-func (c *AuxiliaryController) GetAuxiliaryDeviceType(ctx *gin.Context) {
-	deviceTypeList, err := c.repo.GetAuxiliaryDeviceType()
-	if err != nil {
-		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-		return
-	}
-	ctx.JSON(http.StatusOK, model.ResponseData{
-		"0",
-		"获取信息成功！",
-		deviceTypeList,
-	})
-	return
+func (ctrl *YcController) RegisterRoutes(router *gin.RouterGroup) {
+	router.POST("/api/v2/yc/getLastYcByDeviceIdAndCodes", ctrl.GetLastYcByDeviceIdsAndCodes)
+	router.POST("/api/v2/yc/batchYcHistoryListByDeviceIdAndCodes", ctrl.BatchYcHistoryListByDeviceIdAndCodes)
 }
 
 //获取最新遥测信息GetLastYcListByCode
-//遥测控制器已经写有
-func (c *AuxiliaryController) GetLastYcByDeviceIdAndCodes(ctx *gin.Context) {
+/*
+{
+    "deviceIds":[36559],  //设备id 必填
+    "codes":[2002,2005]  //遥测编码  必填
+}
+*/
+func (c *YcController) GetLastYcByDeviceIdsAndCodes(ctx *gin.Context) {
 	type ycQeury struct {
 		DeviceIds []int `form:"deviceIds"`
 		Codes     []int `form:"codes"`
@@ -95,14 +64,16 @@ func (c *AuxiliaryController) GetLastYcByDeviceIdAndCodes(ctx *gin.Context) {
 	})
 }
 
-type ReturnMap struct {
-	XAxisList []string          `json:"xAxisList"`
-	DataMap   map[int][]float64 `json:"dataMap"`
-}
-
-//根据选择的codes返回对应时间的历史数据
-//已经有
-func (c *AuxiliaryController) GetHistoryYcByDeviceIdCodes(ctx *gin.Context) {
+//根据时间获取多个遥测的历史数据信息
+/*{
+"deviceId":36559,  //设备id 必填
+"codeList":[2002,2005],  //遥测编码  必填
+"startTime":946685445000, //开始时间 必填
+"endTime": 947519999000,  //结束时间  必填
+"interval":10,  //间隔时间  必填
+"intervalType":2 //间隔类型 1秒 2分 3时 4天 必填
+}*/
+func (c *YcController) BatchYcHistoryListByDeviceIdAndCodes(ctx *gin.Context) {
 	var ycQuery *query.QueryTaoData
 	//解析json
 	if err := ctx.ShouldBindBodyWith(&ycQuery, binding.JSON); err != nil {
@@ -132,13 +103,8 @@ func (c *AuxiliaryController) GetHistoryYcByDeviceIdCodes(ctx *gin.Context) {
 		intervalStr = "d"
 	}
 	// 将 int 数组转换为字符串数组
-	strArr := make([]string, len(ycQuery.CodeList))
-	for i, v := range ycQuery.CodeList {
-		strArr[i] = strconv.Itoa(v)
-	}
+	ycQuery.Codes = utils.IntArrayToString(ycQuery.CodeList, ",")
 
-	//拼接codelist sql语句
-	ycQuery.Codes = strings.Join(strArr, ",")
 	//查询历史数据
 	ycList, err := c.hisRepo.GetLastYcHistoryByDeviceIdAndCodeList(ycQuery.DeviceId, ycQuery.Codes, ycQuery.StartTime, ycQuery.EndTime, strconv.Itoa(ycQuery.Interval)+intervalStr)
 	if err != nil {
