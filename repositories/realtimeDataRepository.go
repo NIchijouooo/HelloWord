@@ -1,4 +1,4 @@
-package realtimeDataRepository
+package repositories
 
 import (
 	"database/sql"
