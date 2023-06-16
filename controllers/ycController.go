@@ -21,9 +21,9 @@ func NewYcController() *YcController {
 	return &YcController{
 		hisRepo: repositories.NewHistoryDataRepository()}
 }
-func (ctrl *YcController) RegisterRoutes(router *gin.RouterGroup) {
-	router.POST("/api/v2/yc/getLastYcByDeviceIdAndCodes", ctrl.GetLastYcByDeviceIdsAndCodes)
-	router.POST("/api/v2/yc/batchYcHistoryListByDeviceIdAndCodes", ctrl.BatchYcHistoryListByDeviceIdAndCodes)
+func (c *YcController) RegisterRoutes(router *gin.RouterGroup) {
+	router.POST("/api/v2/yc/getLastYcByDeviceIdAndCodes", c.GetLastYcByDeviceIdsAndCodes)
+	router.POST("/api/v2/yc/batchYcHistoryListByDeviceIdAndCodes", c.BatchYcHistoryListByDeviceIdAndCodes)
 }
 
 //获取最新遥测信息GetLastYcListByCode
@@ -34,11 +34,11 @@ func (ctrl *YcController) RegisterRoutes(router *gin.RouterGroup) {
 }
 */
 func (c *YcController) GetLastYcByDeviceIdsAndCodes(ctx *gin.Context) {
-	type ycQeury struct {
+	type YcQeury struct {
 		DeviceIds []int `form:"deviceIds"`
 		Codes     []int `form:"codes"`
 	}
-	var ycQuery ycQeury
+	var ycQuery YcQeury
 	//将传过来的请求体解析到ycQuery中
 	if err := ctx.ShouldBindJSON(&ycQuery); err != nil {
 		ctx.JSON(http.StatusOK, model.ResponseData{
