@@ -75,6 +75,7 @@ type ReportServiceParamFeisjyTemplate struct {
 	ReceiveDevUpGradeChan          chan MQTTFeisjyUpGradeTemplate        `json:"-"` // 平台下发固件升级
 	ReceiveFileListChan            chan FileListFeisjyTemplate           `json:"-"` // FileList相关
 	CancelFunc                     context.CancelFunc                    `json:"-"`
+	MessageEventBus                eventBus.Bus                          `json:"-"` //通信报文总线
 }
 
 type ReportServiceParamListFeisjyTemplate struct {
@@ -97,6 +98,7 @@ func NewReportServiceParamFeisjy(gw ReportServiceGWParamFeisjyTemplate, nodeList
 		ReportPropertyRequestFrameChan: make(chan MQTTFeisjyReportPropertyTemplate, 50),
 		ReceiveDevUpGradeChan:          make(chan MQTTFeisjyUpGradeTemplate, 2),
 		ReceiveFileListChan:            make(chan FileListFeisjyTemplate, 50),
+		MessageEventBus:                eventBus.NewBus(),
 	}
 
 	ctx, cancel := context.WithCancel(context.Background())

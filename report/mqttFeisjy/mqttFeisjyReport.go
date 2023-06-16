@@ -56,6 +56,8 @@ type MQTTFeisjyReportPropertyTemplate struct {
 func (r *ReportServiceParamFeisjyTemplate) FeisjyPublishData(msg *MQTTFeisjyReportFrameTemplate) bool {
 	status := false
 
+	MQTTFeisjyAddCommunicationMessage(r, msg.Topic, Direction_TX, fmt.Sprintf("%s", msg.Payload))
+
 	// QJHui ADD 2023/6/16 新增了上报数据压缩
 	payloadByte, ok := msg.Payload.([]byte)
 	if ok {
