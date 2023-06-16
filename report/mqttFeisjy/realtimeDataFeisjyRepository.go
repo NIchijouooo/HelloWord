@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"gateway/models"
 	"gateway/repositories"
+	"gateway/rule"
 	"log"
 	"strconv"
 	"sync"
@@ -73,6 +74,10 @@ func (r *RealtimeDataRepository) SaveRealtimeDataList(devName, collName string, 
 	var pointListSettingList []*models.SettingData
 
 	var wg sync.WaitGroup
+
+	//20230615发给吴总的rule
+	realTimeDataJsonList := make([]models.RealTimeDataJson, 0)
+
 	//pointList为查出来的点位list
 	for _, v := range pointList {
 		wg.Add(1)
@@ -82,6 +87,8 @@ func (r *RealtimeDataRepository) SaveRealtimeDataList(devName, collName string, 
 				if numName, err := strconv.Atoi(ycParam.Name); err == nil {
 					if v.Id == numName {
 						t, _ := time.Parse("2021-09-15 14:30:00", ycPropertyPostParam.Time)
+
+						var pType int
 						if v.IotDataType == "yx" {
 							pointListYxList = append(pointListYxList, &models.YxData{
 								DeviceId: emDev.Id,
@@ -89,6 +96,7 @@ func (r *RealtimeDataRepository) SaveRealtimeDataList(devName, collName string, 
 								Value:    ycParam.Value.(int),
 								Ts:       t,
 							})
+							pType = 0
 						} else if v.IotDataType == "yc" {
 							pointListYcList = append(pointListYcList, &models.YcData{
 								DeviceId: emDev.Id,
@@ -96,6 +104,7 @@ func (r *RealtimeDataRepository) SaveRealtimeDataList(devName, collName string, 
 								Value:    ycParam.Value.(float64),
 								Ts:       t,
 							})
+							pType = 1
 						} else if v.IotDataType == "setting" {
 							pointListSettingList = append(pointListSettingList, &models.SettingData{
 								DeviceId: emDev.Id,
@@ -103,7 +112,16 @@ func (r *RealtimeDataRepository) SaveRealtimeDataList(devName, collName string, 
 								Value:    ycParam.Value.(string),
 								Ts:       t,
 							})
+							pType = 2
 						}
+
+						realTimeDataJson := models.RealTimeDataJson{
+							Type:     pType,   //遥信-0；遥测-1
+							Code:     numName, //遥信/遥测CODE
+							Value:    ycParam.Value.(string),
+							DeviceId: emDev.Id,
+						}
+						realTimeDataJsonList = append(realTimeDataJsonList, realTimeDataJson)
 					}
 				}
 			}
@@ -116,4 +134,6 @@ func (r *RealtimeDataRepository) SaveRealtimeDataList(devName, collName string, 
 	go r.repo.BatchCreateYx(pointListYxList)
 	go r.repo.BatchCreateYc(pointListYcList)
 	go r.repo.BatchCreateSetting(pointListSettingList)
+
+	rule.ProcessingSignalMsg(realTimeDataJsonList)
 }
