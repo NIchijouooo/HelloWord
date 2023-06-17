@@ -4,12 +4,9 @@ import (
 	"database/sql"
 	"fmt"
 	"gateway/models"
-	"gateway/report/mqttFeisjy"
+
 	"gorm.io/gorm"
 	"log"
-	"strconv"
-	"sync"
-	"time"
 )
 
 // 定义字典类型管理的存储库
@@ -27,7 +24,7 @@ func NewRealtimeDataRepository() *RealtimeDataRepository {
 添加db
 */
 func (r *RealtimeDataRepository) CreateDB() error {
-	sql := fmt.Sprintf("create database if not exists realtimedatatest;")
+	sql := fmt.Sprintf("create database if not exists realtimedatatest cachemodel 'both';")
 	_, err := r.taosDb.Exec(sql)
 	return err
 }
@@ -38,7 +35,7 @@ func (r *RealtimeDataRepository) CreateDB() error {
 */
 func (r *RealtimeDataRepository) CreateYxTable() error {
 	// 定义查询参数
-	sql := fmt.Sprintf("create table if not exists realtimedatatest.yx (ts timestamp, val int) tags (device_id int, code int);")
+	sql := fmt.Sprintf("create table if not exists realtimedatatest.yx (ts timestamp, val int) tags (device_id int, code int, identifier NCHAR);")
 	_, err := r.taosDb.Exec(sql)
 	return err
 }
@@ -49,7 +46,7 @@ func (r *RealtimeDataRepository) CreateYxTable() error {
 */
 func (r *RealtimeDataRepository) CreateYcTable() error {
 	// 定义查询参数
-	sql := fmt.Sprintf("create table if not exists realtimedatatest.yc (ts timestamp, val double) tags (device_id int, code int);")
+	sql := fmt.Sprintf("create table if not exists realtimedatatest.yc (ts timestamp, val double) tags (device_id int, code int, identifier NCHAR);")
 	_, err := r.taosDb.Exec(sql)
 	return err
 }
@@ -60,7 +57,7 @@ func (r *RealtimeDataRepository) CreateYcTable() error {
 */
 func (r *RealtimeDataRepository) CreateSettingTable() error {
 	// 定义查询参数
-	sql := fmt.Sprintf("create table if not exists realtimedatatest.setting (ts timestamp, val NCHAR(16)) tags (device_id int, code int);")
+	sql := fmt.Sprintf("create table if not exists realtimedatatest.setting (ts timestamp, val NCHAR(16)) tags (device_id int, code int, identifier NCHAR);")
 	_, err := r.taosDb.Exec(sql)
 	return err
 }
@@ -241,91 +238,4 @@ func (r *RealtimeDataRepository) GetSettingById(deviceId, code int) (models.Sett
 	return realtime, err
 }
 
-/*
-*
 
-	根据网关设备的addr查设备，然后更新登录状态
-*/
-func (r *RealtimeDataRepository) UpdateGatewayDeviceConnetStatus(gw mqttFeisjy.ReportServiceGWParamFeisjyTemplate) {
-	//var emDev models.EmDevice
-	if err := r.db.Model(&models.ProjectInfo{}).Where("addr = ?", gw.Param.DeviceID).Updates(models.EmDevice{Connectstatus: gw.ReportStatus}).Error; err != nil {
-		log.Printf("Request params:%v", err)
-	}
-}
-
-/*
-*
-根据设备的coll,name查设备，然后更新登录状态
-*/
-func (r *RealtimeDataRepository) UpdateDeviceConnetStatus(node mqttFeisjy.ReportServiceNodeParamFeisjyTemplate) {
-	//var emDev models.EmDevice
-	if err := r.db.Model(&models.ProjectInfo{}).Where("name = ? and coll_interface_id = ?", node.Name, node.CollInterfaceName).Updates(models.EmDevice{Connectstatus: node.ReportStatus}).Error; err != nil {
-		log.Printf("Request params:%v", err)
-	}
-}
-
-/*
-*
-
-	更新命令参数属性的实时值到taos
-*/
-func (r *RealtimeDataRepository) SaveRealtimeDataList(devName, collName string, ycPropertyPostParam mqttFeisjy.MQTTFeisjyReportYcTemplate) {
-	var emDev models.EmDevice
-	var str = r.db.Joins("inner JOIN em_coll_interface ON em_coll_interface.id = em_device.coll_interface_id").Where("em_device.name = ? and em_coll_interface.name = ?", devName, collName).First(&emDev).Statement.SQL.String()
-	fmt.Println(str)
-	//if err := r.db.Joins("inner JOIN em_coll_interface ON em_coll_interface.id = em_device.coll_interface_id").Where("em_device.name = ? and em_coll_interface.name = ?", devName, collName).First(&emDev).Error; err != nil {
-	//	log.Printf("Request params:%v", err)
-	//}
-	var pointList []*models.EmDeviceModelCmdParam
-	repo := &DevicePointRepository{}
-	pointList = repo.GetPointsByDeviceId("all", emDev.Id, 0)
-
-	var pointListYxList []*models.YxData
-	var pointListYcList []*models.YcData
-	var pointListSettingList []*models.SettingData
-
-	var wg sync.WaitGroup
-	//pointList为查出来的点位list
-	for _, v := range pointList {
-		wg.Add(1)
-		//ycPropertyPostParam.YcList为上报实时数据中的参数list
-		go func() {
-			for _, ycParam := range ycPropertyPostParam.YcList {
-				if numName, err := strconv.Atoi(ycParam.Name); err == nil {
-					if v.Id == numName {
-						t, _ := time.Parse("2021-09-15 14:30:00", ycPropertyPostParam.Time)
-						if v.IotDataType == "yx" {
-							pointListYxList = append(pointListYxList, &models.YxData{
-								DeviceId: emDev.Id,
-								Code:     numName,
-								Value:    ycParam.Value.(int),
-								Ts:       t,
-							})
-						} else if v.IotDataType == "yc" {
-							pointListYcList = append(pointListYcList, &models.YcData{
-								DeviceId: emDev.Id,
-								Code:     numName,
-								Value:    ycParam.Value.(float64),
-								Ts:       t,
-							})
-						} else if v.IotDataType == "setting" {
-							pointListSettingList = append(pointListSettingList, &models.SettingData{
-								DeviceId: emDev.Id,
-								Code:     numName,
-								Value:    ycParam.Value.(string),
-								Ts:       t,
-							})
-						}
-					}
-				}
-			}
-		}()
-	}
-	wg.Wait()
-	/**
-	转出yx。yc。setting分别存入taos
-	*/
-	go r.BatchCreateYx(pointListYxList)
-	go r.BatchCreateYc(pointListYcList)
-	go r.BatchCreateSetting(pointListSettingList)
-}

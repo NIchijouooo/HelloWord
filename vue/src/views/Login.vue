@@ -156,11 +156,11 @@ const showOneResMsg = (res) => {
   right: 0;
   top: 0;
   bottom: 0;
-  background: radial-gradient(circle at 57% 30%, rgba(149, 176, 249, 1), rgba(149, 176, 249, 0) 50%),
-    radial-gradient(circle at 22% 35%, rgba(114, 226, 253, 1), rgba(114, 226, 253, 0) 50%),
-    radial-gradient(circle at 37% 23%, rgba(184, 150, 255, 1), rgba(184, 150, 255, 0) 50%),
-    radial-gradient(circle at 87% 78%, rgba(86, 207, 210, 1), rgba(86, 207, 210, 0) 50%),
-    radial-gradient(circle at 27% 73%, rgba(168, 112, 253, 1), rgba(168, 112, 253, 0) 50%);
+  width: 100%;
+  height: 100%;
+  background: url(assets/images/login-bg.png);
+  background-repeat: no-repeat;
+  background-size: 100% 100%;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -168,7 +168,7 @@ const showOneResMsg = (res) => {
   .login_center {
     width: 490px;
     height: auto;
-    background-color: #3e5370;
+    background-color: rgba(0,0,0,.5);
     box-shadow: none;
     border: 0;
   }
@@ -178,6 +178,7 @@ const showOneResMsg = (res) => {
     text-align: left;
     color: #f0f7ff;
     letter-spacing: 1px;
+    text-align: center;
   }
   .el-input__icon {
     width: 40px;
@@ -197,11 +198,18 @@ const showOneResMsg = (res) => {
   height: 50px;
   line-height: 50px;
   font-size: 16px;
+  background-color: #f5f8fa !important;
 }
 :deep(.el-input__prefix) {
   left: 0;
 }
 :deep(.el-button) {
   height: 50px;
+}
+:deep(.el-input__wrapper) {
+  background-color: #f5f8fa !important;
+}
+:deep(.el-input__prefix) {
+  background-color: #f5f8fa !important;
 }
 </style>

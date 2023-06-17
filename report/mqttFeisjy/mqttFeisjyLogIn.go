@@ -43,6 +43,9 @@ func MQTTFeisjyOnConnectHandler(client MQTT.Client) {
 	for _, v := range ReportServiceParamListFeisjy.ServiceList {
 		if v.GWParam.MQTTClient == client {
 			v.MQTTFeisjySubTopicList(client, v.GWParam)
+			for _, node := range v.NodeList {
+				v.MQTTFeisjySubNodeTopic(node.Param.DeviceID)
+			}
 		}
 	}
 }
@@ -161,6 +164,12 @@ func (r *ReportServiceParamFeisjyTemplate) MQTTFeisjyGWLogin(param ReportService
 		},
 	}
 	setting.ZAPS.Infof("setting report name ->%s  lcoalIP -> %s", setting.ReportNet, localIP)
+
+	//QJHui add 2023/6/16 新增根据网卡配置路由表信息
+	if localIP != "" {
+		defaultRoute := fmt.Sprintf("ip route replace 0.0.0.0/0 via 0.0.0.0 dev %s", setting.ReportNet)
+		setting.Exec_shell(defaultRoute)
+	}
 
 	opts := MQTT.NewClientOptions().AddBroker(param.IP + ":" + param.Port)
 

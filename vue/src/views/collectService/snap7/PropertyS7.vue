@@ -1,52 +1,68 @@
 <template>
+<div class="main-container">
   <div class="main">
-    <div class="title" style="justify-content: space-between">
-      <div>
-        <el-button type="primary" plain @click="toDeviceModel()">
-          <el-icon class="el-input__icon"><back /></el-icon>
-          返回设备模型
-        </el-button>
-      </div>
-      <div style="display: flex; align-items: center">
-        <el-button type="primary" plain class="right-btn" @click="importDPS()">
-          <el-icon class="el-input__icon"><download /></el-icon>
-          导入模型属性
-        </el-button>
-        <el-button type="primary" plain class="right-btn" @click="exportDPS()">
-          <el-icon class="el-input__icon"><upload /></el-icon>
-          导出模型属性
-        </el-button>
-      </div>
+    <div class="search-bar">
+      <el-form :inline="true" ref="searchFormRef" status-icon label-width="90px">
+        <el-form-item style="margin-left: 20px;">
+          <el-button type="primary" plain @click="toDeviceModel()">
+            <el-icon class="el-input__icon"><back /></el-icon>
+            返回设备模型
+          </el-button>
+        </el-form-item>
+        <el-form-item>
+          <el-button type="primary" plain class="right-btn" @click="importDPS()">
+            <el-icon class="el-input__icon"><download /></el-icon>
+            导入模型属性
+          </el-button>
+        </el-form-item>
+        <el-form-item>
+          <el-button type="primary" plain class="right-btn" @click="exportDPS()">
+            <el-icon class="el-input__icon"><upload /></el-icon>
+            导出模型属性
+          </el-button>
+        </el-form-item>
+      </el-form>
     </div>
-    <div class="title" style="top: 60px; height: 76px; padding: 20px 0; justify-content: space-between">
-      <div class="tName">{{ props.curDeviceModel.label }}：属性列表</div>
-      <div style="display: flex">
-        <el-input style="width: 200px" placeholder="请输入属性名称" v-model="ctxData.deviceModelProperty">
-          <template #prefix>
-            <el-icon class="el-input__icon"><search /></el-icon>
-          </template>
-        </el-input>
-        <el-button type="primary" bg class="right-btn" @click="addDeviceModelProperty()">
-          <el-icon class="btn-icon">
-            <Icon name="local-add" size="14px" color="#ffffff" />
-          </el-icon>
-          添加
-        </el-button>
-        <el-button style="color: #fff" color="#2EA554" class="right-btn" @click="refresh()">
-          <el-icon class="btn-icon">
-            <Icon name="local-refresh" size="14px" color="#ffffff" />
-          </el-icon>
-          刷新
-        </el-button>
-        <el-button type="danger" bg class="right-btn" @click="deleteDeviceModelProperty()">
-          <el-icon class="btn-icon">
-            <Icon name="local-delete" size="14px" color="#ffffff" />
-          </el-icon>
-          删除
-        </el-button>
+    <div class="search-bar" style="display: flex;">
+      <div class="title" style="position: relative;margin-right: 40px;justify-content: flex-start;padding: 0px 0px;height: 40px;">
+        <div class="tName">{{ props.curDeviceModel.label }}：属性列表</div>
       </div>
+      <el-form :inline="true" ref="searchFormRef2" status-icon label-width="90px">
+        <el-form-item label="">
+          <el-input style="width: 200px" placeholder="请输入属性名称" v-model="ctxData.deviceModelProperty">
+            <template #prefix>
+              <el-icon class="el-input__icon"><search /></el-icon>
+            </template>
+          </el-input>
+        </el-form-item>
+        <el-form-item>
+          <el-button type="primary" bg class="right-btn" @click="addDeviceModelProperty()">
+            <el-icon class="btn-icon">
+              <Icon name="local-add" size="14px" color="#ffffff" />
+            </el-icon>
+            添加
+          </el-button>
+        </el-form-item>
+        <el-form-item>
+          <el-button style="color: #fff" color="#2EA554" class="right-btn" @click="refresh()">
+            <el-icon class="btn-icon">
+              <Icon name="local-refresh" size="14px" color="#ffffff" />
+            </el-icon>
+            刷新
+          </el-button>
+        </el-form-item>
+        <el-form-item>
+          <el-button type="danger" bg class="right-btn" @click="deleteDeviceModelProperty()">
+            <el-icon class="btn-icon">
+              <Icon name="local-delete" size="14px" color="#ffffff" />
+            </el-icon>
+            删除
+          </el-button>
+        </el-form-item>
+      </el-form>
     </div>
-    <div class="content" ref="contentRef" style="top: 136px">
+
+    <div class="content" ref="contentRef">
       <el-table
         :data="filterDMPTableData"
         :cell-style="ctxData.cellStyle"
@@ -58,60 +74,46 @@
         @row-dblclick="editDeviceModelProperty"
       >
         <el-table-column type="selection" width="55" />
-        <el-table-column prop="name" label="属性名称" width="auto" min-width="150" align="center"> </el-table-column>
-        <el-table-column prop="label" label="属性标签" width="auto" min-width="150" align="center"> </el-table-column>
-        <el-table-column label="读写属性" width="auto" min-width="80" align="center">
+        <el-table-column type="expand">
+            <template #default="scope">
+              <div class="param-content">
+                <div class="pc-title">
+                  <div class="pct-info">
+                    <b> {{ scope.row.name }} </b>
+                    {{ '参数详情' }}
+                  </div>
+                </div>
+                <div class="pc-content">
+                  <div class="param-item" v-for="(item, key, index) of scope.row.params" :key="index">
+                    <div class="param-value">{{ ctxData.paramName[key] }}：</div>
+                    <div v-if="key === 'dataType'" class="param-name">{{ ctxData.dataTypeNames['dt' + item] }}</div>
+                    <div v-if="key !== 'dataType'" class="param-name">
+                      {{ typeof item === 'boolean' ? (item ? '是' : '否') : item }}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </template>
+          </el-table-column>
+        <el-table-column sortable prop="name" label="属性名称" width="auto" min-width="150" align="center"> </el-table-column>
+        <el-table-column sortable prop="label" label="属性标签" width="auto" min-width="150" align="center"> </el-table-column>
+        <el-table-column sortable prop="iotDataType" label="点位类型" width="auto" min-width="80" align="center" />
+        <el-table-column sortable label="读写属性" width="auto" min-width="80" align="center">
           <template #default="scope">
             {{ ctxData.accessModeNames['am' + scope.row.accessMode] }}
           </template>
         </el-table-column>
-        <el-table-column prop="type" label="属性类型" width="auto" min-width="100" align="center">
+        <el-table-column sortable prop="type" label="属性类型" width="auto" min-width="100" align="center">
           <template #default="scope">
             {{ ctxData.typeNames['t' + scope.row.type] }}
           </template>
         </el-table-column>
-        <el-table-column label="小数位数" width="auto" min-width="80" align="center">
+        <el-table-column sortable label="小数位数" width="auto" min-width="80" align="center">
           <template #default="scope">
             {{ scope.row.decimals === '' ? 0 : scope.row.decimals }}
           </template>
         </el-table-column>
-        <el-table-column prop="unit" label="单位" width="auto" min-width="80" align="center" />
-        <el-table-column prop="iotDataType" label="点位类型" width="auto" min-width="80" align="center" />
-        <el-table-column label="参数详情" width="auto" min-width="500" align="center">
-          <template #default="scope">
-            <el-popover
-              trigger="hover"
-              :show-after="500"
-              :auto-close="500"
-              effect="light"
-              width="auto"
-              placement="left"
-            >
-              <template #default>
-                <div class="param-content">
-                  <div class="pc-title">
-                    <div class="pct-info">
-                      <b> {{ scope.row.name }} </b>
-                      {{ '参数详情' }}
-                    </div>
-                  </div>
-                  <div class="pc-content">
-                    <div class="param-item" v-for="(item, key, index) of scope.row.params">
-                      <div class="param-value">{{ ctxData.paramName[key] }}：</div>
-                      <div v-if="key === 'dataType'" class="param-name">{{ ctxData.dataTypeNames['dt' + item] }}</div>
-                      <div v-if="key !== 'dataType'" class="param-name">
-                        {{ typeof item === 'boolean' ? (item ? '是' : '否') : item }}
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </template>
-              <template #reference>
-                <el-tag size="large">{{ scope.row.params }}</el-tag>
-              </template>
-            </el-popover>
-          </template>
-        </el-table-column>
+        <el-table-column sortable prop="unit" label="单位" width="auto" min-width="80" align="center" />
         <el-table-column label="操作" width="auto" min-width="200" align="center" fixed="right">
           <template #default="scope">
             <el-button @click="editDeviceModelProperty(scope.row)" text type="primary">编辑</el-button>
@@ -217,6 +219,40 @@
             >
             </el-input>
           </el-form-item>
+
+          <!-- lp add 2023-06-15-->
+          <div>
+            <el-form-item v-if="ctxData.propertyForm.type !== 3" label="范围报警" prop="minMaxAlarm">
+            <el-switch v-model="ctxData.propertyForm.minMaxAlarm" inline-prompt active-text="是" inactive-text="否" />
+          </el-form-item>
+          </div>
+          <div>
+          <el-form-item v-if="ctxData.propertyForm.type !== 3 && ctxData.propertyForm.minMaxAlarm" label="最小值" prop="min">
+            <el-input type="text" v-model="ctxData.propertyForm.min" autocomplete="off" placeholder="请输入最小值"></el-input>
+          </el-form-item>
+          </div>
+          <el-form-item v-if="ctxData.propertyForm.type !== 3 && ctxData.propertyForm.minMaxAlarm" label="最大值"  prop="max">
+            <el-input type="text" v-model="ctxData.propertyForm.max" autocomplete="off" placeholder="请输入最大值"></el-input>
+          </el-form-item>
+
+          <div>
+          <el-form-item v-if="ctxData.propertyForm.type !== 3" label="步长报警" prop="stepAlarm">
+            <el-switch v-model="ctxData.propertyForm.stepAlarm" inline-prompt active-text="是" inactive-text="否" />
+          </el-form-item>
+          </div>
+          <el-form-item v-if="ctxData.propertyForm.type !== 3 && ctxData.propertyForm.stepAlarm" label="步长" prop="step">
+            <el-input type="text" v-model="ctxData.propertyForm.step" autocomplete="off" placeholder="请输入步长"></el-input>
+          </el-form-item>
+
+          <div>
+          <el-form-item v-if="ctxData.propertyForm.type === 3" label="字符串长度报警" prop="dataLengthAlarm">
+            <el-switch v-model="ctxData.propertyForm.dataLengthAlarm" inline-prompt active-text="是" inactive-text="否" />
+          </el-form-item>
+          </div>
+          <el-form-item v-if="ctxData.propertyForm.type === 3 && ctxData.propertyForm.dataLengthAlarm" label="字符串长度" prop="dataLength">
+            <el-input type="text" v-model="ctxData.propertyForm.dataLength" autocomplete="off" placeholder="请输入字符串长度" ></el-input>
+          </el-form-item>
+
           <div class="form-title"><div class="tName">配置参数</div></div>
           <el-form-item label="数据块号" prop="dbNumber">
             <el-input
@@ -301,6 +337,7 @@
       </template>
     </el-dialog>
   </div>
+</div>
 </template>
 <script setup>
 import { Search, Back, Download, Upload } from '@element-plus/icons-vue'
@@ -321,6 +358,23 @@ const emit = defineEmits(['changeDpFlag'])
 const toDeviceModel = () => {
   console.log('toDeviceModel')
   emit('changeDpFlag')
+}
+
+const regCnt = /^[0-9]*[1-9][0-9]*$/
+const validateRegCnt = (rule, value, callback) => {
+  if (!regCnt.test(value)) {
+    callback(new Error('只能输入正整数数字！'))
+  } else {
+    callback()
+  }
+}
+const regStep = /^[0-9]+(.[0-9]{1,2})?$/
+const validateStep = (rule, value, callback) => {
+  if (!regStep.test(value)) {
+    callback(new Error('只能输入大于等于0,最多两位小数的数字！'))
+  } else {
+    callback()
+  }
 }
 
 const contentRef = ref(null)
@@ -402,6 +456,14 @@ const ctxData = reactive({
     dataType: 0,
     unit: '', // 单位，只有uint32，int32，double有效
     decimals: 0, // 小数位数，只有double有效
+
+    min: 0, // 属性最小值，只有uint32，int32，double有效
+    max: 0, // 属性最大值，只有uint32，int32，double有效
+    minMaxAlarm: false, // 范围报警，只有uint32，int32，double有效
+    step: 0, // 步长，只有uint32，int32，double有效
+    stepAlarm: false, // 步长报警，只有uint32，int32，double有效
+    dataLength: 0, // 字符串长度，只有string有效
+    dataLengthAlarm: false, // 字符串长度报警，只有string有效
     iotDataType: 'yc'
   },
   paramName: {
@@ -413,6 +475,13 @@ const ctxData = reactive({
     dbNumber: '数据块号',
     dataType: '数据类型',
     startAddr: 'PLC地址',
+    min: '最小值',
+    max: '最大值',
+    minMaxAlarm: '范围报警',
+    step: '步长',
+    stepAlarm: '步长报警',
+    dataLength: '字符串长度',
+    dataLengthAlarm: '字符串长度报警',
   },
   propertyRules: {
     name: [
@@ -463,6 +532,51 @@ const ctxData = reactive({
         trigger: 'blur',
       },
     ],
+    
+    step: [
+      {
+        required: true,
+        message: '步长不能为空',
+        trigger: 'blur',
+      },
+      {
+        trigger: 'blur',
+        validator: validateStep,
+      },
+    ],
+    min: [
+      {
+        required: true,
+        message: '最小值不能为空',
+        trigger: 'blur',
+      },
+      {
+        trigger: 'blur',
+        validator: validateStep,
+      },
+    ],
+    max: [
+      {
+        required: true,
+        message: '最大值不能为空',
+        trigger: 'blur',
+      },
+      {
+        trigger: 'blur',
+        validator: validateStep,
+      },
+    ],
+    dataLength: [
+      {
+        required: true,
+        message: '字符串长度不能为空',
+        trigger: 'blur',
+      },
+      {
+        trigger: 'blur',
+        validator: regCnt,
+      },
+    ],
   },
   psFlag: false,
   selectedProperties: [],
@@ -489,7 +603,7 @@ const getDeviceModelProperty = (flag) => {
       showOneResMsg(res)
     }
     await nextTick(() => {
-      ctxData.tableMaxHeight = contentRef.value.clientHeight - 34 - 36 - 22
+      ctxData.tableMaxHeight = contentRef.value.clientHeight - 34 - 36 - 132
     })
   })
 }
@@ -641,6 +755,16 @@ const editDeviceModelProperty = (row) => {
   ctxData.propertyForm.type = row.type
   ctxData.propertyForm.decimals = row.decimals
   ctxData.propertyForm.unit = row.unit
+  if (row.type !== 3) {
+    ctxData.propertyForm['min'] = row.params.min
+    ctxData.propertyForm['max'] = row.params.max
+    ctxData.propertyForm['minMaxAlarm'] = row.params.minMaxAlarm
+    ctxData.propertyForm['step'] = row.params.step
+    ctxData.propertyForm['stepAlarm'] = row.params.stepAlarm
+  } else {
+    ctxData.propertyForm['dataLength'] = row.params.dataLength
+    ctxData.propertyForm['dataLengthAlarm'] = row.params.dataLengthAlarm
+  }
   // s7
   ctxData.propertyForm.dbNumber = row.params.dbNumber
   ctxData.propertyForm.startAddr = row.params.startAddr
@@ -650,6 +774,10 @@ const editDeviceModelProperty = (row) => {
 }
 const propertyFormRef = ref(null)
 const submitPorpertyForm = () => {
+  if (ctxData.propertyForm.type !== 3 && Number(ctxData.propertyForm.min) > Number(ctxData.propertyForm.max)) {
+    ElMessage.warning('最大值必须大于最小值')
+    return;
+  }
   propertyFormRef.value.validate((valid) => {
     console.log('valid', valid)
     if (valid) {
@@ -667,6 +795,16 @@ const submitPorpertyForm = () => {
         startAddr: ctxData.propertyForm.startAddr,
         dataType: ctxData.propertyForm.dataType,
         iotDataType: ctxData.propertyForm.iotDataType
+      }
+      if (ctxData.propertyForm.type !== 3) {
+        params['min'] = ctxData.propertyForm.min.toString()
+        params['max'] = ctxData.propertyForm.max.toString()
+        params['minMaxAlarm'] = ctxData.propertyForm.minMaxAlarm
+        params['step'] = ctxData.propertyForm.step.toString()
+        params['stepAlarm'] = ctxData.propertyForm.stepAlarm
+      } else {
+        params['dataLength'] = ctxData.propertyForm.dataLength.toString()
+        params['dataLengthAlarm'] = ctxData.propertyForm.dataLengthAlarm
       }
       property['params'] = params
       console.log('submitPorpertyForm -> property', property)
@@ -756,6 +894,10 @@ const initPropertyForm = () => {
     dbNumber: '',
     startAddr: '',
     dataType: 0,
+    step: 0,
+    min: 0,
+    max: 0,
+    dataLength: 0
   }
 }
 //显示单个res结果，code不等于 '0' 的message

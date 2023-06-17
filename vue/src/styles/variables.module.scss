@@ -1,18 +1,18 @@
 // sidebar
-$menuText: rgb(255, 255, 255, 0.65);
-$menuActiveText: #ffffff;
-$subMenuActiveText: #ffffff; //https://github.com/ElemeFE/element/issues/12951
+$menuText: rgba(0, 0, 0, 0.65);
+$menuActiveText: rgb(24, 144, 255);
+$subMenuActiveText: rgb(24, 144, 255); //https://github.com/ElemeFE/element/issues/12951
 
-$menuBg: #001529;
-$menuHover: #3054eb;
+$menuBg: #e6e3e3;
+$menuHover: #f0f0f0;
 
-$subMenuBg: #1f2d3d;
-$subMenuHover: #001528;
+$subMenuBg: #e6e3e3;
+$subMenuHover: #f0f0f0;
 
 $sideBarWidth: 200px;
 $sideBarCloseWidth: 64px;
 // 风格颜色统一定义
-$primary-color: #3054eb;
+$primary-color: rgb(24, 144, 255);
 $warning-color: #fa8b16;
 $danger-color: #ee484d;
 $success-color: #2ea554;
@@ -44,17 +44,20 @@ $header-text-color: #333333;
 :root {
   // 主题色
   --system-primary-color: #3054eb; // 可做背景色和文本色，用做背景色时，需要和--system-primary-text-color配合使用，避免文件颜色和主题色冲突
-  --system-primary-text-color: #fff; // 主题色作为背景色时使用
+  --system-primary-text-color: #f5f8fa; // 主题色作为背景色时使用
   // header区域
-  --system-header-background: #fff;
+  --system-header-background: #f5f8fa;
   --system-header-text-color: #303133;
   --system-header-breadcrumb-text-color: #97a8be;
   --system-header-item-hover-color: rgb(240, 240, 240);
   --system-header-border-color: #d8dce5;
-  --system-header-tab-background: #fff;
+  --system-header-tab-background: #f5f8fa;
 
   --system-warning-color: #fa8b16;
   --system-danger-color: #ee484d;
 
   // --el-border-base: #c0c4cc !important;
+  --el-bg-color: #f5f8fa !important;
+  --el-bg-color-overlay: #f5f8fa !important;
+  --el-fill-color-blank:#f5f8fa !important;
 }

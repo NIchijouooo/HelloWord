@@ -42,6 +42,15 @@ const getPropertiesByModelIdList = (params) => {
   })
 }
 
+// 批量添加上报模型属性
+const addProperties = (params) => {
+  return axios.request({
+    url: '/service/report/model/properties',
+    method: 'post',
+    data: params,
+  })
+}
+
 // 添加上报模型属性
 const addProperty = (params) => {
   return axios.request({
@@ -97,6 +106,7 @@ export default {
   editModel,
   deleteModel,
   getPropertiesByModelIdList,
+  addProperties,
   addProperty,
   editProperty,
   deleteProperty,
