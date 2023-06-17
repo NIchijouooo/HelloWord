@@ -36,6 +36,8 @@ func ApiAddReportGWParam(context *gin.Context) {
 
 	type ReportServiceTemplate struct {
 		ServiceName string      `json:"serviceName"`
+		ReportNetSW bool        `json:"reportNetSW"`
+		ReportNet   string      `json:"reportNet"`
 		IP          string      `json:"ip"`
 		Port        string      `json:"port"`
 		ReportTime  int         `json:"reportTime"`
@@ -200,6 +202,8 @@ func ApiModifyReportGWParam(context *gin.Context) {
 
 	type ReportServiceTemplate struct {
 		ServiceName string      `json:"serviceName"`
+		ReportNetSW bool        `json:"reportNetSW"`
+		ReportNet   string      `json:"reportNet"`
 		IP          string      `json:"ip"`
 		Port        string      `json:"port"`
 		ReportTime  int         `json:"reportTime"`
@@ -402,6 +406,8 @@ func ApiGetReportGWParam(context *gin.Context) {
 	type ReportServiceTemplate struct {
 		Index        int         `json:"index"`
 		ServiceName  string      `json:"serviceName"`
+		ReportNetSW  bool        `json:"reportNetSW"`
+		ReportNet    string      `json:"reportNet"`
 		IP           string      `json:"ip"`
 		Port         string      `json:"port"`
 		ReportTime   int         `json:"reportTime"`
@@ -446,6 +452,8 @@ func ApiGetReportGWParam(context *gin.Context) {
 		ReportService.Index = len(params)
 		ReportService.ServiceName = v.GWParam.ServiceName
 		ReportService.IP = v.GWParam.IP
+		ReportService.ReportNetSW = v.GWParam.ReportNetSW
+		ReportService.ReportNet = v.GWParam.ReportNet
 		ReportService.Port = v.GWParam.Port
 		ReportService.ReportTime = v.GWParam.ReportTime
 		ReportService.Protocol = v.GWParam.Protocol
