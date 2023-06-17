@@ -19,8 +19,6 @@ import (
 	"time"
 )
 
-var foo string
-
 func main() {
 	// 连接SQLite数据库
 	models.InitDB()
@@ -32,12 +30,6 @@ func main() {
 			utils.ErrLog.Printf("程序发生错误原因 %v", r)
 		}
 	}()
-
-	if foo == "" {
-		fmt.Println("foo is empty.")
-	} else {
-		fmt.Printf("foo=%s \n", foo)
-	}
 
 	fmt.Println(buildInfo.BuildTime)
 

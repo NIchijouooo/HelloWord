@@ -1091,22 +1091,22 @@ func ApiGetTSLD07Cmd(context *gin.Context) {
 func ApiAddTSLModbusCmdProperty(context *gin.Context) {
 
 	propertyParam := &struct {
-		TSLName    string `json:"tslName"` // 名称
-		CmdName    string `json:"cmdName"`
-		Name       string `json:"name"`
-		Label      string `json:"label"`
-		AccessMode int    `json:"accessMode"`
-		Type       int    `json:"type"`
-		Decimals   int    `json:"decimals"`
-		Unit       string `json:"unit"`
-		RegAddr    int    `json:"regAddr"`
-		RegCnt     int    `json:"regCnt"`
-		RuleType   string `json:"ruleType"`
-		Formula    string `json:"formula"`
+		TSLName     string                                `json:"tslName"` // 名称
+		CmdName     string                                `json:"cmdName"`
+		Name        string                                `json:"name"`
+		Label       string                                `json:"label"`
+		AccessMode  int                                   `json:"accessMode"`
+		Type        int                                   `json:"type"`
+		Decimals    int                                   `json:"decimals"`
+		Unit        string                                `json:"unit"`
+		RegAddr     int                                   `json:"regAddr"`
+		RegCnt      int                                   `json:"regCnt"`
+		RuleType    string                                `json:"ruleType"`
+		Formula     string                                `json:"formula"`
 		BitOffsetSw bool                                  `json:"bitSwitch"` // 位偏移开关
 		BitOffset   int                                   `json:"bitOffset"` // 位偏移数量
 		Params      device.TSLModbusPropertyParamTemplate `json:"params"`    //ltg add 2023-06-15
-		IotDataType string `json:"iotDataType"`
+		IotDataType string                                `json:"iotDataType"`
 	}{}
 
 	emController := controllers.NewEMController()
@@ -1181,20 +1181,20 @@ func ApiAddTSLModbusCmdProperty(context *gin.Context) {
 func ApiAddTSLD07CmdProperty(context *gin.Context) {
 
 	propertyParam := &struct {
-		TSLName        string `json:"tslName"` // 名称
-		CmdName        string `json:"cmdName"`
-		Name           string `json:"name"`
-		Label          string `json:"label"`
-		RulerId        string `json:"rulerId"` //数据标识
-		Format         string `json:"format"`  //数据格式YYMMDDhhmm,XXXXXX.XX,XX.XXXX...
-		Len            int    `json:"len"`     //数据长度
-		Unit           string `json:"unit"`
-		AccessMode     int    `json:"accessMode"`
-		BlockAddOffset int    `json:"blockAddOffset"` //当前数据在块数据域内的偏移地址
-		RulerAddOffset int    `json:"rulerAddOffset"` //当前变量在当前ID数据地址中的偏移地址
-		Type           int    `json:"type"`           //float,uint32...
-		Params device.TSLDLT6452007PropertyParamTemplate `json:"params"` //ltg add 2023-06-15
-		IotDataType    string `json:"iotDataType"`
+		TSLName        string                                    `json:"tslName"` // 名称
+		CmdName        string                                    `json:"cmdName"`
+		Name           string                                    `json:"name"`
+		Label          string                                    `json:"label"`
+		RulerId        string                                    `json:"rulerId"` //数据标识
+		Format         string                                    `json:"format"`  //数据格式YYMMDDhhmm,XXXXXX.XX,XX.XXXX...
+		Len            int                                       `json:"len"`     //数据长度
+		Unit           string                                    `json:"unit"`
+		AccessMode     int                                       `json:"accessMode"`
+		BlockAddOffset int                                       `json:"blockAddOffset"` //当前数据在块数据域内的偏移地址
+		RulerAddOffset int                                       `json:"rulerAddOffset"` //当前变量在当前ID数据地址中的偏移地址
+		Type           int                                       `json:"type"`           //float,uint32...
+		Params         device.TSLDLT6452007PropertyParamTemplate `json:"params"`         //ltg add 2023-06-15
+		IotDataType    string                                    `json:"iotDataType"`
 	}{}
 
 	emController := controllers.NewEMController()
@@ -1739,7 +1739,7 @@ func ApiModifyTSLModbusCmdProperty(context *gin.Context) {
 		BitOffsetSw bool                                  `json:"bitSwitch"` // 位偏移开关
 		BitOffset   int                                   `json:"bitOffset"` // 位偏移数量
 		Params      device.TSLModbusPropertyParamTemplate `json:"params"`    //ltg add 2023-06-15
-		IotDataType string `json:"iotDataType"`
+		IotDataType string                                `json:"iotDataType"`
 	}{}
 
 	emController := controllers.NewEMController()
@@ -1827,7 +1827,7 @@ func ApiModifyTSLD07CmdProperty(context *gin.Context) {
 		RulerAddOffset int                                       `json:"rulerAddOffset"` //当前变量在当前ID数据地址中的偏移地址
 		Type           int                                       `json:"type"`           //float,uint32...
 		Params         device.TSLDLT6452007PropertyParamTemplate `json:"params"`         //ltg add 2023-06-15
-		IotDataType    string `json:"iotDataType"`
+		IotDataType    string                                    `json:"iotDataType"`
 	}{}
 
 	emController := controllers.NewEMController()
