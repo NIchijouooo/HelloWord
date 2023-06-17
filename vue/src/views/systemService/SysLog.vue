@@ -365,7 +365,7 @@ onUnmounted(() => {
     align-items: center;
     padding: 24px;
     box-sizing: border-box;
-    background-color: #fff;
+    background-color: #f3f3f3;
     border-radius: 4px;
   }
   .content {
@@ -374,7 +374,7 @@ onUnmounted(() => {
     left: 20px;
     right: 20px;
     bottom: 20px;
-    background-color: #fff;
+    background-color: #f3f3f3;
     border-radius: 4px;
     padding: 24px;
     box-sizing: border-box;

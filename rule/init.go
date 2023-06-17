@@ -17,7 +17,6 @@ func Init() {
 		return
 	}
 	for _, rule := range ruleList {
-		//fmt.Println(rule)
 		dataProcess.ProcessRuleVariable(rule)
 	}
 

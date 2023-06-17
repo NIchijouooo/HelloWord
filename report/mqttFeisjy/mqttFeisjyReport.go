@@ -302,6 +302,11 @@ func (r *ReportServiceParamFeisjyTemplate) NodePropertyPost(name []string) {
 					r.NodeList[k].HeartBeatMark = true
 					r.NodeList[k].ReportErrCnt = 0
 				}
+
+				/**
+				20230615实时值更新taos
+				*/
+				NewRealtimeDataRepository().SaveRealtimeDataList(v.Name, v.CollInterfaceName, ycPropertyPostParam)
 			}
 		}
 	}

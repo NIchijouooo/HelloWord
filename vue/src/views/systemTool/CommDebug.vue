@@ -13,7 +13,7 @@
               <div class="st-receive">
                 <div class="str-content">
                   <div class="str-noData" v-if="ctxData.receiveData.length == 0">显示区</div>
-                  <div v-for="(item, index) in ctxData.receiveData">
+                  <div v-for="(item, index) in ctxData.receiveData" :key="index">
                     <div v-if="ctxData.receiveTime">【{{ item.date }}】</div>
                     <div :class="item.type == 1 ? 'TxInfo' : 'RxInfo'">
                       {{ item.type == 1 ? 'Tx：' + item.data : 'Rx：' + item.data }}

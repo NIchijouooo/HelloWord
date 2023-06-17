@@ -152,11 +152,16 @@ func ReportServiceFeisjyPoll(ctx context.Context, r *ReportServiceParamFeisjyTem
 					for i, _ := range r.NodeList {
 						r.NodeList[i].ReportStatus = "offLine" //网关未登陆，节点配置为离线状态
 					}
-
 					if r.FeisjyLogInMachine(r.GWParam.Param.DeviceID) == true {
 						r.GWParam.ReportStatus = "onLine"
 						cronProcess.Start()
 						reportState = 2
+						/**
+						todo20230615网关设备上线更新sqlite
+						*/
+						//repo := &repositories.RealtimeDataRepository{}
+						//repo.UpdateGatewayDeviceConnetStatus(r.GWParam)
+
 					} else {
 						time.Sleep(10 * time.Second)
 					}
@@ -169,10 +174,15 @@ func ReportServiceFeisjyPoll(ctx context.Context, r *ReportServiceParamFeisjyTem
 								r.MQTTFeisjySubNodeTopic(node.Param.DeviceID)
 								if r.FeisjyLogInMachine(node.Param.DeviceID) == true {
 									r.NodeList[i].ReportStatus = "onLine"
+									/**
+									todo20230615设备上线更新sqlite
+									*/
+									//repo := &repositories.RealtimeDataRepository{}
+									//repo.UpdateDeviceConnetStatus(r.NodeList[i])
+
 								}
 							}
 						}
-
 						time.Sleep(30 * time.Second)
 					} else {
 						reportState = 1
@@ -399,6 +409,28 @@ func (r *ReportServiceParamFeisjyTemplate) ProcessDownLinkFrame(ctx context.Cont
 								for k, v := range r.NodeList {
 									if v.Param.DeviceID == ID {
 										r.NodeList[k].ReportStatus = "offLine"
+										/**
+										todo20230615设备离线更新sqlite
+										*/
+										//repo := &repositories.RealtimeDataRepository{}
+										//repo.UpdateDeviceConnetStatus(r.NodeList[k])
+									}
+								}
+							}
+						}
+						if resultMsgData.Msg == "device_offline" {
+							if ID == r.GWParam.Param.DeviceID {
+								//r.GWLogin()
+							} else {
+								for k, v := range r.NodeList {
+									if v.Param.DeviceID == ID {
+										r.NodeList[k].ReportStatus = "offLine"
+										/**
+										todo20230615设备离线更新sqlite
+										*/
+										//repo := &repositories.RealtimeDataRepository{}
+										//repo.UpdateDeviceConnetStatus(r.NodeList[k])
+
 									}
 								}
 							}

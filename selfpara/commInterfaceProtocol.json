@@ -1,0 +1,34 @@
+[
+    {
+      "name": "localSerial",
+      "label":"本地串口"
+    },
+    {
+      "name": "tcpClient",
+      "label": "TCP客户端"
+    },
+    {
+      "name": "tcpServer",
+      "label":"TCP服务端"
+    },
+    {
+      "name": "udpClient",
+      "label": "UDP客户端"
+    },
+    {
+      "name": "udpServer",
+      "label": "UDP服务端"
+    },
+    {
+      "name": "mbTCPClient",
+      "label": "ModbusTCP客户端"
+    },
+    {
+      "name": "mbRTUClient",
+      "label": "ModbusRTU客户端"
+    },
+    {
+      "name": "DTL645",
+      "label": "DTL645客户端"
+    }
+  ]

@@ -24,6 +24,7 @@ func RouterWeb(port string) {
 
 	exeCurDir, _ := filepath.Abs(filepath.Dir(os.Args[0]))
 	router.Static("/assets", exeCurDir+"/webroot/assets")
+	//router.Static("/em-web", exeCurDir+"/webroot/em-web")
 	router.StaticFile("/", exeCurDir+"/webroot/index.html")
 	router.StaticFile("/favicon.ico", exeCurDir+"/webroot/favicon.ico")
 	router.StaticFile("/config.json", exeCurDir+"/webroot/config.json")
@@ -78,6 +79,10 @@ func RouterWeb(port string) {
 
 		auxiliaryController := controllers.NewAuxiliaryController()
 		auxiliaryController.RegisterRoutes(&router.RouterGroup)
+		bmsController := controllers.NewBmsController()
+		bmsController.RegisterRoutes(&router.RouterGroup)
+		ycController := controllers.NewYcController()
+		ycController.RegisterRoutes(&router.RouterGroup)
 
 		configurationController := controllers.NewConfigurationCenterController()
 		configurationController.RegisterRoutes(&router.RouterGroup)
