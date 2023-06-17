@@ -2,7 +2,7 @@
   <div class="main-container">
     <div class="main" style="background-color: inherit">
       <el-row :gutter="20" style="height: 100%">
-        <el-col :span="12">
+        <el-col :span="24">
           <el-card class="box-card" :shadow="'hover'">
             <template #header>
               <div class="card-header">
@@ -32,7 +32,7 @@
               </div>
               <div class="st-operate">
                 <div>
-                  <el-select v-model="ctxData.curCollect" style="margin-bottom: 10px" placeholder="请选择采集接口">
+                  <el-select v-model="ctxData.curCollect" style="width:100%;margin-bottom: 10px" placeholder="请选择采集接口">
                     <el-option
                       v-for="item in ctxData.interfaceList"
                       :key="item.collInterfaceName"
@@ -61,7 +61,7 @@
                   >
                     发送
                   </el-button>
-                  <el-select v-model="ctxData.curCheck" style="margin-bottom: 10px" placeholder="请选择数据校验">
+                  <el-select v-model="ctxData.curCheck" style="width:100%;margin-bottom: 10px" placeholder="请选择数据校验">
                     <el-option
                       v-for="item in ctxData.checkOptions"
                       :key="item.name"
@@ -76,17 +76,17 @@
               </div>
               <div class="st-remark">
                 <el-row :gutter="16">
-                  <el-col :span="3">操作步骤:</el-col>
+                  <el-col :span="1">操作步骤:</el-col>
                   <el-col :span="21">1、选择采集接口</el-col>
                 </el-row>
                 <el-row :gutter="16">
-                  <el-col :offset="3" :span="21">2、选择校验方式</el-col>
+                  <el-col :offset="1" :span="21">2、选择校验方式</el-col>
                 </el-row>
                 <el-row :gutter="16">
-                  <el-col :offset="3" :span="21">3、发送区编写发送的报文</el-col>
+                  <el-col :offset="1" :span="21">3、发送区编写发送的报文</el-col>
                 </el-row>
                 <el-row :gutter="16">
-                  <el-col :offset="3" :span="21">4、显示区显示发送的报文和返回的报文</el-col>
+                  <el-col :offset="1" :span="21">4、显示区显示发送的报文和返回的报文</el-col>
                 </el-row>
               </div>
             </div>
@@ -204,11 +204,12 @@ const showOneResMsg = (res) => {
 <style lang="scss" scoped>
 @use 'styles/custom-scoped.scss' as *;
 .box-card {
-  margin-bottom: 20px;
+  padding-bottom: 20px;
+  padding-right: 20px;
 }
 .item {
   position: relative;
-  height: 520px;
+  height: 780px;
   width: 100%;
   min-width: 540px;
 }
@@ -217,10 +218,11 @@ const showOneResMsg = (res) => {
   left: 0;
   right: 192px;
   top: 0;
+  width: calc(100% - 290px);
   bottom: 241px;
   box-sizing: border-box;
   overflow-y: auto;
-  border: 1px solid #3054eb;
+  border: 1px solid #e4e7ed;
   border-radius: 4px;
   padding: 12px;
 }
@@ -230,6 +232,7 @@ const showOneResMsg = (res) => {
   right: 192px;
   height: 129px;
   bottom: 100px;
+  width: calc(100% - 290px);
   box-sizing: border-box;
   overflow-y: auto;
   border-radius: 4px;
@@ -238,7 +241,7 @@ const showOneResMsg = (res) => {
   padding: 12px;
 }
 .st-receive:hover {
-  box-shadow: 0px 0px 12px rgba(48, 84, 235, 0.3);
+  box-shadow: 0 0 0 1px #c0c4cc inset;
 }
 
 .str-content {
@@ -252,11 +255,11 @@ const showOneResMsg = (res) => {
 .st-operate {
   position: absolute;
   right: 0;
-  width: 180px;
+  width: 280px;
   top: 0;
   bottom: 100px;
   box-sizing: border-box;
-  border: 1px solid #3054eb;
+  border: 1px solid #e4e7ed;
   border-radius: 4px;
   padding: 12px;
   display: flex;
@@ -265,7 +268,7 @@ const showOneResMsg = (res) => {
 }
 
 .st-operate:hover {
-  box-shadow: 0px 0px 12px rgba(48, 84, 235, 0.3);
+  box-shadow: 0 0 0 1px #c0c4cc inset;
 }
 .st-remark {
   position: absolute;

@@ -1,36 +1,34 @@
 <template>
   <div class="main-container">
-    <el-tabs type="border-card" class="my-card-tabs" v-model="ctxData.typeFlag">
-      <el-tab-pane label="设置网关SN" name="2">
         <div class="sn-container">
-          <el-card class="box-card">
-            <div>
-              <el-form
-                :model="ctxData.snForm"
-                :rules="ctxData.snRules"
-                ref="snFormRef"
-                status-icon
-                label-position="right"
-                label-width="120px"
-              >
-                <el-form-item label="网关名称" prop="name">
-                  <el-input type="text" v-model="ctxData.snForm.name" autocomplete="off" placeholder="请输入网关名称！">
-                  </el-input>
-                </el-form-item>
-                <el-form-item label="SN" prop="sn">
-                  <el-input type="text" v-model="ctxData.snForm.sn" autocomplete="off" placeholder="请输入SN！">
-                  </el-input>
-                </el-form-item>
-                <el-form-item>
+          <div class="sn-title">设置网关SN</div>
+          <div >
+            <el-form
+              :model="ctxData.snForm"
+              :rules="ctxData.snRules"
+              ref="snFormRef"
+              status-icon
+              label-position="right"
+              label-width="120px"
+              style="width: 50%;margin: 0 auto;padding: 40px 40px 20px 0;border: 1px solid #e4e7ed;background:rgb(255 255 255 / 60%);border-radius:4px;"
+            >
+              <el-form-item label="网关名称" prop="name">
+                <el-input type="text" v-model="ctxData.snForm.name" autocomplete="off" placeholder="请输入网关名称！">
+                </el-input>
+              </el-form-item>
+              <el-form-item label="SN" prop="sn">
+                <el-input type="text" v-model="ctxData.snForm.sn" autocomplete="off" placeholder="请输入SN！">
+                </el-input>
+              </el-form-item>
+              <el-form-item>
+                <div style="display: flex; justify-content: center;width: 90%;">
                   <el-button type="primary" @click="setGatewaySN()" :loading="ctxData.isLoading">设置网关SN</el-button>
                   <el-button type="success" @click="refresh()">刷新</el-button>
-                </el-form-item>
-              </el-form>
-            </div>
-          </el-card>
+                </div>
+              </el-form-item>
+            </el-form>
+          </div>
         </div>
-      </el-tab-pane>
-    </el-tabs>
   </div>
 </template>
 <script setup>
@@ -147,27 +145,21 @@ const showOneResMsg = (res) => {
     color: #333;
   }
 }
-.tips {
-  background-color: #d3dce6;
-  border-radius: 4px;
-  line-height: 48px;
-  height: 48px;
-  padding: 0 20px;
-  margin: 20px;
+.sn-title {
+  height: 80px;
+  line-height: 80px;
+  text-align: center;
+  color: #303133;
+  font-size: 16px;
 }
 
 .sn-container {
   position: relative;
-  height: 100%;
-  width: 50%;
-  background-color: #d3dce6;
-}
-:deep(.el-tabs--border-card > .el-tabs__header .el-tabs__item:not(.is-disabled):hover) {
-  background-color: #3054eb;
-  color: #fff;
-}
-:deep(.el-tabs--border-card > .el-tabs__header .el-tabs__item.is-active) {
-  background-color: #3054eb;
-  color: #fff;
+  height: 97%;
+  width: auto;
+  margin-left: 20px;
+  margin-top: 20px;
+  border-radius: 4px;
+  background-color: #f5f8fa;
 }
 </style>

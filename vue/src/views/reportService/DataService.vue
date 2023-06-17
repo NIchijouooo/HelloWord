@@ -38,7 +38,7 @@
           stripe
           @row-dblclick="editGateway"
         >
-          <el-table-column type="expand">
+          <el-table-column type="expand" min-width="80">
             <template #default="scope">
               <div class="param-content">
                 <div class="pc-title">
