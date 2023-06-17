@@ -1,5 +1,5 @@
 # 基础镜像
-FROM golang:1.19 As goBuild
+FROM golang:1.20.5 As goBuild
 
 # 工作目录
 WORKDIR /app
@@ -22,13 +22,10 @@ WORKDIR /app
 
 COPY --from=goBuild /app/vue /app
 
-RUN ls
 RUN npm config set registry https://registry.npm.taobao.org/
 RUN npm config set sass_binary_site https://npm.taobao.org/mirrors/node-sass/
 RUN npm install
-RUN ls
 RUN npm run build
-RUN ls
 
 FROM ubuntu:latest
 
