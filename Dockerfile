@@ -34,6 +34,7 @@ RUN apt-get update && apt-get install -y sqlite3 libsqlite3-dev
 COPY --from=goBuild /app/app /app
 COPY --from=goBuild /app/em.db /em.db
 COPY --from=goBuild /app/config /config
+COPY --from=goBuild /app/selfpara /selfpara
 COPY --from=nodeBuild /app/webroot /webroot
 
 VOLUME /selfpara
