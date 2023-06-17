@@ -48,9 +48,8 @@
                       style="width: 100%; height: 34px"
                     />
                   </div>
-                  <el-button type="danger" style="height: 34px; width: 100%" plain @click="clearReceive()"
-                    >清空显示区</el-button
-                  >
+                  <el-button type="danger" plain style="height: 34px; width: 100%;margin-bottom: 10px;" @click="clearReceive()">清空显示区</el-button>
+                  <el-button type="primary" plain style="height: 34px; width: 100%;margin-left: 0;" @click="exportCsv()">导出</el-button>
                 </div>
                 <div>
                   <el-button
@@ -100,6 +99,8 @@
 import { userStore } from 'stores/user'
 import SysToolApi from 'api/sysTool.js'
 import InterfaceApi from 'api/interface.js'
+import Papa from 'papaparse'
+import dayjs from 'dayjs'
 
 const users = userStore()
 const ctxData = reactive({
@@ -184,6 +185,36 @@ const sendMessage = () => {
       showOneResMsg(res)
     }
   })
+}
+// 导出
+const exportCsv = () => {
+  let outPutData = []
+  let dataType = ['接收方','发送方']
+  ctxData.receiveData.forEach((item) => {
+    outPutData.push({
+      date: item.date + '\t',
+      type: dataType[item.type],
+      content: item.data,
+    })
+  })
+  var csv = Papa.unparse(outPutData)
+  //定义文件内容，类型必须为Blob 否则createObjectURL会报错
+  let content = new Blob([csv])
+  //生成url对象
+  let urlObject = window.URL || window.webkitURL || window
+  let url = urlObject.createObjectURL(content)
+  //生成<a></a>DOM元素
+  let el = document.createElement('a')
+  //链接赋值
+  el.href = url
+  let fileName = ctxData.curCollect+'通讯报文'
+  var nowTime = dayjs(new Date()).format('YYYY-MM-DD HH-mm-ss')
+  fileName += nowTime
+  el.download = fileName + '.csv'
+  //必须点击否则不会下载
+  el.click()
+  //移除链接释放资源
+  urlObject.revokeObjectURL(url)
 }
 //清空显示区
 const clearReceive = () => {
