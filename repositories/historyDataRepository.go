@@ -175,95 +175,8 @@ func (r *HistoryDataRepository) GetSettingLogByDeviceIdsCodes(deviceIds, codes, 
 	return realtimeList, err
 }
 
-///**
-//	deviceIds
-// */
-//func (r *HistoryDataRepository) GetYxLogBydeviceIds(code int, deviceIds, interval string, startTime, endTime int64) ([]*models.YxData, error) {
-//	var realtimeList []*models.YxData
-//	tableName := "realtimedatatest.yc"
-//	var err error
-//	var sql = ""
-//	if startTime > 0 && endTime > 0 && interval == "" {
-//		sql = fmt.Sprintf("select * from %s Where code = %d and device_id in (%s) and ts >=%v and ts <%v", tableName, code, deviceIds, startTime, endTime)
-//	} else if startTime > 0 && endTime > 0 && interval != ""{
-//		sql = fmt.Sprintf("select * from %s Where code = %d and device_id in (%s) and ts >=%v and ts <%v partition by device_id,code interval(%s) FILL(NULL)", tableName, code, deviceIds, startTime, endTime, interval)
-//	}
-//	if len(sql) <= 0{return nil, err}
-//
-//	rows, err := r.taosDb.Query(sql)
-//	if err != nil {
-//		return nil, err
-//	}
-//	defer rows.Close()
-//	for rows.Next() {
-//		realtime := &models.YxData{}
-//		err := rows.Scan(&realtime.Ts, &realtime.Value, &realtime.DeviceID, &realtime.Code)
-//		if err != nil {
-//			return nil, err
-//		}
-//		realtimeList = append(realtimeList, realtime)
-//	}
-//	return realtimeList, err
-//}
-//
-//func (r *HistoryDataRepository) GetYcLogBydeviceIds(code int, deviceIds, interval string, startTime, endTime int64) ([]*models.YcData, error) {
-//	var realtimeList []*models.YcData
-//	tableName := "realtimedatatest.yc"
-//	var err error
-//	var sql = ""
-//	if startTime > 0 && endTime > 0 && interval == "" {
-//		sql = fmt.Sprintf("select * from %s Where code = %d and device_id in (%s) and ts >=%v and ts <%v", tableName, code, deviceIds, startTime, endTime)
-//	} else if startTime > 0 && endTime > 0 && interval != ""{
-//		sql = fmt.Sprintf("select * from %s Where code = %d and device_id in (%s) and ts >=%v and ts <%v partition by device_id,code interval(%s) FILL(NULL)", tableName, code, deviceIds, startTime, endTime, interval)
-//	}
-//	if len(sql) <= 0{return nil, err}
-//
-//	rows, err := r.taosDb.Query(sql)
-//	if err != nil {
-//		return nil, err
-//	}
-//	defer rows.Close()
-//	for rows.Next() {
-//		realtime := &models.YcData{}
-//		err := rows.Scan(&realtime.Ts, &realtime.Value, &realtime.DeviceID, &realtime.Code)
-//		if err != nil {
-//			return nil, err
-//		}
-//		realtimeList = append(realtimeList, realtime)
-//	}
-//	return realtimeList, err
-//}
-//
-//func (r *HistoryDataRepository) GetSettingLogBydeviceIds(code int, deviceIds, interval string, startTime, endTime int64) ([]*models.SettingData, error) {
-//	var realtimeList []*models.SettingData
-//	tableName := "realtimedatatest.yc"
-//	var err error
-//	var sql = ""
-//	if startTime > 0 && endTime > 0 && interval == "" {
-//		sql = fmt.Sprintf("select * from %s Where code = %d and device_id in (%s) and ts >=%v and ts <%v", tableName, code, deviceIds, startTime, endTime)
-//	} else if startTime > 0 && endTime > 0 && interval != ""{
-//		sql = fmt.Sprintf("select * from %s Where code = %d and device_id in (%s) and ts >=%v and ts <%v partition by device_id,code interval(%s) FILL(NULL)", tableName, code, deviceIds, startTime, endTime, interval)
-//	}
-//	if len(sql) <= 0{return nil, err}
-//
-//	rows, err := r.taosDb.Query(sql)
-//	if err != nil {
-//		return nil, err
-//	}
-//	defer rows.Close()
-//	for rows.Next() {
-//		realtime := &models.SettingData{}
-//		err := rows.Scan(&realtime.Ts, &realtime.Value, &realtime.DeviceID, &realtime.Code)
-//		if err != nil {
-//			return nil, err
-//		}
-//		realtimeList = append(realtimeList, realtime)
-//	}
-//	return realtimeList, err
-//}
-
-//根据设备id和code获取yc的最新一条信息
-func (r *HistoryDataRepository) GetLastYcListByCode(deviceIds string, codes string) ([]*models.YcData, error) {
+//批量code获取yc的最新一条信息
+func (r *HistoryDataRepository) GetLastYcListByCode(deviceIds, codes string) ([]*models.YcData, error) {
 	var realtimeList []*models.YcData
 	tableName := "realtimedata.yc"
 	//
@@ -298,6 +211,34 @@ func (r *HistoryDataRepository) GetLastYcHistoryByDeviceIdAndCodeList(deviceId i
 	for rows.Next() {
 		realtime := &models.YcData{}
 		err := rows.Scan(&realtime.Ts, &realtime.Value, &realtime.DeviceId, &realtime.Code)
+		if err != nil {
+			return nil, err
+		}
+		realtimeList = append(realtimeList, realtime)
+	}
+	return realtimeList, err
+}
+
+/**
+ * 获取充放电量
+ * @param deviceIdList
+ * @param startTime
+ * @param endTime
+ * @return
+ */
+func (r *HistoryDataRepository) getDayEsChargeDischarge(deviceId string, startTime, endTime int64) ([]*models.EsChargeDischargeModel, error) {
+	var realtimeList []*models.EsChargeDischargeModel
+	tableName := "realtimedata.charge_discharge"
+
+	sql := fmt.Sprintf("select last_row(ts) as ts,charge_capacity as chargeCapacity,discharge_capacity as dischargeCapacity,profit,device_id as deviceId from %s Where device_id = %d and code in (%s) and ts >=%v and ts <%v  partition by device_id INTERVAL(1d);", tableName, deviceId, startTime, endTime)
+	rows, err := r.taosDb.Query(sql)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	for rows.Next() {
+		realtime := &models.EsChargeDischargeModel{}
+		err := rows.Scan(&realtime.Ts, &realtime.ChargeCapacity, &realtime.DischargeCapacity, &realtime.Profit, &realtime.DeviceId)
 		if err != nil {
 			return nil, err
 		}

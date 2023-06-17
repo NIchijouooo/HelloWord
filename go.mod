@@ -19,6 +19,7 @@ require (
 	github.com/robfig/cron/v3 v3.0.1
 	github.com/robinson/gos7 v0.0.0-20211020181838-a2b780484319
 	github.com/shirou/gopsutil/v3 v3.22.7
+	github.com/shopspring/decimal v1.3.1
 	github.com/sirupsen/logrus v1.9.0
 	github.com/taosdata/driver-go/v3 v3.5.0
 	github.com/tarm/serial v0.0.0-20180830185346-98f6abe2eb07

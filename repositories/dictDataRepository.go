@@ -41,6 +41,12 @@ func (r *DictDataRepository) GetAll(dictLabel, dictType string, page, pageSize i
 	fmt.Println(dictType)
 	fmt.Println(page)
 	fmt.Println(pageSize)
+	if page <= 0{
+		page = 1
+	}
+	if pageSize <= 0{
+		pageSize = 10
+	}
 	query := r.db.Model(&models.DictData{})
 	if dictLabel != "" {
 		query = query.Where("dict_label = ?", dictLabel)
