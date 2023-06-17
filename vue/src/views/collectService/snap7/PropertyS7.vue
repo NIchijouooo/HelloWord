@@ -349,6 +349,23 @@ const toDeviceModel = () => {
   emit('changeDpFlag')
 }
 
+const regCnt = /^[0-9]*[1-9][0-9]*$/
+const validateRegCnt = (rule, value, callback) => {
+  if (!regCnt.test(value)) {
+    callback(new Error('只能输入正整数数字！'))
+  } else {
+    callback()
+  }
+}
+const regStep = /^[0-9]+(.[0-9]{1,2})?$/
+const validateStep = (rule, value, callback) => {
+  if (!regStep.test(value)) {
+    callback(new Error('只能输入大于等于0,最多两位小数的数字！'))
+  } else {
+    callback()
+  }
+}
+
 const contentRef = ref(null)
 const ctxData = reactive({
   headerCellStyle: {
@@ -424,12 +441,12 @@ const ctxData = reactive({
     unit: '', // 单位，只有uint32，int32，double有效
     decimals: 0, // 小数位数，只有double有效
 
-    min: '', // 属性最小值，只有uint32，int32，double有效
-    max: '', // 属性最大值，只有uint32，int32，double有效
+    min: 0, // 属性最小值，只有uint32，int32，double有效
+    max: 0, // 属性最大值，只有uint32，int32，double有效
     minMaxAlarm: false, // 范围报警，只有uint32，int32，double有效
-    step: '', // 步长，只有uint32，int32，double有效
+    step: 0, // 步长，只有uint32，int32，double有效
     stepAlarm: false, // 步长报警，只有uint32，int32，double有效
-    dataLength: '', // 字符串长度，只有string有效
+    dataLength: 0, // 字符串长度，只有string有效
     dataLengthAlarm: false, // 字符串长度报警，只有string有效
   },
   paramName: {
@@ -498,6 +515,51 @@ const ctxData = reactive({
         trigger: 'blur',
       },
     ],
+    
+    step: [
+      {
+        required: true,
+        message: '步长不能为空',
+        trigger: 'blur',
+      },
+      {
+        trigger: 'blur',
+        validator: validateStep,
+      },
+    ],
+    min: [
+      {
+        required: true,
+        message: '最小值不能为空',
+        trigger: 'blur',
+      },
+      {
+        trigger: 'blur',
+        validator: validateStep,
+      },
+    ],
+    max: [
+      {
+        required: true,
+        message: '最大值不能为空',
+        trigger: 'blur',
+      },
+      {
+        trigger: 'blur',
+        validator: validateStep,
+      },
+    ],
+    dataLength: [
+      {
+        required: true,
+        message: '字符串长度不能为空',
+        trigger: 'blur',
+      },
+      {
+        trigger: 'blur',
+        validator: regCnt,
+      },
+    ],
   },
   psFlag: false,
   selectedProperties: [],
@@ -524,7 +586,7 @@ const getDeviceModelProperty = (flag) => {
       showOneResMsg(res)
     }
     await nextTick(() => {
-      ctxData.tableMaxHeight = contentRef.value.clientHeight - 34 - 36 - 22
+      ctxData.tableMaxHeight = contentRef.value.clientHeight - 34 - 36 - 132
     })
   })
 }
@@ -694,6 +756,10 @@ const editDeviceModelProperty = (row) => {
 }
 const propertyFormRef = ref(null)
 const submitPorpertyForm = () => {
+  if (ctxData.propertyForm.type !== 3 && Number(ctxData.propertyForm.min) > Number(ctxData.propertyForm.max)) {
+    ElMessage.warning('最大值必须大于最小值')
+    return;
+  }
   propertyFormRef.value.validate((valid) => {
     console.log('valid', valid)
     if (valid) {
@@ -712,13 +778,13 @@ const submitPorpertyForm = () => {
         dataType: ctxData.propertyForm.dataType,
       }
       if (ctxData.propertyForm.type !== 3) {
-        params['min'] = ctxData.propertyForm.min
-        params['max'] = ctxData.propertyForm.max
+        params['min'] = ctxData.propertyForm.min.toString()
+        params['max'] = ctxData.propertyForm.max.toString()
         params['minMaxAlarm'] = ctxData.propertyForm.minMaxAlarm
-        params['step'] = ctxData.propertyForm.step
+        params['step'] = ctxData.propertyForm.step.toString()
         params['stepAlarm'] = ctxData.propertyForm.stepAlarm
       } else {
-        params['dataLength'] = ctxData.propertyForm.dataLength
+        params['dataLength'] = ctxData.propertyForm.dataLength.toString()
         params['dataLengthAlarm'] = ctxData.propertyForm.dataLengthAlarm
       }
       property['params'] = params
@@ -809,6 +875,10 @@ const initPropertyForm = () => {
     dbNumber: '',
     startAddr: '',
     dataType: 0,
+    step: 0,
+    min: 0,
+    max: 0,
+    dataLength: 0
   }
 }
 //显示单个res结果，code不等于 '0' 的message
