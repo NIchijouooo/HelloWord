@@ -87,6 +87,13 @@ func RouterWeb(port string) {
 		configurationController := controllers.NewConfigurationCenterController()
 		configurationController.RegisterRoutes(&router.RouterGroup)
 
+		// pcs页面
+		pcsController := controllers.NewPcsController()
+		pcsController.RegisterRoutes(&router.RouterGroup)
+		// 设备相关
+		deviceController := controllers.NewDeviceController()
+		deviceController.RegisterRoutes(&router.RouterGroup)
+
 		accountRouter := router.Group("/api/v2/account")
 		{
 			accountRouter.GET("/permissions", contorl.ApiGetPermissions)

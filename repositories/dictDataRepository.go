@@ -41,10 +41,10 @@ func (r *DictDataRepository) GetAll(dictLabel, dictType string, page, pageSize i
 	fmt.Println(dictType)
 	fmt.Println(page)
 	fmt.Println(pageSize)
-	if page <= 0{
+	if page <= 0 {
 		page = 1
 	}
-	if pageSize <= 0{
+	if pageSize <= 0 {
 		pageSize = 10
 	}
 	query := r.db.Model(&models.DictData{})
@@ -77,4 +77,11 @@ func (r *DictTypeRepository) GetDictDataListByDictTypeId(dictType string) ([]mod
 	var dictDataList []models.DictData
 	err := r.db.Where("dict_type = ?", dictType).Find(&dictDataList).Error
 	return dictDataList, err
+}
+
+// SelectDictValue /*根据字典类型和字典label获取字典信息*
+func (r *DictDataRepository) SelectDictValue(dictType string, dictLabel string) (models.DictData, error) {
+	var dictData models.DictData
+	err := r.db.Where("dict_type = ?", dictType).Where("dict_label = ?", dictLabel).Find(&dictData).Error
+	return dictData, err
 }
