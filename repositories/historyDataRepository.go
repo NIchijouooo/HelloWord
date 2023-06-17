@@ -262,12 +262,12 @@ func (r *HistoryDataRepository) GetSettingLogByDeviceIdsCodes(deviceIds, codes, 
 //	return realtimeList, err
 //}
 
-//批量code获取yc的最新一条信息
-func (r *HistoryDataRepository) GetLastYcListByCode(codes string) ([]*models.YcData, error) {
+//根据设备id和code获取yc的最新一条信息
+func (r *HistoryDataRepository) GetLastYcListByCode(deviceIds string, codes string) ([]*models.YcData, error) {
 	var realtimeList []*models.YcData
-	tableName := "realtimedatatest.yc"
+	tableName := "realtimedata.yc"
 	//
-	sql := fmt.Sprintf("SELECT last(ts),last(val),last(device_id),last(code) FROM %s  where code in (%s) group by code", tableName, codes)
+	sql := fmt.Sprintf("SELECT last(ts),last(val),last(device_id),last(code) FROM %s  where device_id in (%s) and  code in (%s) group by device_id,code", tableName, deviceIds, codes)
 	rows, err := r.taosDb.Query(sql)
 	if err != nil {
 		return nil, err
