@@ -87,6 +87,10 @@ func RouterWeb(port string) {
 		configurationController := controllers.NewConfigurationCenterController()
 		configurationController.RegisterRoutes(&router.RouterGroup)
 
+		// 集控路由
+		centralizedController := controllers.NewCentralizedController()
+		centralizedController.RegisterRoutes(&router.RouterGroup)
+
 		// pcs页面
 		pcsController := controllers.NewPcsController()
 		pcsController.RegisterRoutes(&router.RouterGroup)
