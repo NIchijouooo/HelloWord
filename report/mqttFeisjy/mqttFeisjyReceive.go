@@ -1,6 +1,7 @@
 package mqttFeisjy
 
 import (
+	"fmt"
 	"gateway/setting"
 	MQTT "github.com/eclipse/paho.mqtt.golang"
 )
@@ -21,6 +22,7 @@ func ReceiveMessageHandler(client MQTT.Client, msg MQTT.Message) {
 			}
 			setting.ZAPS.Debugf("Feisjy MQTT接收消息主题:%s", receiveFrame.Topic)
 			setting.ZAPS.Debugf("Feisjy MQTT接收消息内容:%s", receiveFrame.Payload)
+			MQTTFeisjyAddCommunicationMessage(v, fmt.Sprintf("%s", receiveFrame.Topic), Direction_RX, fmt.Sprintf("%s", receiveFrame.Payload))
 			ReportServiceParamListFeisjy.ServiceList[k].ReceiveFrameChan <- receiveFrame
 		}
 	}
