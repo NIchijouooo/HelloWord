@@ -138,6 +138,29 @@ func (r *RealtimeDataRepository) BatchCreateYc(realtimeList []*models.YcData) er
 	return err
 }
 
+//<select id="insertDayEsChargeDischarge" parameterType="java.util.List" resultType="java.lang.Integer">
+//insert into
+//<foreach collection="list" item="item" index="index">
+//realtimedata.charge_discharge_${item.deviceId} (ts,charge_capacity,discharge_capacity,profit) using realtimedata.charge_discharge
+//tags(${item.deviceId})
+//values (#{item.ts}, #{item.chargeCapacity}, #{item.dischargeCapacity}, #{item.profit})
+//</foreach>
+//</select>
+/*
+*
+批量添加充放电和收益
+*/
+func (r *RealtimeDataRepository) BatchCreateEsChargeDischargeModel(realtimeList []*models.EsChargeDischargeModel) error {
+	var err error
+	for _, realtime := range realtimeList {
+		tableName := fmt.Sprintf("%v", "realtimedatatest.charge_discharge_", realtime.DeviceId)
+		sql := fmt.Sprintf("INSERT INTO %s (ts,charge_capacity,discharge_capacity,profit) using realtimedatatest.charge_discharge tags(?) VALUES (?, ?, ?, ?)", tableName)
+		_, err := r.taosDb.Exec(sql, realtime.Ts, realtime.ChargeCapacity, realtime.DischargeCapacity, realtime.Profit)
+		err = err
+	}
+	return err
+}
+
 /*
 *
 批量添加setting
