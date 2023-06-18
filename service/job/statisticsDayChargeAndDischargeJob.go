@@ -1,36 +1,41 @@
-package service
+package job
 
 import (
 	"fmt"
 	"gateway/models"
 	"gateway/repositories"
-	"github.com/jasonlvhit/gocron"
-	"github.com/shopspring/decimal"
 	"strconv"
 	"time"
-
-	"gorm.io/gorm"
 )
 
 // 创建一个 job 结构体，包含需要执行的方法
-type StatisticsDayChargeAndDischargeJob struct{
-	db     *gorm.DB
-	repoDictData *repositories.DictDataRepository
-	repoRealTime *repositories.RealtimeDataRepository
-}
+//type StatisticsDayChargeAndDischargeJob struct{
+//	db     *gorm.DB
+//}
 
 
-func NewStatisticsDayChargeAndDischargeJob() *StatisticsDayChargeAndDischargeJob {
-	return &StatisticsDayChargeAndDischargeJob{
-		db: models.DB,
-		repoDictData: repositories.NewDictDataRepository(),
-		repoRealTime: repositories.NewRealtimeDataRepository()}
-}
+//func NewStatisticsDayChargeAndDischargeJob() *StatisticsDayChargeAndDischargeJob {
+//	return &StatisticsDayChargeAndDischargeJob{
+//		db: models.DB,
+//		repoDictData: repositories.NewDictDataRepository(),
+//		repoRealTime: repositories.NewRealtimeDataRepository()}
+//}
 
-func (job *StatisticsDayChargeAndDischargeJob) Run() {
-	// 需要执行的任务
-	fmt.Println("Running StatisticsDayChargeAndDischargeJob job...")
-}
+//func (s *StatisticsDayChargeAndDischargeJob) Start() {
+//	// 创建一个新的定时任务
+//	job := &StatisticsDayChargeAndDischargeJob{}
+//	cron := gocron.NewScheduler()
+//	// 定义任务执行的时间间隔，例如每分钟执行一次
+//	cron.Every(1).Hour().Do(job)
+//	// 启动定时任务
+//	cron.Start()
+//}
+
+//func Run() {
+//	// 需要执行的任务
+//	setting.ZAPS.Debug("注册StatisticsDayChargeAndDischargeJob定时任务到 GoCron")
+//
+//}
 
 type PvPowerGenerationModel struct {
 	DeviceId int
@@ -45,8 +50,10 @@ code：5为充电，6为放电的点位。
 创建结构体pcsChargeDischarge和taos表，
 用定时任务每小时一次，去taos统计这些deviceId+code点位，昨天的充，放电量，存入taos的pcs_charge_discharge。
 */
-func (c *StatisticsDayChargeAndDischargeJob) statisticsDayChargingAndDischarging() {
-	dictDataList, _, _ := c.repoDictData.GetAll("", "energy_product_code_setting", 1, 50)
+func StatisticsDayChargingAndDischarging() {
+	fmt.Println("Running StatisticsDayChargeAndDischargeJob job...")
+	dictDataRepo := repositories.DictDataRepository{}
+	dictDataList, _, _ := dictDataRepo.GetAll("", "energy_product_code_setting", 1, 50)
 
 	deviceIdList := make([]int, 0)
 	// 将切片转换为 map
@@ -82,7 +89,7 @@ func (c *StatisticsDayChargeAndDischargeJob) statisticsDayChargingAndDischarging
 	}
 
 	if len(deviceIdList) == 0 {
-		XxlJobHelperLog("statisticsDayChargingAndDischarging deviceIdList : ", deviceIdList)
+		xxlJobHelperLog("statisticsDayChargingAndDischarging deviceIdList : ", deviceIdList)
 		return
 	}
 
@@ -117,7 +124,7 @@ func (c *StatisticsDayChargeAndDischargeJob) statisticsDayChargingAndDischarging
 	}
 
 	if fxDeviceDailyStatistics == nil && zxDeviceDailyStatisticsMap == nil {
-		XxlJobHelperLog("statisticsDayChargingAndDischarging fxDeviceDailyStatistics == nil && zxDeviceDailyStatisticsMap == nil")
+		xxlJobHelperLog("statisticsDayChargingAndDischarging fxDeviceDailyStatistics == nil && zxDeviceDailyStatisticsMap == nil")
 		return
 	}
 
@@ -172,7 +179,8 @@ func (c *StatisticsDayChargeAndDischargeJob) statisticsDayChargingAndDischarging
 	}
 
 	if len(insertList) > 0 {
-		c.repoRealTime.BatchCreateEsChargeDischargeModel(insertList)
+		realtimeDataRepo := repositories.RealtimeDataRepository{}
+		realtimeDataRepo.BatchCreateEsChargeDischargeModel(insertList)
 	}
 }
 
@@ -206,16 +214,7 @@ func getSettingValueListByDeviceIdListAndYcCode(deviceIdList []int, code int) []
 	return nil
 }
 
-func XxlJobHelperLog(message ...interface{}) {
+func xxlJobHelperLog(message ...interface{}) {
 	// TODO: Implement XxlJobHelperLog
 }
 
-func (s *StatisticsDayChargeAndDischargeJob) Start() {
-	// 创建一个新的定时任务
-	job := &StatisticsDayChargeAndDischargeJob{}
-	cron := gocron.NewScheduler()
-	// 定义任务执行的时间间隔，例如每分钟执行一次
-	cron.Every(1).Hour().Do(job)
-	// 启动定时任务
-	cron.Start()
-}

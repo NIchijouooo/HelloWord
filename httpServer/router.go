@@ -4,7 +4,6 @@ import (
 	"gateway/controllers"
 	"gateway/httpServer/contorl"
 	"gateway/httpServer/middleware"
-	"gateway/service"
 	"gateway/setting"
 	"os"
 	"path/filepath"
@@ -61,10 +60,6 @@ func RouterWeb(port string) {
 
 		emController := controllers.NewEMController()
 		emController.RegisterRoutes(&router.RouterGroup)
-
-		// 启动充放电量定时任务
-		jobService := &service.StatisticsDayChargeAndDischargeJob{}
-		jobService.Start()
 
 		/**
 		20230605
