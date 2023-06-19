@@ -48,7 +48,7 @@
         :max-height="ctxData.tableMaxHeight"
         stripe
       >
-        <el-table-column type="expand" width="60">
+        <el-table-column type="expand" width="80">
           <template #default="scope">
             <div class="param-content">
               <div class="pc-title">
@@ -66,7 +66,7 @@
             </div>
           </template>
         </el-table-column>
-        <el-table-column type="index" width="60">
+        <el-table-column type="index" width="70">
           <template #header> 序号 </template>
         </el-table-column>
         <el-table-column sortable prop="name" label="属性名称" width="auto" min-width="150" align="center"> </el-table-column>

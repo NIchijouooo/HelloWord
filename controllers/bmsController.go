@@ -124,7 +124,7 @@ func (c *BmsController) GetHistoryYcByDeviceIdCodes(ctx *gin.Context) {
 	}
 	var xAxisList []string
 	// 初始化x轴数据,返回x轴时间对应的历史数据分组,key=x轴,value=x轴对应的历史数据集合
-	returnMap := service.GetCharData(xAxisList, ycQuery.StartTime, ycQuery.EndTime, ycQuery.Interval, ycQuery.IntervalType, ycList, ycQuery.CodeList)
+	returnMap := service.GetCharData(xAxisList, ycQuery.StartTime, ycQuery.EndTime, ycQuery.Interval, ycQuery.IntervalType, ycList, ycQuery.CodeList, ycQuery.CodeNameList)
 
 	ctx.JSON(http.StatusOK, model.ResponseData{
 		"0",

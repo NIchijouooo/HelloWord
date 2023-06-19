@@ -2,8 +2,8 @@
   <div class="main-container">
     <div class="main" style="background-color: inherit">
       <el-row :gutter="20" style="height: 100%">
-        <el-col :span="12">
-          <el-card class="box-card" :shadow="'hover'">
+        <el-col :span="24">
+          <el-card class="box-card" :shadow="'never'">
             <template #header>
               <div class="card-header">
                 <span>NTP校时</span>
@@ -80,20 +80,20 @@
 
               <div class="remark">
                 <el-row :gutter="16">
-                  <el-col :span="3">操作步骤:</el-col>
+                  <el-col :span="1">操作步骤:</el-col>
                   <el-col :span="21">1、选择时区（默认是UTC+8时区）</el-col>
                 </el-row>
                 <el-row :gutter="16">
-                  <el-col :offset="3" :span="21">2、输入主服务器地址、端口</el-col>
+                  <el-col :offset="1" :span="21">2、输入主服务器地址、端口</el-col>
                 </el-row>
                 <el-row :gutter="16">
-                  <el-col :offset="3" :span="21">3、输入次服务器地址、端口</el-col>
+                  <el-col :offset="1" :span="21">3、输入次服务器地址、端口</el-col>
                 </el-row>
                 <el-row :gutter="16">
-                  <el-col :offset="3" :span="21">4、保存配置，重启后生肖</el-col>
+                  <el-col :offset="1" :span="21">4、保存配置，重启后生肖</el-col>
                 </el-row>
                 <el-row :gutter="16">
-                  <el-col :offset="3" :span="21">5、立即校时，系统时间立即更新</el-col>
+                  <el-col :offset="1" :span="21">5、立即校时，系统时间立即更新</el-col>
                 </el-row>
               </div>
             </div>
@@ -307,9 +307,23 @@ const showOneResMsg = (res) => {
 </script>
 <style lang="scss" scoped>
 @use 'styles/custom-scoped.scss' as *;
+.box-card {
+  padding-bottom: 20px;
+  padding-right: 20px;
+}
 .remark {
   margin-top: 16px;
   font-size: 12px;
   color: #f56c6c;
+}
+.item {
+  position: relative;
+  height: 670px;
+  width: 100%;
+  min-width: 540px;
+  margin-bottom: 80px;
+}
+:deep(.el-card.is-always-shadow) {
+  box-shadow: none;
 }
 </style>

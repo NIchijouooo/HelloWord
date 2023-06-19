@@ -43,6 +43,8 @@ type ReportServiceNodeParamFeisjyTemplate struct {
 // 上报网关参数结构体
 type ReportServiceGWParamFeisjyTemplate struct {
 	ServiceName  string
+	ReportNetSW  bool
+	ReportNet    string
 	IP           string
 	Port         string
 	ReportStatus string

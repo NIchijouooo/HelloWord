@@ -1,6 +1,7 @@
 package repositories
 
 import (
+	"fmt"
 	"gateway/models"
 	"gorm.io/gorm"
 )
@@ -24,26 +25,47 @@ func (r DeviceRepository) GetDeviceListByType(param models.DeviceParam) ([]model
 	return result, err
 }
 
-func (r *DeviceRepository) GetEmDevice() {
-	type Device struct {
-		id    int
-		name  string
-		label string
+func (r *DeviceRepository) GetEmDeviceInfo(deviceType string) (interface{}, error) {
+	type Param struct {
+		Name  string `json:"name"`
+		Value int    `json:"value"`
 	}
-	rows, err := r.db.Table("em_device").Select("*").Joins("left join em_device_model_cmd on em_device.model_id = em_device_model_cmd.device_model_id").Rows()
-	if err != nil {
+	type Res struct {
+		Id     int     `json:"id"`
+		Name   string  `json:"name"`
+		Label  string  `json:"label"`
+		Params []Param `json:"params"`
 	}
 
-	var device Device
-	for rows.Next() {
-		err := rows.Scan(&device.id, &device.name, &device.label)
-		if err != nil {
-			return
-		}
+	var res []Res
+	var dictData []models.DictData
+	var deviceParam models.DeviceParam
+	deviceParam.DeviceType = deviceType
+	// 获取设备列表
+	deviceList, err := r.GetDeviceListByType(deviceParam)
+	// 获取字典
+	switch deviceType {
+	case "pcs":
+		fmt.Print(deviceList)
+		err = r.db.Where("dict_type = ?", deviceType).Find(&dictData).Error
+	case "bms":
+
+	case "辅控":
 	}
-	//var emDeviceModelCmd []models.EmDeviceModelCmd
-	//if err := r.db.Where("device_model_id = ?", modelId).Find(&emDeviceModelCmd).Error; err != nil {
-	//	return nil, err
-	//}
-	//return emDeviceModelCmd, nil
+	// 构建数据
+	for _, device := range deviceList {
+		var v Res
+		v.Id = device.Id
+		v.Name = device.Name
+		v.Label = device.Label
+		// 查数据
+		for _, dict := range dictData {
+			var p Param
+			p.Name = dict.DictValue
+			v.Params = append(v.Params, p)
+		}
+		res = append(res, v)
+	}
+	return res, err
+
 }
