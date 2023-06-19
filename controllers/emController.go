@@ -43,7 +43,6 @@ func (c *EmController) RegisterRoutes(router *gin.RouterGroup) {
 	router.POST("/api/v2/em/addEmDeviceModelCmd", c.AddEmDeviceModelCmd)
 	router.POST("/api/v2/em/addEmDeviceModelCmdParam", c.AddEmDeviceModelCmdParam)
 	router.POST("/api/v2/em/getEmDeviceModelCmdParamListByName", c.GetEmDeviceModelCmdParamListByName)
-	router.POST("/api/v2/em/getEmDeviceModelCmdParamListByDeviceId", c.GetEmDeviceModelCmdParamListByDeviceId)
 }
 
 func (c *EmController) GetAllCommInterfaceProtocols(ctx *gin.Context) {
@@ -912,41 +911,6 @@ func (c *EmController) GetEmDeviceModelCmdParamListByName(ctx *gin.Context) {
 	}
 	var deviceCmdParamList []models.EmDeviceModelCmdParam
 	deviceCmdParamList, _ = c.repo.GetEmDeviceModelCmdParamListByName(tmp.Name)
-	if deviceCmdParamList == nil {
-		ctx.JSON(http.StatusOK, model.ResponseData{
-			Code:    "1",
-			Message: "无数据",
-		})
-	}
-	var retList []models.AddEmDeviceModelCmdParam
-	for i := 0; i < len(deviceCmdParamList); i++ {
-		//取出data
-		var addEmDeviceModelCmdParam models.AddEmDeviceModelCmdParam
-		if err := json.Unmarshal([]byte(deviceCmdParamList[i].Data), &addEmDeviceModelCmdParam); err != nil {
-			ctx.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-			return
-		}
-		retList = append(retList, addEmDeviceModelCmdParam)
-	}
-
-	ctx.JSON(http.StatusOK, model.ResponseData{
-		Code:    "0",
-		Message: "成功",
-		Data:    retList,
-	})
-}
-
-// 根据设备ID获取所有模型
-func (c *EmController) GetEmDeviceModelCmdParamListByDeviceId(ctx *gin.Context) {
-	var tmp struct {
-		DeviceId int `json:"deviceId"`
-	}
-	if err := ctx.ShouldBindBodyWith(&tmp, binding.JSON); err != nil {
-		ctx.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-		return
-	}
-	var deviceCmdParamList []models.EmDeviceModelCmdParam
-	deviceCmdParamList, _ = c.repo.GetEmDeviceModelCmdParamListByDeviceId(tmp.DeviceId)
 	if deviceCmdParamList == nil {
 		ctx.JSON(http.StatusOK, model.ResponseData{
 			Code:    "1",

@@ -1,17 +1,16 @@
 package service
 
 import (
-	"fmt"
 	"gateway/models"
 	"gateway/models/ReturnModel"
 	"gateway/utils"
 	"time"
 )
 
-func GetCharData(xAxisList []string, beginDt int64, endDt int64, interval int, intervalType int, historyList []*models.YcData, codeList []int) ReturnModel.CharData {
+func GetCharData(xAxisList []string, beginDt int64, endDt int64, interval int, intervalType int, historyList []*models.YcData, codeList []int, codeNameList []string) ReturnModel.CharData {
 	xAxisList, dateHistoryMap := InitXAxisList(xAxisList, beginDt, endDt, interval, intervalType, historyList)
-	dataMap := make(map[int][]float64)
-	for _, code := range codeList { //按code分组
+	var resYcData []ReturnModel.ResYcData
+	for idx, code := range codeList { //按code分组
 		var valList []float64 //存储结果值
 		for _, xAxis := range xAxisList {
 			ycHistoryList, exists := dateHistoryMap[xAxis] //根据时间获取值
@@ -28,16 +27,16 @@ func GetCharData(xAxisList []string, beginDt int64, endDt int64, interval int, i
 				if len(ycModels) > 0 {
 					//统计值
 					val = utils.YcValueMax(ycModels)
-					fmt.Println(val)
+					//	fmt.Println(val)
 				}
 			}
 			valList = append(valList, val)
 		}
-		dataMap[code] = valList //将结果存入map
+		resYcData = append(resYcData, ReturnModel.ResYcData{Name: codeNameList[idx], Data: valList})
 	}
 	var returnMap ReturnModel.CharData
 	returnMap.XAxisList = xAxisList
-	returnMap.DataMap = dataMap
+	returnMap.DataList = resYcData
 	return returnMap
 }
 
@@ -72,12 +71,8 @@ func InitXAxisList(xAxisList []string, beginDt int64, endDt int64, interval int,
 		//计算曾长长度
 		intervalLong = utils.GetIntervalTime(calendar, intervalType, interval)
 		var list []models.YcData
-		intervalStart := t //开始时间等于当前遍历到的i时间
-		fmt.Printf("开始间1：%s\n", intervalStart)
-		fmt.Printf("开始间2：%s\n", i)
+		intervalStart := t                                                   //开始时间等于当前遍历到的i时间
 		intervalEnd := t.Add(time.Duration(intervalLong) * time.Millisecond) //当前时间加上长度，等于结束时间，用于后面遍历使用
-		fmt.Printf("结束时间1：%s\n", intervalEnd)
-		fmt.Printf("结束时间2：%s\n", intervalEnd.UnixNano()/int64(time.Millisecond))
 		/*
 		   获取当前时间间隔内的历史数据,有的数据不在x轴整点内,算到上个时间间隔里
 		   如按两小时间隔查询历史数据,则x轴为0h,2h,4h...

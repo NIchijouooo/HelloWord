@@ -202,7 +202,7 @@ func (r *HistoryDataRepository) GetLastYcHistoryByDeviceIdAndCodeList(deviceId i
 	var realtimeList []*models.YcData
 	tableName := "realtimedata.yc"
 	//select  from realtimedatatest.yc Where device_id = 121 and code in (1,2) and ts >=1683689768000 and ts<1684553768000 partition by device_id,code INTERVAL(1d) FILL(null);
-	sql := fmt.Sprintf("select FIRST(ts) as ts,val,device_id,code from %s Where device_id = %d and code in (%s) and ts >=%v and ts <%v  partition by code INTERVAL(%s);", tableName, deviceId, codes, startTime, endTime, interval)
+	sql := fmt.Sprintf("select Last(ts) as ts,val,device_id,code from %s Where device_id = %d and code in (%s) and ts >=%v and ts <%v  partition by code INTERVAL(%s);", tableName, deviceId, codes, startTime, endTime, interval)
 	rows, err := r.taosDb.Query(sql)
 	if err != nil {
 		return nil, err

@@ -68,6 +68,7 @@ func (c *YcController) GetLastYcByDeviceIdsAndCodes(ctx *gin.Context) {
 /*{
 "deviceId":36559,  //设备id 必填
 "codeList":[2002,2005],  //遥测编码  必填
+"codeNameList":["温度","湿度"], //遥测名字  必填
 "startTime":946685445000, //开始时间 必填
 "endTime": 947519999000,  //结束时间  必填
 "interval":10,  //间隔时间  必填
@@ -113,7 +114,7 @@ func (c *YcController) BatchYcHistoryListByDeviceIdAndCodes(ctx *gin.Context) {
 	}
 	var xAxisList []string
 	// 初始化x轴数据,返回x轴时间对应的历史数据分组,key=x轴,value=x轴对应的历史数据集合
-	returnMap := service.GetCharData(xAxisList, ycQuery.StartTime, ycQuery.EndTime, ycQuery.Interval, ycQuery.IntervalType, ycList, ycQuery.CodeList)
+	returnMap := service.GetCharData(xAxisList, ycQuery.StartTime, ycQuery.EndTime, ycQuery.Interval, ycQuery.IntervalType, ycList, ycQuery.CodeList, ycQuery.CodeNameList)
 
 	ctx.JSON(http.StatusOK, model.ResponseData{
 		"0",
