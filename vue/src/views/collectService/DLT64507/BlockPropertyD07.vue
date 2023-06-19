@@ -963,7 +963,7 @@ const submitPorpertyForm = () => {
           type:ctxData.propertyForm.type,
           blockAddOffset:ctxData.propertyForm.blockAddOffset,
           rulerAddOffset:ctxData.propertyForm.rulerAddOffset,
-          iotDataType: ctxData.propertyForm.iotDataType
+          iotDataType: ctxData.propertyForm.iotDataType,
           identity: ctxData.propertyForm.identity,
         },
       }
