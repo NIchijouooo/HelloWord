@@ -61,9 +61,6 @@ func RouterWeb(port string) {
 		emController := controllers.NewEMController()
 		emController.RegisterRoutes(&router.RouterGroup)
 
-		deviceController := controllers.NewDeviceController()
-		deviceController.RegisterRoutes(&router.RouterGroup)
-
 		/**
 		20230605
 		*/
