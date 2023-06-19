@@ -33,6 +33,7 @@ type TSLPropertiesTemplate struct {
 	AccessMode int                        `json:"accessMode"` //读写属性
 	Type       int                        `json:"type"`       //类型 uint32 int32 double string
 	Value      []TSLPropertyValueTemplate `json:"value"`
+	Identity   string                     `json:"identity"` //唯一标识
 }
 
 type TSLPropertyValueTemplate struct {

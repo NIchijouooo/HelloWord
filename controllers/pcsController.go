@@ -49,7 +49,7 @@ func (ctrl *PcsController) getPcsDeviceInfoById(ctx *gin.Context) {
 		})
 		return
 	}
-	dictData, _ := ctrl.dictDataRepo.SelectDictValue("em_dict_info", "pcs_device_status_yx_code")
+	dictData, _ := ctrl.dictDataRepo.SelectDictValue("energy_product_code_setting", "pcs_device_status_yx_code")
 	if len(dictData.DictValue) == 0 {
 		ctx.JSON(http.StatusOK, model.ResponseData{
 			Code:    "1",

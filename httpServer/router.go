@@ -101,6 +101,10 @@ func RouterWeb(port string) {
 		ruleHistoryController := controllers.NewRuleHistoryController()
 		ruleHistoryController.RegisterRoutes(&router.RouterGroup)
 
+		// 越限配置
+		ruleController := controllers.NewLimitConfigController()
+		ruleController.RegisterRoutes(&router.RouterGroup)
+
 		accountRouter := router.Group("/api/v2/account")
 		{
 			accountRouter.GET("/permissions", contorl.ApiGetPermissions)

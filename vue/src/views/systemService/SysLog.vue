@@ -365,7 +365,7 @@ onUnmounted(() => {
     align-items: center;
     padding: 24px;
     box-sizing: border-box;
-    background-color: #f3f3f3;
+    background-color: #f5f8fa;
     border-radius: 4px;
   }
   .content {
@@ -374,7 +374,7 @@ onUnmounted(() => {
     left: 20px;
     right: 20px;
     bottom: 20px;
-    background-color: #f3f3f3;
+    background-color: #f5f8fa;
     border-radius: 4px;
     padding: 24px;
     box-sizing: border-box;
@@ -420,5 +420,9 @@ onUnmounted(() => {
 :deep(.el-check-tag) {
   line-height: 22px;
   margin-right: 20px;
+  background-color: #e6ecef;
+}
+:deep(.el-check-tag.is-checked) {
+  background-color: #c6e2ff;
 }
 </style>

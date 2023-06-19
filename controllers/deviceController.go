@@ -17,7 +17,7 @@ func NewDeviceController() *DeviceController {
 }
 
 func (c *DeviceController) RegisterRoutes(router *gin.RouterGroup) {
-	router.POST("/api/v2/device/test", c.GetAllCommInterfaceProtocols)
+	router.POST("/api/v2/device/getEmDeviceInfoByType", c.GetEmDeviceInfoByType)
 	router.POST("/api/v2/device/ctrlDevice", c.CtrlDevice)
 	router.POST("/api/v2/device/getDeviceListByType", c.getDeviceListByType)
 }
@@ -46,7 +46,6 @@ func (ctrl *DeviceController) CtrlDevice(ctx *gin.Context) {
 		})
 		return
 	}
-
 }
 
 /*
@@ -80,11 +79,25 @@ func (c *DeviceController) getDeviceListByType(ctx *gin.Context) {
 	})
 }
 
-func (c *DeviceController) GetAllCommInterfaceProtocols(ctx *gin.Context) {
-	c.repo.GetEmDevice()
+func (c *DeviceController) GetEmDeviceInfoByType(ctx *gin.Context) {
+	var param models.DeviceParam
+	if err := ctx.ShouldBindJSON(&param); err != nil {
+		ctx.JSON(http.StatusOK, model.ResponseData{
+			Code:    "1",
+			Message: "error" + err.Error(),
+			Data:    "",
+		})
+		return
+	}
+	res, _ := c.repo.GetEmDeviceInfo(param.DeviceType)
 	ctx.JSON(http.StatusOK, model.ResponseData{
-		Code:    "1",
+		Code:    "0",
 		Message: "成功",
-		Data:    1,
+		Data:    res,
 	})
+}
+
+func (c *DeviceController) GetDeviceInfoByDeviceType(ctx *gin.Context) {
+	// 获取em设备
+
 }
