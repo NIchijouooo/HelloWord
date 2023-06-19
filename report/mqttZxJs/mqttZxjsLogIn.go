@@ -127,8 +127,9 @@ func (r *ReportServiceParamZxjsTemplate) MQTTZxjsGWLogin(param ReportServiceGWPa
 	// 客户端id生成规则${ProductSN}.${DeviceSN}
 	opts.SetClientID(fmt.Sprintf(param.Param.ProductSn, ".", param.Param.DeviceSn))
 	// 用户名生成规则${ProductSN}|${DeviceSN}|${authmode} authmode: 1表⽰静态注册；2表⽰动态注册
-	//opts.SetUsername(fmt.Sprintf(param.Param.ProductSn, "|", param.Param.DeviceSn, "|1"))
-	opts.SetUsername(param.Param.DeviceSn)
+	opts.SetUsername(fmt.Sprintf(param.Param.ProductSn, "|", param.Param.DeviceSn, "|1"))
+	// 本地测试
+	//opts.SetUsername(param.Param.DeviceSn)
 	// 使用设备密码连接
 	opts.SetPassword(param.Param.DevicePwd)
 	opts.SetDialer(dialer) // hxd modity

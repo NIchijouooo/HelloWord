@@ -119,13 +119,11 @@ func (r *ReportServiceParamZxjsTemplate) NodePropertyPost(property MQTTZxjsRepor
 
 	ycList := make([]MQTTZxjsReportValueTemplate, 0)
 
+	// 将iot的数据上报到第三方平台
 	for _, v := range mqttFeisjy.ReportServiceParamListFeisjy.ServiceList {
 		for _, d := range v.NodeList {
 			initYcList(&ycList, d.CollInterfaceName, d.Name)
 		}
-	}
-	for _, v := range r.NodeList {
-		initYcList(&ycList, v.CollInterfaceName, v.Name)
 	}
 	r.ZxjsPublishYcData(&ycPropertyPostParam, ycList, property.DeviceSN)
 }
@@ -162,7 +160,7 @@ func initYcList(ycList *[]MQTTZxjsReportValueTemplate, collInterfaceName string,
 			Value: v.Value[len(v.Value)-1].Value,
 		}
 		*ycList = append(*ycList, val)
-		// 本地测试
+		////本地测试
 		//if len(v.Identity) == 0 {
 		//	continue
 		//}

@@ -340,7 +340,6 @@
             </el-input>
           </el-tooltip>
         </el-form-item> -->
-        </el-form-item>
 
         <el-form-item label="唯一标识">
             <el-input
@@ -1042,7 +1041,7 @@ const initPropertyForm = () => {
     step: 0,
     min: 0,
     max: 0,
-    dataLength: 0
+    dataLength: 0,
     identity: '',
   }
 }

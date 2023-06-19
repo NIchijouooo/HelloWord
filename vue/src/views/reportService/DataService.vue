@@ -495,7 +495,7 @@ const ctxData = reactive({
     deviceSecret: '',
     //lp add 2023-06-17
     reportNetSw: false,
-    reportNet: ''
+    reportNet: '',
     //wt add 2023-06-14
     productSn: '',
     deviceSn: '',
@@ -991,7 +991,7 @@ const initGatewayForm = () => {
 
     // lp add 2023-06-17
     reportNetSw: false,
-    reportNet: ''
+    reportNet: '',
     // wt add 2023-06-14
     productSn: '',
     deviceSn: '',

@@ -1071,7 +1071,7 @@ func ApiAddTSLModbusCmdProperty(context *gin.Context) {
 		BitOffsetSw bool                                  `json:"bitSwitch"` // 位偏移开关
 		BitOffset   int                                   `json:"bitOffset"` // 位偏移数量
 		Params      device.TSLModbusPropertyParamTemplate `json:"params"`    //ltg add 2023-06-15
-		Identity   string `json:"identity"` //唯一标识
+		Identity    string                                `json:"identity"`  //唯一标识
 	}{}
 
 	err := context.BindJSON(propertyParam)
@@ -1120,7 +1120,7 @@ func ApiAddTSLModbusCmdProperty(context *gin.Context) {
 		BitOffsetSw: propertyParam.BitOffsetSw,
 		BitOffset:   propertyParam.BitOffset,
 		Params:      param,
-		Identity:   propertyParam.Identity,
+		Identity:    propertyParam.Identity,
 	}
 	err = tslModel.TSLModelPropertiesAdd(propertyParam.CmdName, property)
 	if err != nil {
@@ -1156,8 +1156,8 @@ func ApiAddTSLD07CmdProperty(context *gin.Context) {
 		RulerAddOffset int    `json:"rulerAddOffset"` //当前变量在当前ID数据地址中的偏移地址
 		Type           int    `json:"type"`           //float,uint32...
 
-		Params device.TSLDLT6452007PropertyParamTemplate `json:"params"` //ltg add 2023-06-15
-		Identity       string `json:"identity"`       //唯一标识
+		Params   device.TSLDLT6452007PropertyParamTemplate `json:"params"`   //ltg add 2023-06-15
+		Identity string                                    `json:"identity"` //唯一标识
 	}{}
 
 	err := context.BindJSON(propertyParam)
@@ -1736,7 +1736,7 @@ func ApiModifyTSLModbusCmdProperty(context *gin.Context) {
 		BitOffsetSw bool                                  `json:"bitSwitch"` // 位偏移开关
 		BitOffset   int                                   `json:"bitOffset"` // 位偏移数量
 		Params      device.TSLModbusPropertyParamTemplate `json:"params"`    //ltg add 2023-06-15
-		Identity   string `json:"identity"` //唯一标识
+		Identity    string                                `json:"identity"`  //唯一标识
 	}{}
 
 	err := context.BindJSON(propertyParam)
@@ -1785,7 +1785,7 @@ func ApiModifyTSLModbusCmdProperty(context *gin.Context) {
 		BitOffsetSw: propertyParam.BitOffsetSw,
 		BitOffset:   propertyParam.BitOffset,
 		Params:      param,
-		Identity:   propertyParam.Identity,
+		Identity:    propertyParam.Identity,
 	}
 	err = tslModel.TSLModelPropertiesModify(propertyParam.CmdName, property)
 	if err != nil {
@@ -1821,7 +1821,7 @@ func ApiModifyTSLD07CmdProperty(context *gin.Context) {
 		RulerAddOffset int                                       `json:"rulerAddOffset"` //当前变量在当前ID数据地址中的偏移地址
 		Type           int                                       `json:"type"`           //float,uint32...
 		Params         device.TSLDLT6452007PropertyParamTemplate `json:"params"`         //ltg add 2023-06-15
-		Identity       string `json:"identity"`       //唯一标识
+		Identity       string                                    `json:"identity"`       //唯一标识
 	}{}
 
 	err := context.BindJSON(propertyParam)

@@ -103,7 +103,12 @@ func ReportServiceZxjsPoll(ctx context.Context, r *ReportServiceParamZxjsTemplat
 	reportTime := fmt.Sprintf("@every %dm%ds", r.GWParam.ReportTime/60, r.GWParam.ReportTime%60)
 	setting.ZAPS.Infof("上报服务[%s]定时上报周期为%v", r.GWParam.ServiceName, reportTime)
 
-	cronProcess.AddFunc(reportTime, r.ReportTimeFun)
+	_, err := cronProcess.AddFunc(reportTime, r.ReportTimeFun)
+	if err != nil {
+		setting.ZAPS.Errorf("上报服务[%s]添加定时上报任务失败,err:[%v]", r.GWParam.ServiceName, err)
+	} else {
+		cronProcess.Start()
+	}
 
 	//订阅采集接口消息
 	//device.CollectInterfaceMap.Lock.Lock()
