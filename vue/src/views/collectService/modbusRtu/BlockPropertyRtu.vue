@@ -972,7 +972,7 @@ const submitPorpertyForm = () => {
           bitOffsetSw: ctxData.propertyForm.bitOffsetSw,
           bitOffset: ctxData.propertyForm.bitOffsetSw ? ctxData.propertyForm.bitOffset : 0,
           // step: +ctxData.propertyForm.step,
-          iotDataType: ctxData.propertyForm.iotDataType
+          iotDataType: ctxData.propertyForm.iotDataType,
           identity: ctxData.propertyForm.identity,
         },
       }
