@@ -243,14 +243,14 @@ func (r *RealtimeDataRepository) GetYxListByDevIdsAndCodes(deviceIds, codes stri
 }
 
 func (r *RealtimeDataRepository) GetYxListById(deviceId int) ([]models.YxData, error) {
-	rowsYx, err := r.taosDb.Query("SELECT last(code), last(name), last(val) FROM yx where device_id = ? group by code order by code", deviceId)
+	rowsYx, err := r.taosDb.Query("SELECT last(code), last(name), last(val), last(ts) FROM yx where device_id = ? group by code order by code", deviceId)
 	if err != nil {
 		return nil, err
 	}
 	var yxList []models.YxData
 	for rowsYx.Next() {
 		yx := models.YxData{}
-		err := rowsYx.Scan(&yx.Code, &yx.Name, &yx.Value)
+		err := rowsYx.Scan(&yx.Code, &yx.Name, &yx.Value, &yx.Ts)
 		if err != nil {
 			return nil, err
 		}
@@ -319,4 +319,21 @@ func (r *RealtimeDataRepository) GetSettingById(deviceId, code int) (models.Sett
 		}
 	}
 	return realtime, err
+}
+
+func (r *RealtimeDataRepository) GetYcListById(deviceId int) ([]models.YcData, error) {
+	rowsYx, err := r.taosDb.Query("SELECT last(code), last(name), last(val),last(ts) FROM yc where device_id = ? group by code order by code", deviceId)
+	if err != nil {
+		return nil, err
+	}
+	var list []models.YcData
+	for rowsYx.Next() {
+		yc := models.YcData{}
+		err := rowsYx.Scan(&yc.Code, &yc.Name, &yc.Value, &yc.Ts)
+		if err != nil {
+			return nil, err
+		}
+		list = append(list, yc)
+	}
+	return list, err
 }
