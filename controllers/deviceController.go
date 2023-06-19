@@ -56,7 +56,7 @@ deviceType必传
 */
 func (c *DeviceController) getDeviceListByType(ctx *gin.Context) {
 	var param models.DeviceParam
-	if err := ctx.ShouldBindJSON(&param); err != nil {
+	if err := ctx.Bind(&param); err != nil {
 		ctx.JSON(http.StatusOK, model.ResponseData{
 			Code:    "1",
 			Message: "error" + err.Error(),

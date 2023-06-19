@@ -47,3 +47,15 @@ func (r *RuleHistoryRepository) InsertRuleHistoryDevice(emRuleHistoryDeviceModel
 	}
 	return 1, nil
 }
+
+func (r *RuleHistoryRepository) GetRuleHistoryList(param models.RuleHistoryParam) ([]models.EmRuleHistoryModel, int) {
+	pageNum := param.PageNum
+	pageSize := param.PageSize
+	// 分页查询
+	if pageNum > 0 && pageSize > 0 {
+
+	} else {
+
+	}
+	return []models.EmRuleHistoryModel{}, 0
+}
