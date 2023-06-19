@@ -36,8 +36,8 @@ func (c *RuleHistoryController) getRuleHistoryList(ctx *gin.Context) {
 		})
 		return
 	}
-	deviceId := param.DeviceId
-	if deviceId == 0 {
+	deviceIds := param.DeviceIds
+	if len(deviceIds) == 0 {
 		ctx.JSON(http.StatusOK, model.ResponseData{
 			Code:    "1",
 			Message: "参数错误",
@@ -45,5 +45,21 @@ func (c *RuleHistoryController) getRuleHistoryList(ctx *gin.Context) {
 		})
 		return
 	}
-	c.repo.GetRuleHistoryList(param)
+	list, total, err := c.repo.GetRuleHistoryList(param)
+	if err != nil {
+		ctx.JSON(http.StatusOK, model.ResponseData{
+			Code:    "1",
+			Message: "error" + err.Error(),
+			Data:    "",
+		})
+		return
+	}
+	// 将查询结果返回给客户端
+	ctx.JSON(http.StatusOK, model.ResponseData{
+		Code: "0",
+		Data: gin.H{
+			"data":  list,
+			"total": total,
+		},
+	})
 }

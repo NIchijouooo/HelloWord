@@ -97,6 +97,9 @@ func RouterWeb(port string) {
 		// 设备相关
 		deviceController := controllers.NewDeviceController()
 		deviceController.RegisterRoutes(&router.RouterGroup)
+		// 告警历史相关
+		ruleHistoryController := controllers.NewRuleHistoryController()
+		ruleHistoryController.RegisterRoutes(&router.RouterGroup)
 
 		accountRouter := router.Group("/api/v2/account")
 		{
