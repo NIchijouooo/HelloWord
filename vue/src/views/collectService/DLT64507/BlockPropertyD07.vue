@@ -100,6 +100,7 @@
       <el-table-column sortable prop="rulerAddOffset" label="标识偏移地址" width="auto" min-width="150" align="center"> </el-table-column>
       <el-table-column prop="unit" label="单位" width="auto" min-width="80" align="center" ></el-table-column>
       <el-table-column prop="iotDataType" label="点位类型" width="auto" min-width="120" align="center" />
+      <el-table-column sortable prop="identity" label="唯一标识" width="auto" min-width="120" align="center" />
       <el-table-column label="操作" width="auto" min-width="200" align="center" fixed="right">
         <template #default="scope">
           <el-button @click="editDeviceModelProperty(scope.row)" text type="primary">编辑</el-button>
@@ -350,6 +351,17 @@
           </el-tooltip>
         </el-form-item> -->
 
+        <el-form-item label="唯一标识">
+            <el-input
+              type="text"
+              style="width: 220px"
+              v-model="ctxData.propertyForm.identity"
+              autocomplete="off"
+              placeholder="请输入唯一标识"
+            >
+            </el-input>
+        </el-form-item>
+
       </el-form>
     </div>
 
@@ -569,7 +581,8 @@ const ctxData = reactive({
     stepAlarm: false, // 步长报警，只有uint32，int32，double有效
     dataLength: 0, // 字符串长度，只有string有效
     dataLengthAlarm: false, // 字符串长度报警，只有string有效
-    iotDataType: 'yc'
+    iotDataType: 'yc',
+    identity: '', // 唯一标识
   },
 
   //数据类型
@@ -925,6 +938,7 @@ const editDeviceModelProperty = (row) => {
     ctxData.propertyForm['dataLengthAlarm'] = row.params.dataLengthAlarm
   }
   ctxData.propertyForm.iotDataType = row.iotDataType
+  ctxData.propertyForm.identity = row.identity === undefined || row.identity === null ? '' : row.identity
 }
 const propertyFormRef = ref(null)
 const submitPorpertyForm = () => {
@@ -950,6 +964,7 @@ const submitPorpertyForm = () => {
           blockAddOffset:ctxData.propertyForm.blockAddOffset,
           rulerAddOffset:ctxData.propertyForm.rulerAddOffset,
           iotDataType: ctxData.propertyForm.iotDataType
+          identity: ctxData.propertyForm.identity,
         },
       }
       let params = {}
@@ -1044,7 +1059,8 @@ const initPropertyForm = () => {
     step: 0,
     min: 0,
     max: 0,
-    dataLength: 0
+    dataLength: 0,
+    identity: '',
   }
 }
 const getDeviceProperty = () => {
