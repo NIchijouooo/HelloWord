@@ -791,6 +791,7 @@ func (c *EmController) AddEmDeviceModelCmdParam(ctx *gin.Context) {
 	emDeviceModelCmdParam.Name = addEmDeviceModelCmdParam.Name
 	emDeviceModelCmdParam.Label = addEmDeviceModelCmdParam.Label
 	emDeviceModelCmdParam.IotDataType = addEmDeviceModelCmdParam.IotDataType
+	emDeviceModelCmdParam.Identity = addEmDeviceModelCmdParam.Identity
 	// 判断设备模型是否有重名，有就直接返回
 	emDeviceModelCmdParam.Name = addEmDeviceModelCmdParam.Name
 	emDeviceModelCmdParamByName, _ := c.repo.GetEmDeviceModelCmdParamByName(emDeviceModelCmdParam.Name)
@@ -835,11 +836,13 @@ func (c *EmController) AddEmDeviceModelCmdParamFromXlsx(property interface{}, pr
 		emDeviceModelCmdParam.Name = tslModbusPropertyTemplate.Name
 		emDeviceModelCmdParam.Label = tslModbusPropertyTemplate.Label
 		emDeviceModelCmdParam.IotDataType = tslModbusPropertyTemplate.IotDataType
+		emDeviceModelCmdParam.Identity = tslModbusPropertyTemplate.Identity
 	case "dlt645":
 		tslDLT6452007PropertyTemplate := property.(device.TSLDLT6452007PropertyTemplate)
 		emDeviceModelCmdParam.Name = tslDLT6452007PropertyTemplate.Name
 		emDeviceModelCmdParam.Label = tslDLT6452007PropertyTemplate.Label
 		emDeviceModelCmdParam.IotDataType = tslDLT6452007PropertyTemplate.IotDataType
+		emDeviceModelCmdParam.Identity = tslDLT6452007PropertyTemplate.Identity
 	default:
 		return
 	}
@@ -867,6 +870,7 @@ func (c *EmController) UpdateEmDeviceModelCmdParam(ctx *gin.Context) {
 	emDeviceModelCmdParam.Name = addEmDeviceModelCmdParam.Name
 	emDeviceModelCmdParam.Label = addEmDeviceModelCmdParam.Label
 	emDeviceModelCmdParam.IotDataType = addEmDeviceModelCmdParam.IotDataType
+	emDeviceModelCmdParam.Identity = addEmDeviceModelCmdParam.Identity
 	emDeviceModelCmdParamByName, _ := c.repo.GetEmDeviceModelCmdParamByName(addEmDeviceModelCmdParam.Name)
 	emDeviceModelCmdParam.Id = emDeviceModelCmdParamByName.Id
 

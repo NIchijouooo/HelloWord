@@ -85,3 +85,9 @@ func (r *DictDataRepository) SelectDictValue(dictType string, dictLabel string) 
 	err := r.db.Where("dict_type = ?", dictType).Where("dict_label = ?", dictLabel).Find(&dictData).Error
 	return dictData, err
 }
+
+func (r *DictDataRepository) GetDictDataByDictType(dictType string) ([]models.DictData, error) {
+	var dictDataList []models.DictData
+	err := r.db.Where("dict_type = ?", dictType).Find(&dictDataList).Error
+	return dictDataList, err
+}
