@@ -28,6 +28,32 @@ func (r *RealtimeDataRepository) CreateDB() error {
 	return err
 }
 
+//realtimedata.charge_discharge_${item.deviceId} (ts,charge_capacity,discharge_capacity,profit) using realtimedata.charge_discharge
+//tags(${item.deviceId})
+//values (#{item.ts}, #{item.chargeCapacity}, #{item.dischargeCapacity}, #{item.profit})
+
+/*
+*
+添加charge_discharge表
+*/
+func (r *RealtimeDataRepository) CreateChargeDischargeTable() error {
+	// 定义查询参数
+	sql := fmt.Sprintf("create table if not exists realtimedatatest.charge_discharge (ts timestamp, charge_capacity double, discharge_capacity double, profit double) tags (device_id int);")
+	_, err := r.taosDb.Exec(sql)
+	return err
+}
+
+/*
+*
+添加charge_discharge_hour表
+*/
+func (r *RealtimeDataRepository) CreateChargeDischargeHourTable() error {
+	// 定义查询参数
+	sql := fmt.Sprintf("create table if not exists realtimedatatest.charge_discharge_hour (ts timestamp, charge_capacity double, discharge_capacity double, profit double) tags (device_id int);")
+	_, err := r.taosDb.Exec(sql)
+	return err
+}
+
 /*
 *
 添加yx表
