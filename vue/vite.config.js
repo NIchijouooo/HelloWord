@@ -89,7 +89,7 @@ export default defineConfig(({ command, mode }) => {
           changeOrigin: true,
           //target: 'http://192.168.4.162:80', // 代理地址 测试环境
           //target: ' http://192.168.4.196:8080', // 代理地址 测试环境
-           target: 'http://127.0.0.1:7070', // 代理地址 本地环境
+           target: 'http://127.0.0.1:8080', // 代理地址 本地环境
           // target: 'http://120.78.181.76/gw', // 代理地址 本地环境
           rewrite: (path) => path.replace(/^\/api/, '/api'),
         },
