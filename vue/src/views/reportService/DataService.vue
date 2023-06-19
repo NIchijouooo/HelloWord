@@ -38,7 +38,7 @@
           stripe
           @row-dblclick="editGateway"
         >
-          <el-table-column type="expand">
+          <el-table-column type="expand" min-width="80">
             <template #default="scope">
               <div class="param-content">
                 <div class="pc-title">
@@ -59,6 +59,16 @@
           <el-table-column sortable prop="serviceName" label="服务名称" width="auto" min-width="150" align="center">
           </el-table-column>
           <el-table-column sortable prop="protocol" label="协议名称" width="auto" min-width="150" align="center">
+          </el-table-column>
+          <el-table-column sortable prop="reportNetSW" label="指定上报通道" width="auto" min-width="100" align="center">
+            <template #default="scope">
+              {{ scope.row.reportNetSW === false ? '否' : '是' }}
+            </template>
+          </el-table-column>
+          <el-table-column sortable prop="reportNet" label="上报网卡" width="auto" min-width="100" align="center">
+            <template #default="scope">
+              {{ scope.row.reportNetSW === false ? '-' : scope.row.reportNet }}
+            </template>
           </el-table-column>
           <el-table-column sortable prop="ip" label="上报地址" width="auto" min-width="150" align="center"> </el-table-column>
           <el-table-column sortable prop="port" label="上报端口" width="auto" min-width="100" align="center"> </el-table-column>
@@ -155,6 +165,12 @@
               >
               </el-option>
             </el-select>
+          </el-form-item>
+          <el-form-item label="指定上报通道">
+            <el-switch v-model="ctxData.gatewayForm.reportNetSw" inline-prompt active-text="是" inactive-text="否" />
+          </el-form-item>
+          <el-form-item label="上报网卡" v-if="ctxData.gatewayForm.reportNetSw" prop="reportNet">
+            <el-input type="text" v-model.number="ctxData.gatewayForm.reportNet" autocomplete="off" placeholder="请输入上报网卡"></el-input>
           </el-form-item>
           <el-form-item
             label="上报地址"
@@ -381,10 +397,18 @@ const refExpYM =
   /^(?=^.{3,255}$)(http(s)?:\/\/)?(www\.)?[a-zA-Z0-9][-a-zA-Z0-9]{0,62}(\.[a-zA-Z0-9][-a-zA-Z0-9]{0,62})+(:\d+)*(\/\w+\.\w+)*$/
 const validateIP = (rule, value, callback) => {
   console.log('validateIP')
-  if (refExpIP.test(value) || refExpYM.test(value)) {
-    callback()
+  if (ctxData.gatewayForm.reportNetSw) {
+    if (refExpIP.test(value)) {
+      callback()
+    } else {
+      callback(new Error('请输入正确的IP地址！'))
+    }
   } else {
-    callback(new Error('格式错误！'))
+    if (refExpIP.test(value) || refExpYM.test(value)) {
+      callback()
+    } else {
+      callback(new Error('请输入正确的IP地址、域名地址！'))
+    }
   }
 }
 const regCnt = /^[0-9]*[1-9][0-9]*$/
@@ -442,6 +466,9 @@ const ctxData = reactive({
     productKey: '',
     deviceID: '',
     deviceSecret: '',
+    //lp add 2023-06-17
+    reportNetSw: false,
+    reportNet: ''
   },
   paramName: {
     serviceName: '服务名称',
@@ -532,13 +559,14 @@ const ctxData = reactive({
         trigger: 'blur',
       },
     ],
-    keepAlive: [
+    // lp update 2023-06-17
+    /*keepAlive: [
       {
         required: true,
         message: '保活时间不能为空',
         trigger: 'blur',
       },
-    ],
+    ],*/
     deviceName: [
       {
         required: true,
@@ -560,13 +588,14 @@ const ctxData = reactive({
         trigger: 'blur',
       },
     ],
-    cleanSession: [
+    // lp update 2023-06-17
+    /*cleanSession: [
       {
         required: true,
         message: '清除会话不能为空',
         trigger: 'blur',
       },
-    ],
+    ],*/
     slaveID: [
       {
         required: true,
@@ -652,6 +681,14 @@ const ctxData = reactive({
       {
         required: true,
         message: '产品密钥不能为空',
+        trigger: 'blur',
+      },
+    ],
+    // lp add 2023-06-17
+    reportNet: [
+      {
+        required: true,
+        message: '上报网卡不能为空',
         trigger: 'blur',
       },
     ],
@@ -785,6 +822,9 @@ const editGateway = (row) => {
     reportTime: row.reportTime,
     protocol: row.protocol,
   }
+  // lp add 2023-06-17
+  ctxData.gatewayForm['reportNetSw'] = row.reportNetSw
+  ctxData.gatewayForm['reportNet'] = row.reportNet
 
   if (row.protocol.includes('FSJY.MQTT')) {  //gwai add 2023-04-05
     ctxData.gatewayForm['userName'] = row.param.UserName
@@ -888,6 +928,9 @@ const initGatewayForm = () => {
     deviceID: '',
     deviceSecret: '',
 
+    // lp add 2023-06-17
+    reportNetSw: false,
+    reportNet: ''
   }
 }
 const gatewayFormRef = ref(null)
@@ -901,6 +944,8 @@ const submitGatewayForm = () => {
         port: ctxData.gatewayForm.port,
         reportTime: ctxData.gatewayForm.reportTime,
         protocol: ctxData.gatewayForm.protocol,
+        reportNetSw: ctxData.gatewayForm.reportNetSw,
+        reportNet: ctxData.gatewayForm.reportNet,
         param: {},
       }
       let param = {}

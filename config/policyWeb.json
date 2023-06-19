@@ -199,7 +199,7 @@
             "path": "/production",
             "name": "Production",
             "meta": {
-              "title": "SN",
+              "title": "网关SN",
               "icon": "production"
             },
             "children": []
