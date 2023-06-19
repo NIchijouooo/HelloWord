@@ -32,8 +32,10 @@ func (ctrl *RealtimeDataController) RegisterRoutes(router *gin.RouterGroup) {
 	router.POST("/api/v2/realtimeData/GetRealtimeDataYcByID", ctrl.GetRealtimeDataYcByID)
 	router.POST("/api/v2/realtimeData/GetRealtimeDataSettingByID", ctrl.GetRealtimeDataSettingByID)
 	router.POST("/api/v2/realtimeData/GetRealtimeDataYxListByID", ctrl.GetRealtimeDataYxListByID)
+	router.POST("/api/v2/realtimeData/getRealtimeDataYxListByDevId", ctrl.GetRealtimeDataYxListByDevId)
 	router.POST("/api/v2/realtimeData/getRealtimeDataYxListByIdOrCodeList", ctrl.GetRealtimeDataYxListByIdOrCodeList)
 	router.POST("/api/v2/realtimeData/GetRealtimeDataYcListByID", ctrl.GetRealtimeDataYcListByID)
+	router.POST("/api/v2/realtimeData/getRealtimeDataYcListByDevId", ctrl.GetRealtimeDataYcListByDevId)
 	router.POST("/api/v2/realtimeData/getRealtimeDataYcListByIdOrCodeList", ctrl.GetRealtimeDataYcListByIdOrCodeList)
 	router.POST("/api/v2/realtimeData/GetRealtimeDataSettingListByID", ctrl.GetRealtimeDataSettingListByID)
 	router.POST("/api/v2/realtimeData/GetPointsByDeviceId", ctrl.GetPointsByDeviceId)
@@ -311,5 +313,65 @@ func (c *RealtimeDataController) GetRealtimeDataSettingByID(ctx *gin.Context) {
 		"0",
 		"",
 		yx,
+	})
+}
+
+/*
+*
+获取设备全部遥信实时数据
+*/
+func (c *RealtimeDataController) GetRealtimeDataYxListByDevId(ctx *gin.Context) {
+	var realtimeData ParamRealtimeData
+	if err := ctx.Bind(&realtimeData); err != nil {
+		ctx.JSON(http.StatusOK, model.ResponseData{
+			Code:    "1",
+			Message: "error" + err.Error(),
+			Data:    "",
+		})
+		return
+	}
+	deviceId := realtimeData.DeviceId
+	if deviceId == 0 {
+		ctx.JSON(http.StatusOK, model.ResponseData{
+			Code:    "1",
+			Message: "参数错误",
+			Data:    "",
+		})
+		return
+	}
+	yxList, _ := c.repo.GetYxListById(deviceId)
+	ctx.JSON(http.StatusOK, model.ResponseData{
+		Code: "0",
+		Data: yxList,
+	})
+}
+
+/*
+*
+获取设备全部遥测实时数据
+*/
+func (c *RealtimeDataController) GetRealtimeDataYcListByDevId(ctx *gin.Context) {
+	var realtimeData ParamRealtimeData
+	if err := ctx.Bind(&realtimeData); err != nil {
+		ctx.JSON(http.StatusOK, model.ResponseData{
+			Code:    "1",
+			Message: "error" + err.Error(),
+			Data:    "",
+		})
+		return
+	}
+	deviceId := realtimeData.DeviceId
+	if deviceId == 0 {
+		ctx.JSON(http.StatusOK, model.ResponseData{
+			Code:    "1",
+			Message: "参数错误",
+			Data:    "",
+		})
+		return
+	}
+	ycList, _ := c.repo.GetYcListById(deviceId)
+	ctx.JSON(http.StatusOK, model.ResponseData{
+		Code: "0",
+		Data: ycList,
 	})
 }
