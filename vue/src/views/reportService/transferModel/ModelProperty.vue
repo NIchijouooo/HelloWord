@@ -11,7 +11,7 @@
         </el-form-item>
       </el-form>
     </div>
-    
+
     <div class="search-bar" style="display: flex;">
       <div class="title" style="position: relative;margin-right: 40px;height: 40px; padding: 0px 0; justify-content: flex-start">
         <div class="tName">{{ props.curTransferModel.label }}</div>
@@ -200,15 +200,15 @@
             <el-input type="text" v-model="ctxData.propertyForm.max" autocomplete="off" placeholder="请输入最大值">
             </el-input>
           </el-form-item>
-          <el-form-item v-if="ctxData.propertyForm.type !== 3" label="布长报警" prop="stepAlarm">
+          <el-form-item v-if="ctxData.propertyForm.type !== 3" label="步长报警" prop="stepAlarm">
             <el-switch v-model="ctxData.propertyForm.stepAlarm" inline-prompt active-text="是" inactive-text="否" />
           </el-form-item>
           <el-form-item
             v-if="ctxData.propertyForm.type !== 3 && ctxData.propertyForm.stepAlarm"
-            label="布长"
+            label="步长"
             prop="step"
           >
-            <el-input type="text" v-model="ctxData.propertyForm.step" autocomplete="off" placeholder="请输入布长">
+            <el-input type="text" v-model="ctxData.propertyForm.step" autocomplete="off" placeholder="请输入步长">
             </el-input>
           </el-form-item>
           <el-form-item v-if="ctxData.propertyForm.type === 2" label="小数位数" prop="decimals">
@@ -388,6 +388,24 @@ const emit = defineEmits(['changeTmFlag'])
 const toTransferModel = () => {
   emit('changeTmFlag')
 }
+
+const regCnt = /^[0-9]*[1-9][0-9]*$/
+const validateRegCnt = (rule, value, callback) => {
+  if (!regCnt.test(value)) {
+    callback(new Error('只能输入正整数数字！'))
+  } else {
+    callback()
+  }
+}
+const regStep = /^[0-9]+(.[0-9]{1,2})?$/
+const validateStep = (rule, value, callback) => {
+  if (!regStep.test(value)) {
+    callback(new Error('只能输入大于等于0,最多两位小数的数字！'))
+  } else {
+    callback()
+  }
+}
+
 const ctxData = reactive({
   headerCellStyle: {
     background: variables.primaryColor,
@@ -410,12 +428,12 @@ const ctxData = reactive({
     uploadName: '', // 上报属性名称
     type: 0, // 数据类型
     //params
-    min: '', // 属性最小值，只有uint32，int32，double有效
-    max: '', // 属性最大值，只有uint32，int32，double有效
+    min: 0, // 属性最小值，只有uint32，int32，double有效
+    max: 0, // 属性最大值，只有uint32，int32，double有效
     minMaxAlarm: false, // 范围报警，只有uint32，int32，double有效
-    step: '', // 布长，只有uint32，int32，double有效
-    stepAlarm: false, // 布长报警，只有uint32，int32，double有效
-    unit: '', // 单位，只有uint32，int32，double有效
+    step: 0, // 步长，只有uint32，int32，double有效
+    stepAlarm: false, // 步长报警，只有uint32，int32，double有效
+    unit: 0, // 单位，只有uint32，int32，double有效
     decimals: 0, // 小数位数，只有double有效
     dataLength: '', // 字符串长度，只有string有效
     dataLengthAlarm: false, // 字符串长度报警，只有string有效
@@ -441,8 +459,8 @@ const ctxData = reactive({
     min: '最小值',
     max: '最大值',
     minMaxAlarm: '范围报警',
-    step: '布长',
-    stepAlarm: '布长报警',
+    step: '步长',
+    stepAlarm: '步长报警',
     unit: '单位',
     decimals: '小数位数',
     dataLength: '字符串长度',
@@ -481,6 +499,50 @@ const ctxData = reactive({
       {
         type: 'number',
         message: '小数位数只能输入数字',
+      },
+    ],
+    step: [
+      {
+        required: true,
+        message: '步长不能为空',
+        trigger: 'blur',
+      },
+      {
+        trigger: 'blur',
+        validator: validateStep,
+      },
+    ],
+    min: [
+      {
+        required: true,
+        message: '最小值不能为空',
+        trigger: 'blur',
+      },
+      {
+        trigger: 'blur',
+        validator: validateStep,
+      },
+    ],
+    max: [
+      {
+        required: true,
+        message: '最大值不能为空',
+        trigger: 'blur',
+      },
+      {
+        trigger: 'blur',
+        validator: validateStep,
+      },
+    ],
+    dataLength: [
+      {
+        required: true,
+        message: '字符串长度不能为空',
+        trigger: 'blur',
+      },
+      {
+        trigger: 'blur',
+        validator: regCnt,
       },
     ],
   },
@@ -651,14 +713,14 @@ const saveProperties = async() => {
       property['unit'] = item.unit
       let params = {}
       if (item.type !== 3) {
-        params['min'] = ''
-        params['max'] = ''
-        params['minMaxAlarm'] = false
-        params['step'] = ''
-        params['stepAlarm'] = false
+        params['min'] = item.params.min
+        params['max'] = item.params.max
+        params['minMaxAlarm'] = item.params.minMaxAlarm
+        params['step'] = item.params.step
+        params['stepAlarm'] = item.params.stepAlarm
       } else {
-        params['dataLength'] = ''
-        params['dataLengthAlarm'] = false
+        params['dataLength'] = item.params.dataLength
+        params['dataLengthAlarm'] = item.params.dataLengthAlarm
       }
       property['params'] = params
 
@@ -737,6 +799,10 @@ const editProperty = (row) => {
 }
 const propertyFormRef = ref(null)
 const submitPorpertyForm = () => {
+  if (ctxData.propertyForm.type !== 3 && Number(ctxData.propertyForm.min) > Number(ctxData.propertyForm.max)) {
+    ElMessage.warning('最大值必须大于最小值')
+    return;
+  }
   propertyFormRef.value.validate((valid) => {
     console.log('valid', valid)
     if (valid) {
@@ -747,16 +813,16 @@ const submitPorpertyForm = () => {
       property['uploadName'] = ctxData.propertyForm.uploadName
       property['type'] = ctxData.propertyForm.type
       property['decimals'] = ctxData.propertyForm.decimals
-      property['unit'] = ctxData.propertyForm.unit
+      property['unit'] = ctxData.propertyForm.unit.toString()
       let params = {}
       if (ctxData.propertyForm.type !== 3) {
-        params['min'] = ctxData.propertyForm.min
-        params['max'] = ctxData.propertyForm.max
+        params['min'] = ctxData.propertyForm.min.toString()
+        params['max'] = ctxData.propertyForm.max.toString()
         params['minMaxAlarm'] = ctxData.propertyForm.minMaxAlarm
-        params['step'] = ctxData.propertyForm.step
+        params['step'] = ctxData.propertyForm.step.toString()
         params['stepAlarm'] = ctxData.propertyForm.stepAlarm
       } else {
-        params['dataLength'] = ctxData.propertyForm.dataLength
+        params['dataLength'] = ctxData.propertyForm.dataLength.toString()
         params['dataLengthAlarm'] = ctxData.propertyForm.dataLengthAlarm
       }
       property['params'] = params
@@ -842,14 +908,14 @@ const initPropertyForm = () => {
     label: '', // 属性标签
     type: 0, // 数据类型
     //params
-    min: '', // 属性最小值，只有uint32，int32，double有效
-    max: '', // 属性最大值，只有uint32，int32，double有效
+    min: 0, // 属性最小值，只有uint32，int32，double有效
+    max: 0, // 属性最大值，只有uint32，int32，double有效
     minMaxAlarm: false, // 范围报警使能，只有uint32，int32，double有效
-    step: '', // 布长，只有uint32，int32，double有效
-    stepAlarm: false, // 布长报警，只有uint32，int32，double有效
+    step: 0, // 步长，只有uint32，int32，double有效
+    stepAlarm: false, // 步长报警，只有uint32，int32，double有效
     unit: '', // 单位，只有uint32，int32，double有效
     decimals: 0, // 小数位数，只有double有效
-    dataLength: '', // 字符串长度，只有string有效
+    dataLength: 0, // 字符串长度，只有string有效
     dataLengthAlarm: false, // 字符串长度报警使能，只有string有效
   }
 }

@@ -736,7 +736,7 @@ const handleResult = (res, doFunction) => {
   height: calc(50% - 10px);
   left: 0;
   right: 0;
-  background-color: #f5f5f5;
+  background-color: #f5f8fa;
   border-radius: 4px;
 }
 .mcr-bottom {
@@ -745,7 +745,7 @@ const handleResult = (res, doFunction) => {
   height: calc(50% - 10px);
   left: 0;
   right: 0;
-  background-color: #f5f5f5;
+  background-color: #f5f8fa;
   border-radius: 4px;
 }
 .activeModel {

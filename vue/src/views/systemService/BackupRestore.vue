@@ -2,7 +2,7 @@
   <div class="main-container">
     <div class="main" style="background-color: inherit">
       <el-row :gutter="20">
-        <el-col :span="12">
+        <el-col :span="12" style="height: 151%;">
           <el-card class="box-card" :shadow="'hover'">
             <template #header>
               <div class="card-header">
@@ -353,5 +353,13 @@ const showOneResMsg = (res) => {
 @use 'styles/custom-scoped.scss' as *;
 .box-card {
   margin-bottom: 20px;
+}
+.item {
+  :deep(.el-card__header) {
+    background:#dce4eb;
+  }
+}
+:deep(.el-card__body) {
+  color: #999999;
 }
 </style>

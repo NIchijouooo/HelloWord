@@ -56,7 +56,7 @@
               </div>
             </div>
           </el-col>
-          <el-col :span="16" style="height: calc(104%);background-color: #f5f5f5;border-radius: 4px;">
+          <el-col :span="16" style="height: calc(104%);background-color: #f5f8fa;border-radius: 4px;">
             <div style="padding-top: 10px;">
               <div class="bi-title">上报信息</div>
               <div class="bi-body">
@@ -213,7 +213,7 @@ getGatewayList()
       padding-top: 10px;
       padding-left: 20px;
       padding-bottom: 30px;
-      background-color: #f5f5f5;
+      background-color: #f5f8fa;
       border-radius: 4px;
     }
     .bi-title {

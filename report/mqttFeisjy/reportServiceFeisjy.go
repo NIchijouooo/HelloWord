@@ -43,6 +43,8 @@ type ReportServiceNodeParamFeisjyTemplate struct {
 // 上报网关参数结构体
 type ReportServiceGWParamFeisjyTemplate struct {
 	ServiceName  string
+	ReportNetSW  bool
+	ReportNet    string
 	IP           string
 	Port         string
 	ReportStatus string
@@ -75,6 +77,7 @@ type ReportServiceParamFeisjyTemplate struct {
 	ReceiveDevUpGradeChan          chan MQTTFeisjyUpGradeTemplate        `json:"-"` // 平台下发固件升级
 	ReceiveFileListChan            chan FileListFeisjyTemplate           `json:"-"` // FileList相关
 	CancelFunc                     context.CancelFunc                    `json:"-"`
+	MessageEventBus                eventBus.Bus                          `json:"-"` //通信报文总线
 }
 
 type ReportServiceParamListFeisjyTemplate struct {
@@ -97,6 +100,7 @@ func NewReportServiceParamFeisjy(gw ReportServiceGWParamFeisjyTemplate, nodeList
 		ReportPropertyRequestFrameChan: make(chan MQTTFeisjyReportPropertyTemplate, 50),
 		ReceiveDevUpGradeChan:          make(chan MQTTFeisjyUpGradeTemplate, 2),
 		ReceiveFileListChan:            make(chan FileListFeisjyTemplate, 50),
+		MessageEventBus:                eventBus.NewBus(),
 	}
 
 	ctx, cancel := context.WithCancel(context.Background())
@@ -240,18 +244,40 @@ func (r *ReportServiceParamFeisjyTemplate) ProcessCollEvent(ctx context.Context,
 
 				nodeName := make([]string, 0)
 
-				if subMsg.Topic == "onLine" || subMsg.Topic == "offLine" || subMsg.Topic == "update" {
+				switch subMsg.Topic {
+				case "onLine":
 					{
 						nodeName = append(nodeName, subMsg.NodeName)
-						if r.NodeList[index].CommStatus == "onLine" {
-							reportNodeProperty := MQTTFeisjyReportPropertyTemplate{
-								DeviceType: "node",
-								DeviceName: nodeName,
-							}
-							r.ReportPropertyRequestFrameChan <- reportNodeProperty
-						}
+						r.NodeList[index].CommStatus = "onLine"
+						//判断告警
+						r.ProcessAlarmEvent(index, subMsg.CollName, subMsg.NodeName)
+					}
+				case "offLine":
+					{
+						nodeName = append(nodeName, subMsg.NodeName)
+						r.NodeList[index].CommStatus = "offLine"
+					}
+				case "update":
+					{
+						//更新设备的通信状态
+						r.NodeList[index].CommStatus = "onLine"
+						//判断告警
+						r.ProcessAlarmEvent(index, subMsg.CollName, subMsg.NodeName)
 					}
 				}
+
+				//if subMsg.Topic == "onLine" || subMsg.Topic == "offLine" || subMsg.Topic == "update" {
+				//	{
+				//		nodeName = append(nodeName, subMsg.NodeName)
+				//		if r.NodeList[index].CommStatus == "onLine" {
+				//			reportNodeProperty := MQTTFeisjyReportPropertyTemplate{
+				//				DeviceType: "node",
+				//				DeviceName: nodeName,
+				//			}
+				//			r.ReportPropertyRequestFrameChan <- reportNodeProperty
+				//		}
+				//	}
+				//}
 			}
 		}
 	}

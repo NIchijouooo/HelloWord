@@ -9,7 +9,7 @@ import (
 	"time"
 )
 
-//物模型 Thing Specification Language
+// 物模型 Thing Specification Language
 type TSLModelS7Template struct {
 	Index      int                           `json:"index"`
 	Name       string                        `json:"name"`       //名称，只可以是字母和数字的组合
@@ -34,6 +34,14 @@ type TSLModelS7PropertyParamTemplate struct {
 	DBNumber  string `json:"dbNumber"`  //数据块
 	DataType  int    `json:"dataType"`  //数据类型
 	StartAddr string `json:"startAddr"` //起始地址
+
+	Min             string `json:"min"`             //最小
+	Max             string `json:"max"`             //最大
+	MinMaxAlarm     bool   `json:"minMaxAlarm"`     //范围报警
+	Step            string `json:"step"`            //步长
+	StepAlarm       bool   `json:"stepAlarm"`       //阶跃报警
+	DataLength      string `json:"dataLength"`      //字符串长度
+	DataLengthAlarm bool   `json:"dataLengthAlarm"` //字符长度报警
 }
 
 type TSLModelS7PropertyValueTemplate struct {

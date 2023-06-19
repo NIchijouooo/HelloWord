@@ -61,6 +61,24 @@
       @row-dblclick="editDeviceModelProperty"
     >
       <el-table-column type="selection" width="55" />
+      <el-table-column type="expand" width="60">
+        <template #default="scope">
+          <div class="param-content">
+            <div class="pc-title">
+              <div class="pct-info">
+                <b> {{ scope.row.name }} </b>
+                参数详情
+              </div>
+            </div>
+            <div class="pc-content">
+              <div class="param-item" v-for="(item, key, index) of scope.row.params" :key="index">
+                <div class="param-value">{{ ctxData.paramName[key] }}：</div>
+                <div class="param-name">{{ item || '-' }}</div>
+              </div>
+            </div>
+          </div>
+        </template>
+      </el-table-column>
       <el-table-column sortable prop="name" label="属性名称" width="auto" min-width="150" align="center"> </el-table-column>
       <el-table-column sortable prop="label" label="属性标签" width="auto" min-width="150" align="center"> </el-table-column>
 
@@ -80,9 +98,7 @@
       <el-table-column sortable prop="unit" label="单位" width="auto" min-width="80" align="center" ></el-table-column>
       <el-table-column sortable prop="blockAddOffset" label="块偏移地址" width="auto" min-width="150" align="center"> </el-table-column>
       <el-table-column sortable prop="rulerAddOffset" label="标识偏移地址" width="auto" min-width="150" align="center"> </el-table-column>
-      <el-table-column sortable prop="step" label="步长" width="auto" min-width="120" align="center" />
       <el-table-column sortable prop="identity" label="唯一标识" width="auto" min-width="120" align="center" />
-
       <el-table-column label="操作" width="auto" min-width="200" align="center" fixed="right">
         <template #default="scope">
           <el-button @click="editDeviceModelProperty(scope.row)" text type="primary">编辑</el-button>
@@ -179,9 +195,40 @@
           </el-select>
         </el-form-item>
 
+        <!-- lp add 2023-06-15-->
+        <div>
+          <el-form-item v-if="ctxData.propertyForm.type !== 3" label="范围报警" prop="minMaxAlarm">
+          <el-switch v-model="ctxData.propertyForm.minMaxAlarm" inline-prompt active-text="是" inactive-text="否" />
+        </el-form-item>
+        </div>
+        <div>
+        <el-form-item v-if="ctxData.propertyForm.type !== 3 && ctxData.propertyForm.minMaxAlarm" label="最小值" prop="min">
+          <el-input type="text" v-model="ctxData.propertyForm.min" autocomplete="off" placeholder="请输入最小值"></el-input>
+        </el-form-item>
+        </div>
+        <el-form-item v-if="ctxData.propertyForm.type !== 3 && ctxData.propertyForm.minMaxAlarm" label="最大值"  prop="max">
+          <el-input type="text" v-model="ctxData.propertyForm.max" autocomplete="off" placeholder="请输入最大值"></el-input>
+        </el-form-item>
 
+        <div>
+        <el-form-item v-if="ctxData.propertyForm.type !== 3" label="步长报警" prop="stepAlarm">
+          <el-switch v-model="ctxData.propertyForm.stepAlarm" inline-prompt active-text="是" inactive-text="否" />
+        </el-form-item>
+        </div>
+        <el-form-item v-if="ctxData.propertyForm.type !== 3 && ctxData.propertyForm.stepAlarm" label="步长" prop="step">
+          <el-input type="text" v-model="ctxData.propertyForm.step" autocomplete="off" placeholder="请输入步长"></el-input>
+        </el-form-item>
 
-        <el-form-item label="" prop="" style="width: 220px" v-if="props.curModelBlock.format != 1"> </el-form-item>
+        <div>
+        <el-form-item v-if="ctxData.propertyForm.type === 3" label="字符串长度报警" prop="dataLengthAlarm">
+          <el-switch v-model="ctxData.propertyForm.dataLengthAlarm" inline-prompt active-text="是" inactive-text="否" />
+        </el-form-item>
+        </div>
+        <el-form-item v-if="ctxData.propertyForm.type === 3 && ctxData.propertyForm.dataLengthAlarm" label="字符串长度" prop="dataLength">
+          <el-input type="text" v-model="ctxData.propertyForm.dataLength" autocomplete="off" placeholder="请输入字符串长度" ></el-input>
+        </el-form-item>
+
+        <!-- <el-form-item label="" prop="" style="width: 220px" v-if="props.curModelBlock.format != 1"> </el-form-item> -->
         <el-form-item label="数据格式" prop="len">
           <el-input
             type="text"
@@ -212,7 +259,7 @@
         </el-form-item>
 
 
-        <el-form-item label="" prop="" style="width: 220px" v-if="props.curModelBlock.len != 1"> </el-form-item>
+        <!-- <el-form-item label="" prop="" style="width: 220px" v-if="props.curModelBlock.len != 1"> </el-form-item> -->
         <el-form-item label="数据长度" prop="len">
          <el-input
             type="text"
@@ -281,7 +328,7 @@
           </el-input>
         </el-form-item>
 
-        <el-form-item label="步长" prop="step">
+        <!-- <el-form-item label="步长" prop="step">
           <el-tooltip class="item" effect="dark" content="数据变化超过所配步长则变化上送" placement="top">
             <el-input
               type="text"
@@ -292,6 +339,7 @@
             >
             </el-input>
           </el-tooltip>
+        </el-form-item> -->
         </el-form-item>
 
         <el-form-item label="唯一标识">
@@ -516,7 +564,14 @@ const ctxData = reactive({
     len:0,
     blockAddOffset:0,
     rulerAddOffset:0,
-    step: 0, // 步长
+
+    min: 0, // 属性最小值，只有uint32，int32，double有效
+    max: 0, // 属性最大值，只有uint32，int32，double有效
+    minMaxAlarm: false, // 范围报警，只有uint32，int32，double有效
+    step: 0, // 步长，只有uint32，int32，double有效
+    stepAlarm: false, // 步长报警，只有uint32，int32，double有效
+    dataLength: 0, // 字符串长度，只有string有效
+    dataLengthAlarm: false, // 字符串长度报警，只有string有效
     identity: '', // 唯一标识
   },
 
@@ -553,6 +608,13 @@ const ctxData = reactive({
     ruleType: '解析规则',
     regAddr: '寄存器地址',
     formula: '计算公式',
+    min: '最小值',
+    max: '最大值',
+    minMaxAlarm: '范围报警',
+    step: '步长',
+    stepAlarm: '步长报警',
+    dataLength: '字符串长度',
+    dataLengthAlarm: '字符串长度报警',
   },
   propertyRules: {
     name: [
@@ -618,6 +680,39 @@ const ctxData = reactive({
       {
         trigger: 'blur',
         validator: validateStep,
+      },
+    ],
+    min: [
+      {
+        required: true,
+        message: '最小值不能为空',
+        trigger: 'blur',
+      },
+      {
+        trigger: 'blur',
+        validator: validateStep,
+      },
+    ],
+    max: [
+      {
+        required: true,
+        message: '最大值不能为空',
+        trigger: 'blur',
+      },
+      {
+        trigger: 'blur',
+        validator: validateStep,
+      },
+    ],
+    dataLength: [
+      {
+        required: true,
+        message: '字符串长度不能为空',
+        trigger: 'blur',
+      },
+      {
+        trigger: 'blur',
+        validator: regCnt,
       },
     ],
 
@@ -815,11 +910,26 @@ const editDeviceModelProperty = (row) => {
   ctxData.propertyForm.type = row.type
   ctxData.propertyForm.blockAddOffset = row.blockAddOffset
   ctxData.propertyForm.rulerAddOffset = row.rulerAddOffset
-  ctxData.propertyForm.step = row.step === undefined || row.step === null ? 0 : row.step
+  // ctxData.propertyForm.step = row.step === undefined || row.step === null ? 0 : row.step
+
+  if (row.type !== 3) {
+    ctxData.propertyForm['min'] = row.params.min
+    ctxData.propertyForm['max'] = row.params.max
+    ctxData.propertyForm['minMaxAlarm'] = row.params.minMaxAlarm
+    ctxData.propertyForm['step'] = row.params.step === undefined || row.params.step === null ? 0 : row.params.step
+    ctxData.propertyForm['stepAlarm'] = row.params.stepAlarm
+  } else {
+    ctxData.propertyForm['dataLength'] = row.params.dataLength
+    ctxData.propertyForm['dataLengthAlarm'] = row.params.dataLengthAlarm
+  }
   ctxData.propertyForm.identity = row.identity === undefined || row.identity === null ? '' : row.identity
 }
 const propertyFormRef = ref(null)
 const submitPorpertyForm = () => {
+  if (ctxData.propertyForm.type !== 3 && Number(ctxData.propertyForm.min) > Number(ctxData.propertyForm.max)) {
+    ElMessage.warning('最大值必须大于最小值')
+    return;
+  }
   propertyFormRef.value.validate((valid) => {
     if (valid) {
       const pData = {
@@ -837,10 +947,22 @@ const submitPorpertyForm = () => {
           type:ctxData.propertyForm.type,
           blockAddOffset:ctxData.propertyForm.blockAddOffset,
           rulerAddOffset:ctxData.propertyForm.rulerAddOffset,
-          step: +ctxData.propertyForm.step,
           identity: ctxData.propertyForm.identity,
         },
       }
+      let params = {}
+      if (ctxData.propertyForm.type !== 3) {
+        params['min'] = ctxData.propertyForm.min.toString()
+        params['max'] = ctxData.propertyForm.max.toString()
+        params['minMaxAlarm'] = ctxData.propertyForm.minMaxAlarm
+        //params['step'] = +ctxData.propertyForm.step  //ltg del 2023-06-15
+        params['step'] = ctxData.propertyForm.step.toString()
+        params['stepAlarm'] = ctxData.propertyForm.stepAlarm
+      } else {
+        params['dataLength'] = ctxData.propertyForm.dataLength.toString()
+        params['dataLengthAlarm'] = ctxData.propertyForm.dataLengthAlarm
+      }
+      pData.data['params'] = params
       if (ctxData.pTitle.includes('添加')) {
         ModelBlockApiD07.addDeviceModelBlockPropertyD07(pData).then((res) => {
           handleResult(res, getDeviceModelBlockProperty)
@@ -918,6 +1040,9 @@ const initPropertyForm = () => {
     blockAddOffset:0,
     rulerAddOffset:0,
     step: 0,
+    min: 0,
+    max: 0,
+    dataLength: 0
     identity: '',
   }
 }
