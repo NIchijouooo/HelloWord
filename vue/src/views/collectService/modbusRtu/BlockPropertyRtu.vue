@@ -938,7 +938,7 @@ const submitPorpertyForm = () => {
           ruleType: ctxData.propertyForm.ruleType,
           formula: ctxData.propertyForm.formula,
           bitOffsetSw: ctxData.propertyForm.bitOffsetSw,
-          bitOffset: ctxData.propertyForm.bitOffsetSw ? ctxData.propertyForm.bitOffset.toString() : '0',
+          bitOffset: ctxData.propertyForm.bitOffsetSw ? ctxData.propertyForm.bitOffset : 0,
           // step: +ctxData.propertyForm.step,
         },
       }
