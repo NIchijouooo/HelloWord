@@ -12,7 +12,7 @@ import (
 	luar "layeh.com/gopher-luar"
 )
 
-//设备模板
+// 设备模板
 type DeviceNodeTemplate struct {
 	Index          int                     `json:"index"`          //设备偏移量
 	Name           string                  `json:"name"`           //设备名称
@@ -91,6 +91,7 @@ func (d *DeviceNodeTemplate) NewVariables() []TSLPropertiesTemplate {
 				property.Label = p.Label
 				property.Type = p.Type
 				property.AccessMode = p.AccessMode
+				property.Identity = p.Identity
 				properties = append(properties, property)
 			}
 		}
@@ -105,6 +106,7 @@ func (d *DeviceNodeTemplate) NewVariables() []TSLPropertiesTemplate {
 				property.Label = p.Label
 				property.Type = p.Type
 				property.AccessMode = p.AccessMode
+				property.Identity = p.Identity
 				properties = append(properties, property)
 			}
 		}

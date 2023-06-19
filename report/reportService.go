@@ -5,6 +5,7 @@ import (
 	"gateway/report/modbusTCP"
 	mqttEmqx "gateway/report/mqttEMQX"
 	"gateway/report/mqttFeisjy"
+	"gateway/report/mqttZxJs"
 	"gateway/report/reportModel"
 	"gateway/setting"
 	"gateway/utils"
@@ -40,6 +41,8 @@ func ReportServiceInit() {
 	mqttEmqx.ReportServiceEmqxInit()
 
 	mqttFeisjy.ReportServiceFeisjyInit()
+
+	mqttZxJs.ReportServiceZxjsInit()
 
 	//mqttThingsBoard.ReportServiceThingsBoardInit()
 

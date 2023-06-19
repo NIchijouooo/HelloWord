@@ -103,6 +103,7 @@
             {{ scope.row.bitOffsetSw === false ? '-' : scope.row.bitOffset }}
           </template>
         </el-table-column>
+        <el-table-column sortable prop="identity" label="唯一标识" width="auto" min-width="120" align="center" />
         <template #empty>
           <div>无数据</div>
         </template>

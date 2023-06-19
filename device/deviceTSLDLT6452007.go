@@ -40,6 +40,7 @@ type TSLDLT6452007PropertyTemplate struct {
 	RulerAddOffset int                                `json:"rulerAddOffset"` //当前变量在当前ID数据地址中的偏移地址
 	Type           int                                `json:"type"`           //float,uint32...
 	Params         TSLDLT6452007PropertyParamTemplate `json:"params"`
+	Identity       string `json:"identity"`       //唯一标识
 }
 
 type TSLDLT6452007CmdTemplate struct {
