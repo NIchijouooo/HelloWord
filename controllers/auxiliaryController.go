@@ -152,7 +152,7 @@ func (c *AuxiliaryController) GetHistoryYcByDeviceIdCodes(ctx *gin.Context) {
 		strArr[i] = strconv.Itoa(v)
 	}
 
-	//拼接codelist sql语句
+	//拼接codelist sql语句.
 	ycQuery.Codes = strings.Join(strArr, ",")
 	//查询历史数据
 	ycList, err := c.hisRepo.GetLastYcHistoryByDeviceIdAndCodeList(ycQuery.DeviceId, ycQuery.Codes, ycQuery.StartTime, ycQuery.EndTime, strconv.Itoa(ycQuery.Interval)+intervalStr)
