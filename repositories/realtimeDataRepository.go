@@ -4,7 +4,6 @@ import (
 	"database/sql"
 	"fmt"
 	"gateway/models"
-
 	"gorm.io/gorm"
 	"log"
 )
@@ -138,6 +137,29 @@ func (r *RealtimeDataRepository) BatchCreateYc(realtimeList []*models.YcData) er
 	return err
 }
 
+//<select id="insertDayEsChargeDischarge" parameterType="java.util.List" resultType="java.lang.Integer">
+//insert into
+//<foreach collection="list" item="item" index="index">
+//realtimedata.charge_discharge_${item.deviceId} (ts,charge_capacity,discharge_capacity,profit) using realtimedata.charge_discharge
+//tags(${item.deviceId})
+//values (#{item.ts}, #{item.chargeCapacity}, #{item.dischargeCapacity}, #{item.profit})
+//</foreach>
+//</select>
+/*
+*
+批量添加充放电和收益
+*/
+func (r *RealtimeDataRepository) BatchCreateEsChargeDischargeModel(realtimeList []*models.EsChargeDischargeModel) error {
+	var err error
+	for _, realtime := range realtimeList {
+		tableName := fmt.Sprintf("%v", "realtimedatatest.charge_discharge_", realtime.DeviceId)
+		sql := fmt.Sprintf("INSERT INTO %s (ts,charge_capacity,discharge_capacity,profit) using realtimedatatest.charge_discharge tags(?) VALUES (?, ?, ?, ?)", tableName)
+		_, err := r.taosDb.Exec(sql, realtime.Ts, realtime.ChargeCapacity, realtime.DischargeCapacity, realtime.Profit)
+		err = err
+	}
+	return err
+}
+
 /*
 *
 批量添加setting
@@ -200,6 +222,45 @@ func (r *RealtimeDataRepository) GetYxById(deviceId, code int) (models.YxData, e
 
 /*
 *
+获取yx集合
+*/
+func (r *RealtimeDataRepository) GetYxListByDevIdsAndCodes(deviceIds, codes string) ([]models.YxData, error) {
+	var realtime []models.YxData
+	sqlStr := fmt.Sprintf("select Last(ts), val, device_id, code,name from yx where device_id in (%s) and code in (%s)", deviceIds, codes)
+	fmt.Println(sqlStr)
+	rows, err := r.taosDb.Query(sqlStr)
+	defer rows.Close()
+
+	for rows.Next() {
+		realtimeData := models.YxData{}
+		err := rows.Scan(&realtimeData.Ts, &realtimeData.Value, &realtimeData.DeviceId, &realtimeData.Code, &realtimeData.Name)
+		if err != nil {
+			log.Printf("Request params:%v", err)
+		}
+		realtime = append(realtime, realtimeData)
+	}
+	return realtime, err
+}
+
+func (r *RealtimeDataRepository) GetYxListById(deviceId int) ([]models.YxData, error) {
+	rowsYx, err := r.taosDb.Query("SELECT last(code), last(name), last(val) FROM yx where device_id = ? group by code order by code", deviceId)
+	if err != nil {
+		return nil, err
+	}
+	var yxList []models.YxData
+	for rowsYx.Next() {
+		yx := models.YxData{}
+		err := rowsYx.Scan(&yx.Code, &yx.Name, &yx.Value)
+		if err != nil {
+			return nil, err
+		}
+		yxList = append(yxList, yx)
+	}
+	return yxList, err
+}
+
+/*
+*
 获取yc
 */
 func (r *RealtimeDataRepository) GetYcById(deviceId, code int) (models.YcData, error) {
@@ -214,6 +275,28 @@ func (r *RealtimeDataRepository) GetYcById(deviceId, code int) (models.YcData, e
 		if err != nil {
 			log.Printf("Request params:%v", err)
 		}
+	}
+	return realtime, err
+}
+
+/*
+*
+获取yc集合
+*/
+func (r *RealtimeDataRepository) GetYcListByDevIdsAndCodes(deviceIds, codes string) ([]models.YcData, error) {
+	var realtime []models.YcData
+	sqlStr := fmt.Sprintf("select Last(ts), val, device_id, code,name from yc where device_id in (%s) and code in (%s) group by device_id,code", deviceIds, codes)
+	fmt.Println(sqlStr)
+	rows, err := r.taosDb.Query(sqlStr)
+	defer rows.Close()
+
+	for rows.Next() {
+		realtimeData := models.YcData{}
+		err := rows.Scan(&realtimeData.Ts, &realtimeData.Value, &realtimeData.DeviceId, &realtimeData.Code, &realtimeData.Name)
+		if err != nil {
+			log.Printf("Request params:%v", err)
+		}
+		realtime = append(realtime, realtimeData)
 	}
 	return realtime, err
 }
@@ -237,5 +320,3 @@ func (r *RealtimeDataRepository) GetSettingById(deviceId, code int) (models.Sett
 	}
 	return realtime, err
 }
-
-

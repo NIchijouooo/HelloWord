@@ -37,7 +37,7 @@ func NewRealtimeDataRepository() *RealtimeDataRepository {
 */
 func (r *RealtimeDataRepository) UpdateGatewayDeviceConnetStatus(gw ReportServiceGWParamFeisjyTemplate) {
 	//var emDev models.EmDevice
-	if err := r.db.Model(&models.ProjectInfo{}).Where("addr = ?", gw.Param.DeviceID).Updates(models.EmDevice{Connectstatus: gw.ReportStatus}).Error; err != nil {
+	if err := r.db.Model(&models.ProjectInfo{}).Where("addr = ?", gw.Param.DeviceID).Updates(models.EmDevice{ConnectStatus: gw.ReportStatus}).Error; err != nil {
 		log.Printf("Request params:%v", err)
 	}
 }
@@ -49,7 +49,7 @@ func (r *RealtimeDataRepository) UpdateGatewayDeviceConnetStatus(gw ReportServic
 */
 func (r *RealtimeDataRepository) UpdateDeviceConnetStatus(node ReportServiceNodeParamFeisjyTemplate) {
 	//var emDev models.EmDevice
-	if err := r.db.Model(&models.ProjectInfo{}).Where("name = ? and coll_interface_id = ?", node.Name, node.CollInterfaceName).Updates(models.EmDevice{Connectstatus: node.ReportStatus}).Error; err != nil {
+	if err := r.db.Model(&models.ProjectInfo{}).Where("name = ? and coll_interface_id = ?", node.Name, node.CollInterfaceName).Updates(models.EmDevice{ConnectStatus: node.ReportStatus}).Error; err != nil {
 		log.Printf("Request params:%v", err)
 	}
 }
