@@ -8,16 +8,6 @@ import (
 	"net/http"
 )
 
-/*
-*
-设备相关控制器
-*/
-	repositories "gateway/repositories"
-	"net/http"
-
-	"github.com/gin-gonic/gin"
-)
-
 type DeviceController struct {
 	repo *repositories.DeviceRepository
 }
@@ -87,11 +77,8 @@ func (c *DeviceController) getDeviceListByType(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, model.ResponseData{
 		Code: "0",
 		Data: list,
-	return &DeviceController{
-		repo: repositories.NewDeviceRepository(),
-	}
+	})
 }
-
 
 func (c *DeviceController) GetAllCommInterfaceProtocols(ctx *gin.Context) {
 	c.repo.GetEmDevice()

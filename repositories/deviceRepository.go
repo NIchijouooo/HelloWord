@@ -22,9 +22,6 @@ func (r DeviceRepository) GetDeviceListByType(param models.DeviceParam) ([]model
 	r.db.Model(&models.EmDevice{})
 	err := r.db.Where("device_type = ?", param.DeviceType).Find(&result).Error
 	return result, err
-	return &DeviceRepository{
-		db: models.DB,
-	}
 }
 
 func (r *DeviceRepository) GetEmDevice() {
