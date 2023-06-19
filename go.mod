@@ -1,6 +1,6 @@
 module gateway
 
-go 1.17
+go 1.20
 
 require (
 	github.com/beevik/ntp v0.3.0

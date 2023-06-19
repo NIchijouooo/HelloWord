@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"gateway/device"
 	"gateway/device/eventBus"
+	"gateway/report/mqttFeisjy"
 	"gateway/report/mqttRT"
 	"gateway/setting"
 	"github.com/gin-gonic/gin"
@@ -95,6 +96,12 @@ func InitWebsocket(context *gin.Context) {
 	case LogMsgType_Report:
 		{
 			for _, v := range mqttRT.ReportServiceParamListRT.ServiceList {
+				if v.GWParam.ServiceName == param.Name {
+					v.MessageEventBus.Subscribe(param.Name, sub)
+				}
+			}
+
+			for _, v := range mqttFeisjy.ReportServiceParamListFeisjy.ServiceList {
 				if v.GWParam.ServiceName == param.Name {
 					v.MessageEventBus.Subscribe(param.Name, sub)
 				}

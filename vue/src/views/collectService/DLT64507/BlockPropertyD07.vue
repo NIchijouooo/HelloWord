@@ -562,12 +562,12 @@ const ctxData = reactive({
     blockAddOffset:0,
     rulerAddOffset:0,
 
-    min: '', // 属性最小值，只有uint32，int32，double有效
-    max: '', // 属性最大值，只有uint32，int32，double有效
+    min: 0, // 属性最小值，只有uint32，int32，double有效
+    max: 0, // 属性最大值，只有uint32，int32，double有效
     minMaxAlarm: false, // 范围报警，只有uint32，int32，double有效
-    step: '', // 步长，只有uint32，int32，double有效
+    step: 0, // 步长，只有uint32，int32，double有效
     stepAlarm: false, // 步长报警，只有uint32，int32，double有效
-    dataLength: '', // 字符串长度，只有string有效
+    dataLength: 0, // 字符串长度，只有string有效
     dataLengthAlarm: false, // 字符串长度报警，只有string有效
     iotDataType: 'yc'
   },
@@ -673,7 +673,7 @@ const ctxData = reactive({
         trigger: 'blur',
       },
     ],
-    /*step: [
+    step: [
       {
         required: true,
         message: '步长不能为空',
@@ -683,7 +683,40 @@ const ctxData = reactive({
         trigger: 'blur',
         validator: validateStep,
       },
-    ],*/
+    ],
+    min: [
+      {
+        required: true,
+        message: '最小值不能为空',
+        trigger: 'blur',
+      },
+      {
+        trigger: 'blur',
+        validator: validateStep,
+      },
+    ],
+    max: [
+      {
+        required: true,
+        message: '最大值不能为空',
+        trigger: 'blur',
+      },
+      {
+        trigger: 'blur',
+        validator: validateStep,
+      },
+    ],
+    dataLength: [
+      {
+        required: true,
+        message: '字符串长度不能为空',
+        trigger: 'blur',
+      },
+      {
+        trigger: 'blur',
+        validator: regCnt,
+      },
+    ],
 
   },
   psFlag: false,
@@ -895,6 +928,10 @@ const editDeviceModelProperty = (row) => {
 }
 const propertyFormRef = ref(null)
 const submitPorpertyForm = () => {
+  if (ctxData.propertyForm.type !== 3 && Number(ctxData.propertyForm.min) > Number(ctxData.propertyForm.max)) {
+    ElMessage.warning('最大值必须大于最小值')
+    return;
+  }
   propertyFormRef.value.validate((valid) => {
     if (valid) {
       const pData = {
@@ -917,14 +954,14 @@ const submitPorpertyForm = () => {
       }
       let params = {}
       if (ctxData.propertyForm.type !== 3) {
-        params['min'] = ctxData.propertyForm.min
-        params['max'] = ctxData.propertyForm.max
+        params['min'] = ctxData.propertyForm.min.toString()
+        params['max'] = ctxData.propertyForm.max.toString()
         params['minMaxAlarm'] = ctxData.propertyForm.minMaxAlarm
         //params['step'] = +ctxData.propertyForm.step  //ltg del 2023-06-15
-        params['step'] = ctxData.propertyForm.step
+        params['step'] = ctxData.propertyForm.step.toString()
         params['stepAlarm'] = ctxData.propertyForm.stepAlarm
       } else {
-        params['dataLength'] = ctxData.propertyForm.dataLength
+        params['dataLength'] = ctxData.propertyForm.dataLength.toString()
         params['dataLengthAlarm'] = ctxData.propertyForm.dataLengthAlarm
       }
       pData.data['params'] = params
@@ -1005,6 +1042,9 @@ const initPropertyForm = () => {
     blockAddOffset:0,
     rulerAddOffset:0,
     step: 0,
+    min: 0,
+    max: 0,
+    dataLength: 0
   }
 }
 const getDeviceProperty = () => {

@@ -675,7 +675,7 @@ const submitAddNode = () => {
   console.log('checkedNodes => ', checkedNodes)
   console.log('props.curGateway => ', props.curGateway)
   if (checkedNodes.length === 0) {
-    ElMessage.info('请至少选择一个节点！')
+    ElMessage.info('请先展开节点，获取节点下的子设备数据！')
     return
   } else {
     let count = 0

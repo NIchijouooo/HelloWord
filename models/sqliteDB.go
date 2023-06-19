@@ -18,3 +18,8 @@ func InitDB() {
 	}
 	DB = db
 }
+
+// 获取 SQLite 数据库连接
+func GetDB() *gorm.DB {
+	return DB
+}

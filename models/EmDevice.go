@@ -8,7 +8,7 @@ type EmDevice struct {
 	CollInterfaceId int    `json:"collInterfaceId"`
 	Addr            string `json:"addr"`
 	Data            string `json:"data"`
-	Connectstatus   string `json:"connectstatus"`
+	ConnectStatus   string `json:"connectStatus"`
 }
 
 type AddEmDevice struct {
