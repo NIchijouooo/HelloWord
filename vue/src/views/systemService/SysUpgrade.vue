@@ -187,4 +187,7 @@ const showOneResMsg = (res) => {
 .box-card {
   margin-bottom: 20px;
 }
+:deep(.el-card__body) {
+  color: #999999;
+}
 </style>

@@ -38,7 +38,7 @@
           stripe
           @row-dblclick="editGateway"
         >
-          <el-table-column type="expand">
+          <el-table-column type="expand" min-width="80">
             <template #default="scope">
               <div class="param-content">
                 <div class="pc-title">
@@ -59,6 +59,16 @@
           <el-table-column sortable prop="serviceName" label="服务名称" width="auto" min-width="150" align="center">
           </el-table-column>
           <el-table-column sortable prop="protocol" label="协议名称" width="auto" min-width="150" align="center">
+          </el-table-column>
+          <el-table-column sortable prop="reportNetSW" label="指定上报通道" width="auto" min-width="100" align="center">
+            <template #default="scope">
+              {{ scope.row.reportNetSW === false ? '否' : '是' }}
+            </template>
+          </el-table-column>
+          <el-table-column sortable prop="reportNet" label="上报网卡" width="auto" min-width="100" align="center">
+            <template #default="scope">
+              {{ scope.row.reportNetSW === false ? '-' : scope.row.reportNet }}
+            </template>
           </el-table-column>
           <el-table-column sortable prop="ip" label="上报地址" width="auto" min-width="150" align="center"> </el-table-column>
           <el-table-column sortable prop="port" label="上报端口" width="auto" min-width="100" align="center"> </el-table-column>
@@ -107,9 +117,9 @@
       style="width: 100%; height: 100%;overflow:hidden;"
     ></NodeService>
 
-    <RegInfo 
-      v-if="ctxData.dnFlag === 3" 
-      :curGateway="ctxData.curGateway" 
+    <RegInfo
+      v-if="ctxData.dnFlag === 3"
+      :curGateway="ctxData.curGateway"
       @changeDnFlag="changeDnFlag"
       style="width: 100%; height: 100%;overflow:hidden;"
     ></RegInfo>
@@ -156,6 +166,12 @@
               </el-option>
             </el-select>
           </el-form-item>
+          <el-form-item label="指定上报通道">
+            <el-switch v-model="ctxData.gatewayForm.reportNetSw" inline-prompt active-text="是" inactive-text="否" />
+          </el-form-item>
+          <el-form-item label="上报网卡" v-if="ctxData.gatewayForm.reportNetSw" prop="reportNet">
+            <el-input type="text" v-model.number="ctxData.gatewayForm.reportNet" autocomplete="off" placeholder="请输入上报网卡"></el-input>
+          </el-form-item>
           <el-form-item
             label="上报地址"
             :prop="ctxData.gatewayForm.protocol !== 'ModbusTCP' ? 'ip' : ''"
@@ -183,16 +199,16 @@
             </el-input>
           </el-form-item>
 
-          <el-form-item v-if="ctxData.gatewayForm.protocol.includes('MQTT')" label="用户名" prop="userName">
+          <el-form-item v-if="ctxData.gatewayForm.protocol.includes('MQTT') && !ctxData.gatewayForm.protocol.includes('ZXJS')" label="用户名" prop="userName">
             <el-input type="text" v-model="ctxData.gatewayForm.userName" autocomplete="off" placeholder="请输入用户名">
             </el-input>
           </el-form-item>
 
-          <el-form-item v-if="ctxData.gatewayForm.protocol.includes('MQTT')" label="密码" prop="password">
+          <el-form-item v-if="ctxData.gatewayForm.protocol.includes('MQTT') && !ctxData.gatewayForm.protocol.includes('ZXJS')" label="密码" prop="password">
             <el-input type="text" v-model="ctxData.gatewayForm.password" autocomplete="off" placeholder="请输入密码">
             </el-input>
           </el-form-item>
-          <el-form-item v-if="ctxData.gatewayForm.protocol.includes('MQTT')" label="客户端名称" prop="clientID">
+          <el-form-item v-if="ctxData.gatewayForm.protocol.includes('MQTT') && !ctxData.gatewayForm.protocol.includes('ZXJS')" label="客户端名称" prop="clientID">
             <el-input
               type="text"
               v-model="ctxData.gatewayForm.clientID"
@@ -250,7 +266,7 @@
               <template #append>单位秒</template>
             </el-input>
           </el-form-item>
-          <el-form-item v-if="ctxData.gatewayForm.protocol.includes('MQTT')" label="是否清除会话" prop="cleanSession">
+          <el-form-item v-if="ctxData.gatewayForm.protocol.includes('MQTT') && !ctxData.gatewayForm.protocol.includes('ZXJS')" label="是否清除会话" prop="cleanSession">
             <el-switch v-model="ctxData.gatewayForm.cleanSession" inline-prompt active-text="是" inactive-text="否" />
           </el-form-item>
           <el-form-item v-if="ctxData.gatewayForm.protocol === 'RT.STLV2'" label="秘钥" prop="token">
@@ -352,6 +368,33 @@
             >
             </el-input>
           </el-form-item>
+          <el-form-item v-if="ctxData.gatewayForm.protocol === 'ZXJS.MQTT'" label="产品序列号" prop="productSn">
+            <el-input
+              type="text"
+              v-model="ctxData.gatewayForm.productSn"
+              autocomplete="off"
+              placeholder="请输入产品序列号"
+            >
+            </el-input>
+          </el-form-item>
+          <el-form-item v-if="ctxData.gatewayForm.protocol === 'ZXJS.MQTT'" label="设备序列号" prop="deviceSn">
+            <el-input
+              type="text"
+              v-model="ctxData.gatewayForm.deviceSn"
+              autocomplete="off"
+              placeholder="请输入设备序列号"
+            >
+            </el-input>
+          </el-form-item>
+          <el-form-item v-if="ctxData.gatewayForm.protocol === 'ZXJS.MQTT'" label="设备密码" prop="devicePwd">
+            <el-input
+              type="text"
+              v-model="ctxData.gatewayForm.devicePwd"
+              autocomplete="off"
+              placeholder="请输入设备密码"
+            >
+            </el-input>
+          </el-form-item>
         </el-form>
       </div>
       <template #footer>
@@ -381,10 +424,18 @@ const refExpYM =
   /^(?=^.{3,255}$)(http(s)?:\/\/)?(www\.)?[a-zA-Z0-9][-a-zA-Z0-9]{0,62}(\.[a-zA-Z0-9][-a-zA-Z0-9]{0,62})+(:\d+)*(\/\w+\.\w+)*$/
 const validateIP = (rule, value, callback) => {
   console.log('validateIP')
-  if (refExpIP.test(value) || refExpYM.test(value)) {
-    callback()
+  if (ctxData.gatewayForm.reportNetSw) {
+    if (refExpIP.test(value)) {
+      callback()
+    } else {
+      callback(new Error('请输入正确的IP地址！'))
+    }
   } else {
-    callback(new Error('格式错误！'))
+    if (refExpIP.test(value) || refExpYM.test(value)) {
+      callback()
+    } else {
+      callback(new Error('请输入正确的IP地址、域名地址！'))
+    }
   }
 }
 const regCnt = /^[0-9]*[1-9][0-9]*$/
@@ -442,6 +493,13 @@ const ctxData = reactive({
     productKey: '',
     deviceID: '',
     deviceSecret: '',
+    //lp add 2023-06-17
+    reportNetSw: false,
+    reportNet: '',
+    //wt add 2023-06-14
+    productSn: '',
+    deviceSn: '',
+    devicePwd: '',
   },
   paramName: {
     serviceName: '服务名称',
@@ -463,6 +521,10 @@ const ctxData = reactive({
     ProductKey: '产品密钥',
     DeviceID: '通讯地址',
     DeviceSecret: '设备密钥',
+    //wt add 2023-06-14
+    ProductSn: '产品序列号',
+    DeviceSn: '设备序列号',
+    DevicePwd: '设备密码',
   },
   gatewayRules: {
     serviceName: [
@@ -532,13 +594,14 @@ const ctxData = reactive({
         trigger: 'blur',
       },
     ],
-    keepAlive: [
+    // lp update 2023-06-17
+    /*keepAlive: [
       {
         required: true,
         message: '保活时间不能为空',
         trigger: 'blur',
       },
-    ],
+    ],*/
     deviceName: [
       {
         required: true,
@@ -560,13 +623,14 @@ const ctxData = reactive({
         trigger: 'blur',
       },
     ],
-    cleanSession: [
+    // lp update 2023-06-17
+    /*cleanSession: [
       {
         required: true,
         message: '清除会话不能为空',
         trigger: 'blur',
       },
-    ],
+    ],*/
     slaveID: [
       {
         required: true,
@@ -651,7 +715,37 @@ const ctxData = reactive({
     deviceSecret: [
       {
         required: true,
-        message: '产品密钥不能为空',
+        message: '设备密钥不能为空',
+        trigger: 'blur',
+      },
+    ],
+    //wt add 2023-06-14
+    productSn: [
+      {
+        required: true,
+        message: '产品序列号不能为空',
+        trigger: 'blur',
+      },
+    ],
+    deviceSn: [
+      {
+        required: true,
+        message: '设备序列号不能为空',
+        trigger: 'blur',
+      },
+    ],
+    devicePwd: [
+      {
+        required: true,
+        message: '设备密码不能为空',
+        trigger: 'blur',
+      },
+    ],
+    // lp add 2023-06-17
+    reportNet: [
+      {
+        required: true,
+        message: '上报网卡不能为空',
         trigger: 'blur',
       },
     ],
@@ -785,6 +879,9 @@ const editGateway = (row) => {
     reportTime: row.reportTime,
     protocol: row.protocol,
   }
+  // lp add 2023-06-17
+  ctxData.gatewayForm['reportNetSw'] = row.reportNetSw
+  ctxData.gatewayForm['reportNet'] = row.reportNet
 
   if (row.protocol.includes('FSJY.MQTT')) {  //gwai add 2023-04-05
     ctxData.gatewayForm['userName'] = row.param.UserName
@@ -796,7 +893,11 @@ const editGateway = (row) => {
     ctxData.gatewayForm['productKey'] = row.param.ProductKey
     ctxData.gatewayForm['deviceID'] = row.param.DeviceID
     ctxData.gatewayForm['deviceSecret'] = row.param.DeviceSecret
-  }else if (row.protocol.includes('MQTT')) {
+  }else if (row.protocol == 'ZXJS.MQTT') {
+    ctxData.gatewayForm['productSn'] = row.param.ProductSn
+    ctxData.gatewayForm['deviceSn'] = row.param.DeviceSn
+    ctxData.gatewayForm['devicePwd'] = row.param.DevicePwd
+  } else if (row.protocol.includes('MQTT')) {
     ctxData.gatewayForm['userName'] = row.param.userName
     ctxData.gatewayForm['password'] = row.param.password
     ctxData.gatewayForm['clientID'] = row.param.clientID
@@ -888,6 +989,13 @@ const initGatewayForm = () => {
     deviceID: '',
     deviceSecret: '',
 
+    // lp add 2023-06-17
+    reportNetSw: false,
+    reportNet: '',
+    // wt add 2023-06-14
+    productSn: '',
+    deviceSn: '',
+    devicePwd: '',
   }
 }
 const gatewayFormRef = ref(null)
@@ -901,6 +1009,8 @@ const submitGatewayForm = () => {
         port: ctxData.gatewayForm.port,
         reportTime: ctxData.gatewayForm.reportTime,
         protocol: ctxData.gatewayForm.protocol,
+        reportNetSw: ctxData.gatewayForm.reportNetSw,
+        reportNet: ctxData.gatewayForm.reportNet,
         param: {},
       }
       let param = {}
@@ -914,6 +1024,10 @@ const submitGatewayForm = () => {
         param['productKey'] = ctxData.gatewayForm.productKey
         param['deviceID'] = ctxData.gatewayForm.deviceID
         param['deviceSecret'] = ctxData.gatewayForm.deviceSecret
+      } else if (ctxData.gatewayForm.protocol === 'ZXJS.MQTT') {
+        param['productSn'] = ctxData.gatewayForm.productSn
+        param['deviceSn'] = ctxData.gatewayForm.deviceSn
+        param['devicePwd'] = ctxData.gatewayForm.devicePwd
       } else if (ctxData.gatewayForm.protocol.includes('MQTT')) {
         param['userName'] = ctxData.gatewayForm.userName
         param['password'] = ctxData.gatewayForm.password

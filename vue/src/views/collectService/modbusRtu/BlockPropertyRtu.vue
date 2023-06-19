@@ -112,6 +112,7 @@
             {{ scope.row.bitOffsetSw === false ? '-' : scope.row.bitOffset }}
           </template>
         </el-table-column>
+      <el-table-column sortable prop="identity" label="唯一标识" width="auto" min-width="120" align="center" />
       <el-table-column label="操作" width="auto" min-width="200" align="center" fixed="right">
         <template #default="scope">
           <el-button @click="editDeviceModelProperty(scope.row)" text type="primary">编辑</el-button>
@@ -328,10 +329,10 @@
         <el-row>
             <el-form-item v-if="props.curModelBlock.funCode == 3 || props.curModelBlock.funCode == 4" label="按位解析">
               <el-tooltip class="item" effect="dark" content="开启后按字节位解析数据,位偏移从0开始" placement="top">
-              <el-switch style="width: 220px" v-model="ctxData.propertyForm.bitSwitch" inline-prompt active-text="是" inactive-text="否" />
+              <el-switch style="width: 220px" v-model="ctxData.propertyForm.bitOffsetSw" inline-prompt active-text="是" inactive-text="否" />
               </el-tooltip>
             </el-form-item>
-            <el-form-item label="位偏移" v-if="ctxData.propertyForm.bitSwitch" prop="bitOffset">
+            <el-form-item label="位偏移" v-if="ctxData.propertyForm.bitOffsetSw" prop="bitOffset">
               <el-input
                 type="text"
                 style="width: 220px"
@@ -354,6 +355,17 @@
             </el-input>
           </el-tooltip>
         </el-form-item> -->
+
+        <el-form-item label="唯一标识">
+            <el-input
+              type="text"
+              style="width: 220px"
+              v-model="ctxData.propertyForm.identity"
+              autocomplete="off"
+              placeholder="请输入唯一标识"
+            >
+            </el-input>
+        </el-form-item>
       </el-form>
     </div>
 
@@ -476,8 +488,8 @@ const validateRegAddr = (rule, value, callback) => {
 }
 const regOffset = /^[0-9]\d*$/
 const validateBitOffset = (rule, value, callback) => {
-  if (!regOffset.test(value) || value > 1000) {
-    callback(new Error('只能输入0-1000的整数数字！'))
+  if (!regOffset.test(value) || value > 65) {
+    callback(new Error('只能输入0-64的整数数字！'))
   } else {
     callback()
   }
@@ -554,18 +566,19 @@ const ctxData = reactive({
     unit: '', // 单位，只有uint32，int32，double有效
     decimals: 0, // 小数位数，只有double有效
     formula: '', // 计算公式
-    bitSwitch: false, // 按位解析
+    bitOffsetSw: false, // 按位解析
     bitOffset: 0, // 位偏移
 
 
-    min: '', // 属性最小值，只有uint32，int32，double有效
-    max: '', // 属性最大值，只有uint32，int32，double有效
+    min: 0, // 属性最小值，只有uint32，int32，double有效
+    max: 0, // 属性最大值，只有uint32，int32，double有效
     minMaxAlarm: false, // 范围报警，只有uint32，int32，double有效
-    step: '', // 步长，只有uint32，int32，double有效
+    step: 0, // 步长，只有uint32，int32，double有效
     stepAlarm: false, // 步长报警，只有uint32，int32，double有效
-    dataLength: '', // 字符串长度，只有string有效
+    dataLength: 0, // 字符串长度，只有string有效
     dataLengthAlarm: false, // 字符串长度报警，只有string有效
-    iotDataType: 'yc'
+    iotDataType: 'yc',
+    identity: '', // 唯一标识
   },
 
   //数据类型
@@ -677,7 +690,7 @@ const ctxData = reactive({
         validator: validateBitOffset,
       },
     ],
-    /*step: [
+    step: [
       {
         required: true,
         message: '步长不能为空',
@@ -687,7 +700,40 @@ const ctxData = reactive({
         trigger: 'blur',
         validator: validateStep,
       },
-    ],*/
+    ],
+    min: [
+      {
+        required: true,
+        message: '最小值不能为空',
+        trigger: 'blur',
+      },
+      {
+        trigger: 'blur',
+        validator: validateStep,
+      },
+    ],
+    max: [
+      {
+        required: true,
+        message: '最大值不能为空',
+        trigger: 'blur',
+      },
+      {
+        trigger: 'blur',
+        validator: validateStep,
+      },
+    ],
+    dataLength: [
+      {
+        required: true,
+        message: '字符串长度不能为空',
+        trigger: 'blur',
+      },
+      {
+        trigger: 'blur',
+        validator: regCnt,
+      },
+    ],
   },
   psFlag: false,
   selectedProperties: [],
@@ -883,7 +929,7 @@ const editDeviceModelProperty = (row) => {
   ctxData.propertyForm.regAddr = row.regAddr
   ctxData.propertyForm.ruleType = row.ruleType
   ctxData.propertyForm.formula = row.formula === undefined || row.formula === null ? '' : row.formula
-  ctxData.propertyForm.bitSwitch = row.bitSwitch === undefined || row.bitSwitch === null ? false : row.bitSwitch
+  ctxData.propertyForm.bitOffsetSw = row.bitOffsetSw === undefined || row.bitOffsetSw === null ? false : row.bitOffsetSw
   ctxData.propertyForm.bitOffset = row.bitOffset === undefined || row.bitOffset === null ? 0 : row.bitOffset
   // ctxData.propertyForm.step = row.step === undefined || row.step === null ? 0 : row.step
 
@@ -898,9 +944,14 @@ const editDeviceModelProperty = (row) => {
     ctxData.propertyForm['dataLengthAlarm'] = row.params.dataLengthAlarm
   }
   ctxData.propertyForm.iotDataType = row.iotDataType
+  ctxData.propertyForm.identity = row.identity === undefined || row.identity === null ? '' : row.identity
 }
 const propertyFormRef = ref(null)
 const submitPorpertyForm = () => {
+  if (ctxData.propertyForm.type !== 3 && Number(ctxData.propertyForm.min) > Number(ctxData.propertyForm.max)) {
+    ElMessage.warning('最大值必须大于最小值')
+    return;
+  }
   propertyFormRef.value.validate((valid) => {
     if (valid) {
       const pData = {
@@ -918,22 +969,23 @@ const submitPorpertyForm = () => {
           regAddr: ctxData.propertyForm.regAddr,
           ruleType: ctxData.propertyForm.ruleType,
           formula: ctxData.propertyForm.formula,
-          bitSwitch: ctxData.propertyForm.bitSwitch,
-          bitOffset: ctxData.propertyForm.bitSwitch ? ctxData.propertyForm.bitOffset : -1,
+          bitOffsetSw: ctxData.propertyForm.bitOffsetSw,
+          bitOffset: ctxData.propertyForm.bitOffsetSw ? ctxData.propertyForm.bitOffset : 0,
           // step: +ctxData.propertyForm.step,
-          iotDataType: ctxData.propertyForm.iotDataType
+          iotDataType: ctxData.propertyForm.iotDataType,
+          identity: ctxData.propertyForm.identity,
         },
       }
       let params = {}
       if (ctxData.propertyForm.type !== 3) {
-        params['min'] = ctxData.propertyForm.min
-        params['max'] = ctxData.propertyForm.max
+        params['min'] = ctxData.propertyForm.min.toString()
+        params['max'] = ctxData.propertyForm.max.toString()
         params['minMaxAlarm'] = ctxData.propertyForm.minMaxAlarm
         //params['step'] = +ctxData.propertyForm.step
-        params['step'] = ctxData.propertyForm.step   //ltg del 2023-06-15
+        params['step'] = ctxData.propertyForm.step.toString()   //ltg del 2023-06-15
         params['stepAlarm'] = ctxData.propertyForm.stepAlarm
       } else {
-        params['dataLength'] = ctxData.propertyForm.dataLength
+        params['dataLength'] = ctxData.propertyForm.dataLength.toString()
         params['dataLengthAlarm'] = ctxData.propertyForm.dataLengthAlarm
       }
       pData.data['params'] = params
@@ -1014,9 +1066,13 @@ const initPropertyForm = () => {
     regAddr: null,
     ruleType: 'Int_AB',
     formula: '',
-    bitSwitch: false,
+    bitOffsetSw: false,
     bitOffset: 0,
     step: 0,
+    min: 0,
+    max: 0,
+    dataLength: 0,
+    identity: '',
   }
 }
 const getDeviceProperty = () => {

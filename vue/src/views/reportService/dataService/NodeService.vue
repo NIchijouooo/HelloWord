@@ -277,7 +277,7 @@
             </el-select>
           </el-form-item>
 
-          <el-form-item v-if="ctxData.nodeForm.protocol != 'FSJY.MQTT'" label="通讯编码" prop="deviceCode">
+          <el-form-item v-if="ctxData.nodeForm.protocol != 'FSJY.MQTT' && ctxData.nodeForm.protocol != 'ZXJS.MQTT'" label="通讯编码" prop="deviceCode">
             <el-input type="text" v-model="ctxData.nodeForm.deviceCode" autocomplete="off" placeholder="请输入通讯编码">
             </el-input>
           </el-form-item>
@@ -292,6 +292,19 @@
           </el-form-item>
           <el-form-item v-if="ctxData.nodeForm.protocol == 'FSJY.MQTT'" label="设备密钥" prop="deviceSecret">
             <el-input type="text" v-model="ctxData.nodeForm.deviceSecret" autocomplete="off" placeholder="请输入网关设备密钥">
+            </el-input>
+          </el-form-item>
+
+          <el-form-item v-if="ctxData.nodeForm.protocol == 'ZXJS.MQTT'" label="产品序列号" prop="productSn">
+            <el-input type="text" v-model="ctxData.nodeForm.productSn" autocomplete="off" placeholder="请输入产品序列号">
+            </el-input>
+          </el-form-item>
+          <el-form-item v-if="ctxData.nodeForm.protocol == 'ZXJS.MQTT'" label="设备序列号" prop="deviceSn">
+            <el-input type="text" v-model="ctxData.nodeForm.deviceSn" autocomplete="off" placeholder="请输入设备序列号">
+            </el-input>
+          </el-form-item>
+          <el-form-item v-if="ctxData.nodeForm.protocol == 'ZXJS.MQTT'" label="设备密码" prop="devicePwd">
+            <el-input type="text" v-model="ctxData.nodeForm.devicePwd" autocomplete="off" placeholder="请输入设备密码">
             </el-input>
           </el-form-item>
 
@@ -370,6 +383,9 @@ const ctxData = reactive({
     ProductKey: '产品密钥',
     DeviceID: '通讯地址',
     DeviceSecret: '设备密钥',
+    ProductSn: '产品序列号',
+    DeviceSn: '设备序列号',
+    DevicePwd: '设备密码',
   },
   cellStyle: {
     height: '48px',
@@ -393,6 +409,9 @@ const ctxData = reactive({
     productKey: '',
     deviceID: '',
     deviceSecret: '',
+    productSn: '',
+    deviceSn: '',
+    devicePwd: '',
   },
   nodeRules: {
     serviceName: [
@@ -458,6 +477,27 @@ const ctxData = reactive({
       {
         required: true,
         message: '产品密钥不能为空',
+        trigger: 'blur',
+      },
+    ],
+    productSn: [
+      {
+        required: true,
+        message: '产品序列号不能为空',
+        trigger: 'blur',
+      },
+    ],
+    deviceSn: [
+      {
+        required: true,
+        message: '设备序列号不能为空',
+        trigger: 'blur',
+      },
+    ],
+    devicePwd: [
+      {
+        required: true,
+        message: '设备密码',
         trigger: 'blur',
       },
     ],
@@ -675,7 +715,7 @@ const submitAddNode = () => {
   console.log('checkedNodes => ', checkedNodes)
   console.log('props.curGateway => ', props.curGateway)
   if (checkedNodes.length === 0) {
-    ElMessage.info('请至少选择一个节点！')
+    ElMessage.info('请先展开节点，获取节点下的子设备数据！')
     return
   } else {
     let count = 0
@@ -758,6 +798,10 @@ const editNode = (row) => {
   ctxData.nodeForm['deviceID'] = row.param.DeviceID
   ctxData.nodeForm['deviceSecret'] = row.param.DeviceSecret
 
+  ctxData.nodeForm['productSn'] = row.param.ProductSn
+  ctxData.nodeForm['deviceSn'] = row.param.DeviceSn
+  ctxData.nodeForm['devicePwd'] = row.param.DevicePwd
+
 }
 const nodeFormRef = ref(null)
 const submitNodeForm = () => {
@@ -778,6 +822,9 @@ const submitNodeForm = () => {
           productKey: ctxData.nodeForm.productKey,
           deviceID: ctxData.nodeForm.deviceID,
           deviceSecret: ctxData.nodeForm.deviceSecret,
+          productSn: ctxData.nodeForm.productSn,
+          deviceSn: ctxData.nodeForm.deviceSn,
+          devicePwd: ctxData.nodeForm.devicePwd,
         },
       }
       const pData = {

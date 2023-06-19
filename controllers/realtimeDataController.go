@@ -22,7 +22,7 @@ type RealtimeDataController struct {
 
 func NewRealtimeDataController() *RealtimeDataController {
 	return &RealtimeDataController{
-		repo: repositories.NewRealtimeDataRepository(),
+		repo:      repositories.NewRealtimeDataRepository(),
 		repoHis:   repositories.NewHistoryDataRepository(),
 		repoPoint: repositories.NewDevicePointRepository()}
 }
@@ -32,7 +32,11 @@ func (ctrl *RealtimeDataController) RegisterRoutes(router *gin.RouterGroup) {
 	router.POST("/api/v2/realtimeData/GetRealtimeDataYcByID", ctrl.GetRealtimeDataYcByID)
 	router.POST("/api/v2/realtimeData/GetRealtimeDataSettingByID", ctrl.GetRealtimeDataSettingByID)
 	router.POST("/api/v2/realtimeData/GetRealtimeDataYxListByID", ctrl.GetRealtimeDataYxListByID)
+	router.POST("/api/v2/realtimeData/getRealtimeDataYxListByDevId", ctrl.GetRealtimeDataYxListByDevId)
+	router.POST("/api/v2/realtimeData/getRealtimeDataYxListByIdOrCodeList", ctrl.GetRealtimeDataYxListByIdOrCodeList)
 	router.POST("/api/v2/realtimeData/GetRealtimeDataYcListByID", ctrl.GetRealtimeDataYcListByID)
+	router.POST("/api/v2/realtimeData/getRealtimeDataYcListByDevId", ctrl.GetRealtimeDataYcListByDevId)
+	router.POST("/api/v2/realtimeData/getRealtimeDataYcListByIdOrCodeList", ctrl.GetRealtimeDataYcListByIdOrCodeList)
 	router.POST("/api/v2/realtimeData/GetRealtimeDataSettingListByID", ctrl.GetRealtimeDataSettingListByID)
 	router.POST("/api/v2/realtimeData/GetPointsByDeviceId", ctrl.GetPointsByDeviceId)
 	router.POST("/api/v2/realtimeData/GetDeviceByDevLabel", ctrl.GetDeviceByDevLabel)
@@ -136,6 +140,32 @@ func (c *RealtimeDataController) GetRealtimeDataYxByID(ctx *gin.Context) {
 	})
 }
 
+/*
+*
+根据设备id集合和遥信编码集合获取遥信列表
+*/
+func (c *RealtimeDataController) GetRealtimeDataYxListByIdOrCodeList(ctx *gin.Context) {
+	var realtimeData ParamRealtimeData
+	if err := ctx.Bind(&realtimeData); err != nil {
+		ctx.JSON(http.StatusOK, model.ResponseData{
+			Code:    "1",
+			Message: "error" + err.Error(),
+			Data:    "",
+		})
+		return
+	}
+
+	yxList, err := c.repo.GetYxListByDevIdsAndCodes(realtimeData.DeviceIds, realtimeData.Codes)
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	ctx.JSON(http.StatusOK, model.ResponseData{
+		Code: "0",
+		Data: yxList,
+	})
+}
+
 func (c *RealtimeDataController) GetRealtimeDataYxListByID(ctx *gin.Context) {
 	var realtimeData ParamRealtimeData
 	if err := ctx.Bind(&realtimeData); err != nil {
@@ -187,6 +217,33 @@ func (c *RealtimeDataController) GetRealtimeDataYcListByID(ctx *gin.Context) {
 		yxList,
 	})
 }
+
+/*
+*
+根据设备id集合和遥信编码集合获取遥信列表
+*/
+func (c *RealtimeDataController) GetRealtimeDataYcListByIdOrCodeList(ctx *gin.Context) {
+	var realtimeData ParamRealtimeData
+	if err := ctx.Bind(&realtimeData); err != nil {
+		ctx.JSON(http.StatusOK, model.ResponseData{
+			Code:    "1",
+			Message: "error" + err.Error(),
+			Data:    "",
+		})
+		return
+	}
+
+	ycList, err := c.repo.GetYcListByDevIdsAndCodes(realtimeData.DeviceIds, realtimeData.Codes)
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	ctx.JSON(http.StatusOK, model.ResponseData{
+		Code: "0",
+		Data: ycList,
+	})
+}
+
 func (c *RealtimeDataController) GetRealtimeDataSettingListByID(ctx *gin.Context) {
 	var realtimeData ParamRealtimeData
 	if err := ctx.Bind(&realtimeData); err != nil {
@@ -256,5 +313,65 @@ func (c *RealtimeDataController) GetRealtimeDataSettingByID(ctx *gin.Context) {
 		"0",
 		"",
 		yx,
+	})
+}
+
+/*
+*
+获取设备全部遥信实时数据
+*/
+func (c *RealtimeDataController) GetRealtimeDataYxListByDevId(ctx *gin.Context) {
+	var realtimeData ParamRealtimeData
+	if err := ctx.Bind(&realtimeData); err != nil {
+		ctx.JSON(http.StatusOK, model.ResponseData{
+			Code:    "1",
+			Message: "error" + err.Error(),
+			Data:    "",
+		})
+		return
+	}
+	deviceId := realtimeData.DeviceId
+	if deviceId == 0 {
+		ctx.JSON(http.StatusOK, model.ResponseData{
+			Code:    "1",
+			Message: "参数错误",
+			Data:    "",
+		})
+		return
+	}
+	yxList, _ := c.repo.GetYxListById(deviceId)
+	ctx.JSON(http.StatusOK, model.ResponseData{
+		Code: "0",
+		Data: yxList,
+	})
+}
+
+/*
+*
+获取设备全部遥测实时数据
+*/
+func (c *RealtimeDataController) GetRealtimeDataYcListByDevId(ctx *gin.Context) {
+	var realtimeData ParamRealtimeData
+	if err := ctx.Bind(&realtimeData); err != nil {
+		ctx.JSON(http.StatusOK, model.ResponseData{
+			Code:    "1",
+			Message: "error" + err.Error(),
+			Data:    "",
+		})
+		return
+	}
+	deviceId := realtimeData.DeviceId
+	if deviceId == 0 {
+		ctx.JSON(http.StatusOK, model.ResponseData{
+			Code:    "1",
+			Message: "参数错误",
+			Data:    "",
+		})
+		return
+	}
+	ycList, _ := c.repo.GetYcListById(deviceId)
+	ctx.JSON(http.StatusOK, model.ResponseData{
+		Code: "0",
+		Data: ycList,
 	})
 }

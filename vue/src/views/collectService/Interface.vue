@@ -124,7 +124,7 @@
               <el-select
                 v-model="ctxData.interfaceForm.protocolTypeName"
                 style="width: 100%"
-                placeholder="请选择通讯协议(GWAI ADD 2023-05-10)"
+                placeholder="请选择通讯协议"
               >
                 <el-option
                   v-for="item of ctxData.protocolTypeNameList"

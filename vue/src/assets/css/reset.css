@@ -69,7 +69,7 @@ div::-webkit-scrollbar {
 }
 div::-webkit-scrollbar-thumb {
   border-radius: 6px;
-  background-color: #3054eb;
+  background-color: rgb(24, 144, 255);
 }
 div::-webkit-scrollbar-track {
   box-shadow: inset 0 0 5px rgba(0, 0, 0, 0.2);

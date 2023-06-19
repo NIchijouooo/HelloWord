@@ -1,12 +1,16 @@
 package mqttFeisjy
 
 import (
+	"bytes"
+	"compress/gzip"
 	"encoding/json"
 	"fmt"
 	"gateway/buildInfo"
 	"gateway/device"
 	"gateway/setting"
+	"math"
 	"net"
+	"os"
 	"strconv"
 	"time"
 )
@@ -51,6 +55,30 @@ type MQTTFeisjyReportPropertyTemplate struct {
 
 func (r *ReportServiceParamFeisjyTemplate) FeisjyPublishData(msg *MQTTFeisjyReportFrameTemplate) bool {
 	status := false
+
+	MQTTFeisjyAddCommunicationMessage(r, msg.Topic, Direction_TX, fmt.Sprintf("%s", msg.Payload))
+
+	// QJHui ADD 2023/6/16 新增了上报数据压缩
+	payloadByte, ok := msg.Payload.([]byte)
+	if ok {
+
+		//fmt.Println("压缩前 ************************************* json >", len(msg.Payload.([]byte)))
+
+		var b bytes.Buffer
+		gz := gzip.NewWriter(&b)
+		if _, err := gz.Write(payloadByte); err != nil {
+			fmt.Println("Error compressing JSON data:", err)
+			os.Exit(1)
+		}
+		if err := gz.Close(); err != nil {
+			fmt.Println("Error closing gzip writer:", err)
+			os.Exit(1)
+		}
+		compressedData := b.Bytes()
+		msg.Payload = compressedData
+
+		//fmt.Println("压缩后 ************************************* compressed Data >", len(msg.Payload.([]byte)))
+	}
 
 	if r.GWParam.MQTTClient != nil {
 		if token := r.GWParam.MQTTClient.Publish(msg.Topic, 0, false, msg.Payload); token.WaitTimeout(2000*time.Millisecond) && token.Error() != nil {
@@ -159,7 +187,7 @@ func (r *ReportServiceParamFeisjyTemplate) GWPropertyPost() {
 
 	count++
 	ycProperty.ID = 1
-	ycProperty.Name = "M2M上报计数"
+	ycProperty.Name = "网关上报计数"
 	ycProperty.Value = count
 	ycPropertyMap = append(ycPropertyMap, ycProperty)
 
@@ -308,6 +336,187 @@ func (r *ReportServiceParamFeisjyTemplate) NodePropertyPost(name []string) {
 				*/
 				NewRealtimeDataRepository().SaveRealtimeDataList(v.Name, v.CollInterfaceName, ycPropertyPostParam)
 			}
+		}
+	}
+}
+
+func (r *ReportServiceParamFeisjyTemplate) ProcessAlarmEvent(index int, collName string, nodeName string) {
+
+	reportStatus := false
+
+	//1、查找到对应的设备
+	coll, ok := device.CollectInterfaceMap.Coll[collName]
+	if !ok {
+		return
+	}
+	node, ok := coll.DeviceNodeMap[nodeName]
+	if !ok {
+		return
+	}
+
+	//2、初始化上报结构体
+	ycPropertyMap := make([]MQTTFeisjyReportDataTemplate, 0)
+	ycPropertyPostParam := MQTTFeisjyReportYcTemplate{
+		Time:       time.Now().Format("2006-01-02 15:04:05"),
+		CommStatus: "onLink",
+	}
+
+	//3、判断设备是否在线，不在线退出，在线判断报警上报状态
+	if node.CommStatus == "offLine" {
+		r.NodeList[index].CommStatus = "offLine"
+		return
+	} else {
+		for _, v := range node.Properties {
+			rProperty, ok := r.NodeList[index].Properties[v.Name]
+			if !ok {
+				continue
+			}
+
+			//3.1、判断步长报警
+			if rProperty.Params.StepAlarm == true {
+				valueCnt := len(v.Value)
+				if valueCnt >= 2 { //阶跃报警必须是2个值
+					switch v.Type {
+					case device.PropertyTypeInt32:
+						{
+							pValueCur := v.Value[valueCnt-1].Value.(int32)
+							pValuePre := v.Value[valueCnt-2].Value.(int32)
+							step, _ := strconv.Atoi(rProperty.Params.Step)
+							if math.Abs(float64(pValueCur-pValuePre)) > float64(step) {
+								reportStatus = true //满足报警条件，上报
+								setting.ZAPS.Infof("设备[%v]阶跃报警", r.NodeList[index].Name)
+								//转换时间
+								//timeStamp, _ := time.ParseInLocation("2006-01-02 15:04:05", v.Value[valueCnt-1].TimeStamp, time.Local)
+
+								if num, err := strconv.Atoi(v.Name); err == nil {
+									ycProperty := MQTTFeisjyReportDataTemplate{
+										ID:    num,
+										Value: v.Value[valueCnt-1].Value.(int32),
+									}
+									ycPropertyMap = append(ycPropertyMap, ycProperty)
+								}
+
+								continue
+							}
+						}
+					case device.PropertyTypeUInt32:
+						{
+							pValueCur := v.Value[valueCnt-1].Value.(uint32)
+							pValuePre := v.Value[valueCnt-2].Value.(uint32)
+							step, _ := strconv.Atoi(rProperty.Params.Step)
+							if math.Abs(float64(pValueCur-pValuePre)) > float64(step) {
+								reportStatus = true //满足报警条件，上报
+								setting.ZAPS.Infof("设备[%v]阶跃报警", r.NodeList[index].Name)
+								//转换时间
+								//timeStamp, _ := time.ParseInLocation("2006-01-02 15:04:05", v.Value[valueCnt-1].TimeStamp, time.Local)
+
+								if num, err := strconv.Atoi(v.Name); err == nil {
+									ycProperty := MQTTFeisjyReportDataTemplate{
+										ID:    num,
+										Value: v.Value[valueCnt-1].Value.(uint32),
+									}
+									ycPropertyMap = append(ycPropertyMap, ycProperty)
+								}
+
+								continue
+							}
+						}
+					case device.PropertyTypeDouble:
+						{
+							pValueCur := v.Value[valueCnt-1].Value.(float64)
+							pValuePre := v.Value[valueCnt-2].Value.(float64)
+							step, err := strconv.ParseFloat(rProperty.Params.Step, 64)
+							if err != nil {
+								continue
+							}
+							if math.Abs(pValueCur-pValuePre) > float64(step) {
+								reportStatus = true //满足报警条件，上报
+								setting.ZAPS.Infof("设备[%v]阶跃报警", r.NodeList[index].Name)
+								//转换时间
+								//timeStamp, _ := time.ParseInLocation("2006-01-02 15:04:05", v.Value[valueCnt-1].TimeStamp, time.Local)
+
+								if num, err := strconv.Atoi(v.Name); err == nil {
+									ycProperty := MQTTFeisjyReportDataTemplate{
+										ID:    num,
+										Value: v.Value[valueCnt-1].Value.(float64),
+									}
+									ycPropertyMap = append(ycPropertyMap, ycProperty)
+								}
+								continue
+							}
+						}
+					}
+				}
+			}
+
+			//3.2、判断范围报警
+			if rProperty.Params.MinMaxAlarm == true {
+				valueCnt := len(v.Value)
+				if v.Type == device.PropertyTypeInt32 {
+					pValueCur := v.Value[valueCnt-1].Value.(int32)
+					min, _ := strconv.Atoi(rProperty.Params.Min)
+					max, _ := strconv.Atoi(rProperty.Params.Max)
+					if pValueCur < int32(min) || pValueCur > int32(max) {
+						reportStatus = true //满足报警条件，上报
+						setting.ZAPS.Infof("设备[%v]范围报警", r.NodeList[index].Name)
+
+						if num, err := strconv.Atoi(v.Name); err == nil {
+							ycProperty := MQTTFeisjyReportDataTemplate{
+								ID:    num,
+								Value: v.Value[valueCnt-1].Value.(int32),
+							}
+							ycPropertyMap = append(ycPropertyMap, ycProperty)
+						}
+					}
+				} else if v.Type == device.PropertyTypeUInt32 {
+					pValueCur := v.Value[valueCnt-1].Value.(uint32)
+					min, _ := strconv.Atoi(rProperty.Params.Min)
+					max, _ := strconv.Atoi(rProperty.Params.Max)
+					if pValueCur < uint32(min) || pValueCur > uint32(max) {
+						reportStatus = true //满足报警条件，上报
+						setting.ZAPS.Infof("设备[%v]范围报警", r.NodeList[index].Name)
+
+						if num, err := strconv.Atoi(v.Name); err == nil {
+							ycProperty := MQTTFeisjyReportDataTemplate{
+								ID:    num,
+								Value: v.Value[valueCnt-1].Value.(uint32),
+							}
+							ycPropertyMap = append(ycPropertyMap, ycProperty)
+						}
+					}
+				} else if v.Type == device.PropertyTypeDouble {
+					pValueCur := v.Value[valueCnt-1].Value.(float64)
+					min, err := strconv.ParseFloat(rProperty.Params.Min, 64)
+					if err != nil {
+						continue
+					}
+					max, err := strconv.ParseFloat(rProperty.Params.Max, 64)
+					if err != nil {
+						continue
+					}
+					if pValueCur < min || pValueCur > max {
+						reportStatus = true //满足报警条件，上报
+						setting.ZAPS.Infof("设备[%v]范围报警", r.NodeList[index].Name)
+
+						if num, err := strconv.Atoi(v.Name); err == nil {
+							ycProperty := MQTTFeisjyReportDataTemplate{
+								ID:    num,
+								Value: v.Value[valueCnt-1].Value.(float64),
+							}
+							ycPropertyMap = append(ycPropertyMap, ycProperty)
+						}
+					}
+				}
+			}
+		}
+	}
+
+	//4、满足报警条件,推送信息
+	if reportStatus == true {
+		ycPropertyPostParam.YcList = ycPropertyMap
+		if true == r.FeisjyPublishYcData(&ycPropertyPostParam, r.NodeList[index].Param.DeviceID) {
+			r.NodeList[index].HeartBeatMark = true
+			r.NodeList[index].ReportErrCnt = 0
 		}
 	}
 }
