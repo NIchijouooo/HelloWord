@@ -45,6 +45,7 @@ type TSLModbusPropertyTemplate struct {
 	BitOffsetSw bool   `json:"bitOffsetSw"` // 位偏移开关
 	BitOffset   int    `json:"bitOffset"`   // 位偏移数量
 	IotDataType string `json:"iotDataType"`
+	Identity   string `json:"identity"` //唯一标识
 }
 
 type TSLModbusCmdTemplate struct {

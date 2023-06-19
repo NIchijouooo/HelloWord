@@ -36,7 +36,7 @@ import zhCn from 'element-plus/lib/locale/lang/zh-cn'
     bottom: 20px;
     width: 100%;
     height: calc(100%);
-    background-color: #f5f5f5;
+    background-color: #f5f8fa;
     border-radius: 4px;
     overflow: hidden;
   }
@@ -109,7 +109,7 @@ import zhCn from 'element-plus/lib/locale/lang/zh-cn'
 // 自定义弹窗内容
 .param-content {
   position: relative;
-  width: 400px;
+  width: 500px;
   padding-left: 40px;
   .pc-title {
     position: relative;
@@ -142,7 +142,7 @@ import zhCn from 'element-plus/lib/locale/lang/zh-cn'
   width: 384px;
   top: 20px;
   bottom: 20px;
-  background-color: #f5f5f5;
+  background-color: #f5f8fa;
   border-radius: 4px;
 }
 .mcl-content {

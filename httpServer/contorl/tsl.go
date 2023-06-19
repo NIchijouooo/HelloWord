@@ -1107,6 +1107,7 @@ func ApiAddTSLModbusCmdProperty(context *gin.Context) {
 		BitOffset   int                                   `json:"bitOffset"` // 位偏移数量
 		Params      device.TSLModbusPropertyParamTemplate `json:"params"`    //ltg add 2023-06-15
 		IotDataType string                                `json:"iotDataType"`
+		Identity    string                                `json:"identity"` //唯一标识
 	}{}
 
 	emController := controllers.NewEMController()
@@ -1159,6 +1160,7 @@ func ApiAddTSLModbusCmdProperty(context *gin.Context) {
 		BitOffset:   propertyParam.BitOffset,
 		Params:      param,
 		IotDataType: propertyParam.IotDataType,
+		Identity:    propertyParam.Identity,
 	}
 	err = tslModel.TSLModelPropertiesAdd(propertyParam.CmdName, property)
 	if err != nil {
@@ -1195,6 +1197,7 @@ func ApiAddTSLD07CmdProperty(context *gin.Context) {
 		Type           int                                       `json:"type"`           //float,uint32...
 		Params         device.TSLDLT6452007PropertyParamTemplate `json:"params"`         //ltg add 2023-06-15
 		IotDataType    string                                    `json:"iotDataType"`
+		Identity       string                                    `json:"identity"` //唯一标识
 	}{}
 
 	emController := controllers.NewEMController()
@@ -1245,6 +1248,7 @@ func ApiAddTSLD07CmdProperty(context *gin.Context) {
 		Type:           propertyParam.Type,
 		Params:         param,
 		IotDataType:    propertyParam.IotDataType,
+		Identity:       propertyParam.Identity,
 	}
 	err = tslModel.TSLModelPropertiesAdd(propertyParam.CmdName, property)
 	if err != nil {
@@ -1510,7 +1514,7 @@ func ApiAddTSLModbusCmdPropertyFromXlsx(context *gin.Context) {
 
 	setting.ZAPS.Debugf("cells %v", cells)
 	for _, cell := range cells {
-		if len(cell) < 10 {
+		if len(cell) < 20 {
 			continue
 		}
 
@@ -1525,6 +1529,7 @@ func ApiAddTSLModbusCmdPropertyFromXlsx(context *gin.Context) {
 			RegCnt:      setting.GetInt(cell[7]),
 			RuleType:    setting.GetString(cell[8]),
 			IotDataType: setting.GetString(cell[19]),
+			Identity:   setting.GetString(cell[19]),
 		}
 		if setting.GetString(cell[2]) == "R" {
 			property.AccessMode = 0
@@ -1689,7 +1694,7 @@ func ApiAddTSLD07CmdPropertyFromXlsx(context *gin.Context) {
 
 	setting.ZAPS.Debugf("cells %v", cells)
 	for _, cell := range cells {
-		if len(cell) < 10 {
+		if len(cell) < 18 {
 			continue
 		}
 
@@ -1705,6 +1710,7 @@ func ApiAddTSLD07CmdPropertyFromXlsx(context *gin.Context) {
 			BlockAddOffset: setting.GetInt(cell[8]),
 			RulerAddOffset: setting.GetInt(cell[9]),
 			IotDataType:    setting.GetString(cell[17]),
+			Identity:       setting.GetString(cell[17]),
 		}
 		if setting.GetString(cell[5]) == "R" {
 			property.AccessMode = 0
@@ -1795,6 +1801,7 @@ func ApiModifyTSLModbusCmdProperty(context *gin.Context) {
 		BitOffset   int                                   `json:"bitOffset"` // 位偏移数量
 		Params      device.TSLModbusPropertyParamTemplate `json:"params"`    //ltg add 2023-06-15
 		IotDataType string                                `json:"iotDataType"`
+		Identity    string                                `json:"identity"`  //唯一标识
 	}{}
 
 	emController := controllers.NewEMController()
@@ -1847,6 +1854,7 @@ func ApiModifyTSLModbusCmdProperty(context *gin.Context) {
 		BitOffset:   propertyParam.BitOffset,
 		Params:      param,
 		IotDataType: propertyParam.IotDataType,
+		Identity:    propertyParam.Identity,
 	}
 	err = tslModel.TSLModelPropertiesModify(propertyParam.CmdName, property)
 	if err != nil {
@@ -1883,6 +1891,7 @@ func ApiModifyTSLD07CmdProperty(context *gin.Context) {
 		Type           int                                       `json:"type"`           //float,uint32...
 		Params         device.TSLDLT6452007PropertyParamTemplate `json:"params"`         //ltg add 2023-06-15
 		IotDataType    string                                    `json:"iotDataType"`
+		Identity       string                                    `json:"identity"`       //唯一标识
 	}{}
 
 	emController := controllers.NewEMController()
@@ -1933,6 +1942,7 @@ func ApiModifyTSLD07CmdProperty(context *gin.Context) {
 		Type:           propertyParam.Type,
 		Params:         param,
 		IotDataType:    propertyParam.IotDataType,
+		Identity:       propertyParam.Identity,
 	}
 	err = tslModel.TSLModelPropertiesModify(propertyParam.CmdName, property)
 	if err != nil {
@@ -2198,8 +2208,8 @@ func ApiExportTSLModbusCmdPropertiesToXlsx(context *gin.Context) {
 	csvRecords := make([][]string, 0)
 
 	csvRecords = [][]string{
-		{"属性名称", "属性标识符", "读写类型", "数据类型", "小数位", "单位", "寄存器地址", "寄存器数量", "解析规则", "计算公式", "位解析开关", "位偏移", "范围报警", "最小值", "最大值", "步长报警", "步长", "字符串长度报警", "字符串长度", "点位类型"},
-		{"Name", "Label", "AccessMode", "Type", "Decimals", "Unit", "RegAddr", "RegCnt", "RuleType", "Formula", "BitOffsetSw", "BitOffset", "MinMaxAlarm", "Min", "Max", "StepAlarm", "Step", "DataLengthAlarm", "DataLength", "IotDataType"},
+		{"属性名称", "属性标识符", "读写类型", "数据类型", "小数位", "单位", "寄存器地址", "寄存器数量", "解析规则", "计算公式", "位解析开关", "位偏移", "范围报警", "最小值", "最大值", "步长报警", "步长", "字符串长度报警", "字符串长度", "点位类型", "唯一标识"},
+		{"Name", "Label", "AccessMode", "Type", "Decimals", "Unit", "RegAddr", "RegCnt", "RuleType", "Formula", "BitOffsetSw", "BitOffset", "MinMaxAlarm", "Min", "Max", "StepAlarm", "Step", "DataLengthAlarm", "DataLength", "IotDataType", "Identity"},
 	}
 
 	for _, v := range cmd.Registers {
@@ -2266,6 +2276,7 @@ func ApiExportTSLModbusCmdPropertiesToXlsx(context *gin.Context) {
 
 		record = append(record, v.Params.DataLength)
 		record = append(record, v.IotDataType)
+		record = append(record, v.Identity)
 
 		csvRecords = append(csvRecords, record)
 	}
@@ -2321,8 +2332,8 @@ func ApiExportTSLD07CmdPropertiesToXlsx(context *gin.Context) {
 	//创建一个新的写入文件流
 	csvRecords := make([][]string, 0)
 	csvRecords = [][]string{
-		{"属性名称", "属性标识符", "数据标识", "数据格式", "数据长度", "读写类型", "数据类型", "单位", "数据块偏移地址", "数据标识偏移地址", "范围报警", "最小值", "最大值", "步长报警", "步长", "字符串长度报警", "字符串长度", "点位类型"},
-		{"Name", "Label", "RulerId", "Format", "Len", "AccessMode", "Type", "Unit", "BlockAddOffset", "RulerAddOffset", "MinMaxAlarm", "Min", "Max", "StepAlarm", "Step", "DataLengthAlarm", "DataLength", "IotDataType"},
+		{"属性名称", "属性标识符", "数据标识", "数据格式", "数据长度", "读写类型", "数据类型", "单位", "数据块偏移地址", "数据标识偏移地址", "范围报警", "最小值", "最大值", "步长报警", "步长", "字符串长度报警", "字符串长度", "点位类型", "唯一标识"},
+		{"Name", "Label", "RulerId", "Format", "Len", "AccessMode", "Type", "Unit", "BlockAddOffset", "RulerAddOffset", "MinMaxAlarm", "Min", "Max", "StepAlarm", "Step", "DataLengthAlarm", "DataLength", "IotDataType", "Identity"},
 	}
 
 	for _, v := range cmd.Properties {
@@ -2378,6 +2389,7 @@ func ApiExportTSLD07CmdPropertiesToXlsx(context *gin.Context) {
 
 		record = append(record, v.Params.DataLength)
 		record = append(record, v.IotDataType)
+		record = append(record, v.Identity)
 
 		csvRecords = append(csvRecords, record)
 	}

@@ -41,6 +41,7 @@ type TSLDLT6452007PropertyTemplate struct {
 	Type           int                                `json:"type"`           //float,uint32...
 	Params         TSLDLT6452007PropertyParamTemplate `json:"params"`
 	IotDataType    string `json:"iotDataType"`
+	Identity       string `json:"identity"`       //唯一标识
 }
 
 type TSLDLT6452007CmdTemplate struct {
