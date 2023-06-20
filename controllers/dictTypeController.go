@@ -14,11 +14,12 @@ import (
 
 // 定义字典类型管理的控制器
 type DictTypeController struct {
-	repo *repositories.DictTypeRepository
+	repoType *repositories.DictTypeRepository
+	repoData *repositories.DictDataRepository
 }
 
 func NewDictTypeController() *DictTypeController {
-	return &DictTypeController{repo: repositories.NewDictTypeRepository()}
+	return &DictTypeController{repoType: repositories.NewDictTypeRepository(),repoData: repositories.NewDictDataRepository()}
 }
 
 func (ctrl *DictTypeController) RegisterRoutes(router *gin.RouterGroup) {
@@ -28,6 +29,7 @@ func (ctrl *DictTypeController) RegisterRoutes(router *gin.RouterGroup) {
 	router.POST("/api/v2/dictType/getDictTypeList", ctrl.GetDictTypeList)
 	router.POST("/api/v2/dictType/getDictTypeByID", ctrl.GetDictTypeByID)
 	router.POST("/api/v2/dictData/getDictTypeListByDictTypeId", ctrl.GetDictTypeListByDictTypeId)
+	router.POST("/api/v2/dictData/GetDictTypeListByTypeAndLable", ctrl.GetDictTypeListByTypeAndLable)
 	// 注册其他路由...
 }
 
@@ -53,7 +55,7 @@ func (c *DictTypeController) CreateDictType(ctx *gin.Context) {
 		})
 		return
 	}
-	if err := c.repo.Create(&dictType); err != nil {
+	if err := c.repoType.Create(&dictType); err != nil {
 		ctx.JSON(http.StatusOK, model.ResponseData{
 			"1",
 			"error" + err.Error(),
@@ -80,7 +82,7 @@ func (c *DictTypeController) UpdateDictType(ctx *gin.Context) {
 		})
 		return
 	}
-	if err := c.repo.Update(&dictType); err != nil {
+	if err := c.repoType.Update(&dictType); err != nil {
 		ctx.JSON(http.StatusOK, model.ResponseData{
 			"1",
 			"error" + err.Error(),
@@ -106,7 +108,7 @@ func (c *DictTypeController) DeleteDictType(ctx *gin.Context) {
 		})
 		return
 	}
-	if err := c.repo.Delete(paramType.DictId); err != nil {
+	if err := c.repoType.Delete(paramType.DictId); err != nil {
 		ctx.JSON(http.StatusOK, model.ResponseData{
 			"1",
 			"error" + err.Error(),
@@ -136,7 +138,7 @@ func (c *DictTypeController) GetDictTypeList(ctx *gin.Context) {
 		return
 	}
 
-	dictTypeList, total, err := c.repo.GetAll(paramType.DictName, paramType.CreateTimeStart, paramType.CreateTimeEnd, paramType.PageNum, paramType.PageSize)
+	dictTypeList, total, err := c.repoType.GetAll(paramType.DictName, paramType.CreateTimeStart, paramType.CreateTimeEnd, paramType.PageNum, paramType.PageSize)
 	if err != nil {
 		ctx.JSON(http.StatusOK, model.ResponseData{
 			"1",
@@ -169,7 +171,7 @@ func (c *DictTypeController) GetDictTypeByID(ctx *gin.Context) {
 		})
 		return
 	}
-	dictType, err := c.repo.GetById(paramType.DictId)
+	dictType, err := c.repoType.GetById(paramType.DictId)
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -192,7 +194,7 @@ func (c *DictTypeController) GetDictTypeListByDictTypeId(ctx *gin.Context) {
 		})
 		return
 	}
-	dictDataList, err := c.repo.GetDictDataListByDictTypeId(paramType.DictType)
+	dictDataList, err := c.repoType.GetDictDataListByDictTypeId(paramType.DictType)
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -201,5 +203,28 @@ func (c *DictTypeController) GetDictTypeListByDictTypeId(ctx *gin.Context) {
 		"0",
 		"",
 		dictDataList,
+	})
+}
+
+// 获取字典类型下的所有字典数据
+func (c *DictTypeController) GetDictTypeListByTypeAndLable(ctx *gin.Context) {
+	var paramType models.DictData
+	if err := ctx.Bind(&paramType); err != nil {
+		ctx.JSON(http.StatusOK, model.ResponseData{
+			"1",
+			"error" + err.Error(),
+			"",
+		})
+		return
+	}
+	dictData, err := c.repoData.SelectDictValue(paramType.DictType, paramType.DictLabel)
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	ctx.JSON(http.StatusOK, model.ResponseData{
+		"0",
+		"",
+		dictData,
 	})
 }
