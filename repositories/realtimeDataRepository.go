@@ -351,6 +351,55 @@ func (r *RealtimeDataRepository) GetYcListById(deviceId int) ([]models.YcData, e
 	return list, err
 }
 
+func (r *RealtimeDataRepository) GetSettingPointParamListById(deviceId int) ([]models.PointParam, error) {
+	rowsYx, err := r.taosDb.Query("SELECT last(code), last(name), last(val),last(ts) FROM setting where device_id = ? group by code order by code", deviceId)
+	if err != nil {
+		return nil, err
+	}
+	var list []models.PointParam
+	for rowsYx.Next() {
+		pointParam := models.PointParam{}
+		err := rowsYx.Scan(&pointParam.Code, &pointParam.Name, &pointParam.Value, &pointParam.Ts)
+		if err != nil {
+			return nil, err
+		}
+		list = append(list, pointParam)
+	}
+	return list, err
+}
+func (r *RealtimeDataRepository) GetYxPointParamListById(deviceId int) ([]models.PointParam, error) {
+	rowsYx, err := r.taosDb.Query("SELECT last(code), last(name), last(val),last(ts) FROM yx where device_id = ? group by code order by code", deviceId)
+	if err != nil {
+		return nil, err
+	}
+	var list []models.PointParam
+	for rowsYx.Next() {
+		pointParam := models.PointParam{}
+		err := rowsYx.Scan(&pointParam.Code, &pointParam.Name, &pointParam.Value, &pointParam.Ts)
+		if err != nil {
+			return nil, err
+		}
+		list = append(list, pointParam)
+	}
+	return list, err
+}
+func (r *RealtimeDataRepository) GetYcPointParamListById(deviceId int) ([]models.PointParam, error) {
+	rowsYx, err := r.taosDb.Query("SELECT last(code), last(name), last(val),last(ts) FROM yc where device_id = ? group by code order by code", deviceId)
+	if err != nil {
+		return nil, err
+	}
+	var list []models.PointParam
+	for rowsYx.Next() {
+		pointParam := models.PointParam{}
+		err := rowsYx.Scan(&pointParam.Code, &pointParam.Name, &pointParam.Value, &pointParam.Ts)
+		if err != nil {
+			return nil, err
+		}
+		list = append(list, pointParam)
+	}
+	return list, err
+}
+
 
 /*
 *
