@@ -3,15 +3,15 @@ package ReturnModel
 import "gateway/models"
 
 type CharData struct {
-	XAxisList []string         `json:"xAxisList"`
-	DataMap   map[int][]string `json:"dataMap"`
+	XAxisList []string              `json:"xAxisList"`
+	DataMap   map[int][]interface{} `json:"dataMap"`
 	//DataList []ResYcData `json:"dataList"`
 }
 
-//type ResYcData struct {
-//	Name string   `json:"name"`
-//	Data []string `json:"data"`
-//}
+//	type ResYcData struct {
+//		Name string   `json:"name"`
+//		Data []string `json:"data"`
+//	}
 type YcData struct {
 	Code     int              `json:"code"`     //测点编码
 	DeviceId int              `json:"deviceId"` //设备id

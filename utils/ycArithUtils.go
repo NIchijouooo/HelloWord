@@ -2,19 +2,18 @@ package utils
 
 import (
 	"gateway/models"
-	"math/big"
+	"github.com/shopspring/decimal"
 	"reflect"
 	"time"
 )
 
-//遥测累加
-func YcValueSum(ycModelList interface{}) float64 {
-	result := 0.0
+// 遥测累加
+func YcValueSum(ycModelList interface{}) interface{} {
 	// 检查 ycModelList 是否为空
 	if ycModelList == nil || reflect.ValueOf(ycModelList).Len() == 0 {
-		return result
+		return nil
 	}
-	zero := big.NewFloat(0.0)
+	zero := decimal.NewFromFloat(0)
 	// 使用反射获取 ycModelList 的值并进行遍历
 	listValue := reflect.ValueOf(ycModelList)
 	for i := 0; i < listValue.Len(); i++ {
@@ -22,17 +21,15 @@ func YcValueSum(ycModelList interface{}) float64 {
 
 		switch obj := obj.(type) {
 		case models.YcData:
-			if obj.Value != 0 {
-				zero.Add(zero, big.NewFloat(obj.Value))
-			}
+			zero = zero.Add(decimal.NewFromFloat(obj.Value))
 		}
 	}
 	// 保留三位小数点
-	resultFloat, _ := zero.SetPrec(3).Float64()
+	resultFloat, _ := zero.RoundUp(3).Float64()
 	return resultFloat
 }
 
-//取出最大遥测值
+// 取出最大遥测值
 func YcValueMax(ycModelList interface{}) float64 {
 	result := 0.0
 
