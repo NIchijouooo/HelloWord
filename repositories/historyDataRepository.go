@@ -28,7 +28,7 @@ func NewHistoryDataRepository() *HistoryDataRepository {
 */
 func (r *HistoryDataRepository) GetYxLogByDeviceIdsCodes(deviceIds, codes, interval string, startTime, endTime int64) ([]*models.PointParam, error) {
 	var realtimeList []*models.PointParam
-	tableName := "realtimedatatest.yx"
+	tableName := "realtimedata.yx"
 	var err error
 	var sql = ""
 	if startTime > 0 && endTime > 0 && interval == "" {
@@ -88,7 +88,7 @@ func (r *HistoryDataRepository) GetYxLogByDeviceIdsCodes(deviceIds, codes, inter
 */
 func (r *HistoryDataRepository) GetYcLogByDeviceIdsCodes(deviceIds, codes, interval string, startTime, endTime int64) ([]*models.PointParam, error) {
 	var realtimeList []*models.PointParam
-	tableName := "realtimedatatest.yc"
+	tableName := "realtimedata.yc"
 	var err error
 	var sql = ""
 	if startTime > 0 && endTime > 0 && interval == "" {
@@ -146,7 +146,7 @@ func (r *HistoryDataRepository) GetYcLogByDeviceIdsCodes(deviceIds, codes, inter
 */
 func (r *HistoryDataRepository) GetSettingLogByDeviceIdsCodes(deviceIds, codes, interval string, startTime, endTime int64) ([]*models.SettingData, error) {
 	var realtimeList []*models.SettingData
-	tableName := "realtimedatatest.setting"
+	tableName := "realtimedata.setting"
 	var err error
 
 	var sql = ""
@@ -201,8 +201,8 @@ func (r *HistoryDataRepository) GetLastYcListByCode(deviceIds, codes string) ([]
 func (r *HistoryDataRepository) GetLastYcHistoryByDeviceIdAndCodeList(deviceId int, codes string, startTime, endTime int64, interval string) ([]*models.YcData, error) {
 	var realtimeList []*models.YcData
 	tableName := "realtimedata.yc"
-	//select  from realtimedatatest.yc Where device_id = 121 and code in (1,2) and ts >=1683689768000 and ts<1684553768000 partition by device_id,code INTERVAL(1d) FILL(null);
-	sql := fmt.Sprintf("select FIRST(ts) as ts,val,device_id,code from %s Where device_id = %d and code in (%s) and ts >=%v and ts <%v  partition by code INTERVAL(%s);", tableName, deviceId, codes, startTime, endTime, interval)
+	//select  from realtimedata.yc Where device_id = 121 and code in (1,2) and ts >=1683689768000 and ts<1684553768000 partition by device_id,code INTERVAL(1d) FILL(null);
+	sql := fmt.Sprintf("select Last(ts) as ts,val,device_id,code from %s Where device_id = %d and code in (%s) and ts >=%v and ts <%v  partition by code INTERVAL(%s);", tableName, deviceId, codes, startTime, endTime, interval)
 	rows, err := r.taosDb.Query(sql)
 	if err != nil {
 		return nil, err

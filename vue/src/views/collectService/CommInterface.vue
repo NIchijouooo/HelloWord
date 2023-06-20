@@ -1176,11 +1176,11 @@ const handleResult = (res, doFunction) => {
   padding: 0;
 }
 :deep(.el-collapse-item__header.is-active) {
-  background-color: #f5f5f5 !important;
+  background-color: #f5f8fa !important;
 }
 :deep(.el-collapse-item__content) {
   padding-bottom: 15px;
-  background-color: #f5f5f5 !important;
+  background-color: #f5f8fa !important;
 }
 </style>
 <style lang="scss">

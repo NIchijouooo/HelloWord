@@ -23,7 +23,7 @@ import Header from './Header.vue'
   width: 100vw;
   height: 100vh;
   overflow: auto;
-  background-color: #f3f3f3;
+  background-color: #f2f5f9;
   .el-container {
     height: 100vh;
     min-width: 1370px;

@@ -7,6 +7,7 @@ type EmDeviceModelCmdParam struct {
 	Label            string `json:"label"`
 	Data             string `json:"data"`
 	IotDataType      string `json:"iotDataType"`
+	Identity         string `json:"identity"`
 }
 
 type AddEmDeviceModelCmdParam struct {
@@ -23,6 +24,7 @@ type AddEmDeviceModelCmdParam struct {
 	RuleType    string `json:"ruleType"`
 	Formula     string `json:"formula"`
 	IotDataType string `json:"IotDataType"`
+	Identity    string `json:"identity"`
 }
 
 func (u *EmDeviceModelCmdParam) TableName() string {
