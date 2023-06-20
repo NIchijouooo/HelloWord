@@ -32,7 +32,7 @@ func (ctrl *PcsController) RegisterRoutes(router *gin.RouterGroup) {
 */
 func (ctrl *PcsController) getPcsDeviceInfoById(ctx *gin.Context) {
 	var param models.PcsParam
-	if err := ctx.ShouldBindJSON(&param); err != nil {
+	if err := ctx.Bind(&param); err != nil {
 		ctx.JSON(http.StatusOK, model.ResponseData{
 			Code:    "1",
 			Message: "error" + err.Error(),

@@ -8,6 +8,7 @@ type EmDeviceModelCmdParam struct {
 	Data             string `json:"data"`
 	IotDataType      string `json:"iotDataType"`
 	Identity         string `json:"identity"`
+	Unit             string `json:"unit"`
 }
 
 type AddEmDeviceModelCmdParam struct {

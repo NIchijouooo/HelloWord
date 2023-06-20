@@ -47,3 +47,71 @@ func (r *RuleHistoryRepository) InsertRuleHistoryDevice(emRuleHistoryDeviceModel
 	}
 	return 1, nil
 }
+
+/*
+*
+获取告警历史集合
+*/
+func (r *RuleHistoryRepository) GetRuleHistoryList(param models.RuleHistoryParam) ([]models.EmRuleHistoryModel, int64, error) {
+	pageNum := param.PageNum
+	pageSize := param.PageSize
+	var (
+		historyList []models.EmRuleHistoryModel
+		total       int64
+	)
+	query := r.db.Table("rule_history ruleHis").
+		Joins("join rule_history_device ruleHisDev").
+		Where("ruleHis.id = ruleHisDev.rule_history_id").
+		Where("ruleHisDev.device_id in ?", param.DeviceIds)
+	// 按点位查询
+	codes := param.Codes
+	if len(codes) > 0 {
+		query.Where("ruleHisDev.property_code in ?", codes)
+	}
+	// 按产生时间查询
+	startTime := param.StartTime
+	if len(startTime) > 0 {
+		query.Where("ruleHis.produce_time >= ?", startTime)
+	}
+	endTime := param.EndTime
+	if len(endTime) > 0 {
+		query.Where("ruleHis.produce_time <= ?", endTime)
+	}
+	// 事件等级(0-通知；1-次要；2-告警；3-故障)
+	level := param.Level
+	if len(level) > 0 {
+		query.Where("ruleHis.level = ?", level)
+	}
+	// 恢复标记：0-未确认，1-自动恢复 2-手动恢复
+	tag := param.Tag
+	if len(tag) > 0 {
+		query.Where("ruleHis.tag = ?", tag)
+	}
+	// 分页查询
+	if pageNum > 0 && pageSize > 0 {
+		countErr := query.Count(&total).Error
+		if countErr != nil || total == 0 {
+			return []models.EmRuleHistoryModel{}, 0, countErr
+		}
+		// 计算页数
+		pages := total / pageSize
+		if total%pageSize > 0 {
+			pages += 1
+		}
+		// 调整当前页
+		if pageNum > pages {
+			pageNum = pages
+		}
+		// 计算当前页的索引
+		offsetIndex := (pageNum - 1) * pageSize
+		query.Offset(int(offsetIndex)).Limit(int(offsetIndex + pageSize))
+	}
+	err := query.Select("ruleHis.*,ruleHisDev.device_id,ruleHisDev.property_code").Order("ruleHis.produce_time desc").Find(&historyList).Error
+	if err != nil {
+		return []models.EmRuleHistoryModel{}, 0, err
+	}
+	if pageNum == 0 || pageSize == 0 {
+		total = int64(len(historyList))
+	}
+	return historyList, total, nil
+}

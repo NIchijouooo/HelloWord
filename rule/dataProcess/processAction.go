@@ -68,7 +68,7 @@ func insertHistory(actionList []string, rule models.EmRuleVo) {
 		}
 	}
 
-	date := time.Now().Format("2006-01-02 15:04:05")
+	date := time.Now().Format(time.DateTime)
 	ruleHistory.ProduceTime = date
 	ruleHistory.CreateTime = date
 	ruleHistory.UpdateTime = date
@@ -121,7 +121,7 @@ func insertHistory(actionList []string, rule models.EmRuleVo) {
 						RuleHistoryId: ruleHistory.Id,
 						DeviceId:      key,
 						PropertyCode:  value,
-						CreateTime:    time.DateTime,
+						CreateTime:    time.Now().Format(time.DateTime),
 					}
 					ruleHistoryDevice = append(ruleHistoryDevice, ruleHistoryDeviceItem)
 				}

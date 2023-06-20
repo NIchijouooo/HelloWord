@@ -10,7 +10,7 @@ import (
 	"gateway/models"
 	"gateway/report"
 	"gateway/rule"
-	"gateway/service/job"
+	//"gateway/service/job"
 	"gateway/setting"
 	"gateway/utils"
 	"gateway/virtual"
@@ -66,12 +66,11 @@ func main() {
 
 	scheduler := gocron.NewScheduler()
 	// 定时60秒,定时获取系统信息
-	_ = scheduler.Every(60).Second().Do(setting.CollectSystemParam)
 	// 定时1小时,定时获取NTP服务器的时间，并校时
 	_ = scheduler.Every(1).Hour().Do(setting.NTPGetTime)
 	// 启动充放电量定时任务
 	setting.ZAPS.Debug("注册充放电量定时任务到 GoCron")
-	_ = scheduler.Every(1).Hour().Do(job.StatisticsDayChargingAndDischarging)
+	//_ = scheduler.Every(1).Hour().Do(job.StatisticsDayChargingAndDischarging)
 
 	// 每天0：0重启系统
 	//_ = scheduler.Every(1).Day().At("0:0").Do(setting.SystemReboot)

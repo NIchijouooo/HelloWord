@@ -91,3 +91,10 @@ func (r *DictDataRepository) GetDictDataByDictType(dictType string) ([]models.Di
 	err := r.db.Where("dict_type = ?", dictType).Find(&dictDataList).Error
 	return dictDataList, err
 }
+
+// 根据字典标签获取字典建值
+func (r *DictDataRepository) GetDictDataByDictLabel(dictLabels []string) ([]models.DictData, error) {
+	var dictDataList []models.DictData
+	err := r.db.Where("dict_label in ?", dictLabels).Find(&dictDataList).Error
+	return dictDataList, err
+}
