@@ -2,6 +2,7 @@ package controllers
 
 import (
 	"gateway/httpServer/model"
+	"gateway/models"
 	"gateway/models/query"
 	repositories "gateway/repositories"
 	"gateway/service"
@@ -17,24 +18,38 @@ import (
 type AuxiliaryController struct {
 	repo    *repositories.AuxiliaryRepository
 	hisRepo *repositories.HistoryDataRepository
+	emRepo  *repositories.EmRepository
 }
 
 func NewAuxiliaryController() *AuxiliaryController {
 	return &AuxiliaryController{repo: repositories.NewAuxiliaryRepository(),
-		hisRepo: repositories.NewHistoryDataRepository()}
+		hisRepo: repositories.NewHistoryDataRepository(),
+		emRepo:  repositories.NewEmRepository()}
 }
 
 func (ctrl *AuxiliaryController) RegisterRoutes(router *gin.RouterGroup) {
-	router.GET("/api/v2/auxiliary/getDeviceListByDeviceType", ctrl.GetDeviceListByDeviceType)
+	router.POST("/api/v2/auxiliary/getDeviceListByDeviceType", ctrl.GetDeviceListByDeviceType)
 	router.GET("/api/v2/auxiliary/getDeviceType", ctrl.GetAuxiliaryDeviceType)
 	router.POST("/api/v2/auxiliary/getLastYcByDeviceIdAndCodes", ctrl.GetLastYcByDeviceIdAndCodes)
 	router.POST("/api/v2/auxiliary/getHistoryYcByDeviceIdCodes", ctrl.GetHistoryYcByDeviceIdCodes)
+	router.POST("/api/v2/auxiliary/getEmDeviceModelCmdParamListByDeviceId", ctrl.GetEmDeviceModelCmdParamListByDeviceId)
 }
 
 ///获取设备类型下的所有设备数据
 func (c *AuxiliaryController) GetDeviceListByDeviceType(ctx *gin.Context) {
-	label := ctx.Query("label")
-	deviceList, err := c.repo.GetAuxiliaryDevice(label)
+	type tmpQuery struct {
+		Label string `json:"label"`
+	}
+	var query tmpQuery
+	if err := ctx.Bind(&query); err != nil {
+		ctx.JSON(http.StatusOK, model.ResponseData{
+			"1",
+			"error" + err.Error(),
+			"",
+		})
+		return
+	}
+	deviceList, err := c.repo.GetAuxiliaryDevice(query.Label)
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -71,7 +86,7 @@ func (c *AuxiliaryController) GetLastYcByDeviceIdAndCodes(ctx *gin.Context) {
 	}
 	var ycQuery ycQeury
 	//将传过来的请求体解析到ycQuery中
-	if err := ctx.ShouldBindJSON(&ycQuery); err != nil {
+	if err := ctx.Bind(&ycQuery); err != nil {
 		ctx.JSON(http.StatusOK, model.ResponseData{
 			"1",
 			"error" + err.Error(),
@@ -101,7 +116,7 @@ type ReturnMap struct {
 }
 
 //根据选择的codes返回对应时间的历史数据
-//已经有
+
 func (c *AuxiliaryController) GetHistoryYcByDeviceIdCodes(ctx *gin.Context) {
 	var ycQuery *query.QueryTaoData
 	//解析json
@@ -137,7 +152,7 @@ func (c *AuxiliaryController) GetHistoryYcByDeviceIdCodes(ctx *gin.Context) {
 		strArr[i] = strconv.Itoa(v)
 	}
 
-	//拼接codelist sql语句
+	//拼接codelist sql语句.
 	ycQuery.Codes = strings.Join(strArr, ",")
 	//查询历史数据
 	ycList, err := c.hisRepo.GetLastYcHistoryByDeviceIdAndCodeList(ycQuery.DeviceId, ycQuery.Codes, ycQuery.StartTime, ycQuery.EndTime, strconv.Itoa(ycQuery.Interval)+intervalStr)
@@ -147,11 +162,53 @@ func (c *AuxiliaryController) GetHistoryYcByDeviceIdCodes(ctx *gin.Context) {
 	}
 	var xAxisList []string
 	// 初始化x轴数据,返回x轴时间对应的历史数据分组,key=x轴,value=x轴对应的历史数据集合
-	returnMap := service.GetCharData(xAxisList, ycQuery.StartTime, ycQuery.EndTime, ycQuery.Interval, ycQuery.IntervalType, ycList, ycQuery.CodeList)
+	returnMap := service.GetCharData(xAxisList, ycQuery.StartTime, ycQuery.EndTime, ycQuery.Interval, ycQuery.IntervalType, ycList, ycQuery.CodeList, ycQuery.CodeNameList)
 
 	ctx.JSON(http.StatusOK, model.ResponseData{
 		"0",
 		"获取信息成功！",
 		returnMap,
+	})
+}
+
+// 根据设备ID获取所有模型
+func (c *AuxiliaryController) GetEmDeviceModelCmdParamListByDeviceId(ctx *gin.Context) {
+	var tmp struct {
+		DeviceId int `json:"deviceId"`
+	}
+	if err := ctx.ShouldBindBodyWith(&tmp, binding.JSON); err != nil {
+		ctx.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+	var deviceCmdParamList []models.EmDeviceModelCmdParam
+	deviceCmdParamList, _ = c.emRepo.GetEmDeviceModelCmdParamListByDeviceId(tmp.DeviceId)
+	if deviceCmdParamList == nil {
+		ctx.JSON(http.StatusOK, model.ResponseData{
+			Code:    "1",
+			Message: "无数据",
+		})
+		return
+	}
+
+	//收集所有codes查询最新测点信息
+	var codes []string
+	mapCodes := make(map[string]string) //按name进行label分组
+	for i := 0; i < len(deviceCmdParamList); i++ {
+		codes = append(codes, deviceCmdParamList[i].Name)
+		mapCodes[deviceCmdParamList[i].Name] = deviceCmdParamList[i].Label
+	}
+
+	ycList, err := c.hisRepo.GetLastYcListByCode(strconv.Itoa(tmp.DeviceId), strings.Join(codes, ","))
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	for _, model := range ycList {
+		model.Name = mapCodes[strconv.Itoa(model.Code)]
+	}
+	ctx.JSON(http.StatusOK, model.ResponseData{
+		Code:    "0",
+		Message: "成功",
+		Data:    ycList,
 	})
 }

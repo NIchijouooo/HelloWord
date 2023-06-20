@@ -1528,8 +1528,8 @@ func ApiAddTSLModbusCmdPropertyFromXlsx(context *gin.Context) {
 			RegAddr:     setting.GetInt(cell[6]),
 			RegCnt:      setting.GetInt(cell[7]),
 			RuleType:    setting.GetString(cell[8]),
-			IotDataType: setting.GetString(cell[19]),
-			Identity:   setting.GetString(cell[19]),
+			Identity:    setting.GetString(cell[19]),
+			IotDataType: setting.GetString(cell[20]),
 		}
 		if setting.GetString(cell[2]) == "R" {
 			property.AccessMode = 0
@@ -1589,7 +1589,8 @@ func ApiAddTSLModbusCmdPropertyFromXlsx(context *gin.Context) {
 			property.Params.DataLengthAlarm = false
 		}
 		property.Params.DataLength = setting.GetString(cell[18])
-		property.IotDataType = setting.GetString(cell[19])
+		property.Identity = setting.GetString(cell[19])
+		property.IotDataType = setting.GetString(cell[20])
 
 		err = tslModel.TSLModelPropertiesAdd(cmdName, property)
 		// 导入param写入sqlite
@@ -1801,7 +1802,7 @@ func ApiModifyTSLModbusCmdProperty(context *gin.Context) {
 		BitOffset   int                                   `json:"bitOffset"` // 位偏移数量
 		Params      device.TSLModbusPropertyParamTemplate `json:"params"`    //ltg add 2023-06-15
 		IotDataType string                                `json:"iotDataType"`
-		Identity    string                                `json:"identity"`  //唯一标识
+		Identity    string                                `json:"identity"` //唯一标识
 	}{}
 
 	emController := controllers.NewEMController()
@@ -1891,7 +1892,7 @@ func ApiModifyTSLD07CmdProperty(context *gin.Context) {
 		Type           int                                       `json:"type"`           //float,uint32...
 		Params         device.TSLDLT6452007PropertyParamTemplate `json:"params"`         //ltg add 2023-06-15
 		IotDataType    string                                    `json:"iotDataType"`
-		Identity       string                                    `json:"identity"`       //唯一标识
+		Identity       string                                    `json:"identity"` //唯一标识
 	}{}
 
 	emController := controllers.NewEMController()

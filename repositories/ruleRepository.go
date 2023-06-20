@@ -23,16 +23,3 @@ func (r *RuleRepository) GetAllRule() ([]models.EmRuleModel, error) {
 	}
 	return emRuleModel, nil
 }
-
-// GetRuleByDeviceLabel 通过设备标签获取规则
-func (r *RuleRepository) GetRuleByDeviceLabel(deviceLabel string) ([]models.EmRuleModel, error) {
-	var emRuleModel []models.EmRuleModel
-	tx := r.db.Where("del_flag = ?", 0)
-	if len(deviceLabel) > 0 {
-		tx = tx.Where("content like ?", "%product.${"+deviceLabel+":\"%")
-	}
-	if err := tx.Find(&emRuleModel).Error; err != nil {
-		return nil, err
-	}
-	return emRuleModel, nil
-}
