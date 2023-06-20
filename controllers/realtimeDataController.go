@@ -40,6 +40,7 @@ func (ctrl *RealtimeDataController) RegisterRoutes(router *gin.RouterGroup) {
 	router.POST("/api/v2/realtimeData/GetRealtimeDataSettingListByID", ctrl.GetRealtimeDataSettingListByID)
 	router.POST("/api/v2/realtimeData/GetPointsByDeviceId", ctrl.GetPointsByDeviceId)
 	router.POST("/api/v2/realtimeData/GetDeviceByDevLabel", ctrl.GetDeviceByDevLabel)
+	router.POST("/api/v2/realtimeData/GetRealtimeDataListByDevId", ctrl.GetRealtimeDataListByDevId)
 	// 注册其他路由...
 }
 
@@ -205,8 +206,8 @@ func (c *RealtimeDataController) GetRealtimeDataYcListByID(ctx *gin.Context) {
 	fmt.Println(realtimeData.StartTime)
 	fmt.Println(realtimeData.EndTime)
 
-	var yxList []*models.PointParam
-	yxList, err := c.repoHis.GetYcLogByDeviceIdsCodes(realtimeData.DeviceIds, realtimeData.Codes, realtimeData.Interval, realtimeData.StartTime, realtimeData.EndTime)
+	var ycList []*models.PointParam
+	ycList, err := c.repoHis.GetYcLogByDeviceIdsCodes(realtimeData.DeviceIds, realtimeData.Codes, realtimeData.Interval, realtimeData.StartTime, realtimeData.EndTime)
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -214,7 +215,7 @@ func (c *RealtimeDataController) GetRealtimeDataYcListByID(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, model.ResponseData{
 		"0",
 		"",
-		yxList,
+		ycList,
 	})
 }
 
@@ -373,5 +374,43 @@ func (c *RealtimeDataController) GetRealtimeDataYcListByDevId(ctx *gin.Context) 
 	ctx.JSON(http.StatusOK, model.ResponseData{
 		Code: "0",
 		Data: ycList,
+	})
+}
+
+/*
+*
+获取设备全部实时数据
+*/
+func (c *RealtimeDataController) GetRealtimeDataListByDevId(ctx *gin.Context) {
+	var realtimeData ParamRealtimeData
+	if err := ctx.Bind(&realtimeData); err != nil {
+		ctx.JSON(http.StatusOK, model.ResponseData{
+			Code:    "1",
+			Message: "error" + err.Error(),
+			Data:    "",
+		})
+		return
+	}
+	deviceId := realtimeData.DeviceId
+	if deviceId == 0 {
+		ctx.JSON(http.StatusOK, model.ResponseData{
+			Code:    "1",
+			Message: "参数错误",
+			Data:    "",
+		})
+		return
+	}
+	var slice1 []models.PointParam
+
+	yxList, _ := c.repo.GetYxPointParamListById(deviceId)
+	ycList, _ := c.repo.GetYcPointParamListById(deviceId)
+	settingList, _ := c.repo.GetSettingPointParamListById(deviceId)
+
+	slice1 = append(slice1, yxList[:]...)
+	slice1 = append(slice1, ycList[:]...)
+	slice1 = append(slice1, settingList[:]...)
+	ctx.JSON(http.StatusOK, model.ResponseData{
+		Code: "0",
+		Data: slice1,
 	})
 }

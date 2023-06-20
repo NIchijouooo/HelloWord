@@ -38,4 +38,9 @@ func (t *LocalTime) Scan(v interface{}) error {
 func (t LocalTime) After(u LocalTime) bool {
 	return t.Time.After(u.Time)
 }
-
+func (t LocalTime) Before(u LocalTime) bool {
+	return t.Time.Before(u.Time)
+}
+func (t LocalTime) Equal(u LocalTime) bool {
+	return t.Time.Equal(u.Time)
+}

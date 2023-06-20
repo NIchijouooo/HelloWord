@@ -2,8 +2,8 @@ package models
 
 // 设备参数相关
 type RuleHistoryParam struct {
-	DeviceIds string `json:"deviceIds"`
-	Codes     string `json:"codes"`
+	DeviceIds []int  `json:"deviceIds"`
+	Codes     []int  `json:"codes"`
 	Level     string `json:"level"`
 	Tag       string `json:"tag"`
 	PageNum   int64  `json:"pageNum"`
