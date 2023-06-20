@@ -34,7 +34,7 @@ func ProcessRecover(action []string, rule models.EmRuleVo, condition string) boo
 					result := operation.GetResult(rule, condition)
 					if result != "" && result != "true" {
 						ruleHistory.Tag = 1
-						date := time.Now().Format("2006-01-02 15:04:05")
+						date := time.Now().Format(time.DateTime)
 						ruleHistory.UpdateTime = date
 						ruleHistory.RecoveryTime = date
 						repositories.NewRuleHistoryRepository().UpdateRuleHistoryTag(ruleHistory)

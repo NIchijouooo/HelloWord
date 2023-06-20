@@ -87,14 +87,13 @@ func (r *RealtimeDataRepository) SaveRealtimeDataList(devName, collName string, 
 				if numName, err := strconv.Atoi(ycParam.Name); err == nil {
 					if v.Id == numName {
 						t, _ := time.Parse("2021-09-15 14:30:00", ycPropertyPostParam.Time)
-
 						var pType int
 						if v.IotDataType == "yx" {
 							pointListYxList = append(pointListYxList, &models.YxData{
 								DeviceId: emDev.Id,
 								Code:     numName,
 								Value:    ycParam.Value.(int),
-								Ts:       t,
+								Ts:       models.LocalTime{Time: t},
 							})
 							pType = 0
 						} else if v.IotDataType == "yc" {
@@ -102,7 +101,7 @@ func (r *RealtimeDataRepository) SaveRealtimeDataList(devName, collName string, 
 								DeviceId: emDev.Id,
 								Code:     numName,
 								Value:    ycParam.Value.(float64),
-								Ts:       t,
+								Ts:       models.LocalTime{Time: t},
 							})
 							pType = 1
 						} else if v.IotDataType == "setting" {
@@ -110,7 +109,7 @@ func (r *RealtimeDataRepository) SaveRealtimeDataList(devName, collName string, 
 								DeviceId: emDev.Id,
 								Code:     numName,
 								Value:    ycParam.Value.(string),
-								Ts:       t,
+								Ts:       models.LocalTime{Time: t},
 							})
 							pType = 2
 						}

@@ -1,16 +1,27 @@
 package models
 
 type LimitConfigVo struct {
-	DeviceLabel  string `json:"deviceLabel"`
-	PropertyCode string `json:"propertyCode"`
-	EnableFlag   string `json:"enableFlag"`
-	ModelJson    string `json:"modelJson"`
-	NotifyMin    string `json:"notifyMin"`
-	NotifyMax    string `json:"notifyMax"`
-	SecondaryMin string `json:"secondaryMin"`
-	SecondaryMax string `json:"secondaryMax"`
-	SeriousMin   string `json:"seriousMin"`
-	SeriousMax   string `json:"seriousMax"`
-	UrgentMin    string `json:"urgentMin"`
-	UrgentMax    string `json:"urgentMax"`
+	Id              int    `json:"id" gorm:"primary_key"`
+	DeviceType      string `json:"deviceType"`
+	PropertyCode    string `json:"propertyCode"`
+	EnableFlag      int    `json:"enableFlag"`
+	NotifyMin       string `json:"notifyMin"`
+	NotifyMax       string `json:"notifyMax"`
+	NotifyRuleId    int    `json:"notifyRuleId"`
+	SecondaryMin    string `json:"secondaryMin"`
+	SecondaryMax    string `json:"secondaryMax"`
+	SecondaryRuleId int    `json:"secondaryRuleId"`
+	SeriousMin      string `json:"seriousMin"`
+	SeriousMax      string `json:"seriousMax"`
+	SeriousRuleId   int    `json:"seriousRuleId"`
+	UrgentMin       string `json:"urgentMin"`
+	UrgentMax       string `json:"urgentMax"`
+	UrgentRuleId    int    `json:"urgentRuleId"`
+	DelFlag         int    `json:"delFlag"`
+	CreateTime      string `json:"createTime"`
+	UpdateTime      string `json:"updateTime"`
+}
+
+func (u *LimitConfigVo) TableName() string {
+	return "em_limit_config"
 }
