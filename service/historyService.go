@@ -4,17 +4,19 @@ import (
 	"gateway/models"
 	"gateway/models/ReturnModel"
 	"gateway/utils"
+	"strconv"
 	"time"
 )
 
 func GetCharData(xAxisList []string, beginDt int64, endDt int64, interval int, intervalType int, historyList []*models.YcData, codeList []int, codeNameList []string) ReturnModel.CharData {
 	xAxisList, dateHistoryMap := InitXAxisList(xAxisList, beginDt, endDt, interval, intervalType, historyList)
 	var resYcData []ReturnModel.ResYcData
+
 	for idx, code := range codeList { //按code分组
-		var valList []float64 //存储结果值
+		var valList []string //存储结果值
 		for _, xAxis := range xAxisList {
 			ycHistoryList, exists := dateHistoryMap[xAxis] //根据时间获取值
-			var val float64
+			var val string
 			if exists { //如果值不为空，再按code进行分组
 				//将ycHistoruList按code进行分组收集
 				codeMap := make(map[int][]models.YcData)
@@ -26,8 +28,11 @@ func GetCharData(xAxisList []string, beginDt int64, endDt int64, interval int, i
 				ycModels := codeMap[code] //将code对应的值取出来
 				if len(ycModels) > 0 {
 					//统计值
-					val = utils.YcValueMax(ycModels)
+					//将返回值转成string prec保留几位小数，bitSize 32或64
+					val = strconv.FormatFloat(utils.YcValueMax(ycModels), 'f', 3, 64)
 					//	fmt.Println(val)
+				} else {
+					val = "-"
 				}
 			}
 			valList = append(valList, val)
@@ -80,7 +85,8 @@ func InitXAxisList(xAxisList []string, beginDt int64, endDt int64, interval int,
 		*/
 		var newHistoryList []*models.YcData
 		for _, item := range historyList { //遍历历史数据
-			if item.Ts.After(intervalStart) && item.Ts.Before(intervalEnd) { //大于开始时间，小于结束时间
+			//历史数据要大于等于开始时间，并且小于结束时间
+			if (item.Ts.Equal(intervalStart) || item.Ts.After(intervalStart)) && item.Ts.Before(intervalEnd) { //大于开始时间，小于结束时间
 				//将符合条件的数据添加到list
 				list = append(list, *item)
 			} else {

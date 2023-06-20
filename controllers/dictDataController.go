@@ -7,9 +7,8 @@ import (
 	"gateway/httpServer/model"
 	"gateway/models"
 	repositories "gateway/repositories"
-	"net/http"
-
 	"github.com/gin-gonic/gin"
+	"net/http"
 )
 
 // 定义字典数据管理的控制器
@@ -27,6 +26,7 @@ func (ctrl *DictDataController) RegisterRoutes(router *gin.RouterGroup) {
 	router.POST("/api/v2/dictData/deleteDictData", ctrl.DeleteDictData)
 	router.POST("/api/v2/dictData/getDictDataList", ctrl.GetDictDataList)
 	router.POST("/api/v2/dictData/getDictDataByID", ctrl.GetDictDataByID)
+	router.POST("/api/v2/dictData/getDictDataByDictLabel", ctrl.GetDictDataByDictLabel)
 	// 注册其他路由...
 }
 
@@ -159,6 +159,35 @@ func (c *DictDataController) GetDictDataByID(ctx *gin.Context) {
 		return
 	}
 	dictData, err := c.repo.GetById(paramData.DictCode)
+	if err != nil {
+		ctx.JSON(http.StatusOK, model.ResponseData{
+			"0",
+			"error" + err.Error(),
+			"",
+		})
+		return
+	}
+	ctx.JSON(http.StatusOK, model.ResponseData{
+		"0",
+		"",
+		dictData,
+	})
+}
+
+// 根据字典标签获取字典数据
+func (c *DictDataController) GetDictDataByDictLabel(ctx *gin.Context) {
+	var temp struct {
+		DictLabels []string `form:"dictLabels"`
+	}
+	if err := ctx.Bind(&temp); err != nil {
+		ctx.JSON(http.StatusOK, model.ResponseData{
+			"1",
+			"error" + err.Error(),
+			"",
+		})
+		return
+	}
+	dictData, err := c.repo.GetDictDataByDictLabel(temp.DictLabels)
 	if err != nil {
 		ctx.JSON(http.StatusOK, model.ResponseData{
 			"0",
