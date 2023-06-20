@@ -32,7 +32,7 @@ func (r *HistoryDataRepository) GetYxLogByDeviceIdsCodes(deviceIds, codes, inter
 	var err error
 	var sql = ""
 	if startTime > 0 && endTime > 0 && interval == "" {
-		sql = fmt.Sprintf("select * from %s Where device_id in (%s) and code in (%s) and ts >=%v and ts <%v", tableName, deviceIds, codes, startTime, endTime)
+		sql = fmt.Sprintf("select ts, val, device_id, code from %s Where device_id in (%s) and code in (%s) and ts >=%v and ts <%v", tableName, deviceIds, codes, startTime, endTime)
 		if len(sql) <= 0 {
 			return nil, err
 		}
@@ -92,7 +92,7 @@ func (r *HistoryDataRepository) GetYcLogByDeviceIdsCodes(deviceIds, codes, inter
 	var err error
 	var sql = ""
 	if startTime > 0 && endTime > 0 && interval == "" {
-		sql = fmt.Sprintf("select * from %s Where device_id in (%s) and code in (%s) and ts >=%v and ts <%v", tableName, deviceIds, codes, startTime, endTime)
+		sql = fmt.Sprintf("select ts, val, device_id, code from %s Where device_id in (%s) and code in (%s) and ts >=%v and ts <%v", tableName, deviceIds, codes, startTime, endTime)
 		if len(sql) <= 0 {
 			return nil, err
 		}
@@ -151,7 +151,7 @@ func (r *HistoryDataRepository) GetSettingLogByDeviceIdsCodes(deviceIds, codes, 
 
 	var sql = ""
 	if startTime > 0 && endTime > 0 && interval == "" {
-		sql = fmt.Sprintf("select * from %s Where device_id in (%s) and code in (%s) and ts >=%v and ts <%v", tableName, deviceIds, codes, startTime, endTime)
+		sql = fmt.Sprintf("select ts, val, device_id, code from %s Where device_id in (%s) and code in (%s) and ts >=%v and ts <%v", tableName, deviceIds, codes, startTime, endTime)
 	}
 	//else if startTime > 0 && endTime > 0 && interval != ""{
 	//	sql = fmt.Sprintf("select sum(val) as val, device_id, code from %s Where device_id in (%s) and code in (%s) and ts >=%v and ts <%v partition by device_id,code interval(%s) FILL(NULL)", tableName, deviceIds, codes, startTime, endTime, interval)
