@@ -63,8 +63,8 @@ func (r *DevicePointRepository) GetDeviceByDeviceId(deviceId int) *models.EmDevi
 */
 //func (r *DevicePointRepository) GetYcById(deviceId, code int) (models.YcData, error) {
 //	var realtime models.YcData
-//	//tableName := fmt.Sprintf("%v%d%v%d", "realtimedatatest.yc_", deviceId, "_", code)
-//	sql := fmt.Sprint("select Last(ts), val, device_id, code from realtimedatatest.yc where device_id =", deviceId, "and code =", code)
+//	//tableName := fmt.Sprintf("%v%d%v%d", "realtimedata.yc_", deviceId, "_", code)
+//	sql := fmt.Sprint("select Last(ts), val, device_id, code from realtimedata.yc where device_id =", deviceId, "and code =", code)
 //	rows, err := r.taosDb.Query(sql)
 //	defer rows.Close()
 //
@@ -83,8 +83,8 @@ func (r *DevicePointRepository) GetDeviceByDeviceId(deviceId int) *models.EmDevi
 */
 //func (r *DevicePointRepository) GetSettingById(deviceId, code int) (models.SettingData, error) {
 //	var realtime models.SettingData
-//	//tableName := fmt.Sprintf("%v%d%v%d", "realtimedatatest.setting_", deviceId, "_", code)
-//	sql := fmt.Sprint("select Last(ts), val, device_id, code from realtimedatatest.setting where device_id =", deviceId, "and code =", code)
+//	//tableName := fmt.Sprintf("%v%d%v%d", "realtimedata.setting_", deviceId, "_", code)
+//	sql := fmt.Sprint("select Last(ts), val, device_id, code from realtimedata.setting where device_id =", deviceId, "and code =", code)
 //	rows, err := r.taosDb.Query(sql)
 //	defer rows.Close()
 //

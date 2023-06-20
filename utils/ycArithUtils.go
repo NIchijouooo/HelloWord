@@ -50,9 +50,9 @@ func YcValueMax(ycModelList interface{}) float64 {
 		obj := listValue.Index(i).Interface()
 		switch obj := obj.(type) {
 		case models.YcData:
-			if obj.Ts.After(calendar) { //如果当日期大于calendar日期就可以重新赋值
+			if obj.Ts.Time.After(calendar) { //如果当日期大于calendar日期就可以重新赋值
 				zero = obj.Value //重新赋值zero
-				calendar = obj.Ts
+				calendar = obj.Ts.Time
 			}
 		}
 	}

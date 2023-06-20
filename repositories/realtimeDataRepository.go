@@ -23,7 +23,7 @@ func NewRealtimeDataRepository() *RealtimeDataRepository {
 添加db
 */
 func (r *RealtimeDataRepository) CreateDB() error {
-	sql := fmt.Sprintf("create database if not exists realtimedatatest cachemodel 'both';")
+	sql := fmt.Sprintf("create database if not exists realtimedata cachemodel 'both';")
 	_, err := r.taosDb.Exec(sql)
 	return err
 }
@@ -38,7 +38,7 @@ func (r *RealtimeDataRepository) CreateDB() error {
 */
 func (r *RealtimeDataRepository) CreateChargeDischargeTable() error {
 	// 定义查询参数
-	sql := fmt.Sprintf("create table if not exists realtimedatatest.charge_discharge (ts timestamp, charge_capacity double, discharge_capacity double, profit double) tags (device_id int);")
+	sql := fmt.Sprintf("create table if not exists realtimedata.charge_discharge (ts timestamp, charge_capacity double, discharge_capacity double, profit double) tags (device_id int);")
 	_, err := r.taosDb.Exec(sql)
 	return err
 }
@@ -49,7 +49,7 @@ func (r *RealtimeDataRepository) CreateChargeDischargeTable() error {
 */
 func (r *RealtimeDataRepository) CreateChargeDischargeHourTable() error {
 	// 定义查询参数
-	sql := fmt.Sprintf("create table if not exists realtimedatatest.charge_discharge_hour (ts timestamp, charge_capacity double, discharge_capacity double, profit double) tags (device_id int);")
+	sql := fmt.Sprintf("create table if not exists realtimedata.charge_discharge_hour (ts timestamp, charge_capacity double, discharge_capacity double, profit double) tags (device_id int);")
 	_, err := r.taosDb.Exec(sql)
 	return err
 }
@@ -60,7 +60,7 @@ func (r *RealtimeDataRepository) CreateChargeDischargeHourTable() error {
 */
 func (r *RealtimeDataRepository) CreateYxTable() error {
 	// 定义查询参数
-	sql := fmt.Sprintf("create table if not exists realtimedatatest.yx (ts timestamp, val int) tags (device_id int, code int, identifier NCHAR);")
+	sql := fmt.Sprintf("create table if not exists realtimedata.yx (ts timestamp, val int) tags (device_id int, code int, identifier NCHAR);")
 	_, err := r.taosDb.Exec(sql)
 	return err
 }
@@ -71,7 +71,7 @@ func (r *RealtimeDataRepository) CreateYxTable() error {
 */
 func (r *RealtimeDataRepository) CreateYcTable() error {
 	// 定义查询参数
-	sql := fmt.Sprintf("create table if not exists realtimedatatest.yc (ts timestamp, val double) tags (device_id int, code int, identifier NCHAR);")
+	sql := fmt.Sprintf("create table if not exists realtimedata.yc (ts timestamp, val double) tags (device_id int, code int, identifier NCHAR);")
 	_, err := r.taosDb.Exec(sql)
 	return err
 }
@@ -82,7 +82,7 @@ func (r *RealtimeDataRepository) CreateYcTable() error {
 */
 func (r *RealtimeDataRepository) CreateSettingTable() error {
 	// 定义查询参数
-	sql := fmt.Sprintf("create table if not exists realtimedatatest.setting (ts timestamp, val NCHAR(16)) tags (device_id int, code int, identifier NCHAR);")
+	sql := fmt.Sprintf("create table if not exists realtimedata.setting (ts timestamp, val NCHAR(16)) tags (device_id int, code int, identifier NCHAR);")
 	_, err := r.taosDb.Exec(sql)
 	return err
 }
@@ -93,8 +93,8 @@ func (r *RealtimeDataRepository) CreateSettingTable() error {
 */
 func (r *RealtimeDataRepository) CreateYx(realtime *models.YxData) error {
 	// 定义查询参数
-	tableName := fmt.Sprintf("%v%d%v%d", "realtimedatatest.yx_", realtime.DeviceId, "_", realtime.Code)
-	sql := fmt.Sprintf("INSERT INTO %s (ts, val) using realtimedatatest.yx tags(%d, %d) VALUES (%v, %d)", tableName, realtime.DeviceId, realtime.Code, realtime.Ts, realtime.Value)
+	tableName := fmt.Sprintf("%v%d%v%d", "realtimedata.yx_", realtime.DeviceId, "_", realtime.Code)
+	sql := fmt.Sprintf("INSERT INTO %s (ts, val) using realtimedata.yx tags(%d, %d) VALUES (%v, %d)", tableName, realtime.DeviceId, realtime.Code, realtime.Ts, realtime.Value)
 	_, err := r.taosDb.Exec(sql)
 	return err
 }
@@ -105,8 +105,8 @@ func (r *RealtimeDataRepository) CreateYx(realtime *models.YxData) error {
 */
 func (r *RealtimeDataRepository) CreateYc(realtime *models.YcData) error {
 	// 定义查询参数
-	tableName := fmt.Sprintf("%v%d%v%d", "realtimedatatest.yc_", realtime.DeviceId, "_", realtime.Code)
-	sql := fmt.Sprintf("INSERT INTO %s (ts, val) using realtimedatatest.yc tags(%d, %d) VALUES (%v, %d)", tableName, realtime.DeviceId, realtime.Code, realtime.Ts, realtime.Value)
+	tableName := fmt.Sprintf("%v%d%v%d", "realtimedata.yc_", realtime.DeviceId, "_", realtime.Code)
+	sql := fmt.Sprintf("INSERT INTO %s (ts, val) using realtimedata.yc tags(%d, %d) VALUES (%v, %d)", tableName, realtime.DeviceId, realtime.Code, realtime.Ts, realtime.Value)
 	_, err := r.taosDb.Exec(sql)
 	return err
 }
@@ -117,8 +117,8 @@ func (r *RealtimeDataRepository) CreateYc(realtime *models.YcData) error {
 */
 func (r *RealtimeDataRepository) CreateSetting(realtime *models.SettingData) error {
 	// 定义查询参数
-	tableName := fmt.Sprintf("%v%d%v%d", "realtimedatatest.setting_", realtime.DeviceId, "_", realtime.Code)
-	sql := fmt.Sprintf("INSERT INTO %s (ts, val) using realtimedatatest.setting tags(%d, %d) VALUES (%v, %d)", tableName, realtime.DeviceId, realtime.Code, realtime.Ts, realtime.Value)
+	tableName := fmt.Sprintf("%v%d%v%d", "realtimedata.setting_", realtime.DeviceId, "_", realtime.Code)
+	sql := fmt.Sprintf("INSERT INTO %s (ts, val) using realtimedata.setting tags(%d, %d) VALUES (%v, %d)", tableName, realtime.DeviceId, realtime.Code, realtime.Ts, realtime.Value)
 	_, err := r.taosDb.Exec(sql)
 	return err
 }
@@ -131,8 +131,8 @@ func (r *RealtimeDataRepository) BatchCreateYx(realtimeList []*models.YxData) er
 	// 定义查询参数
 	var err error
 	for _, realtime := range realtimeList {
-		tableName := fmt.Sprintf("%v%d%v%d", "realtimedatatest.yx_", realtime.DeviceId, "_", realtime.Code)
-		sql := fmt.Sprintf("INSERT INTO %s (ts, val) using realtimedatatest.yx tags(?, ?) VALUES (?, ?)", tableName)
+		tableName := fmt.Sprintf("%v%d%v%d", "realtimedata.yx_", realtime.DeviceId, "_", realtime.Code)
+		sql := fmt.Sprintf("INSERT INTO %s (ts, val) using realtimedata.yx tags(?, ?) VALUES (?, ?)", tableName)
 		_, err := r.taosDb.Exec(sql, realtime.DeviceId, realtime.Code, realtime.Ts, realtime.Value)
 		err = err
 	}
@@ -147,8 +147,8 @@ func (r *RealtimeDataRepository) BatchCreateYc(realtimeList []*models.YcData) er
 	// 定义查询参数
 	var err error
 	for _, realtime := range realtimeList {
-		tableName := fmt.Sprintf("%v%d%v%d", "realtimedatatest.yc_", realtime.DeviceId, "_", realtime.Code)
-		sql := fmt.Sprintf("INSERT INTO %s (ts, val) using realtimedatatest.yc tags(?, ?) VALUES (?, ?)", tableName)
+		tableName := fmt.Sprintf("%v%d%v%d", "realtimedata.yc_", realtime.DeviceId, "_", realtime.Code)
+		sql := fmt.Sprintf("INSERT INTO %s (ts, val) using realtimedata.yc tags(?, ?) VALUES (?, ?)", tableName)
 		_, err := r.taosDb.Exec(sql, realtime.DeviceId, realtime.Code, realtime.Ts, realtime.Value)
 		err = err
 	}
@@ -162,8 +162,8 @@ func (r *RealtimeDataRepository) BatchCreateYc(realtimeList []*models.YcData) er
 func (r *RealtimeDataRepository) BatchCreateEsChargeDischargeModel(realtimeList []*models.EsChargeDischargeModel) error {
 	var err error
 	for _, realtime := range realtimeList {
-		tableName := fmt.Sprintf("%v", "realtimedatatest.charge_discharge_", realtime.DeviceId)
-		sql := fmt.Sprintf("INSERT INTO %s (ts,charge_capacity,discharge_capacity,profit) using realtimedatatest.charge_discharge tags(?) VALUES (?, ?, ?, ?)", tableName)
+		tableName := fmt.Sprintf("%v", "realtimedata.charge_discharge_", realtime.DeviceId)
+		sql := fmt.Sprintf("INSERT INTO %s (ts,charge_capacity,discharge_capacity,profit) using realtimedata.charge_discharge tags(?) VALUES (?, ?, ?, ?)", tableName)
 		_, err := r.taosDb.Exec(sql, realtime.Ts, realtime.ChargeCapacity, realtime.DischargeCapacity, realtime.Profit)
 		err = err
 	}
@@ -177,13 +177,13 @@ func (r *RealtimeDataRepository) BatchCreateEsChargeDischargeModel(realtimeList 
 func (r *RealtimeDataRepository) BatchCreateSetting(realtimeList []*models.SettingData) error {
 	// 定义查询参数
 	//tableName := fmt.Sprintf("%d%d", realtime.DeviceId, realtime.Code)
-	//sql := fmt.Sprintf("INSERT INTO %s (ts, val) using realtimedatatest.yx tags(?, ?) VALUES (?, ?)", tableName)
+	//sql := fmt.Sprintf("INSERT INTO %s (ts, val) using realtimedata.yx tags(?, ?) VALUES (?, ?)", tableName)
 	//result := r.taosDb.Exec(sql, realtime.DeviceId, realtime.Code, realtime.Ts, realtime.Value)
 	var err error
 	for _, realtime := range realtimeList {
-		tableName := fmt.Sprintf("%v%d%v%d", "realtimedatatest.setting_", realtime.DeviceId, "_", realtime.Code)
+		tableName := fmt.Sprintf("%v%d%v%d", "realtimedata.setting_", realtime.DeviceId, "_", realtime.Code)
 		//r.taosDb.Table(tableName).Create(&realtime)
-		sql := fmt.Sprintf("INSERT INTO %s (ts, val) using realtimedatatest.setting tags(?, ?) VALUES (?, ?)", tableName)
+		sql := fmt.Sprintf("INSERT INTO %s (ts, val) using realtimedata.setting tags(?, ?) VALUES (?, ?)", tableName)
 		_, err := r.taosDb.Exec(sql, realtime.DeviceId, realtime.Code, realtime.Ts, realtime.Value)
 		err = err
 	}
@@ -214,9 +214,9 @@ func (r *RealtimeDataRepository) BatchCreateSetting(realtimeList []*models.Setti
 */
 func (r *RealtimeDataRepository) GetYxById(deviceId, code int) (models.YxData, error) {
 	var realtime models.YxData
-	//tableName := fmt.Sprintf("%v%d%v%d", "realtimedatatest.yx_", deviceId, "_", code)
+	//tableName := fmt.Sprintf("%v%d%v%d", "realtimedata.yx_", deviceId, "_", code)
 	//sql := fmt.Sprintf("select last(*) from ? ", tableName)
-	sql := fmt.Sprint("select Last(ts), val, device_id, code from realtimedatatest.yx where device_id =", deviceId, "and code =", code)
+	sql := fmt.Sprint("select Last(ts), val, device_id, code from realtimedata.yx where device_id =", deviceId, "and code =", code)
 	fmt.Println(sql)
 	rows, err := r.taosDb.Query(sql)
 	defer rows.Close()
@@ -278,8 +278,8 @@ func (r *RealtimeDataRepository) GetYxListById(deviceId int) ([]models.YxData, e
 */
 func (r *RealtimeDataRepository) GetYcById(deviceId, code int) (models.YcData, error) {
 	var realtime models.YcData
-	//tableName := fmt.Sprintf("%v%d%v%d", "realtimedatatest.yc_", deviceId, "_", code)
-	sql := fmt.Sprint("select Last(ts), val, device_id, code from realtimedatatest.yc where device_id =", deviceId, "and code =", code)
+	//tableName := fmt.Sprintf("%v%d%v%d", "realtimedata.yc_", deviceId, "_", code)
+	sql := fmt.Sprint("select Last(ts), val, device_id, code from realtimedata.yc where device_id =", deviceId, "and code =", code)
 	rows, err := r.taosDb.Query(sql)
 	defer rows.Close()
 
@@ -320,8 +320,8 @@ func (r *RealtimeDataRepository) GetYcListByDevIdsAndCodes(deviceIds, codes stri
 */
 func (r *RealtimeDataRepository) GetSettingById(deviceId, code int) (models.SettingData, error) {
 	var realtime models.SettingData
-	//tableName := fmt.Sprintf("%v%d%v%d", "realtimedatatest.setting_", deviceId, "_", code)
-	sql := fmt.Sprint("select Last(ts), val, device_id, code from realtimedatatest.setting where device_id =", deviceId, "and code =", code)
+	//tableName := fmt.Sprintf("%v%d%v%d", "realtimedata.setting_", deviceId, "_", code)
+	sql := fmt.Sprint("select Last(ts), val, device_id, code from realtimedata.setting where device_id =", deviceId, "and code =", code)
 	rows, err := r.taosDb.Query(sql)
 	defer rows.Close()
 
@@ -358,7 +358,7 @@ func (r *RealtimeDataRepository) GetYcListById(deviceId int) ([]models.YcData, e
 */
 func (r *RealtimeDataRepository) GetSettingListByDevIdsAndCodes(deviceIds, codes string) ([]models.SettingData, error) {
 	var realtime []models.SettingData
-	sqlStr := fmt.Sprintf("select Last(ts), val, device_id, code,name from realtimedatatest.setting where device_id in (%s) and code in (%s) group by device_id,code", deviceIds, codes)
+	sqlStr := fmt.Sprintf("select Last(ts), val, device_id, code,name from realtimedata.setting where device_id in (%s) and code in (%s) group by device_id,code", deviceIds, codes)
 	fmt.Println(sqlStr)
 	rows, err := r.taosDb.Query(sqlStr)
 	defer rows.Close()
@@ -380,8 +380,8 @@ func (r *RealtimeDataRepository) GetSettingListByDevIdsAndCodes(deviceIds, codes
 */
 func (r *RealtimeDataRepository) GetLastYcHistoryByDeviceIdListAndCodeList(deviceIds, codes, interval string, beginDt int64, endDt int64) ([]models.YcData, error) {
 	var realtimeData []models.YcData
-	//tableName := fmt.Sprintf("%v%d%v%d", "realtimedatatest.setting_", deviceId, "_", code)
-	sql := fmt.Sprintf("select Last(ts), val, device_id, code,name from realtimedatatest.yc where device_id in (%s) and code in (%s) group by device_id,code", deviceIds, codes)
+	//tableName := fmt.Sprintf("%v%d%v%d", "realtimedata.setting_", deviceId, "_", code)
+	sql := fmt.Sprintf("select Last(ts), val, device_id, code,name from realtimedata.yc where device_id in (%s) and code in (%s) group by device_id,code", deviceIds, codes)
 	rows, err := r.taosDb.Query(sql)
 	defer rows.Close()
 

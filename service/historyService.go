@@ -80,7 +80,7 @@ func InitXAxisList(xAxisList []string, beginDt int64, endDt int64, interval int,
 		*/
 		var newHistoryList []*models.YcData
 		for _, item := range historyList { //遍历历史数据
-			if item.Ts.After(intervalStart) && item.Ts.Before(intervalEnd) { //大于开始时间，小于结束时间
+			if item.Ts.Time.After(intervalStart) && item.Ts.Before(intervalEnd) { //大于开始时间，小于结束时间
 				//将符合条件的数据添加到list
 				list = append(list, *item)
 			} else {
