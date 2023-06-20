@@ -220,17 +220,44 @@ func (r *HistoryDataRepository) GetLastYcHistoryByDeviceIdAndCodeList(deviceId i
 }
 
 /**
- * 获取充放电量
+ * 获取充放电量大于日的降采样
  * @param deviceIdList
  * @param startTime
  * @param endTime
  * @return
  */
-func (r *HistoryDataRepository) getDayEsChargeDischarge(deviceId string, startTime, endTime int64) ([]*models.EsChargeDischargeModel, error) {
+func (r *HistoryDataRepository) getDayEsChargeDischarge(deviceIds string, startTime, endTime int64) ([]*models.EsChargeDischargeModel, error) {
 	var realtimeList []*models.EsChargeDischargeModel
 	tableName := "realtimedata.charge_discharge"
 
-	sql := fmt.Sprintf("select last_row(ts) as ts,charge_capacity as chargeCapacity,discharge_capacity as dischargeCapacity,profit,device_id as deviceId from %s Where device_id = %d and code in (%s) and ts >=%v and ts <%v  partition by device_id INTERVAL(1d);", tableName, deviceId, startTime, endTime)
+	sql := fmt.Sprintf("select last_row(ts) as ts,charge_capacity as chargeCapacity,discharge_capacity as dischargeCapacity,profit,device_id as deviceId from %s Where device_id in (%s) and ts >=%v and ts <%v  partition by device_id INTERVAL(1d);", tableName, deviceIds, startTime, endTime)
+	rows, err := r.taosDb.Query(sql)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	for rows.Next() {
+		realtime := &models.EsChargeDischargeModel{}
+		err := rows.Scan(&realtime.Ts, &realtime.ChargeCapacity, &realtime.DischargeCapacity, &realtime.Profit, &realtime.DeviceId)
+		if err != nil {
+			return nil, err
+		}
+		realtimeList = append(realtimeList, realtime)
+	}
+	return realtimeList, err
+}
+/**
+ * 获取充放电量小时的降采样
+ * @param deviceIdList
+ * @param startTime
+ * @param endTime
+ * @return
+ */
+func (r *HistoryDataRepository) getDayEsChargeDischargeHour(deviceIds string, startTime, endTime int64) ([]*models.EsChargeDischargeModel, error) {
+	var realtimeList []*models.EsChargeDischargeModel
+	tableName := "realtimedata.charge_discharge_hour"
+
+	sql := fmt.Sprintf("select last_row(ts) as ts,charge_capacity as chargeCapacity,discharge_capacity as dischargeCapacity,profit,device_id as deviceId from %s Where device_id in (%s) and ts >=%v and ts <%v  partition by device_id INTERVAL(1h);", tableName, deviceIds, startTime, endTime)
 	rows, err := r.taosDb.Query(sql)
 	if err != nil {
 		return nil, err

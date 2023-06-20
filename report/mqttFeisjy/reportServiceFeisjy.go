@@ -163,8 +163,7 @@ func ReportServiceFeisjyPoll(ctx context.Context, r *ReportServiceParamFeisjyTem
 						/**
 						todo20230615网关设备上线更新sqlite
 						*/
-						//repo := &repositories.RealtimeDataRepository{}
-						//repo.UpdateGatewayDeviceConnetStatus(r.GWParam)
+						NewRealtimeDataRepository().UpdateGatewayDeviceConnetStatus(r.GWParam)
 
 					} else {
 						time.Sleep(10 * time.Second)
@@ -181,8 +180,7 @@ func ReportServiceFeisjyPoll(ctx context.Context, r *ReportServiceParamFeisjyTem
 									/**
 									todo20230615设备上线更新sqlite
 									*/
-									//repo := &repositories.RealtimeDataRepository{}
-									//repo.UpdateDeviceConnetStatus(r.NodeList[i])
+									NewRealtimeDataRepository().UpdateDeviceConnetStatus(r.NodeList[i])
 
 								}
 							}
@@ -438,8 +436,7 @@ func (r *ReportServiceParamFeisjyTemplate) ProcessDownLinkFrame(ctx context.Cont
 										/**
 										todo20230615设备离线更新sqlite
 										*/
-										//repo := &repositories.RealtimeDataRepository{}
-										//repo.UpdateDeviceConnetStatus(r.NodeList[k])
+										NewRealtimeDataRepository().UpdateDeviceConnetStatus(r.NodeList[k])
 									}
 								}
 							}
@@ -454,8 +451,7 @@ func (r *ReportServiceParamFeisjyTemplate) ProcessDownLinkFrame(ctx context.Cont
 										/**
 										todo20230615设备离线更新sqlite
 										*/
-										//repo := &repositories.RealtimeDataRepository{}
-										//repo.UpdateDeviceConnetStatus(r.NodeList[k])
+										NewRealtimeDataRepository().UpdateDeviceConnetStatus(r.NodeList[k])
 
 									}
 								}
