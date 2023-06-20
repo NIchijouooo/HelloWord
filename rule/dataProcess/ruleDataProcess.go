@@ -63,8 +63,9 @@ func processLogicRule(rule models.EmRuleModel, condition string) {
 func processProductCondition(rule models.EmRuleModel, operator string) {
 	ruleId := rule.Id
 	propertyName := utils.GetConditionVariablePropertyId(operator)
-	deviceLabel := utils.GetConditionVariableObjectId(operator)
-	deviceList := repositories.NewDevicePointRepository().GetDeviceByDevLabel(deviceLabel)
+	deviceType := utils.GetConditionVariableObjectId(operator)
+	deviceParam := models.DeviceParam{DeviceType: deviceType}
+	deviceList, _ := repositories.NewDeviceRepository().GetDeviceListByType(deviceParam)
 	s := strings.Split(propertyName, "_")
 	propertyType := s[0]
 	propertyCode := s[1]
