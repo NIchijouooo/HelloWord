@@ -4,19 +4,19 @@ type LimitConfigVo struct {
 	Id              int    `json:"id" gorm:"primary_key"`
 	DeviceType      string `json:"deviceType"`
 	PropertyCode    string `json:"propertyCode"`
-	EnableFlag      string `json:"enableFlag"`
+	EnableFlag      int    `json:"enableFlag"`
 	NotifyMin       string `json:"notifyMin"`
 	NotifyMax       string `json:"notifyMax"`
-	NotifyRuleId    string `json:"notifyRuleId"`
+	NotifyRuleId    int    `json:"notifyRuleId"`
 	SecondaryMin    string `json:"secondaryMin"`
 	SecondaryMax    string `json:"secondaryMax"`
-	SecondaryRuleId string `json:"secondaryRuleId"`
+	SecondaryRuleId int    `json:"secondaryRuleId"`
 	SeriousMin      string `json:"seriousMin"`
 	SeriousMax      string `json:"seriousMax"`
-	SeriousRuleId   string `json:"seriousRuleId"`
+	SeriousRuleId   int    `json:"seriousRuleId"`
 	UrgentMin       string `json:"urgentMin"`
 	UrgentMax       string `json:"urgentMax"`
-	UrgentRuleId    string `json:"urgentRuleId"`
+	UrgentRuleId    int    `json:"urgentRuleId"`
 	DelFlag         int    `json:"delFlag"`
 	CreateTime      string `json:"createTime"`
 	UpdateTime      string `json:"updateTime"`
