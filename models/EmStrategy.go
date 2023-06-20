@@ -2,7 +2,8 @@ package models
 
 type EmStrategy struct {
 	Id            int     `json:"id" gorm:"primary_key"`
-	Date          string  `json:"date"`
+	StartDate     string  `json:"startDate"`
+	EndDate       string  `json:"endDate"`
 	StartTime     string  `json:"startTime"`
 	EndTime       string  `json:"endTime"`
 	ActivePower   float64 `json:"activePower"`
