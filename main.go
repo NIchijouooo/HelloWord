@@ -10,7 +10,7 @@ import (
 	"gateway/models"
 	"gateway/report"
 	"gateway/rule"
-	"gateway/service/job"
+	//"gateway/service/job"
 	"gateway/setting"
 	"gateway/utils"
 	"gateway/virtual"
