@@ -22,8 +22,8 @@ func NewLimitConfigController() *LimitConfigController {
 
 func (c *LimitConfigController) RegisterRoutes(router *gin.RouterGroup) {
 	router.POST("/api/v2/em/getLimitConfigListByDeviceType", c.GetLimitConfigListByDeviceType)
-	router.POST("/api/v2/em/saveLimitConfigList", c.SaveLimitConfig)
-	router.POST("/api/v2/em/deleteLimitConfigList", c.DeleteLimitConfig)
+	router.POST("/api/v2/em/saveLimitConfig", c.SaveLimitConfig)
+	router.POST("/api/v2/em/deleteLimitConfig", c.DeleteLimitConfig)
 }
 
 func (c *LimitConfigController) GetLimitConfigListByDeviceType(ctx *gin.Context) {
