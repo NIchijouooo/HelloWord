@@ -22,8 +22,8 @@ func NewLimitConfigController() *LimitConfigController {
 
 func (c *LimitConfigController) RegisterRoutes(router *gin.RouterGroup) {
 	router.POST("/api/v2/em/getLimitConfigListByDeviceType", c.GetLimitConfigListByDeviceType)
-	router.POST("/api/v2/em/saveLimitConfigList", c.SaveLimitConfigList)
-	router.POST("/api/v2/em/deleteLimitConfigList", c.DeleteLimitConfigList)
+	router.POST("/api/v2/em/saveLimitConfig", c.SaveLimitConfig)
+	router.POST("/api/v2/em/deleteLimitConfig", c.DeleteLimitConfig)
 }
 
 func (c *LimitConfigController) GetLimitConfigListByDeviceType(ctx *gin.Context) {
@@ -47,7 +47,7 @@ func (c *LimitConfigController) GetLimitConfigListByDeviceType(ctx *gin.Context)
 	})
 }
 
-func (c *LimitConfigController) SaveLimitConfigList(ctx *gin.Context) {
+func (c *LimitConfigController) SaveLimitConfig(ctx *gin.Context) {
 	limitConfig := new(models.LimitConfigVo)
 	if err := ctx.ShouldBindBodyWith(&limitConfig, binding.JSON); err != nil {
 		ctx.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
@@ -84,7 +84,7 @@ func (c *LimitConfigController) SaveLimitConfigList(ctx *gin.Context) {
 	})
 }
 
-func (c *LimitConfigController) DeleteLimitConfigList(ctx *gin.Context) {
+func (c *LimitConfigController) DeleteLimitConfig(ctx *gin.Context) {
 	limitConfig := new(models.LimitConfigVo)
 	if err := ctx.ShouldBindBodyWith(&limitConfig, binding.JSON); err != nil {
 		ctx.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
