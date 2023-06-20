@@ -40,6 +40,7 @@ func (ctrl *RealtimeDataController) RegisterRoutes(router *gin.RouterGroup) {
 	router.POST("/api/v2/realtimeData/GetRealtimeDataSettingListByID", ctrl.GetRealtimeDataSettingListByID)
 	router.POST("/api/v2/realtimeData/GetPointsByDeviceId", ctrl.GetPointsByDeviceId)
 	router.POST("/api/v2/realtimeData/GetDeviceByDevLabel", ctrl.GetDeviceByDevLabel)
+	router.POST("/api/v2/realtimeData/GetChartByDeviceIdAndCode", ctrl.GetChartByDeviceIdAndCode)
 	// 注册其他路由...
 }
 
@@ -373,5 +374,13 @@ func (c *RealtimeDataController) GetRealtimeDataYcListByDevId(ctx *gin.Context) 
 	ctx.JSON(http.StatusOK, model.ResponseData{
 		Code: "0",
 		Data: ycList,
+	})
+}
+
+func (c *RealtimeDataController) GetChartByDeviceIdAndCode(ctx *gin.Context) {
+	list, _ := c.repo.GetChartByDeviceIdAndCode(100, "66")
+	ctx.JSON(http.StatusOK, model.ResponseData{
+		Code: "0",
+		Data: list,
 	})
 }
