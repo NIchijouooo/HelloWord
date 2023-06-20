@@ -17,5 +17,5 @@ type DeviceEquipmentAccountInfo struct {
 }
 
 func (u *DeviceEquipmentAccountInfo) TableName() string {
-	return "device_equipment_account"
+	return "em_device_equipment_account"
 }
