@@ -1,6 +1,7 @@
 package service
 
 import (
+	"fmt"
 	"gateway/models"
 	"gateway/models/ReturnModel"
 	"gateway/utils"
@@ -10,9 +11,8 @@ import (
 
 func GetCharData(xAxisList []string, beginDt int64, endDt int64, interval int, intervalType int, historyList []*models.YcData, codeList []int, codeNameList []string) ReturnModel.CharData {
 	xAxisList, dateHistoryMap := InitXAxisList(xAxisList, beginDt, endDt, interval, intervalType, historyList)
-	var resYcData []ReturnModel.ResYcData
-
-	for idx, code := range codeList { //按code分组
+	dataMap := make(map[int][]string)
+	for _, code := range codeList { //按code分组
 		var valList []string //存储结果值
 		for _, xAxis := range xAxisList {
 			ycHistoryList, exists := dateHistoryMap[xAxis] //根据时间获取值
@@ -28,20 +28,17 @@ func GetCharData(xAxisList []string, beginDt int64, endDt int64, interval int, i
 				ycModels := codeMap[code] //将code对应的值取出来
 				if len(ycModels) > 0 {
 					//统计值
-					//将返回值转成string prec保留几位小数，bitSize 32或64
 					val = strconv.FormatFloat(utils.YcValueMax(ycModels), 'f', 3, 64)
-					//	fmt.Println(val)
-				} else {
-					val = "-"
+					fmt.Println(val)
 				}
 			}
 			valList = append(valList, val)
 		}
-		resYcData = append(resYcData, ReturnModel.ResYcData{Name: codeNameList[idx], Data: valList})
+		dataMap[code] = valList //将结果存入map
 	}
 	var returnMap ReturnModel.CharData
 	returnMap.XAxisList = xAxisList
-	returnMap.DataList = resYcData
+	returnMap.DataMap = dataMap
 	return returnMap
 }
 
@@ -76,8 +73,8 @@ func InitXAxisList(xAxisList []string, beginDt int64, endDt int64, interval int,
 		//计算曾长长度
 		intervalLong = utils.GetIntervalTime(calendar, intervalType, interval)
 		var list []models.YcData
-		intervalStart := t                                                   //开始时间等于当前遍历到的i时间
-		intervalEnd := t.Add(time.Duration(intervalLong) * time.Millisecond) //当前时间加上长度，等于结束时间，用于后面遍历使用
+		intervalStart := models.LocalTime{t}                                                   //开始时间等于当前遍历到的i时间
+		intervalEnd := models.LocalTime{t.Add(time.Duration(intervalLong) * time.Millisecond)} //当前时间加上长度，等于结束时间，用于后面遍历使用
 		/*
 		   获取当前时间间隔内的历史数据,有的数据不在x轴整点内,算到上个时间间隔里
 		   如按两小时间隔查询历史数据,则x轴为0h,2h,4h...
@@ -85,7 +82,6 @@ func InitXAxisList(xAxisList []string, beginDt int64, endDt int64, interval int,
 		*/
 		var newHistoryList []*models.YcData
 		for _, item := range historyList { //遍历历史数据
-			//历史数据要大于等于开始时间，并且小于结束时间
 			if (item.Ts.Equal(intervalStart) || item.Ts.After(intervalStart)) && item.Ts.Before(intervalEnd) { //大于开始时间，小于结束时间
 				//将符合条件的数据添加到list
 				list = append(list, *item)
