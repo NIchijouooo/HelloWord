@@ -62,11 +62,11 @@ func (r *RuleHistoryRepository) GetRuleHistoryList(param models.RuleHistoryParam
 	query := r.db.Table("rule_history ruleHis").
 		Joins("join rule_history_device ruleHisDev").
 		Where("ruleHis.id = ruleHisDev.rule_history_id").
-		Where("ruleHisDev.device_id in (?)", param.DeviceIds)
+		Where("ruleHisDev.device_id in ?", param.DeviceIds)
 	// 按点位查询
 	codes := param.Codes
 	if len(codes) > 0 {
-		query.Where("ruleHis.property_code in (?)", codes)
+		query.Where("ruleHisDev.property_code in ?", codes)
 	}
 	// 按产生时间查询
 	startTime := param.StartTime
@@ -80,7 +80,7 @@ func (r *RuleHistoryRepository) GetRuleHistoryList(param models.RuleHistoryParam
 	// 事件等级(0-通知；1-次要；2-告警；3-故障)
 	level := param.Level
 	if len(level) > 0 {
-		query.Where("ruleHis.level = ?", endTime)
+		query.Where("ruleHis.level = ?", level)
 	}
 	// 恢复标记：0-未确认，1-自动恢复 2-手动恢复
 	tag := param.Tag
@@ -106,7 +106,7 @@ func (r *RuleHistoryRepository) GetRuleHistoryList(param models.RuleHistoryParam
 		offsetIndex := (pageNum - 1) * pageSize
 		query.Offset(int(offsetIndex)).Limit(int(offsetIndex + pageSize))
 	}
-	err := query.Select("ruleHis.*").Order("ruleHis.produce_time desc").Find(&historyList).Error
+	err := query.Select("ruleHis.*,ruleHisDev.device_id,ruleHisDev.property_code").Order("ruleHis.produce_time desc").Find(&historyList).Error
 	if err != nil {
 		return []models.EmRuleHistoryModel{}, 0, err
 	}

@@ -180,7 +180,7 @@ func (r *HistoryDataRepository) GetLastYcListByCode(deviceIds, codes string) ([]
 	var realtimeList []*models.YcData
 	tableName := "realtimedata.yc"
 	//
-	sql := fmt.Sprintf("SELECT last(ts),last(val),last(device_id),last(code) FROM %s  where device_id in (%s) and  code in (%s) group by device_id,code", tableName, deviceIds, codes)
+	sql := fmt.Sprintf("SELECT last(ts),val,device_id,name,code FROM %s  where device_id in (%s) and  code in (%s) group by device_id,code", tableName, deviceIds, codes)
 	rows, err := r.taosDb.Query(sql)
 	if err != nil {
 		return nil, err
@@ -188,7 +188,7 @@ func (r *HistoryDataRepository) GetLastYcListByCode(deviceIds, codes string) ([]
 	defer rows.Close()
 	for rows.Next() {
 		realtime := &models.YcData{}
-		err := rows.Scan(&realtime.Ts, &realtime.Value, &realtime.DeviceId, &realtime.Code)
+		err := rows.Scan(&realtime.Ts, &realtime.Value, &realtime.DeviceId, &realtime.Name, &realtime.Code)
 		if err != nil {
 			return nil, err
 		}

@@ -3,6 +3,7 @@ package repositories
 import (
 	"gateway/models"
 	"gorm.io/gorm"
+	"strings"
 )
 
 type EmRepository struct {
@@ -236,6 +237,21 @@ func (r *EmRepository) GetEmDeviceModelCmdParamListByDeviceId(deviceId int) ([]m
 		Joins("left join em_device_model as model on cmd.device_model_id = model.id").
 		Joins("left join em_device as device on device.model_id = model.id").
 		Where("device.id=?", deviceId).Scan(&emDeviceModelCmdParamList).Error; err != nil {
+		return nil, err
+	}
+	return emDeviceModelCmdParamList, nil
+}
+
+// 根据设备id获取测点列表
+func (r *EmRepository) GetEmDeviceModelCmdParamListByDeviceIdCodes(deviceId int, codes []string) ([]models.EmDeviceModelCmdParam, error) {
+	codeString := "'" + strings.Join(codes, "','") + "'"
+	var emDeviceModelCmdParamList []models.EmDeviceModelCmdParam
+	if err := r.db.Table("em_device_model_cmd_param as param").
+		Select("param.id, param.device_model_cmd_id, param.name, param.label,param.data,param.unit").
+		Joins("left join em_device_model_cmd as cmd on param.device_model_cmd_id = cmd.id").
+		Joins("left join em_device_model as model on cmd.device_model_id = model.id").
+		Joins("left join em_device as device on device.model_id = model.id").
+		Where("device.id=? and param.name in ("+codeString+")", deviceId).Scan(&emDeviceModelCmdParamList).Error; err != nil {
 		return nil, err
 	}
 	return emDeviceModelCmdParamList, nil
