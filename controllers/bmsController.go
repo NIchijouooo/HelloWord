@@ -19,10 +19,14 @@ type BmsController struct {
 	hisRepo      *repositories.HistoryDataRepository
 	dictDataRepo *repositories.DictDataRepository
 	auxRepo      *repositories.AuxiliaryRepository
+	emRepo       *repositories.EmRepository
 }
 
 func NewBmsController() *BmsController {
-	return &BmsController{hisRepo: repositories.NewHistoryDataRepository(), dictDataRepo: repositories.NewDictDataRepository(), auxRepo: repositories.NewAuxiliaryRepository()}
+	return &BmsController{hisRepo: repositories.NewHistoryDataRepository(),
+		dictDataRepo: repositories.NewDictDataRepository(),
+		auxRepo:      repositories.NewAuxiliaryRepository(),
+		emRepo:       repositories.NewEmRepository()}
 }
 func (ctrl *BmsController) RegisterRoutes(router *gin.RouterGroup) {
 	router.POST("/api/v2/bms/getYcLastByDeviceIdAndDict", ctrl.GetYcLastByDeviceIdAndDict)
@@ -33,7 +37,7 @@ func (ctrl *BmsController) RegisterRoutes(router *gin.RouterGroup) {
 
 }
 
-// 获取设备点位最新的一条非空数据
+// GetYcLastByDeviceIdAndDict 获取设备点位最新的一条非空数据
 func (c *BmsController) GetYcLastByDeviceIdAndDict(ctx *gin.Context) {
 	//1.根据设备id去查询字典
 	//2.将查询出来的所有code拼接成字符串
@@ -54,7 +58,7 @@ func (c *BmsController) GetYcLastByDeviceIdAndDict(ctx *gin.Context) {
 	//})
 }
 
-//批量获取遥信息GetYcLogById,用于·历史数据
+// GetYcLogById 批量获取遥信息GetYcLogById,用于·历史数据
 func (c *BmsController) GetYcLogById(ctx *gin.Context) {
 	type ycQeury struct {
 		DeviceId  int    `form:"DeviceId"`
@@ -195,25 +199,51 @@ func (c *BmsController) GetBmsYcMaxAndMinListByDeviceIdCodes(ctx *gin.Context) {
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
+	//取出单位
+	paramList, err := c.emRepo.GetEmDeviceModelCmdParamListByDeviceIdCodes(ycData.DeviceId, codeList)
+	paramMap := make(map[string]models.EmDeviceModelCmdParam)
+	if err == nil && len(paramList) > 0 {
+		for _, v := range paramList {
+			paramMap[v.Name] = v //name就是测点code
+		}
+	}
 	//字典数据转成map
-	dictList := make(map[string]models.DictData)
-	for _, v := range DictDataList {
-		dictList[v.DictValue] = v
+	ycMap := make(map[string]*models.YcData)
+	for _, v := range ycDataList {
+		ycMap[strconv.Itoa(v.Code)] = v
 	}
 	var resData []ReturnModel.YcData
-	for _, v := range ycDataList {
-		tmpDictData := dictList[strconv.Itoa(v.Code)]
-		var ycData ReturnModel.YcData
-		ycData.DeviceId = v.DeviceId
-		ycData.Code = v.Code
-		ycData.Value = v.Value
-		ycData.Name = v.Name
-		ycData.Ts = v.Ts
-		ycData.Sort = tmpDictData.DictSort   //根据code去拿数据
-		ycData.Alias = tmpDictData.DictLabel //根据code去拿数据
-		resData = append(resData, ycData)
+	//循环字典数据，赋值
+	for _, v := range DictDataList {
+		tmpYcData := ycMap[v.DictValue]  //赋值数据
+		tmpUnit := paramMap[v.DictValue] //赋值单位
+		var yc ReturnModel.YcData
+		if tmpYcData != nil { //存在测点数据，取出单位
+			yc.Uint = tmpUnit.Unit //单位还要再去查表
+		}
+		if tmpYcData != nil { //没有数据赋值为空
+			yc.DeviceId = tmpYcData.DeviceId
+			yc.Code = tmpYcData.Code
+			yc.Value = tmpYcData.Value
+			yc.Name = tmpYcData.Name
+			yc.Ts = tmpYcData.Ts
+			yc.Sort = v.DictSort   //根据code去拿数据
+			yc.Alias = v.DictLabel //根据code去拿数据
+		} else { //没有数据就补-
+			yc.DeviceId = ycData.DeviceId
+			code, err := strconv.Atoi(v.DictValue) //字符串转换int
+			if err == nil {
+				yc.Code = code
+			}
+			yc.Value = 0
+			yc.Name = "-"
+			yc.Uint = "-"
+			yc.Sort = v.DictSort   //根据code去拿数据
+			yc.Alias = v.DictLabel //根据code拿数据
+		}
+		resData = append(resData, yc)
 	}
-	//排序
+	//排序 //按sort排序
 	sort.Slice(resData, func(i, j int) bool {
 		return resData[i].Sort < resData[j].Sort
 	})
@@ -222,25 +252,6 @@ func (c *BmsController) GetBmsYcMaxAndMinListByDeviceIdCodes(ctx *gin.Context) {
 		"获取信息成功！",
 		resData,
 	})
-
-	//ycMap := make(map[string]*models.YcData)
-	////将遥测数据转成map
-	//for _, v := range ycDataList {
-	//	ycMap[strconv.Itoa(v.Code)] = v
-	//}
-	//
-	////遍历返回数据
-	//resMap := make(map[string]models.YcData)
-	//for _, v := range DictDataList {
-	//	if ycMap[v.DictValue] != nil {
-	//		resMap[v.DictLabel] = *ycMap[v.DictValue]
-	//	}
-	//}
-	//ctx.JSON(http.StatusOK, model.ResponseData{
-	//	"0",
-	//	"获取信息成功！",
-	//	resMap,
-	//})
 	return
 }
 

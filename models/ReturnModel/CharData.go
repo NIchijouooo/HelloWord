@@ -1,23 +1,26 @@
 package ReturnModel
 
-import "time"
+import "gateway/models"
 
 type CharData struct {
-	XAxisList []string `json:"xAxisList"`
-	//DataMap   map[string][]float64 `json:"dataMap"`
-	DataList []ResYcData `json:"dataList"`
+	XAxisList []string         `json:"xAxisList"`
+	DataMap   map[int][]string `json:"dataMap"`
+	//DataList []ResYcData `json:"dataList"`
 }
-type ResYcData struct {
-	Name string   `json:"name"`
-	Data []string `json:"data"`
-}
+
+//type ResYcData struct {
+//	Name string   `json:"name"`
+//	Data []string `json:"data"`
+//}
 type YcData struct {
-	Code     int       `json:"code"`
-	DeviceId int       `json:"deviceId"`
-	Value    float64   `json:"val"`
-	Name     string    `json:"name"`
-	Type     string    `json:"type"`
-	Ts       time.Time `json:"ts"`
-	Alias    string    `json:"alias"`
-	Sort     int       `json:"sort"`
+	Code     int              `json:"code"`     //测点编码
+	DeviceId int              `json:"deviceId"` //设备id
+	Value    float64          `json:"val"`      //值
+	Name     string           `json:"name"`     //名称
+	Type     string           `json:"type"`     //类型
+	Ts       models.LocalTime `json:"ts"`       //时间
+	Alias    string           `json:"alias"`    //别名
+	Sort     int              `json:"sort"`     //排序
+	Uint     string           `json:"uint"`     //单位
+	Status   int              `json:"status"`   //状态
 }
