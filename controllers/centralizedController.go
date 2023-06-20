@@ -23,6 +23,7 @@ func (ctrl *CentralizedController) RegisterRoutes(router *gin.RouterGroup) {
 	router.POST("/api/v2/auxiliary/createPolicy", ctrl.createPolicy)
 	router.POST("/api/v2/auxiliary/updatePolicy", ctrl.updatePolicy)
 	router.POST("/api/v2/auxiliary/deletePolicy", ctrl.deletePolicy)
+	router.POST("/api/v2/auxiliary/getDeviceYkYtList", ctrl.getDeviceYkYtList)
 }
 
 // 请求参数
@@ -123,4 +124,9 @@ func (c *CentralizedController) deletePolicy(ctx *gin.Context) {
 		"ok",
 		"",
 	})
+}
+
+// 获取实时控制遥控遥调列表
+func (c *CentralizedController) getDeviceYkYtList(ctx *gin.Context) {
+
 }
