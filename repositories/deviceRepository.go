@@ -59,3 +59,18 @@ func (r *DeviceRepository) GetDevicePoint(deviceType string, pointDictType strin
 	}
 	return res, err
 }
+
+func (r *DeviceRepository) GetDeviceModelCmdParam(paramId int) models.GetDeviceModelCmdParam {
+	var res models.GetDeviceModelCmdParam
+	r.db.Table("em_device ed").
+		Select("ed.name AS device_name,cmd.name AS cmd_name,eci.name AS coll_name,cmdp.name AS param_name").
+		Joins("left join em_device_model_cmd cmd").
+		Joins("left join em_coll_interface eci").
+		Joins("left join em_device_model_cmd_param cmdp").
+		Where("model_id = cmd.device_model_id").
+		Where("ed.coll_interface_id = eci.id").
+		Where("cmd.id = cmdp.device_model_cmd_id").
+		Where("cmdp.id =?", paramId).
+		Scan(&res)
+	return res
+}

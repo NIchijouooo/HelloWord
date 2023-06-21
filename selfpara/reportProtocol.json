@@ -1,0 +1,14 @@
+[
+    {
+      "name": "EMQX.MQTT",
+      "label":"EMQX.MQTT"
+    },
+    {
+      "name": "ModbusTCP",
+      "label": "ModbusTCP"
+    },
+    {
+      "name": "FSJY.MQTT",
+      "label":"FSJY.MQTT"
+    }
+  ]

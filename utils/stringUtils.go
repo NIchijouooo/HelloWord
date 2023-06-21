@@ -14,7 +14,7 @@ func IntArrayToString(intArray []int, separator string) string {
 	return strings.Join(strArray, separator)
 }
 
-// strArray要处理的数组，返回int数组
+// strArray字符串数组转int数组，要处理的数组，返回int数组
 func StringArrayToIntArray(strArray []string) ([]int, error) {
 	intArray := make([]int, len(strArray))
 	for i, str := range strArray {

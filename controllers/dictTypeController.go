@@ -19,7 +19,7 @@ type DictTypeController struct {
 }
 
 func NewDictTypeController() *DictTypeController {
-	return &DictTypeController{repoType: repositories.NewDictTypeRepository(),repoData: repositories.NewDictDataRepository()}
+	return &DictTypeController{repoType: repositories.NewDictTypeRepository(), repoData: repositories.NewDictDataRepository()}
 }
 
 func (ctrl *DictTypeController) RegisterRoutes(router *gin.RouterGroup) {
@@ -29,7 +29,7 @@ func (ctrl *DictTypeController) RegisterRoutes(router *gin.RouterGroup) {
 	router.POST("/api/v2/dictType/getDictTypeList", ctrl.GetDictTypeList)
 	router.POST("/api/v2/dictType/getDictTypeByID", ctrl.GetDictTypeByID)
 	router.POST("/api/v2/dictData/getDictTypeListByDictTypeId", ctrl.GetDictTypeListByDictTypeId)
-	router.POST("/api/v2/dictData/getDictDataByTypeAndLabel", ctrl.GetDictDataByTypeAndLable)
+	router.POST("/api/v2/dictData/getDictDataByTypeAndLabel", ctrl.GetDictDataByTypeAndLabel)
 	// 注册其他路由...
 }
 
@@ -207,7 +207,7 @@ func (c *DictTypeController) GetDictTypeListByDictTypeId(ctx *gin.Context) {
 }
 
 // 获取字典类型下的所有字典数据
-func (c *DictTypeController) GetDictDataByTypeAndLable(ctx *gin.Context) {
+func (c *DictTypeController) GetDictDataByTypeAndLabel(ctx *gin.Context) {
 	var paramType models.DictData
 	if err := ctx.Bind(&paramType); err != nil {
 		ctx.JSON(http.StatusOK, model.ResponseData{

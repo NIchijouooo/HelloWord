@@ -257,6 +257,7 @@ func (r *RealtimeDataRepository) GetYxListByDevIdsAndCodes(deviceIds, codes stri
 	}
 	return realtime, err
 }
+
 /*
 *
 获取yx
@@ -406,7 +407,6 @@ func (r *RealtimeDataRepository) GetYcPointParamListById(deviceId int) ([]models
 	return list, err
 }
 
-
 /*
 *
 获取setting集合
@@ -468,9 +468,10 @@ func (r *RealtimeDataRepository) GetChartByDeviceIdAndCode(deviceId int, code st
 	return list, err
 }
 
-func (r *RealtimeDataRepository) GetGenerateElectricityChartByDeviceIds(deviceIds []int) ([]Res, error) {
+// GetGenerateElectricityChartByDeviceIds 获取前一天每小时的充电电量
+func (r *RealtimeDataRepository) GetGenerateElectricityChartByDeviceIds(deviceIds []int, fieldName string, intervalType string) ([]Res, error) {
 	ids := utils.IntArrayToString(deviceIds, ",")
-	sql := fmt.Sprintf("SELECT _WSTART AS ts,SUM(charge_capacity) AS charge_capacity FROM charge_discharge_hour WHERE device_id IN (%s) AND ts>= NOW-1d and ts<=NOW INTERVAL(1h) FILL(VALUE,0);", ids)
+	sql := fmt.Sprintf("SELECT _WSTART AS ts,SUM(%v) AS charge_capacity FROM charge_discharge_hour WHERE device_id IN (%s) AND ts>= NOW-1d and ts<=NOW INTERVAL(1%s) FILL(VALUE,0);", ids, fieldName, intervalType)
 	rows, err := r.taosDb.Query(sql)
 	if err != nil {
 		return nil, err
@@ -487,6 +488,7 @@ func (r *RealtimeDataRepository) GetGenerateElectricityChartByDeviceIds(deviceId
 	return list, err
 }
 
+// GetGenerateElectricitySumByDeviceIds 统计累计可充电电量信息
 func (r *RealtimeDataRepository) GetGenerateElectricitySumByDeviceIds(deviceIds []int) Res {
 	ids := utils.IntArrayToString(deviceIds, ",")
 	var res Res
@@ -498,6 +500,19 @@ func (r *RealtimeDataRepository) GetGenerateElectricitySumByDeviceIds(deviceIds 
 	return res
 }
 
+// GetReleaseElectricitySumByDeviceIds 统计累计可放电电量信息
+func (r *RealtimeDataRepository) GetReleaseElectricitySumByDeviceIds(deviceIds []int) Res {
+	ids := utils.IntArrayToString(deviceIds, ",")
+	var res Res
+	sql := fmt.Sprintf("SELECT SUM(discharge_capacity) AS val FROM charge_discharge WHERE device_id IN (%s)", ids)
+	err := r.taosDb.QueryRow(sql).Scan(&res.Val)
+	if err != nil {
+		fmt.Println(err)
+	}
+	return res
+}
+
+// GetGenerateElectricitySumByDeviceIds 统计累计每日收益信息
 func (r *RealtimeDataRepository) GetProfitChartByDeviceIds(deviceIds []int, startTime int64, endTime int64) ([]Res, error) {
 	ids := utils.IntArrayToString(deviceIds, ",")
 	sql := fmt.Sprintf("SELECT _WSTART AS ts,SUM(profit) AS profit FROM charge_discharge WHERE device_id IN (%s) AND ts>= %v and ts<=%v INTERVAL(1d) FILL(VALUE,0)", ids, startTime, endTime)
@@ -517,6 +532,7 @@ func (r *RealtimeDataRepository) GetProfitChartByDeviceIds(deviceIds []int, star
 	return list, err
 }
 
+// GetProfitSumByDeviceIds 统计累计收益信息
 func (r *RealtimeDataRepository) GetProfitSumByDeviceIds(deviceIds []int, startTime int64, endTime int64) Res {
 	ids := utils.IntArrayToString(deviceIds, ",")
 	var res Res
