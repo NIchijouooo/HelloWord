@@ -28,9 +28,9 @@ func (r *DevicePointRepository) GetPointsByDeviceId(pointType string, deviceId, 
 	var pointParams []*models.EmDeviceModelCmdParam
 	//.Joins("left join em_device_model on em_device_model.id = em_device.model_id")
 	if len(pointType) == 0 {
-		r.sqldb.Joins("LEFT JOIN em_device_model_cmd ON em_device_model_cmd.id = em_device_model_cmd_param.device_model_cmd_id").Joins("LEFT JOIN em_device ON em_device.id = em_device_model_cmd.device_model_id").Where("em_device.id = ?", deviceId).Find(&pointParams).Statement.SQL.String()
+		r.sqldb.Joins("LEFT JOIN em_device_model_cmd ON em_device_model_cmd.id = em_device_model_cmd_param.device_model_cmd_id").Joins("LEFT JOIN em_device ON em_device.model_id = em_device_model_cmd.device_model_id").Where("em_device.id = ?", deviceId).Find(&pointParams).Statement.SQL.String()
 	} else {
-		r.sqldb.Joins("LEFT JOIN em_device_model_cmd ON em_device_model_cmd.id = em_device_model_cmd_param.device_model_cmd_id").Joins("LEFT JOIN em_device ON em_device.id = em_device_model_cmd.device_model_id").Where("em_device.id = ?", deviceId).Where("em_device_model_cmd_param.iot_data_type = ?", pointType).Find(&pointParams).Statement.SQL.String()
+		r.sqldb.Joins("LEFT JOIN em_device_model_cmd ON em_device_model_cmd.id = em_device_model_cmd_param.device_model_cmd_id").Joins("LEFT JOIN em_device ON em_device.model_id = em_device_model_cmd.device_model_id").Where("em_device.id = ?", deviceId).Where("em_device_model_cmd_param.iot_data_type = ?", pointType).Find(&pointParams).Statement.SQL.String()
 	}
 	return pointParams
 }
