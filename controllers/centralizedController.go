@@ -11,11 +11,14 @@ import (
 
 // 定义集控管理的控制器
 type CentralizedController struct {
-	repo *repositories.CentralizedRepository
+	repo       *repositories.CentralizedRepository
+	deviceRepo *repositories.DeviceRepository
 }
 
 func NewCentralizedController() *CentralizedController {
-	return &CentralizedController{repo: repositories.NewCentralizedRepository()}
+	return &CentralizedController{
+		repo:       repositories.NewCentralizedRepository(),
+		deviceRepo: repositories.NewDeviceRepository()}
 }
 
 func (ctrl *CentralizedController) RegisterRoutes(router *gin.RouterGroup) {
@@ -128,5 +131,15 @@ func (c *CentralizedController) deletePolicy(ctx *gin.Context) {
 
 // 获取实时控制遥控遥调列表
 func (c *CentralizedController) getDeviceYkYtList(ctx *gin.Context) {
-
+	YkYtList, err := c.repo.GetDeviceYkYtList()
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	ctx.JSON(http.StatusOK, model.ResponseData{
+		"0",
+		"获取信息成功！",
+		YkYtList,
+	})
+	return
 }
