@@ -39,3 +39,12 @@ func (r *LimitConfigRepository) UpdateLimitConfig(limitConfig *models.LimitConfi
 	}
 	return 1, nil
 }
+
+//根据设备类型和codes获取越限配置信息
+func (r *LimitConfigRepository) GetLimitConfigListByDeviceTypeAndCodes(deviceType string, codes []string) ([]models.LimitConfigVo, error) {
+	var limitConfigList []models.LimitConfigVo
+	if err := r.db.Where("del_flag = ?", 0).Where("device_type = ?", deviceType).Where("property_code in ?", codes).Find(&limitConfigList).Error; err != nil {
+		return nil, err
+	}
+	return limitConfigList, nil
+}
