@@ -220,7 +220,7 @@ func (c *DeviceController) GetGenerateElectricityChart(ctx *gin.Context) {
 	}
 	var resC Res
 	resC.Name = "充电"
-	tdDataListC, _ := c.repoRealTimeData.GetGenerateElectricityChartByDeviceIds(ids)
+	tdDataListC, _ := c.repoRealTimeData.GetGenerateElectricityChartByDeviceIds(ids, "charge_capacity", "h")
 	resC.Data = tdDataListC
 	// 计算充电累计
 	sumC := c.repoRealTimeData.GetGenerateElectricitySumByDeviceIds(ids)
@@ -228,7 +228,7 @@ func (c *DeviceController) GetGenerateElectricityChart(ctx *gin.Context) {
 	result = append(result, resC)
 	var resD Res
 	resD.Name = "放电"
-	tdDataListD, _ := c.repoRealTimeData.GetGenerateElectricityChartByDeviceIds(ids)
+	tdDataListD, _ := c.repoRealTimeData.GetGenerateElectricityChartByDeviceIds(ids, "discharge_capacity", "h")
 	resD.Data = tdDataListD
 	// 计算放电累计
 	sumD := c.repoRealTimeData.GetGenerateElectricitySumByDeviceIds(ids)
