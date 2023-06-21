@@ -2,30 +2,40 @@ package controllers
 
 import (
 	"gateway/httpServer/model"
+	"gateway/models"
+	"gateway/models/ReturnModel"
 	"gateway/models/query"
 	repositories "gateway/repositories"
-	"gateway/service"
 	"github.com/gin-gonic/gin"
-	"github.com/gin-gonic/gin/binding"
 	"net/http"
+	"sort"
 	"strconv"
 	"strings"
 )
 
 type BmsController struct {
-	hisRepo *repositories.HistoryDataRepository
+	hisRepo      *repositories.HistoryDataRepository
+	dictDataRepo *repositories.DictDataRepository
+	auxRepo      *repositories.AuxiliaryRepository
+	emRepo       *repositories.EmRepository
 }
 
 func NewBmsController() *BmsController {
-	return &BmsController{hisRepo: repositories.NewHistoryDataRepository()}
+	return &BmsController{hisRepo: repositories.NewHistoryDataRepository(),
+		dictDataRepo: repositories.NewDictDataRepository(),
+		auxRepo:      repositories.NewAuxiliaryRepository(),
+		emRepo:       repositories.NewEmRepository()}
 }
 func (ctrl *BmsController) RegisterRoutes(router *gin.RouterGroup) {
 	router.POST("/api/v2/bms/getYcLastByDeviceIdAndDict", ctrl.GetYcLastByDeviceIdAndDict)
 	router.POST("/api/v2/bms/getYcLogById", ctrl.GetYcLogById)
 	router.POST("/api/v2/bms/getHistoryYcByDeviceIdCodes", ctrl.GetHistoryYcByDeviceIdCodes)
+	router.POST("/api/v2/bms/getBmsYcMaxAndMinListByDeviceIdCodes", ctrl.GetBmsYcMaxAndMinListByDeviceIdCodes)
+	router.POST("/api/v2/bms/getBmsDevices", ctrl.GetBmsDevices)
+
 }
 
-// 获取设备点位最新的一条非空数据
+// GetYcLastByDeviceIdAndDict 获取设备点位最新的一条非空数据
 func (c *BmsController) GetYcLastByDeviceIdAndDict(ctx *gin.Context) {
 	//1.根据设备id去查询字典
 	//2.将查询出来的所有code拼接成字符串
@@ -46,7 +56,7 @@ func (c *BmsController) GetYcLastByDeviceIdAndDict(ctx *gin.Context) {
 	//})
 }
 
-//批量获取遥信息GetYcLogById,用于·历史数据
+// GetYcLogById 批量获取遥信息GetYcLogById,用于·历史数据
 func (c *BmsController) GetYcLogById(ctx *gin.Context) {
 	type ycQeury struct {
 		DeviceId  int    `form:"DeviceId"`
@@ -56,7 +66,7 @@ func (c *BmsController) GetYcLogById(ctx *gin.Context) {
 	}
 	var ycQuery ycQeury
 	//将传过来的请求体解析到ycQuery中
-	if err := ctx.ShouldBindJSON(&ycQuery); err != nil {
+	if err := ctx.Bind(&ycQuery); err != nil {
 		ctx.JSON(http.StatusOK, model.ResponseData{
 			"1",
 			"error" + err.Error(),
@@ -78,11 +88,38 @@ func (c *BmsController) GetYcLogById(ctx *gin.Context) {
 	})
 }
 
-//根据选择的codes返回对应的历史数据
+// 根据选择的codes返回对应的历史数据
 func (c *BmsController) GetHistoryYcByDeviceIdCodes(ctx *gin.Context) {
-	var ycQuery *query.QueryTaoData
+	var ycQuery query.QueryTaoData
 	//解析json
-	if err := ctx.ShouldBindBodyWith(&ycQuery, binding.JSON); err != nil {
+	if err := ctx.Bind(&ycQuery); err != nil {
+		ctx.JSON(http.StatusOK, model.ResponseData{
+			Code:    "1",
+			Message: "error" + err.Error(),
+			Data:    "",
+		})
+		return
+	}
+	returnMap, err := c.hisRepo.GetCharData(ycQuery)
+	if err != nil {
+		ctx.JSON(http.StatusOK, model.ResponseData{
+			Code:    "1",
+			Message: "error" + err.Error(),
+			Data:    nil,
+		})
+	} else {
+		ctx.JSON(http.StatusOK, model.ResponseData{
+			Code:    "0",
+			Message: "获取信息成功！",
+			Data:    returnMap,
+		})
+	}
+}
+
+// BMS批量获取最高最低的遥测信息
+func (c *BmsController) GetBmsYcMaxAndMinListByDeviceIdCodes(ctx *gin.Context) {
+	var ycData models.YcData
+	if err := ctx.Bind(&ycData); err != nil {
 		ctx.JSON(http.StatusOK, model.ResponseData{
 			"1",
 			"error" + err.Error(),
@@ -90,45 +127,126 @@ func (c *BmsController) GetHistoryYcByDeviceIdCodes(ctx *gin.Context) {
 		})
 		return
 	}
-	//必要条件校验
-	if ycQuery.StartTime == 0 || ycQuery.EndTime == 0 || ycQuery.Interval == 0 || ycQuery.IntervalType == 0 || len(ycQuery.CodeList) == 0 {
-		ctx.JSON(http.StatusOK, model.ResponseData{
-			"1",
-			"error",
-			"缺少必要参数",
-		})
-		return
+	//把所有的BMS测点查出来
+	var dictLabels = []string{
+		"energy_storage_bms_max_voltage_code",        //BMS设备最高电压测点
+		"energy_storage_bms_min_voltage_code",        //BMS设备最低电压测点
+		"energy_storage_bms_max_voltage_serial_code", //BMS设备最高电压序号测点
+		"energy_storage_bms_min_voltage_serial_code", //BMS设备最低电压序号测点
+		"energy_storage_bms_max_temp_code",           //BMS设备最高温度测点
+		"energy_storage_bms_min_temp_code",           //BMS设备最低温度测点
+		"energy_storage_bms_max_temp_serial_code",    //BMS设备最高温度序号测点
+		"energy_storage_bms_min_temp_serial_code",    //BMS设备最低温度序号测点
+		"energy_storage_bms_max_soc_code",            //BMS设备最高SOC测点
+		"energy_storage_bms_min_soc_code",            //BMS设备最低SOC测点
+		"energy_storage_bms_max_soc_serial_code",     //BMS设备最高SOC序号测点
+		"energy_storage_bms_min_soc_serial_code",     //BMS设备最低SOC序号测点
+		"energy_storage_bms_max_soh_code",            //BMS设备最高SOH测点
+		"energy_storage_bms_min_soh_code",            //BMS设备最低SOH测点
+		"energy_storage_bms_max_soh_serial_code",     //BMS设备最高SOH序号测点
+		"energy_storage_bms_min_soh_serial_code",     //BMS设备最低SOH序号测点
 	}
-	//间隔时间段
-	intervalStr := "s"
-	if ycQuery.IntervalType == 2 {
-		intervalStr = "m"
-	} else if ycQuery.IntervalType == 3 {
-		intervalStr = "h"
-	} else if ycQuery.IntervalType > 3 {
-		intervalStr = "d"
+	//查询字典code
+	DictDataList, err := c.dictDataRepo.GetDictDataByDictLabel(dictLabels)
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 	}
-	// 将 int 数组转换为字符串数组
-	strArr := make([]string, len(ycQuery.CodeList))
-	for i, v := range ycQuery.CodeList {
-		strArr[i] = strconv.Itoa(v)
+	var codeList []string
+	for _, v := range DictDataList {
+		codeList = append(codeList, v.DictValue)
 	}
-
-	//拼接codelist sql语句
-	ycQuery.Codes = strings.Join(strArr, ",")
 	//查询历史数据
-	ycList, err := c.hisRepo.GetLastYcHistoryByDeviceIdAndCodeList(ycQuery.DeviceId, ycQuery.Codes, ycQuery.StartTime, ycQuery.EndTime, strconv.Itoa(ycQuery.Interval)+intervalStr)
+	codes := strings.Join(codeList, ",")
+	ycDataList, err := c.hisRepo.GetLastYcListByCode(strconv.Itoa(ycData.DeviceId), codes)
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
-	var xAxisList []string
-	// 初始化x轴数据,返回x轴时间对应的历史数据分组,key=x轴,value=x轴对应的历史数据集合
-	returnMap := service.GetCharData(xAxisList, ycQuery.StartTime, ycQuery.EndTime, ycQuery.Interval, ycQuery.IntervalType, ycList, ycQuery.CodeList, ycQuery.CodeNameList)
-
+	//取出单位
+	paramList, err := c.emRepo.GetEmDeviceModelCmdParamListByDeviceIdCodes(ycData.DeviceId, codeList)
+	paramMap := make(map[string]models.EmDeviceModelCmdParam)
+	if err == nil && len(paramList) > 0 {
+		for _, v := range paramList {
+			paramMap[v.Name] = v //name就是测点code
+		}
+	}
+	//字典数据转成map
+	ycMap := make(map[string]*models.YcData)
+	for _, v := range ycDataList {
+		ycMap[strconv.Itoa(v.Code)] = v
+	}
+	var resData []ReturnModel.YcData
+	//循环字典数据，赋值
+	for _, v := range DictDataList {
+		tmpYcData := ycMap[v.DictValue]  //赋值数据
+		tmpUnit := paramMap[v.DictValue] //赋值单位
+		var yc ReturnModel.YcData
+		if tmpYcData != nil { //存在测点数据，取出单位
+			yc.Uint = tmpUnit.Unit //单位还要再去查表
+		}
+		if tmpYcData != nil { //没有数据赋值为空
+			yc.DeviceId = tmpYcData.DeviceId
+			yc.Code = tmpYcData.Code
+			yc.Value = tmpYcData.Value
+			yc.Name = tmpYcData.Name
+			yc.Ts = tmpYcData.Ts
+			yc.Sort = v.DictSort   //根据code去拿数据
+			yc.Alias = v.DictLabel //根据code去拿数据
+		} else { //没有数据就补-
+			yc.DeviceId = ycData.DeviceId
+			code, err := strconv.Atoi(v.DictValue) //字符串转换int
+			if err == nil {
+				yc.Code = code
+			}
+			yc.Value = 0
+			yc.Name = "-"
+			yc.Uint = "-"
+			yc.Sort = v.DictSort   //根据code去拿数据
+			yc.Alias = v.DictLabel //根据code拿数据
+		}
+		resData = append(resData, yc)
+	}
+	//排序 //按sort排序
+	sort.Slice(resData, func(i, j int) bool {
+		return resData[i].Sort < resData[j].Sort
+	})
 	ctx.JSON(http.StatusOK, model.ResponseData{
 		"0",
 		"获取信息成功！",
-		returnMap,
+		resData,
 	})
+	return
+}
+
+// 获取BMS设备
+func (c *BmsController) GetBmsDevices(ctx *gin.Context) {
+	var dictLabels = []string{"energy_storage_bms_device_label"}
+	DictDataList, err := c.dictDataRepo.GetDictDataByDictLabel(dictLabels)
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+	}
+	if len(DictDataList) > 0 {
+		var codeList []string
+		for _, v := range DictDataList {
+			codeList = append(codeList, v.DictValue)
+		}
+		deviceList, err := c.auxRepo.GetAuxiliaryDevice(codeList[0])
+		if err != nil {
+			ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			return
+		}
+		ctx.JSON(http.StatusOK, model.ResponseData{
+			"0",
+			"获取信息成功！",
+			deviceList,
+		})
+		return
+	} else {
+		ctx.JSON(http.StatusOK, model.ResponseData{
+			"1",
+			"无数据！",
+			"",
+		})
+		return
+	}
 }
