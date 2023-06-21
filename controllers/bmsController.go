@@ -6,6 +6,7 @@ import (
 	"gateway/models/ReturnModel"
 	"gateway/models/query"
 	repositories "gateway/repositories"
+	"gateway/utils"
 	"github.com/gin-gonic/gin"
 	"net/http"
 	"sort"
@@ -18,21 +19,71 @@ type BmsController struct {
 	dictDataRepo *repositories.DictDataRepository
 	auxRepo      *repositories.AuxiliaryRepository
 	emRepo       *repositories.EmRepository
+	ruRepo       *repositories.RuleHistoryRepository
+	limitRepo    *repositories.LimitConfigRepository
+	bmsRepo      *repositories.BmsRepository
 }
 
 func NewBmsController() *BmsController {
 	return &BmsController{hisRepo: repositories.NewHistoryDataRepository(),
 		dictDataRepo: repositories.NewDictDataRepository(),
 		auxRepo:      repositories.NewAuxiliaryRepository(),
-		emRepo:       repositories.NewEmRepository()}
+		emRepo:       repositories.NewEmRepository(),
+		ruRepo:       repositories.NewRuleHistoryRepository(),
+		limitRepo:    repositories.NewLimitConfigRepository(),
+		bmsRepo:      repositories.NewBmsRepository()}
 }
 func (ctrl *BmsController) RegisterRoutes(router *gin.RouterGroup) {
+	router.POST("/api/v2/bms/getDeviceTreeByDeviceType", ctrl.GetDeviceTreeByDeviceType)
 	router.POST("/api/v2/bms/getYcLastByDeviceIdAndDict", ctrl.GetYcLastByDeviceIdAndDict)
 	router.POST("/api/v2/bms/getYcLogById", ctrl.GetYcLogById)
 	router.POST("/api/v2/bms/getHistoryYcByDeviceIdCodes", ctrl.GetHistoryYcByDeviceIdCodes)
 	router.POST("/api/v2/bms/getBmsYcMaxAndMinListByDeviceIdCodes", ctrl.GetBmsYcMaxAndMinListByDeviceIdCodes)
 	router.POST("/api/v2/bms/getBmsDevices", ctrl.GetBmsDevices)
 
+}
+
+// /获取设备类型下的所有设备数据,返回树形结构
+func (c *BmsController) GetDeviceTreeByDeviceType(ctx *gin.Context) {
+	type tmpQuery struct {
+		DeviceType string `json:"deviceType"`
+	}
+	var query tmpQuery
+	if err := ctx.Bind(&query); err != nil {
+		ctx.JSON(http.StatusOK, model.ResponseData{
+			"1",
+			"error" + err.Error(),
+			"",
+		})
+		return
+	}
+	deviceList, err := c.bmsRepo.GetBmsDeviceList(query.DeviceType)
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	nodeMap := make(map[int]*ReturnModel.TreeDevice)
+	var rootNodes []*ReturnModel.TreeDevice
+	//构建节点映射表
+	for _, node := range deviceList {
+		nodeMap[node.Id] = node
+	}
+	//构建父子关系
+	for _, node := range deviceList {
+		parentId := node.ParentId
+		parentNode, err := nodeMap[parentId]
+		if err {
+			parentNode.Children = append(parentNode.Children, *node)
+		} else {
+			rootNodes = append(rootNodes, node)
+		}
+	}
+	ctx.JSON(http.StatusOK, model.ResponseData{
+		Code:    "0",
+		Message: "获取信息成功！",
+		Data:    rootNodes,
+	})
+	return
 }
 
 // GetYcLastByDeviceIdAndDict 获取设备点位最新的一条非空数据
@@ -146,7 +197,7 @@ func (c *BmsController) GetBmsYcMaxAndMinListByDeviceIdCodes(ctx *gin.Context) {
 		"energy_storage_bms_max_soh_serial_code",     //BMS设备最高SOH序号测点
 		"energy_storage_bms_min_soh_serial_code",     //BMS设备最低SOH序号测点
 	}
-	//查询字典code
+	//1.查询字典对应的测点code
 	DictDataList, err := c.dictDataRepo.GetDictDataByDictLabel(dictLabels)
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
@@ -155,21 +206,61 @@ func (c *BmsController) GetBmsYcMaxAndMinListByDeviceIdCodes(ctx *gin.Context) {
 	for _, v := range DictDataList {
 		codeList = append(codeList, v.DictValue)
 	}
-	//查询历史数据
+	//2.查询最新一条历史数据
 	codes := strings.Join(codeList, ",")
 	ycDataList, err := c.hisRepo.GetLastYcListByCode(strconv.Itoa(ycData.DeviceId), codes)
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
-	//取出单位
+	//3.查询em_device_model_cmd_param表取出单位
 	paramList, err := c.emRepo.GetEmDeviceModelCmdParamListByDeviceIdCodes(ycData.DeviceId, codeList)
-	paramMap := make(map[string]models.EmDeviceModelCmdParam)
+	paramMap := make(map[string]*models.EmDeviceModelCmdParam)
 	if err == nil && len(paramList) > 0 {
 		for _, v := range paramList {
-			paramMap[v.Name] = v //name就是测点code
+			item := v
+			paramMap[v.Name] = &item //name就是测点code
 		}
 	}
+	//4.查询告警信息=====================================================
+	var param models.RuleHistoryParam
+	deviceIds := []int{ycData.DeviceId}
+	param.DeviceIds = deviceIds
+	param.Codes, err = utils.StringArrayToIntArray(codeList) //测点code
+	param.Tag = "0"                                          //最新告警
+	list, total, err := c.ruRepo.GetRuleHistoryList(param)
+	var ruleHistoryMap = make(map[string]*models.EmRuleHistoryModel)
+	if total != 0 { //存在数据
+		//for循环list，以键值对形式存储到map中
+		for _, v := range list {
+			item := v
+			ruleHistoryMap[strconv.Itoa(v.PropertyCode)] = &item
+		}
+	}
+	//=====================================================
+	//5.获取越线配置信息=============================================
+	//根据设备id获取设备信息
+	emDevice, err := c.emRepo.GetEmDeviceById(ycData.DeviceId)
+	limitConfigList, err := c.limitRepo.GetLimitConfigListByDeviceTypeAndCodes(emDevice.DeviceType, codeList)
+	//根据code按照键值对存储到map中
+	var limitConfigMap = make(map[string]*ReturnModel.LimitScope)
+	if err == nil && len(limitConfigList) > 0 {
+		for _, v := range limitConfigList {
+			limitScope := &ReturnModel.LimitScope{
+				PropertyCode: v.PropertyCode,
+				NotifyMin:    v.NotifyMin,
+				NotifyMax:    v.NotifyMax,
+				SeriousMax:   v.SeriousMax,
+				SeriousMin:   v.SeriousMin,
+				SecondaryMax: v.SecondaryMax,
+				SecondaryMin: v.SecondaryMin,
+				UrgentMax:    v.UrgentMax,
+				UrgentMin:    v.UrgentMin,
+			}
+			limitConfigMap[v.PropertyCode] = limitScope
+		}
+	}
+	//=============================================
 	//字典数据转成map
 	ycMap := make(map[string]*models.YcData)
 	for _, v := range ycDataList {
@@ -178,13 +269,28 @@ func (c *BmsController) GetBmsYcMaxAndMinListByDeviceIdCodes(ctx *gin.Context) {
 	var resData []ReturnModel.YcData
 	//循环字典数据，赋值
 	for _, v := range DictDataList {
-		tmpYcData := ycMap[v.DictValue]  //赋值数据
-		tmpUnit := paramMap[v.DictValue] //赋值单位
 		var yc ReturnModel.YcData
-		if tmpYcData != nil { //存在测点数据，取出单位
-			yc.Uint = tmpUnit.Unit //单位还要再去查表
+		tmpYcData := ycMap[v.DictValue] //赋值数据
+		//单位获取--------------------------------------
+		tmpUnit := paramMap[v.DictValue] //赋值单位
+		if tmpUnit != nil {              //存在测点数据，取出单位
+			yc.Unit = tmpUnit.Unit //单位还要再去查表
 		}
+		//告警等级--------------------------------------
+		tmpLevel := ruleHistoryMap[v.DictValue] //告警数据
+		if tmpLevel != nil {
+			yc.Level = tmpLevel.Level
+		} else {
+			yc.Level = -1 //-1无告警
+		}
+
+		//遥测数据--------------------------------------
 		if tmpYcData != nil { //没有数据赋值为空
+			//越线配置--------------------------------------
+			tmpLimit := limitConfigMap[v.DictValue] //越线配置
+			if tmpLimit != nil {
+				yc.LimitScope = *tmpLimit //配置范围
+			}
 			yc.DeviceId = tmpYcData.DeviceId
 			yc.Code = tmpYcData.Code
 			yc.Value = tmpYcData.Value
@@ -198,11 +304,12 @@ func (c *BmsController) GetBmsYcMaxAndMinListByDeviceIdCodes(ctx *gin.Context) {
 			if err == nil {
 				yc.Code = code
 			}
+			yc.Name = ""
+			yc.Unit = ""
 			yc.Value = 0
-			yc.Name = "-"
-			yc.Uint = "-"
 			yc.Sort = v.DictSort   //根据code去拿数据
 			yc.Alias = v.DictLabel //根据code拿数据
+			yc.LimitScope = ReturnModel.LimitScope{}
 		}
 		resData = append(resData, yc)
 	}

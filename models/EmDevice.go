@@ -4,6 +4,7 @@ type EmDevice struct {
 	Id              int    `json:"id" gorm:"primary_key"`
 	Name            string `json:"name"`
 	Label           string `json:"label"`
+	DeviceType      string `json:"deviceType"`
 	ModelId         int    `json:"modelId"`
 	CollInterfaceId int    `json:"collInterfaceId"`
 	Addr            string `json:"addr"`

@@ -13,3 +13,16 @@ func IntArrayToString(intArray []int, separator string) string {
 	}
 	return strings.Join(strArray, separator)
 }
+
+// strArray要处理的数组，返回int数组
+func StringArrayToIntArray(strArray []string) ([]int, error) {
+	intArray := make([]int, len(strArray))
+	for i, str := range strArray {
+		num, err := strconv.Atoi(str)
+		if err != nil {
+			return nil, err
+		}
+		intArray[i] = num
+	}
+	return intArray, nil
+}
