@@ -2,11 +2,13 @@ package controllers
 
 import (
 	"fmt"
+	"gateway/device"
 	"gateway/httpServer/model"
 	"gateway/models"
 	repositories "gateway/repositories"
 	"gateway/utils"
 	"github.com/gin-gonic/gin"
+	"github.com/goccy/go-json"
 	"net/http"
 	"strconv"
 	"time"
@@ -35,29 +37,71 @@ func (c *DeviceController) RegisterRoutes(router *gin.RouterGroup) {
 	router.POST("/api/v2/device/getProfitChart", c.GetProfitChart)
 }
 
-// 未完成
-func (ctrl *DeviceController) CtrlDevice(ctx *gin.Context) {
+// CtrlDevice 遥控摇调
+func (c *DeviceController) CtrlDevice(ctx *gin.Context) {
 	var param models.CtrlInfo
 	if err := ctx.Bind(&param); err != nil {
 		ctx.JSON(http.StatusOK, model.ResponseData{
 			Code:    "1",
-			Message: "error" + err.Error(),
+			Message: err.Error(),
 			Data:    "",
 		})
 		return
 	}
-	device, err := repositories.NewEmRepository().GetEmDeviceById(param.DeviceId)
-	if device == nil || err != nil {
-		msg := "未查询到设备"
-		if err != nil {
-			msg = "error" + err.Error()
-		}
-		ctx.JSON(http.StatusOK, model.ResponseData{
-			Code:    "1",
-			Message: msg,
-			Data:    "",
-		})
+	aParam := struct {
+		Code    string `json:"Code"`
+		Message string `json:"Message"`
+		Data    string `json:"Data"`
+	}{
+		Code:    "1",
+		Message: "",
+		Data:    "",
+	}
+
+	serviceInfo := struct {
+		CollInterfaceName string                 `json:"collInterfaceName"`
+		DeviceName        string                 `json:"deviceName"`
+		ServiceName       string                 `json:"serviceName"`
+		ServiceParam      map[string]interface{} `json:"serviceParam"`
+	}{}
+
+	// 查点
+	deviceParam := c.repo.GetDeviceModelCmdParam(param.ParamId)
+	serviceInfo.ServiceName = "SetVariables"
+	serviceInfo.DeviceName = deviceParam.DeviceName
+	serviceInfo.CollInterfaceName = deviceParam.CollName
+	serviceParam := make(map[string]interface{})
+	serviceParam[deviceParam.ParamName] = param.Value
+	serviceInfo.ServiceParam = serviceParam
+
+	device.CollectInterfaceMap.Lock.Lock()
+	coll, ok := device.CollectInterfaceMap.Coll[serviceInfo.CollInterfaceName]
+	device.CollectInterfaceMap.Lock.Unlock()
+	if !ok {
+		aParam.Code = "1"
+		aParam.Message = "device is not exist"
+		sJson, _ := json.Marshal(aParam)
+		ctx.String(http.StatusOK, string(sJson))
 		return
+	}
+
+	cmd := device.CommunicationCmdTemplate{}
+	cmd.CollInterfaceName = serviceInfo.CollInterfaceName
+	cmd.DeviceName = serviceInfo.DeviceName
+	cmd.FunName = serviceInfo.ServiceName
+	paramStr, _ := json.Marshal(serviceInfo.ServiceParam)
+	cmd.FunPara = string(paramStr)
+	cmdRX := coll.CommQueueManage.CommunicationManageAddEmergency(cmd)
+	if cmdRX.Status == true {
+		aParam.Code = "0"
+		aParam.Message = ""
+		sJson, _ := json.Marshal(aParam)
+		ctx.String(http.StatusOK, string(sJson))
+	} else {
+		aParam.Code = "1"
+		aParam.Message = "device is not return"
+		sJson, _ := json.Marshal(aParam)
+		ctx.String(http.StatusOK, string(sJson))
 	}
 }
 
