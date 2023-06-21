@@ -37,7 +37,7 @@ func (ctrl *AuxiliaryController) RegisterRoutes(router *gin.RouterGroup) {
 // /获取设备类型下的所有设备数据
 func (c *AuxiliaryController) GetDeviceListByDeviceType(ctx *gin.Context) {
 	type tmpQuery struct {
-		Label string `json:"label"`
+		DeviceType string `json:"deviceType"`
 	}
 	var query tmpQuery
 	if err := ctx.Bind(&query); err != nil {
@@ -48,7 +48,7 @@ func (c *AuxiliaryController) GetDeviceListByDeviceType(ctx *gin.Context) {
 		})
 		return
 	}
-	deviceList, err := c.repo.GetAuxiliaryDevice(query.Label)
+	deviceList, err := c.repo.GetAuxiliaryDevice(query.DeviceType)
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
