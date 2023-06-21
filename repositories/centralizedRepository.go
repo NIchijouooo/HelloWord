@@ -66,9 +66,8 @@ func (r *CentralizedRepository) GetDeviceYkYtList() (YkYcData, error) {
 	err := r.db.Table("em_device_model_cmd_param as param").
 		Select("param.id as id, param.name as param_name, param.data, param.iot_data_type, device.name as device_name").
 		Joins("LEFT JOIN em_device_model_cmd as cmd on param.device_model_cmd_id = cmd.id").
-		Joins("LEFT JOIN em_device_model as model on cmd.device_model_id = model.id").
-		Joins("LEFT JOIN em_device as device on model.id = device.model_id").
-		Where("param.iot_data_type = 'yc' or param.iot_data_type = 'yx'").
+		Joins("LEFT JOIN em_device as device on cmd.device_model_id = device.model_id").
+		Where("(iot_data_type = 'yc' or iot_data_type = 'yx') and device_name not NULL").
 		Find(&ykYtList).
 		Error
 
