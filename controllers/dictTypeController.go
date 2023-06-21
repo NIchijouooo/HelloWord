@@ -29,7 +29,7 @@ func (ctrl *DictTypeController) RegisterRoutes(router *gin.RouterGroup) {
 	router.POST("/api/v2/dictType/getDictTypeList", ctrl.GetDictTypeList)
 	router.POST("/api/v2/dictType/getDictTypeByID", ctrl.GetDictTypeByID)
 	router.POST("/api/v2/dictData/getDictTypeListByDictTypeId", ctrl.GetDictTypeListByDictTypeId)
-	router.POST("/api/v2/dictData/GetDictDataByTypeAndLable", ctrl.GetDictDataByTypeAndLable)
+	router.POST("/api/v2/dictData/getDictDataByTypeAndLabel", ctrl.GetDictDataByTypeAndLable)
 	// 注册其他路由...
 }
 

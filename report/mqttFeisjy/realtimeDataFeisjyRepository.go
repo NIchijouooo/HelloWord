@@ -6,6 +6,7 @@ import (
 	"gateway/models"
 	"gateway/repositories"
 	"gateway/rule"
+	"gateway/setting"
 	"log"
 	"strconv"
 	"sync"
@@ -32,11 +33,11 @@ func NewRealtimeDataRepository() *RealtimeDataRepository {
 
 /*
 *
-
 	根据网关设备的addr查设备，然后更新登录状态
 */
 func (r *RealtimeDataRepository) UpdateGatewayDeviceConnetStatus(gw ReportServiceGWParamFeisjyTemplate) {
 	//var emDev models.EmDevice
+	setting.ZAPS.Debugf("UpdateGatewayDeviceConnetStatus start......")
 	if err := r.db.Model(&models.ProjectInfo{}).Where("addr = ?", gw.Param.DeviceID).Updates(models.EmDevice{ConnectStatus: gw.ReportStatus}).Error; err != nil {
 		log.Printf("Request params:%v", err)
 	}
@@ -44,11 +45,11 @@ func (r *RealtimeDataRepository) UpdateGatewayDeviceConnetStatus(gw ReportServic
 
 /*
 *
-
 	根据设备的coll,name查设备，然后更新登录状态
 */
 func (r *RealtimeDataRepository) UpdateDeviceConnetStatus(node ReportServiceNodeParamFeisjyTemplate) {
 	//var emDev models.EmDevice
+	setting.ZAPS.Debugf("UpdateGatewayDeviceConnetStatus start......")
 	if err := r.db.Model(&models.ProjectInfo{}).Where("name = ? and coll_interface_id = ?", node.Name, node.CollInterfaceName).Updates(models.EmDevice{ConnectStatus: node.ReportStatus}).Error; err != nil {
 		log.Printf("Request params:%v", err)
 	}
@@ -56,7 +57,6 @@ func (r *RealtimeDataRepository) UpdateDeviceConnetStatus(node ReportServiceNode
 
 /*
 *
-
 	更新命令参数属性的实时值到taos
 */
 func (r *RealtimeDataRepository) SaveRealtimeDataList(devName, collName string, ycPropertyPostParam MQTTFeisjyReportYcTemplate) {
@@ -113,7 +113,6 @@ func (r *RealtimeDataRepository) SaveRealtimeDataList(devName, collName string, 
 							})
 							pType = 2
 						}
-
 						realTimeDataJson := models.RealTimeDataJson{
 							Type:     pType,   //遥信-0；遥测-1
 							Code:     numName, //遥信/遥测CODE

@@ -67,6 +67,8 @@ func RouterWeb(port string) {
 		/**
 		字典
 		*/
+		//mqttFeisjy.NewRealtimeDataSubRepository()
+
 		realtimeDataController := controllers.NewRealtimeDataController()
 		realtimeDataController.RegisterRoutes(&router.RouterGroup)
 		dictTypeController := controllers.NewDictTypeController()

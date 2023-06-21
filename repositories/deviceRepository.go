@@ -31,6 +31,17 @@ func (r DeviceRepository) GetDeviceListByType(param models.DeviceParam) ([]model
 	return result, err
 }
 
+/*
+*
+根据设备类型获取设备列表
+*/
+func (r DeviceRepository) GetDeviceListByCollAndName(collInterfaceId, name string) (models.EmDevice, error) {
+	var result models.EmDevice
+	r.db.Model(&models.EmDevice{})
+	err := r.db.Where("coll_interface_id = ? and name = ?", collInterfaceId, name).Find(&result).Error
+	return result, err
+}
+
 func (r *DeviceRepository) GetDevicePoint(deviceType string, pointDictType string) ([]DevicePoint, error) {
 	var param models.DeviceParam
 	var dictData models.DictData
