@@ -5,7 +5,6 @@ import (
 	"gateway/models"
 	"gateway/models/query"
 	repositories "gateway/repositories"
-	"gateway/service"
 	"gateway/utils"
 	"github.com/gin-gonic/gin"
 	"github.com/gin-gonic/gin/binding"
@@ -14,7 +13,7 @@ import (
 	"strings"
 )
 
-//定义辅控管理的控制器
+// 定义辅控管理的控制器
 type AuxiliaryController struct {
 	repo    *repositories.AuxiliaryRepository
 	hisRepo *repositories.HistoryDataRepository
@@ -35,7 +34,7 @@ func (ctrl *AuxiliaryController) RegisterRoutes(router *gin.RouterGroup) {
 	router.POST("/api/v2/auxiliary/getEmDeviceModelCmdParamListByDeviceId", ctrl.GetEmDeviceModelCmdParamListByDeviceId)
 }
 
-///获取设备类型下的所有设备数据
+// /获取设备类型下的所有设备数据
 func (c *AuxiliaryController) GetDeviceListByDeviceType(ctx *gin.Context) {
 	type tmpQuery struct {
 		Label string `json:"label"`
@@ -62,7 +61,7 @@ func (c *AuxiliaryController) GetDeviceListByDeviceType(ctx *gin.Context) {
 	return
 }
 
-//获取所有设备类型
+// 获取所有设备类型
 func (c *AuxiliaryController) GetAuxiliaryDeviceType(ctx *gin.Context) {
 	deviceTypeList, err := c.repo.GetAuxiliaryDeviceType()
 	if err != nil {
@@ -77,8 +76,8 @@ func (c *AuxiliaryController) GetAuxiliaryDeviceType(ctx *gin.Context) {
 	return
 }
 
-//获取最新遥测信息GetLastYcListByCode
-//遥测控制器已经写有
+// 获取最新遥测信息GetLastYcListByCode
+// 遥测控制器已经写有
 func (c *AuxiliaryController) GetLastYcByDeviceIdAndCodes(ctx *gin.Context) {
 	type ycQeury struct {
 		DeviceIds []int `form:"deviceIds"`
@@ -118,57 +117,30 @@ type ReturnMap struct {
 //根据选择的codes返回对应时间的历史数据
 
 func (c *AuxiliaryController) GetHistoryYcByDeviceIdCodes(ctx *gin.Context) {
-	var ycQuery *query.QueryTaoData
+	var ycQuery query.QueryTaoData
 	//解析json
-	if err := ctx.ShouldBindBodyWith(&ycQuery, binding.JSON); err != nil {
+	if err := ctx.Bind(&ycQuery); err != nil {
 		ctx.JSON(http.StatusOK, model.ResponseData{
-			"1",
-			"error" + err.Error(),
-			"",
+			Code:    "1",
+			Message: "error" + err.Error(),
+			Data:    "",
 		})
 		return
 	}
-	//必要条件校验
-	if ycQuery.StartTime == 0 || ycQuery.EndTime == 0 || ycQuery.Interval == 0 || ycQuery.IntervalType == 0 || len(ycQuery.CodeList) == 0 {
-		ctx.JSON(http.StatusOK, model.ResponseData{
-			"1",
-			"error",
-			"缺少必要参数",
-		})
-		return
-	}
-	//间隔时间段
-	intervalStr := "s"
-	if ycQuery.IntervalType == 2 {
-		intervalStr = "m"
-	} else if ycQuery.IntervalType == 3 {
-		intervalStr = "h"
-	} else if ycQuery.IntervalType > 3 {
-		intervalStr = "d"
-	}
-	// 将 int 数组转换为字符串数组
-	strArr := make([]string, len(ycQuery.CodeList))
-	for i, v := range ycQuery.CodeList {
-		strArr[i] = strconv.Itoa(v)
-	}
-
-	//拼接codelist sql语句.
-	ycQuery.Codes = strings.Join(strArr, ",")
-	//查询历史数据
-	ycList, err := c.hisRepo.GetLastYcHistoryByDeviceIdAndCodeList(ycQuery.DeviceId, ycQuery.Codes, ycQuery.StartTime, ycQuery.EndTime, strconv.Itoa(ycQuery.Interval)+intervalStr)
+	returnMap, err := c.hisRepo.GetCharData(ycQuery)
 	if err != nil {
-		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-		return
+		ctx.JSON(http.StatusOK, model.ResponseData{
+			Code:    "1",
+			Message: "error" + err.Error(),
+			Data:    nil,
+		})
+	} else {
+		ctx.JSON(http.StatusOK, model.ResponseData{
+			Code:    "0",
+			Message: "获取信息成功！",
+			Data:    returnMap,
+		})
 	}
-	var xAxisList []string
-	// 初始化x轴数据,返回x轴时间对应的历史数据分组,key=x轴,value=x轴对应的历史数据集合
-	returnMap := service.GetCharData(xAxisList, ycQuery.StartTime, ycQuery.EndTime, ycQuery.Interval, ycQuery.IntervalType, ycList, ycQuery.CodeList, ycQuery.CodeNameList)
-
-	ctx.JSON(http.StatusOK, model.ResponseData{
-		"0",
-		"获取信息成功！",
-		returnMap,
-	})
 }
 
 // 根据设备ID获取所有模型

@@ -8,7 +8,8 @@ type EmRuleModel struct {
 	Level              int    `json:"level"`
 	EnableFlag         int    `json:"enableFlag"`
 	TypeClassification int    `json:"typeClassification"`
-	ModelJson          string `json:"modelJson"`
+	CreateTime         string `json:"createTime"`
+	UpdateTime         string `json:"updateTime"`
 }
 
 func (u *EmRuleModel) TableName() string {

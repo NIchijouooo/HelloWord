@@ -377,6 +377,14 @@ func (c *RealtimeDataController) GetRealtimeDataYcListByDevId(ctx *gin.Context) 
 	})
 }
 
+func (c *RealtimeDataController) GetChartByDeviceIdAndCode(ctx *gin.Context) {
+	list, _ := c.repo.GetChartByDeviceIdAndCode(100, "66")
+	ctx.JSON(http.StatusOK, model.ResponseData{
+		Code: "0",
+		Data: list,
+	})
+}
+
 /*
 *
 获取设备全部实时数据

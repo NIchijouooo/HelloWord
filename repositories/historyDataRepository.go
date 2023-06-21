@@ -4,7 +4,13 @@ import (
 	sqlt "database/sql"
 	"fmt"
 	"gateway/models"
+	"gateway/models/ReturnModel"
+	"gateway/models/query"
+	"gateway/service"
+	"gateway/utils"
+	"github.com/taosdata/driver-go/v3/errors"
 	"gorm.io/gorm"
+	"strconv"
 )
 
 // 定义字典类型管理的存储库
@@ -175,7 +181,7 @@ func (r *HistoryDataRepository) GetSettingLogByDeviceIdsCodes(deviceIds, codes, 
 	return realtimeList, err
 }
 
-//批量code获取yc的最新一条信息
+// 批量code获取yc的最新一条信息
 func (r *HistoryDataRepository) GetLastYcListByCode(deviceIds, codes string) ([]*models.YcData, error) {
 	var realtimeList []*models.YcData
 	tableName := "realtimedata.yc"
@@ -197,7 +203,7 @@ func (r *HistoryDataRepository) GetLastYcListByCode(deviceIds, codes string) ([]
 	return realtimeList, err
 }
 
-//根据时间段获取历史数据数据
+// 根据时间段获取历史数据数据
 func (r *HistoryDataRepository) GetLastYcHistoryByDeviceIdAndCodeList(deviceId int, codes string, startTime, endTime int64, interval string) ([]*models.YcData, error) {
 	var realtimeList []*models.YcData
 	tableName := "realtimedata.yc"
@@ -213,6 +219,38 @@ func (r *HistoryDataRepository) GetLastYcHistoryByDeviceIdAndCodeList(deviceId i
 		err := rows.Scan(&realtime.Ts, &realtime.Value, &realtime.DeviceId, &realtime.Code)
 		if err != nil {
 			return nil, err
+		}
+		realtimeList = append(realtimeList, realtime)
+	}
+	return realtimeList, err
+}
+
+// 根据设备id和遥测编码集合获取历史数据数据
+func (r *HistoryDataRepository) GetLastYcHistoryByDeviceIdListAndCodeList(deviceIdList []int, codes string, startTime, endTime int64, interval string) ([]*models.YcData, error) {
+	if len(deviceIdList) == 0 {
+		return []*models.YcData{}, nil
+	}
+	var realtimeList []*models.YcData
+	tableName := "realtimedata.yc"
+	sql := fmt.Sprintf("select Last(ts) as ts,val,device_id,code from %s Where code in (%s) and ts >=%v and ts <%v  partition by device_id,code INTERVAL(%s);", tableName, codes, startTime, endTime, interval)
+	rows, err := r.taosDb.Query(sql)
+	if err != nil {
+		return nil, err
+	}
+	// 设备id map,在map里的设备才返回数据
+	devIdMap := make(map[int]bool)
+	for _, devId := range deviceIdList {
+		devIdMap[devId] = true
+	}
+	defer rows.Close()
+	for rows.Next() {
+		realtime := &models.YcData{}
+		err := rows.Scan(&realtime.Ts, &realtime.Value, &realtime.DeviceId, &realtime.Code)
+		if err != nil {
+			return nil, err
+		}
+		if !devIdMap[realtime.DeviceId] {
+			continue
 		}
 		realtimeList = append(realtimeList, realtime)
 	}
@@ -246,6 +284,7 @@ func (r *HistoryDataRepository) getDayEsChargeDischarge(deviceIds string, startT
 	}
 	return realtimeList, err
 }
+
 /**
  * 获取充放电量小时的降采样
  * @param deviceIdList
@@ -272,4 +311,36 @@ func (r *HistoryDataRepository) getDayEsChargeDischargeHour(deviceIds string, st
 		realtimeList = append(realtimeList, realtime)
 	}
 	return realtimeList, err
+}
+
+/*
+*
+通用图表接口
+*/
+func (r *HistoryDataRepository) GetCharData(ycQuery query.QueryTaoData) (ReturnModel.CharData, error) {
+	//必要条件校验
+	if ycQuery.StartTime == 0 || ycQuery.EndTime == 0 || ycQuery.Interval == 0 || ycQuery.IntervalType == 0 || len(ycQuery.CodeList) == 0 {
+		return ReturnModel.CharData{}, errors.NewError(1, "缺少必要参数")
+	}
+	//间隔时间段
+	intervalStr := "s"
+	if ycQuery.IntervalType == 2 {
+		intervalStr = "m"
+	} else if ycQuery.IntervalType == 3 {
+		intervalStr = "h"
+	} else if ycQuery.IntervalType > 3 {
+		intervalStr = "d"
+	}
+	// 将 int 数组转换为字符串数组
+	ycQuery.Codes = utils.IntArrayToString(ycQuery.CodeList, ",")
+
+	//查询历史数据
+	ycList, err := r.GetLastYcHistoryByDeviceIdListAndCodeList(ycQuery.DeviceIds, ycQuery.Codes, ycQuery.StartTime, ycQuery.EndTime, strconv.Itoa(ycQuery.Interval)+intervalStr)
+	if err != nil {
+		return ReturnModel.CharData{}, err
+	}
+	var xAxisList []string
+	// 初始化x轴数据,返回x轴时间对应的历史数据分组,key=x轴,value=x轴对应的历史数据集合
+	returnMap := service.GetCharData(xAxisList, ycQuery.StartTime, ycQuery.EndTime, ycQuery.Interval, ycQuery.IntervalType, ycList, ycQuery.CodeList)
+	return returnMap, nil
 }
