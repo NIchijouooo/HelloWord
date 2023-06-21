@@ -1,17 +1,23 @@
 package repositories
 
 import (
-	"fmt"
+	"database/sql"
 	"gateway/models"
 	"gorm.io/gorm"
 )
 
 type DeviceRepository struct {
-	db *gorm.DB
+	db     *gorm.DB
+	taosDb *sql.DB
+}
+
+type DevicePoint struct {
+	DeviceId int    `json:"deviceId"`
+	Code     string `json:"code"`
 }
 
 func NewDeviceRepository() *DeviceRepository {
-	return &DeviceRepository{db: models.DB}
+	return &DeviceRepository{db: models.DB, taosDb: models.TaosDB}
 }
 
 /*
@@ -25,47 +31,20 @@ func (r DeviceRepository) GetDeviceListByType(param models.DeviceParam) ([]model
 	return result, err
 }
 
-func (r *DeviceRepository) GetEmDeviceInfo(deviceType string) (interface{}, error) {
-	type Param struct {
-		Name  string `json:"name"`
-		Value int    `json:"value"`
-	}
-	type Res struct {
-		Id     int     `json:"id"`
-		Name   string  `json:"name"`
-		Label  string  `json:"label"`
-		Params []Param `json:"params"`
-	}
-
-	var res []Res
-	var dictData []models.DictData
-	var deviceParam models.DeviceParam
-	deviceParam.DeviceType = deviceType
-	// 获取设备列表
-	deviceList, err := r.GetDeviceListByType(deviceParam)
-	// 获取字典
-	switch deviceType {
-	case "pcs":
-		fmt.Print(deviceList)
-		err = r.db.Where("dict_type = ?", deviceType).Find(&dictData).Error
-	case "bms":
-
-	case "辅控":
-	}
-	// 构建数据
+func (r *DeviceRepository) GetDevicePoint(deviceType string, pointDictType string) ([]DevicePoint, error) {
+	var param models.DeviceParam
+	var dictData models.DictData
+	var res []DevicePoint
+	// 找设备
+	param.DeviceType = deviceType
+	deviceList, err := r.GetDeviceListByType(param)
+	err = r.db.Where("dict_type = ?", pointDictType).First(&dictData).Error
+	// 组装数据
 	for _, device := range deviceList {
-		var v Res
-		v.Id = device.Id
-		v.Name = device.Name
-		v.Label = device.Label
-		// 查数据
-		for _, dict := range dictData {
-			var p Param
-			p.Name = dict.DictValue
-			v.Params = append(v.Params, p)
-		}
+		var v DevicePoint
+		v.DeviceId = device.Id
+		v.Code = dictData.DictValue
 		res = append(res, v)
 	}
 	return res, err
-
 }

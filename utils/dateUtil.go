@@ -108,3 +108,43 @@ func GetIntervalTime(calendar time.Time, intervalType int, interval int) (int64,
 	return intervalLong, calendar
 
 }
+
+// GetFirstDateOfWeek 获取本周周一的日期
+func GetFirstDateOfWeek(t time.Time) time.Time {
+	offset := int(time.Monday - t.Weekday())
+	if offset > 0 {
+		offset = -6
+	}
+	return time.Date(t.Year(), t.Month(), t.Day(), 0, 0, 0, 0, time.Local).AddDate(0, 0, offset)
+}
+
+// GetLastDateOfWeek 获取本周周日
+func GetLastDateOfWeek(t time.Time) time.Time {
+	return GetFirstDateOfWeek(t).AddDate(0, 0, 6)
+}
+
+// GetLastWeekFirstDate 获取上周的周一
+func GetLastWeekFirstDate(t time.Time) time.Time {
+	thisWeekMonday := GetFirstDateOfWeek(t)
+	return thisWeekMonday.AddDate(0, 0, -7)
+}
+
+// GetNextFirstDateOfWeek 获取下周周一
+func GetNextFirstDateOfWeek(t time.Time) time.Time {
+	return GetFirstDateOfWeek(t).AddDate(0, 0, 7)
+}
+
+// GetLastWeekLastDate 获取下周周日
+func GetLastWeekLastDate(t time.Time) time.Time {
+	return GetLastDateOfWeek(t).AddDate(0, 0, -7)
+}
+
+// GetFirstDateOfMonth 获取本月第一天
+func GetFirstDateOfMonth(t time.Time) time.Time {
+	return t.AddDate(0, 0, -t.Day()+1)
+}
+
+// GetLastDateOfMonth  获取本月最后一天
+func GetLastDateOfMonth(t time.Time) time.Time {
+	return GetFirstDateOfMonth(t).AddDate(0, 1, -1)
+}

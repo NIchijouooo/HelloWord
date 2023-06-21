@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"fmt"
 	"gateway/models"
+	"gateway/utils"
 	"gorm.io/gorm"
 	"log"
 )
@@ -12,6 +13,11 @@ import (
 type RealtimeDataRepository struct {
 	db     *gorm.DB
 	taosDb *sql.DB
+}
+
+type Res struct {
+	Ts  string  `json:"ts"`
+	Val float32 `json:"val"`
 }
 
 func NewRealtimeDataRepository() *RealtimeDataRepository {
@@ -442,4 +448,82 @@ func (r *RealtimeDataRepository) GetLastYcHistoryByDeviceIdListAndCodeList(devic
 		}
 	}
 	return realtimeData, err
+}
+
+func (r *RealtimeDataRepository) GetChartByDeviceIdAndCode(deviceId int, code string) ([]Res, error) {
+	sql := fmt.Sprint("SELECT _WSTART AS ts,LAST(VAL) AS val FROM yc_100_66 WHERE ts>= NOW-2d and ts<=NOW+1d INTERVAL(1h) FILL(VALUE,0)")
+	rows, err := r.taosDb.Query(sql)
+	if err != nil {
+		return nil, err
+	}
+	var list []Res
+	for rows.Next() {
+		yc := Res{}
+		err := rows.Scan(&yc.Ts, &yc.Val)
+		if err != nil {
+			return nil, err
+		}
+		list = append(list, yc)
+	}
+	return list, err
+}
+
+func (r *RealtimeDataRepository) GetGenerateElectricityChartByDeviceIds(deviceIds []int) ([]Res, error) {
+	ids := utils.IntArrayToString(deviceIds, ",")
+	sql := fmt.Sprintf("SELECT _WSTART AS ts,SUM(charge_capacity) AS charge_capacity FROM charge_discharge_hour WHERE device_id IN (%s) AND ts>= NOW-1d and ts<=NOW INTERVAL(1h) FILL(VALUE,0);", ids)
+	rows, err := r.taosDb.Query(sql)
+	if err != nil {
+		return nil, err
+	}
+	var list []Res
+	for rows.Next() {
+		yc := Res{}
+		err := rows.Scan(&yc.Ts, &yc.Val)
+		if err != nil {
+			return nil, err
+		}
+		list = append(list, yc)
+	}
+	return list, err
+}
+
+func (r *RealtimeDataRepository) GetGenerateElectricitySumByDeviceIds(deviceIds []int) Res {
+	ids := utils.IntArrayToString(deviceIds, ",")
+	var res Res
+	sql := fmt.Sprintf("SELECT SUM(charge_capacity) AS val FROM charge_discharge WHERE device_id IN (%s)", ids)
+	err := r.taosDb.QueryRow(sql).Scan(&res.Val)
+	if err != nil {
+		fmt.Println(err)
+	}
+	return res
+}
+
+func (r *RealtimeDataRepository) GetProfitChartByDeviceIds(deviceIds []int, startTime int64, endTime int64) ([]Res, error) {
+	ids := utils.IntArrayToString(deviceIds, ",")
+	sql := fmt.Sprintf("SELECT _WSTART AS ts,SUM(profit) AS profit FROM charge_discharge WHERE device_id IN (%s) AND ts>= %v and ts<=%v INTERVAL(1d) FILL(VALUE,0)", ids, startTime, endTime)
+	rows, err := r.taosDb.Query(sql)
+	if err != nil {
+		return nil, err
+	}
+	var list []Res
+	for rows.Next() {
+		yc := Res{}
+		err := rows.Scan(&yc.Ts, &yc.Val)
+		if err != nil {
+			return nil, err
+		}
+		list = append(list, yc)
+	}
+	return list, err
+}
+
+func (r *RealtimeDataRepository) GetProfitSumByDeviceIds(deviceIds []int, startTime int64, endTime int64) Res {
+	ids := utils.IntArrayToString(deviceIds, ",")
+	var res Res
+	sql := fmt.Sprintf("SELECT SUM(profit) AS val FROM charge_discharge WHERE device_id IN (%s) AND ts >= %v AND ts <= %v", ids, startTime, endTime)
+	err := r.taosDb.QueryRow(sql).Scan(&res.Val)
+	if err != nil {
+		fmt.Println(err)
+	}
+	return res
 }
