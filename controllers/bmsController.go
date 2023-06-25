@@ -1,12 +1,12 @@
 package controllers
 
 import (
+	"encoding/json"
 	"gateway/httpServer/model"
 	"gateway/models"
 	"gateway/models/ReturnModel"
 	"gateway/models/query"
 	repositories "gateway/repositories"
-	"gateway/utils"
 	"github.com/gin-gonic/gin"
 	"net/http"
 	"sort"
@@ -42,10 +42,11 @@ func (ctrl *BmsController) RegisterRoutes(router *gin.RouterGroup) {
 	router.POST("/api/v2/bms/getHistoryYcByDeviceIdCodes", ctrl.GetHistoryYcByDeviceIdCodes)
 	router.POST("/api/v2/bms/getBmsYcMaxAndMinListByDeviceIdCodes", ctrl.GetBmsYcMaxAndMinListByDeviceIdCodes)
 	router.POST("/api/v2/bms/getBmsDevices", ctrl.GetBmsDevices)
-	router.POST("/api/v2/bms/getHourElectricityChartByDeviceIds", ctrl.GetHourElectricityChartByDeviceIds)
-	//router.POST("/api/v2/bms/getDayElectricityChartByDeviceIds", ctrl.GetDayElectricityChartByDeviceIds)
-	router.POST("/api/v2/bms/getReleaseElectricitySumByDeviceIds", ctrl.GetReleaseElectricitySumByDeviceIds)   //累计可放电电量
-	router.POST("/api/v2/bms/getGenerateElectricitySumByDeviceIds", ctrl.GetGenerateElectricitySumByDeviceIds) //累计可充电电量
+	//router.POST("/api/v2/bms/getHourElectricityChartByDeviceIds", ctrl.GetHourElectricityChartByDeviceIds)
+	router.POST("/api/v2/bms/getDayElectricityChartByDeviceId", ctrl.GetDayElectricityChartByDeviceId) //获取日电量曲线
+	//router.POST("/api/v2/bms/getReleaseElectricitySumByDeviceIds", ctrl.GetReleaseElectricitySumByDeviceIds)   //累计可放电电量
+	//router.POST("/api/v2/bms/getGenerateElectricitySumByDeviceIds", ctrl.GetGenerateElectricitySumByDeviceIds) //累计可充电电量
+	router.POST("/api/v2/bms/getDevicesStatus", ctrl.GetDevicesStatus) //获取日电量曲线
 
 }
 
@@ -228,21 +229,21 @@ func (c *BmsController) GetBmsYcMaxAndMinListByDeviceIdCodes(ctx *gin.Context) {
 			paramMap[v.Name] = &item //name就是测点code
 		}
 	}
-	//4.查询告警信息=====================================================
-	var param models.RuleHistoryParam
-	deviceIds := []int{ycData.DeviceId}
-	param.DeviceIds = deviceIds
-	param.Codes, err = utils.StringArrayToIntArray(codeList) //测点code
-	param.Tag = "0"                                          //最新告警
-	list, total, err := c.ruRepo.GetRuleHistoryList(param)
-	var ruleHistoryMap = make(map[string]*models.EmRuleHistoryModel)
-	if total != 0 { //存在数据
-		//for循环list，以键值对形式存储到map中
-		for _, v := range list {
-			item := v
-			ruleHistoryMap[strconv.Itoa(v.PropertyCode)] = &item
-		}
-	}
+	//4.查询告警信息---暂时先不用，自己遍历=====================================================
+	//var param models.RuleHistoryParam
+	//deviceIds := []int{ycData.DeviceId}
+	//param.DeviceIds = deviceIds
+	//param.Codes, err = utils.StringArrayToIntArray(codeList) //测点code
+	//param.Tag = "0"                                          //最新告警
+	//list, total, err := c.ruRepo.GetRuleHistoryList(param)
+	//var ruleHistoryMap = make(map[string]*models.EmRuleHistoryModel)
+	//if total != 0 { //存在数据
+	//	//for循环list，以键值对形式存储到map中
+	//	for _, v := range list {
+	//		item := v
+	//		ruleHistoryMap[strconv.Itoa(v.PropertyCode)] = &item
+	//	}
+	//}
 	//=====================================================
 	//5.获取越线配置信息=============================================
 	//根据设备id获取设备信息
@@ -283,18 +284,40 @@ func (c *BmsController) GetBmsYcMaxAndMinListByDeviceIdCodes(ctx *gin.Context) {
 			yc.Unit = tmpUnit.Unit //单位还要再去查表
 		}
 		//告警等级--------------------------------------
-		tmpLevel := ruleHistoryMap[v.DictValue] //告警数据
-		if tmpLevel != nil {
-			yc.Level = tmpLevel.Level
-		} else {
-			yc.Level = -1 //-1无告警
-		}
+		//tmpLevel := ruleHistoryMap[v.DictValue] //告警数据
+		//if tmpLevel != nil {
+		//	yc.Level = tmpLevel.Level
+		//} else {
+		//	yc.Level = -1 //-1无告警
+		//}
 
 		//遥测数据--------------------------------------
 		if tmpYcData != nil { //没有数据赋值为空
 			//越线配置--------------------------------------
 			tmpLimit := limitConfigMap[v.DictValue] //越线配置
+			yc.Level = -1
 			if tmpLimit != nil {
+				notifyMini, n1 := strconv.ParseFloat(tmpLimit.NotifyMin, 64)
+				notifyMax, n2 := strconv.ParseFloat(tmpLimit.NotifyMax, 64)
+				secondaryMin, s1 := strconv.ParseFloat(tmpLimit.SecondaryMin, 64)
+				secondaryMax, s2 := strconv.ParseFloat(tmpLimit.SecondaryMax, 64)
+				seriousMin, s3 := strconv.ParseFloat(tmpLimit.SeriousMin, 64)
+				seriousMax, s4 := strconv.ParseFloat(tmpLimit.SeriousMax, 64)
+				urgentMin, u1 := strconv.ParseFloat(tmpLimit.UrgentMin, 64)
+				urgentMax, u2 := strconv.ParseFloat(tmpLimit.UrgentMax, 64)
+				if n1 == nil && n2 == nil && s1 == nil && s2 == nil && s3 == nil && s4 == nil && u1 == nil && u2 == nil {
+					if tmpYcData.Value >= notifyMini && tmpYcData.Value <= notifyMax { //越线判断
+						yc.Level = 0
+					} else if tmpYcData.Value >= secondaryMin && tmpYcData.Value <= secondaryMax {
+						yc.Level = 1
+					} else if tmpYcData.Value >= seriousMin && tmpYcData.Value <= seriousMax {
+						yc.Level = 2
+					} else if tmpYcData.Value >= urgentMin && tmpYcData.Value <= urgentMax {
+						yc.Level = 3
+					} else {
+						yc.Level = -1
+					}
+				}
 				yc.LimitScope = *tmpLimit //配置范围
 			}
 			yc.DeviceId = tmpYcData.DeviceId
@@ -364,8 +387,42 @@ func (c *BmsController) GetBmsDevices(ctx *gin.Context) {
 	}
 }
 
-//获取前一天每小时的放电电量
-func (c *BmsController) GetHourElectricityChartByDeviceIds(ctx *gin.Context) {
+////获取前一天每小时的放电电量
+//func (c *BmsController) GetHourElectricityChartByDeviceIds(ctx *gin.Context) {
+//	type Res struct {
+//		Name string             `json:"name"`
+//		Data []repositories.Res `json:"data"`
+//	}
+//
+//	var queryData query.QueryTaoData
+//	if err := ctx.Bind(&queryData); err != nil {
+//		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+//		return
+//	}
+//	//间隔时间段
+//	intervalStr := "h"
+//	var result []Res
+//	var resC Res
+//	resC.Name = "充电"
+//	//每小时充电电力
+//	tdDataLisC, _ := c.realRepo.GetGenerateElectricityChartByDeviceIds(queryData.DeviceIds, "charge_capacity", intervalStr)
+//	resC.Data = tdDataLisC
+//	var resD Res
+//	resC.Name = "放电"
+//	//每小时充电电力
+//	tdDataLisD, _ := c.realRepo.GetGenerateElectricityChartByDeviceIds(queryData.DeviceIds, "discharge_capacity", intervalStr)
+//	resD.Data = tdDataLisD
+//	result = append(result, resC)
+//	result = append(result, resD)
+//	ctx.JSON(http.StatusOK, model.ResponseData{
+//		"0",
+//		"获取信息成功！",
+//		result,
+//	})
+//}
+
+//获取每天的充放电量数据
+func (c *BmsController) GetDayElectricityChartByDeviceId(ctx *gin.Context) {
 	type Res struct {
 		Name string             `json:"name"`
 		Data []repositories.Res `json:"data"`
@@ -374,6 +431,15 @@ func (c *BmsController) GetHourElectricityChartByDeviceIds(ctx *gin.Context) {
 	var queryData query.QueryTaoData
 	if err := ctx.Bind(&queryData); err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+	//必要条件校验
+	if len(queryData.DeviceIds) == 0 || queryData.StartTime == 0 || queryData.EndTime == 0 || queryData.IntervalType == 0 {
+		ctx.JSON(http.StatusOK, model.ResponseData{
+			"1",
+			"缺少必要参数",
+			"",
+		})
 		return
 	}
 	//间隔时间段
@@ -385,16 +451,28 @@ func (c *BmsController) GetHourElectricityChartByDeviceIds(ctx *gin.Context) {
 	} else if queryData.IntervalType > 3 {
 		intervalStr = "d"
 	}
+	tableName := "charge_discharge"
+	if queryData.IntervalType == 3 {
+		tableName = "charge_discharge_hour"
+	}
 	var result []Res
 	var resC Res
 	resC.Name = "充电"
-	//每小时充电电力
-	tdDataLisC, _ := c.realRepo.GetGenerateElectricityChartByDeviceIds(queryData.DeviceIds, "charge_capacity", intervalStr)
+	//充电
+	tdDataLisC, err := c.realRepo.GetElectricityChartByDeviceIds(queryData.DeviceIds, "charge_capacity", queryData.StartTime, queryData.EndTime, intervalStr, tableName)
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
 	resC.Data = tdDataLisC
 	var resD Res
-	resC.Name = "放电"
-	//每小时充电电力
-	tdDataLisD, _ := c.realRepo.GetGenerateElectricityChartByDeviceIds(queryData.DeviceIds, "discharge_capacity", intervalStr)
+	resD.Name = "放电"
+	//放电
+	tdDataLisD, err := c.realRepo.GetElectricityChartByDeviceIds(queryData.DeviceIds, "discharge_capacity", queryData.StartTime, queryData.EndTime, intervalStr, tableName)
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
 	resD.Data = tdDataLisD
 	result = append(result, resC)
 	result = append(result, resD)
@@ -405,19 +483,31 @@ func (c *BmsController) GetHourElectricityChartByDeviceIds(ctx *gin.Context) {
 	})
 }
 
-////获取每天的充放电量数据
-//func (c *BmsController) GetDayElectricityChartByDeviceIds(ctx *gin.Context) {
+////累计放电电量
+//func (c *BmsController) GetReleaseElectricitySumByDeviceIds(ctx *gin.Context) {
 //	var queryData query.QueryTaoData
 //	if err := ctx.Bind(&queryData); err != nil {
 //		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 //		return
 //	}
 //	//查询设备信息
-//	list, err := c.realRepo.GetDayElectricityChartByDeviceIds(queryData.DeviceIds, queryData.StartTime, queryData.EndTime)
-//	if err != nil {
-//		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+//	list := c.realRepo.GetReleaseElectricitySumByDeviceIds(queryData.DeviceIds)
+//	ctx.JSON(http.StatusOK, model.ResponseData{
+//		"0",
+//		"获取信息成功！",
+//		list,
+//	})
+//}
+//
+////累计充电电量
+//func (c *BmsController) GetGenerateElectricitySumByDeviceIds(ctx *gin.Context) {
+//	var queryData query.QueryTaoData
+//	if err := ctx.Bind(&queryData); err != nil {
+//		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 //		return
 //	}
+//	//查询设备信息
+//	list := c.realRepo.GetGenerateElectricitySumByDeviceIds(queryData.DeviceIds)
 //	ctx.JSON(http.StatusOK, model.ResponseData{
 //		"0",
 //		"获取信息成功！",
@@ -425,34 +515,81 @@ func (c *BmsController) GetHourElectricityChartByDeviceIds(ctx *gin.Context) {
 //	})
 //}
 
-//累计放电电量
-func (c *BmsController) GetReleaseElectricitySumByDeviceIds(ctx *gin.Context) {
+//获取设备状态信息
+func (c *BmsController) GetDevicesStatus(ctx *gin.Context) {
 	var queryData query.QueryTaoData
 	if err := ctx.Bind(&queryData); err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-	//查询设备信息
-	list := c.realRepo.GetReleaseElectricitySumByDeviceIds(queryData.DeviceIds)
-	ctx.JSON(http.StatusOK, model.ResponseData{
-		"0",
-		"获取信息成功！",
-		list,
-	})
-}
-
-//累计充电电量
-func (c *BmsController) GetGenerateElectricitySumByDeviceIds(ctx *gin.Context) {
-	var queryData query.QueryTaoData
-	if err := ctx.Bind(&queryData); err != nil {
-		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+	//必要条件校验
+	if queryData.DeviceId == 0 {
+		ctx.JSON(http.StatusOK, model.ResponseData{
+			"1",
+			"缺少必要参数",
+			"",
+		})
 		return
 	}
-	//查询设备信息
-	list := c.realRepo.GetGenerateElectricitySumByDeviceIds(queryData.DeviceIds)
+	//1.根据code查询设备测点信息
+	dictType := "energy_product_code_setting"     //类型状态
+	dictLabel := "energy_storage_bms_status_code" //状态测点
+	dict, err := c.dictDataRepo.SelectDictValue(dictType, dictLabel)
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	if dict == (models.DictData{}) {
+		ctx.JSON(http.StatusOK, model.ResponseData{
+			"1",
+			"无数据",
+			"",
+		})
+		return
+	}
+	//2.通过测点信息和设备id去获取最新测点值
+	ycData, err := c.hisRepo.GetLastYcListByCode(strconv.Itoa(queryData.DeviceId), dict.DictValue) //查询最新测点值
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	if ycData == nil {
+		ctx.JSON(http.StatusOK, model.ResponseData{
+			"1",
+			"无数据",
+			"",
+		})
+		return
+	}
+	//3.获取设备状态json
+	dictStatus := "bms_run_status" //设备运行状态
+	dictStatusLabel := "bms"       //状态json
+	dictRes, err := c.dictDataRepo.SelectDictValue(dictStatus, dictStatusLabel)
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	//4.解析成map
+	var status map[string]string
+	errJson := json.Unmarshal([]byte(dictRes.DictValue), &status)
+	if errJson != nil {
+		ctx.JSON(http.StatusOK, model.ResponseData{
+			"1",
+			"json解析失败",
+			"",
+		})
+		return
+	}
+	//5.赋值
+	for _, yc := range ycData { //读字典赋值
+		name := status[strconv.Itoa(int(yc.Value))] //不要小数点
+		if name != "" {
+			yc.Name = name
+		}
+	}
 	ctx.JSON(http.StatusOK, model.ResponseData{
 		"0",
 		"获取信息成功！",
-		list,
+		ycData,
 	})
 }

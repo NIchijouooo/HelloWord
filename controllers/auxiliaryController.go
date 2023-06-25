@@ -79,11 +79,11 @@ func (c *AuxiliaryController) GetAuxiliaryDeviceType(ctx *gin.Context) {
 // 获取最新遥测信息GetLastYcListByCode
 // 遥测控制器已经写有
 func (c *AuxiliaryController) GetLastYcByDeviceIdAndCodes(ctx *gin.Context) {
-	type ycQeury struct {
+	type ycQueryData struct {
 		DeviceIds []int `form:"deviceIds"`
 		Codes     []int `form:"codes"`
 	}
-	var ycQuery ycQeury
+	var ycQuery ycQueryData
 	//将传过来的请求体解析到ycQuery中
 	if err := ctx.Bind(&ycQuery); err != nil {
 		ctx.JSON(http.StatusOK, model.ResponseData{
@@ -166,8 +166,10 @@ func (c *AuxiliaryController) GetEmDeviceModelCmdParamListByDeviceId(ctx *gin.Co
 	var codes []string
 	mapCodes := make(map[string]string) //按name进行label分组
 	for i := 0; i < len(deviceCmdParamList); i++ {
-		codes = append(codes, deviceCmdParamList[i].Name)
-		mapCodes[deviceCmdParamList[i].Name] = deviceCmdParamList[i].Label
+		if "yc" == deviceCmdParamList[i].IotDataType { //筛选出遥测测点
+			codes = append(codes, deviceCmdParamList[i].Name)
+			mapCodes[deviceCmdParamList[i].Name] = deviceCmdParamList[i].Label
+		}
 	}
 
 	ycList, err := c.hisRepo.GetLastYcListByCode(strconv.Itoa(tmp.DeviceId), strings.Join(codes, ","))
