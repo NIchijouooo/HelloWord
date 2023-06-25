@@ -148,3 +148,42 @@ func GetFirstDateOfMonth(t time.Time) time.Time {
 func GetLastDateOfMonth(t time.Time) time.Time {
 	return GetFirstDateOfMonth(t).AddDate(0, 1, -1)
 }
+
+// GetLastMonthFirstDate 获取上个月的第一天
+func GetLastMonthFirstDate(t time.Time) time.Time {
+	lastMonth := t.AddDate(0, -1, 0)
+	return time.Date(lastMonth.Year(), lastMonth.Month(), 1, 0, 0, 0, 0, time.UTC)
+}
+
+// GetLastDateOfLastMonth 获取上个月的最后一天
+func GetLastDateOfLastMonth(t time.Time) time.Time {
+	lastMonth := t.AddDate(0, -1, 0)
+	// 获取上个月的下一个月的第一天
+	nextMonthFirstDay := time.Date(lastMonth.Year(), lastMonth.Month()+1, 1, 0, 0, 0, 0, time.UTC)
+	// 上个月的最后一天即为下个月的第一天的前一天
+	return nextMonthFirstDay.AddDate(0, 0, -1)
+}
+
+func GetFirstDateOfYear(t time.Time) time.Time {
+	return time.Date(t.Year(), time.January, 1, 0, 0, 0, 0, time.UTC)
+}
+
+// GetLastDateOfYear 获取今年的最后一天
+func GetLastDateOfYear(t time.Time) time.Time {
+	nextYearFirstDay := time.Date(t.Year()+1, time.January, 1, 0, 0, 0, 0, time.UTC)
+	// 今年的最后一天即为明年的第一天的前一天
+	return nextYearFirstDay.AddDate(0, 0, -1)
+}
+
+// GetFirstDateOfFirstYear 获取去年的第一天
+func GetFirstDateOfFirstYear(t time.Time) time.Time {
+	return time.Date(t.Year()-1, time.January, 1, 0, 0, 0, 0, time.UTC)
+}
+
+// GetLastDateOfLastYear 获取去年的最后一天
+func GetLastDateOfLastYear(t time.Time) time.Time {
+	// 获取今年的第一天
+	thisYearFirstDay := time.Date(t.Year(), time.January, 1, 0, 0, 0, 0, time.UTC)
+	// 去年的最后一天即为今年的第一天的前一天
+	return thisYearFirstDay.AddDate(0, 0, -1)
+}
