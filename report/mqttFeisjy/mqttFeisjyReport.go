@@ -334,7 +334,8 @@ func (r *ReportServiceParamFeisjyTemplate) NodePropertyPost(name []string) {
 				/**
 				20230615实时值更新taos
 				*/
-				NewRealtimeDataRepository().SaveRealtimeDataList(v.Name, v.CollInterfaceName, ycPropertyPostParam)
+				//setting.ZAPS.Infof("设备[%v]时值更新taos", v.Name)
+				//NewRealtimeDataRepository().SaveRealtimeDataList(v.Name, v.CollInterfaceName, ycPropertyPostParam)
 			}
 		}
 	}
