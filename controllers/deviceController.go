@@ -139,6 +139,7 @@ func (c *DeviceController) getDeviceListByType(ctx *gin.Context) {
 func (c *DeviceController) GetDeviceInfo(ctx *gin.Context) {
 	type Param struct {
 		Name  string      `json:"name"`
+		Label string      `json:"label"`
 		Value interface{} `json:"value"`
 	}
 	type Res struct {
@@ -165,12 +166,13 @@ func (c *DeviceController) GetDeviceInfo(ctx *gin.Context) {
 	for _, device := range deviceList {
 		var v Res
 		v.Id = device.Id
-		v.Name = device.Name
-		v.Label = device.Label
+		v.Name = device.Label
+		v.Label = device.Name
 		// 查数据
 		for _, dict := range dictDataList {
 			var p Param
-			p.Name = dict.DictLabel
+			p.Name = dict.DictValue
+			p.Label = dict.DictLabel
 			// 查时序库
 			code, err := strconv.Atoi(dict.DictValue)
 			if err != nil {
@@ -264,7 +266,7 @@ func (c *DeviceController) GetGenerateElectricityChart(ctx *gin.Context) {
 	}
 	var resC Res
 	resC.Name = "充电"
-	tdDataListC, _ := c.repoRealTimeData.GetGenerateElectricityChartByDeviceIds(ids, "charge_capacity", "h")
+	tdDataListC, _ := c.repoRealTimeData.GetGenerateElectricityChartByDeviceIds(ids, "charge_capacity", "d")
 	resC.Data = tdDataListC
 	// 计算充电累计
 	sumC := c.repoRealTimeData.GetGenerateElectricitySumByDeviceIds(ids)
@@ -272,10 +274,10 @@ func (c *DeviceController) GetGenerateElectricityChart(ctx *gin.Context) {
 	result = append(result, resC)
 	var resD Res
 	resD.Name = "放电"
-	tdDataListD, _ := c.repoRealTimeData.GetGenerateElectricityChartByDeviceIds(ids, "discharge_capacity", "h")
+	tdDataListD, _ := c.repoRealTimeData.GetGenerateElectricityChartByDeviceIds(ids, "discharge_capacity", "d")
 	resD.Data = tdDataListD
 	// 计算放电累计
-	sumD := c.repoRealTimeData.GetGenerateElectricitySumByDeviceIds(ids)
+	sumD := c.repoRealTimeData.GetReleaseElectricitySumByDeviceIds(ids)
 	resD.Sum = sumD.Val
 	result = append(result, resD)
 
@@ -347,9 +349,9 @@ func (c *DeviceController) GetProfitChart(ctx *gin.Context) {
 		nameD = "上月"
 	case "year":
 		// 今年第一天
-		startTimeC = utils.GetFirstDateOfWeek(time.Now())
+		startTimeC = utils.GetFirstDateOfMonth(time.Now())
 		// 今年最后一天
-		endTimeC = utils.GetLastDateOfWeek(time.Now())
+		endTimeC = utils.GetLastDateOfMonth(time.Now())
 		// 去年第一天
 		startTimeD = utils.GetLastWeekFirstDate(time.Now())
 		// 去年最后一天

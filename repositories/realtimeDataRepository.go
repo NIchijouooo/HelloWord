@@ -451,7 +451,7 @@ func (r *RealtimeDataRepository) GetLastYcHistoryByDeviceIdListAndCodeList(devic
 }
 
 func (r *RealtimeDataRepository) GetChartByDeviceIdAndCode(deviceId int, code string) ([]Res, error) {
-	sql := fmt.Sprint("SELECT _WSTART AS ts,LAST(VAL) AS val FROM yc_100_66 WHERE ts>= NOW-2d and ts<=NOW+1d INTERVAL(1h) FILL(VALUE,0)")
+	sql := fmt.Sprintf("SELECT _WSTART AS ts,LAST(VAL) AS val FROM yc_%d_%s WHERE ts>= NOW-1d and ts<=NOW INTERVAL(1h) FILL(VALUE,0)", deviceId, code)
 	rows, err := r.taosDb.Query(sql)
 	if err != nil {
 		return nil, err
@@ -471,7 +471,7 @@ func (r *RealtimeDataRepository) GetChartByDeviceIdAndCode(deviceId int, code st
 // GetGenerateElectricityChartByDeviceIds 获取前一天每小时的充电电量
 func (r *RealtimeDataRepository) GetGenerateElectricityChartByDeviceIds(deviceIds []int, fieldName string, intervalType string) ([]Res, error) {
 	ids := utils.IntArrayToString(deviceIds, ",")
-	sql := fmt.Sprintf("SELECT _WSTART AS ts,SUM(%v) AS charge_capacity FROM charge_discharge_hour WHERE device_id IN (%s) AND ts>= NOW-1d and ts<=NOW INTERVAL(1%s) FILL(VALUE,0);", ids, fieldName, intervalType)
+	sql := fmt.Sprintf("SELECT _WSTART AS ts,SUM(%v) AS %v FROM charge_discharge WHERE device_id IN (%s) AND ts>= NOW-7d and ts<=NOW INTERVAL(1%s) FILL(VALUE,0);", fieldName, fieldName, ids, intervalType)
 	rows, err := r.taosDb.Query(sql)
 	if err != nil {
 		return nil, err
