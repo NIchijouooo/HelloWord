@@ -24,7 +24,7 @@ func (r *RuleHistoryRepository) GetLastRuleHistory(ruleId int, deviceId int) (*m
 	return emRuleHistoryModel, nil
 }
 
-// updateRuleHistoryTag 修改告警恢复
+// UpdateRuleHistoryTag 修改告警恢复
 func (r *RuleHistoryRepository) UpdateRuleHistoryTag(emRuleHistoryModel *models.EmRuleHistoryModel) (int, error) {
 	if err := r.db.Save(emRuleHistoryModel).Error; err != nil {
 		return 0, err
@@ -40,7 +40,7 @@ func (r *RuleHistoryRepository) InsertRuleHistory(emRuleHistoryModel *models.EmR
 	return 1, nil
 }
 
-// InsertRuleHistory 新增关联设备
+// InsertRuleHistoryDevice 新增关联设备
 func (r *RuleHistoryRepository) InsertRuleHistoryDevice(emRuleHistoryDeviceModelList *[]models.EmRuleHistoryDeviceModel) (int, error) {
 	if err := r.db.Create(emRuleHistoryDeviceModelList).Error; err != nil {
 		return 0, err
