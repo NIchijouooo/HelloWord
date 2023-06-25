@@ -553,3 +553,23 @@ func (r *RealtimeDataRepository) GetProfitSumByDeviceIds(deviceIds []int, startT
 	}
 	return res
 }
+
+// GetGenerateElectricityChartByDeviceIds 获取充放电量信息
+func (r *RealtimeDataRepository) GetElectricityChartByDeviceIds(deviceIds []int, fieldName string, startTime, endTime int64, intervalType string, tableName string) ([]Res, error) {
+	ids := utils.IntArrayToString(deviceIds, ",")
+	sql := fmt.Sprintf("SELECT _WSTART AS ts,SUM(%[2]v) AS %[2]v FROM %[6]v WHERE device_id IN (%[1]s) AND ts>=%[3]d and ts<=%[4]d INTERVAL(1%[5]s) FILL(VALUE,0);", ids, fieldName, startTime, endTime, intervalType, tableName)
+	rows, err := r.taosDb.Query(sql)
+	if err != nil {
+		return nil, err
+	}
+	var list []Res
+	for rows.Next() {
+		yc := Res{}
+		err := rows.Scan(&yc.Ts, &yc.Val)
+		if err != nil {
+			return nil, err
+		}
+		list = append(list, yc)
+	}
+	return list, err
+}
