@@ -522,10 +522,10 @@ func (r *RealtimeDataRepository) GetReleaseElectricitySumByDeviceIds(deviceIds [
 	return res
 }
 
-// GetGenerateElectricitySumByDeviceIds 统计累计每日收益信息
-func (r *RealtimeDataRepository) GetProfitChartByDeviceIds(deviceIds []int, startTime int64, endTime int64) ([]Res, error) {
+// GetProfitChartByDeviceIds 统计累计每日收益信息
+func (r *RealtimeDataRepository) GetProfitChartByDeviceIds(deviceIds []int, startTime int64, endTime int64, interval string) ([]Res, error) {
 	ids := utils.IntArrayToString(deviceIds, ",")
-	sql := fmt.Sprintf("SELECT _WSTART AS ts,SUM(profit) AS profit FROM charge_discharge WHERE device_id IN (%s) AND ts>= %v and ts<=%v INTERVAL(1d) FILL(VALUE,0)", ids, startTime, endTime)
+	sql := fmt.Sprintf("SELECT _WSTART AS ts,SUM(profit) AS profit FROM charge_discharge WHERE device_id IN (%s) AND ts>= %v and ts<=%v INTERVAL(%s) FILL(VALUE,0)", ids, startTime, endTime, interval)
 	rows, err := r.taosDb.Query(sql)
 	if err != nil {
 		return nil, err

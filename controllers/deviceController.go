@@ -303,6 +303,7 @@ func (c *DeviceController) GetProfitChart(ctx *gin.Context) {
 	var param Param
 	var result []Res
 	var ids []int
+	interval := "1d"
 
 	var startTimeC time.Time
 	var endTimeC time.Time
@@ -342,28 +343,29 @@ func (c *DeviceController) GetProfitChart(ctx *gin.Context) {
 		// 本月最后一天
 		endTimeC = utils.GetLastDateOfMonth(time.Now())
 		// 上月第一天
-		startTimeD = utils.GetLastWeekFirstDate(time.Now())
-		// 上周最后一天
-		endTimeD = utils.GetLastDateOfWeek(startTimeD)
+		startTimeD = utils.GetLastMonthFirstDate(time.Now())
+		// 上月最后一天
+		endTimeD = utils.GetLastDateOfLastMonth(time.Now())
 		nameC = "本月"
 		nameD = "上月"
 	case "year":
 		// 今年第一天
-		startTimeC = utils.GetFirstDateOfMonth(time.Now())
+		startTimeC = utils.GetFirstDateOfYear(time.Now())
 		// 今年最后一天
-		endTimeC = utils.GetLastDateOfMonth(time.Now())
+		endTimeC = utils.GetLastDateOfYear(time.Now())
 		// 去年第一天
-		startTimeD = utils.GetLastWeekFirstDate(time.Now())
+		startTimeD = utils.GetFirstDateOfFirstYear(time.Now())
 		// 去年最后一天
-		endTimeD = utils.GetLastDateOfWeek(startTimeD)
+		endTimeD = utils.GetLastDateOfLastYear(time.Now())
 		nameC = "今年"
 		nameD = "去年"
+		interval = "1n"
 	default:
 
 	}
 	var resC Res
 	resC.Name = nameC
-	tdDataListC, _ := c.repoRealTimeData.GetProfitChartByDeviceIds(ids, startTimeC.UnixMilli(), endTimeC.UnixMilli())
+	tdDataListC, _ := c.repoRealTimeData.GetProfitChartByDeviceIds(ids, startTimeC.UnixMilli(), endTimeC.UnixMilli(), interval)
 	resC.Data = tdDataListC
 	// 计算本周收益累计
 	sumC := c.repoRealTimeData.GetProfitSumByDeviceIds(ids, startTimeC.UnixMilli(), endTimeC.UnixMilli())
@@ -371,7 +373,7 @@ func (c *DeviceController) GetProfitChart(ctx *gin.Context) {
 	result = append(result, resC)
 	var resD Res
 	resD.Name = nameD
-	tdDataListD, _ := c.repoRealTimeData.GetProfitChartByDeviceIds(ids, startTimeD.UnixMilli(), endTimeD.UnixMilli())
+	tdDataListD, _ := c.repoRealTimeData.GetProfitChartByDeviceIds(ids, startTimeD.UnixMilli(), endTimeD.UnixMilli(), interval)
 	resD.Data = tdDataListD
 	// 计算下周累计
 	sumD := c.repoRealTimeData.GetProfitSumByDeviceIds(ids, startTimeD.UnixMilli(), endTimeD.UnixMilli())
