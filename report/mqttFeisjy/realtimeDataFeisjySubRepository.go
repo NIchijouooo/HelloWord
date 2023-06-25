@@ -72,7 +72,6 @@ func (r *ReportServiceParamFeisjyTemplate) ProcessCollRealtimeData(ctx context.C
 					if collParam.CollInterfaceName == subMsg.CollName {
 						node := collParam.DeviceNodeMap[subMsg.NodeName]
 						if node != nil {
-							setting.ZAPS.Debugf("ProcessCollRealtimeData start......[%v]", subMsg)
 							//去sqlite查数据判断设备在该上报服务中
 							//var result, err = repositories.NewDeviceRepository().GetDeviceListByCollAndName(subMsg.CollName, subMsg.NodeName)
 							//if result.Id <= 0{
@@ -109,7 +108,6 @@ func (r *ReportServiceParamFeisjyTemplate) ProcessCollRealtimeData(ctx context.C
 }
 
 func (r *ReportServiceParamFeisjyTemplate) ProcessTaosRealtimeData(devProperties *device.DeviceNodeTemplate, collName string, nodeName string) {
-	setting.ZAPS.Infof("ProcessTaosRealtimeData start......[%v]", device.CollectInterfaceMap)
 
 	//1、查找到对应的设备
 	coll, ok := device.CollectInterfaceMap.Coll[collName]
@@ -140,6 +138,7 @@ func (r *ReportServiceParamFeisjyTemplate) ProcessTaosRealtimeData(devProperties
 			case device.PropertyTypeInt32:
 				{
 					if num, err := strconv.Atoi(v.Name); err == nil {
+
 						ycProperty := MQTTFeisjyReportDataTemplate{
 							ID:    num,
 							Value: v.Value[valueCnt-1].Value.(int32),
@@ -151,6 +150,7 @@ func (r *ReportServiceParamFeisjyTemplate) ProcessTaosRealtimeData(devProperties
 			case device.PropertyTypeUInt32:
 				{
 					if num, err := strconv.Atoi(v.Name); err == nil {
+
 						ycProperty := MQTTFeisjyReportDataTemplate{
 							ID:    num,
 							Value: v.Value[valueCnt-1].Value.(uint32),
@@ -162,6 +162,7 @@ func (r *ReportServiceParamFeisjyTemplate) ProcessTaosRealtimeData(devProperties
 			case device.PropertyTypeDouble:
 				{
 					if num, err := strconv.Atoi(v.Name); err == nil {
+
 						ycProperty := MQTTFeisjyReportDataTemplate{
 							ID:    num,
 							Value: v.Value[valueCnt-1].Value.(float64),
@@ -181,3 +182,4 @@ func (r *ReportServiceParamFeisjyTemplate) ProcessTaosRealtimeData(devProperties
 	NewRealtimeDataRepository().SaveRealtimeDataList(nodeName, collName, ycPropertyPostParam)
 
 }
+
