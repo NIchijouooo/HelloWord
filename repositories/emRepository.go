@@ -232,7 +232,7 @@ func (r *EmRepository) GetEmDeviceModelCmdParamListByName(name string) ([]models
 func (r *EmRepository) GetEmDeviceModelCmdParamListByDeviceId(deviceId int) ([]models.EmDeviceModelCmdParam, error) {
 	var emDeviceModelCmdParamList []models.EmDeviceModelCmdParam
 	if err := r.db.Table("em_device_model_cmd_param as param").
-		Select("param.id, param.device_model_cmd_id, param.name, param.label,param.data").
+		Select("param.id, param.device_model_cmd_id, param.name, param.label,param.data,param.iot_data_type").
 		Joins("left join em_device_model_cmd as cmd on param.device_model_cmd_id = cmd.id").
 		Joins("left join em_device_model as model on cmd.device_model_id = model.id").
 		Joins("left join em_device as device on device.model_id = model.id").
@@ -252,6 +252,22 @@ func (r *EmRepository) GetEmDeviceModelCmdParamListByDeviceIdCodes(deviceId int,
 		Joins("left join em_device_model as model on cmd.device_model_id = model.id").
 		Joins("left join em_device as device on device.model_id = model.id").
 		Where("device.id=? and param.name in ("+codeString+")", deviceId).Scan(&emDeviceModelCmdParamList).Error; err != nil {
+		return nil, err
+	}
+	return emDeviceModelCmdParamList, nil
+}
+func (r *EmRepository) GetYcListByDeviceId(deviceId int, iotDataType []string) ([]models.EmDeviceModelCmdParam, error) {
+	var emDeviceModelCmdParamList []models.EmDeviceModelCmdParam
+	query := r.db.Table("em_device_model_cmd_param as param").
+		Select("param.id, param.device_model_cmd_id, param.name, param.label,param.data,param.iot_data_type").
+		Joins("left join em_device_model_cmd as cmd on param.device_model_cmd_id = cmd.id").
+		Joins("left join em_device_model as model on cmd.device_model_id = model.id").
+		Joins("left join em_device as device on device.model_id = model.id").
+		Where("device.id=?", deviceId)
+	if iotDataType != nil {
+		query.Where("param.iot_data_type in (?)", iotDataType)
+	}
+	if err := query.Select("param.id, param.device_model_cmd_id, param.name, param.label,param.data,param.iot_data_type").Scan(&emDeviceModelCmdParamList).Error; err != nil {
 		return nil, err
 	}
 	return emDeviceModelCmdParamList, nil
