@@ -37,16 +37,12 @@ func NewBmsController() *BmsController {
 }
 func (ctrl *BmsController) RegisterRoutes(router *gin.RouterGroup) {
 	router.POST("/api/v2/bms/getDeviceTreeByDeviceType", ctrl.GetDeviceTreeByDeviceType)
-	router.POST("/api/v2/bms/getYcLastByDeviceIdAndDict", ctrl.GetYcLastByDeviceIdAndDict)
 	router.POST("/api/v2/bms/getYcLogById", ctrl.GetYcLogById)
 	router.POST("/api/v2/bms/getHistoryYcByDeviceIdCodes", ctrl.GetHistoryYcByDeviceIdCodes)
 	router.POST("/api/v2/bms/getBmsYcMaxAndMinListByDeviceIdCodes", ctrl.GetBmsYcMaxAndMinListByDeviceIdCodes)
 	router.POST("/api/v2/bms/getBmsDevices", ctrl.GetBmsDevices)
-	//router.POST("/api/v2/bms/getHourElectricityChartByDeviceIds", ctrl.GetHourElectricityChartByDeviceIds)
 	router.POST("/api/v2/bms/getDayElectricityChartByDeviceId", ctrl.GetDayElectricityChartByDeviceId) //获取日电量曲线
-	//router.POST("/api/v2/bms/getReleaseElectricitySumByDeviceIds", ctrl.GetReleaseElectricitySumByDeviceIds)   //累计可放电电量
-	//router.POST("/api/v2/bms/getGenerateElectricitySumByDeviceIds", ctrl.GetGenerateElectricitySumByDeviceIds) //累计可充电电量
-	router.POST("/api/v2/bms/getDevicesStatus", ctrl.GetDevicesStatus) //获取日电量曲线
+	router.POST("/api/v2/bms/getDevicesStatus", ctrl.GetDevicesStatus)                                 //获取日电量曲线
 
 }
 
@@ -91,27 +87,6 @@ func (c *BmsController) GetDeviceTreeByDeviceType(ctx *gin.Context) {
 		Data:    rootNodes,
 	})
 	return
-}
-
-// GetYcLastByDeviceIdAndDict 获取设备点位最新的一条非空数据
-func (c *BmsController) GetYcLastByDeviceIdAndDict(ctx *gin.Context) {
-	//1.根据设备id去查询字典
-	//2.将查询出来的所有code拼接成字符串
-	deviceId := ctx.Value("deviceId")
-	//codes := ctx.Value("codes")
-	print(deviceId)
-	//codes := "2005,2002"
-	//3.然后查询涛思数据库
-	//ycList, err := c.hisRepo.GetLastYcListByCode(codes)
-	//if err != nil {
-	//	ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-	//	return
-	//}
-	//ctx.JSON(http.StatusOK, model.ResponseData{
-	//	"0",
-	//	"获取信息成功！",
-	//	ycList,
-	//})
 }
 
 // GetYcLogById 批量获取遥信息GetYcLogById,用于·历史数据
@@ -387,6 +362,7 @@ func (c *BmsController) GetBmsDevices(ctx *gin.Context) {
 	}
 }
 
+<<<<<<< HEAD
 ////获取前一天每小时的放电电量
 //func (c *BmsController) GetHourElectricityChartByDeviceIds(ctx *gin.Context) {
 //	type Res struct {
@@ -421,6 +397,8 @@ func (c *BmsController) GetBmsDevices(ctx *gin.Context) {
 //	})
 //}
 
+=======
+>>>>>>> 218daa0ba07cad9d46ee108bfab2814a2e88b3e3
 //获取每天的充放电量数据
 func (c *BmsController) GetDayElectricityChartByDeviceId(ctx *gin.Context) {
 	type Res struct {
@@ -483,6 +461,7 @@ func (c *BmsController) GetDayElectricityChartByDeviceId(ctx *gin.Context) {
 	})
 }
 
+<<<<<<< HEAD
 ////累计放电电量
 //func (c *BmsController) GetReleaseElectricitySumByDeviceIds(ctx *gin.Context) {
 //	var queryData query.QueryTaoData
@@ -515,6 +494,8 @@ func (c *BmsController) GetDayElectricityChartByDeviceId(ctx *gin.Context) {
 //	})
 //}
 
+=======
+>>>>>>> 218daa0ba07cad9d46ee108bfab2814a2e88b3e3
 //获取设备状态信息
 func (c *BmsController) GetDevicesStatus(ctx *gin.Context) {
 	var queryData query.QueryTaoData
@@ -545,6 +526,7 @@ func (c *BmsController) GetDevicesStatus(ctx *gin.Context) {
 			"无数据",
 			"",
 		})
+<<<<<<< HEAD
 		return
 	}
 	//2.通过测点信息和设备id去获取最新测点值
@@ -553,6 +535,16 @@ func (c *BmsController) GetDevicesStatus(ctx *gin.Context) {
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
+=======
+		return
+	}
+	//2.通过测点信息和设备id去获取最新测点值
+	ycData, err := c.hisRepo.GetLastYcListByCode(strconv.Itoa(queryData.DeviceId), dict.DictValue) //查询最新测点值
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+>>>>>>> 218daa0ba07cad9d46ee108bfab2814a2e88b3e3
 	if ycData == nil {
 		ctx.JSON(http.StatusOK, model.ResponseData{
 			"1",
