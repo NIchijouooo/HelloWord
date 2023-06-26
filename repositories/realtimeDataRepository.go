@@ -460,8 +460,8 @@ func (r *RealtimeDataRepository) GetLastYcHistoryByDeviceIdListAndCodeList(devic
 	return realtimeData, err
 }
 
-func (r *RealtimeDataRepository) GetChartByDeviceIdAndCode(deviceId int, code string) ([]Res, error) {
-	sql := fmt.Sprintf("SELECT _WSTART AS ts,LAST(VAL) AS val FROM yc_%d_%s WHERE ts>= NOW-1d and ts<=NOW INTERVAL(1h) FILL(VALUE,0)", deviceId, code)
+func (r *RealtimeDataRepository) GetChartByDeviceIdAndCode(deviceId int, code string, startTime int64, endTime int64) ([]Res, error) {
+	sql := fmt.Sprintf("SELECT _WSTART AS ts,LAST(VAL) AS val FROM yc_%d_%s WHERE ts>= %v and ts<=%v INTERVAL(1h) FILL(VALUE,0)", deviceId, code, startTime, endTime)
 	rows, err := r.taosDb.Query(sql)
 	if err != nil {
 		return nil, err
