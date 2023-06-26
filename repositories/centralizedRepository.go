@@ -1,19 +1,21 @@
 package repositories
 
 import (
+	"database/sql"
 	"encoding/json"
 	"fmt"
 	"gateway/models"
-
 	"gorm.io/gorm"
+	"log"
 )
 
 type CentralizedRepository struct {
-	db *gorm.DB
+	db     *gorm.DB
+	taosDb *sql.DB
 }
 
 func NewCentralizedRepository() *CentralizedRepository {
-	return &CentralizedRepository{db: models.DB}
+	return &CentralizedRepository{db: models.DB, taosDb: models.TaosDB}
 }
 
 // 获取策略数据
@@ -48,12 +50,14 @@ func (r *CentralizedRepository) DeletePolicy2(Id int) error {
 }
 
 type YkYcList struct {
-	Id          int    `json:"id" gorm:"primary_key"`
-	DeviceName  string `json:"deviceName"`
-	ParamName   string `json:"paramName"`
-	IotDataType string `json:"iotDataType"`
-	Data        string `json:"data"`
-	Unit        string `json:"unit"`
+	Id          int         `json:"id" gorm:"primary_key"`
+	DeviceName  string      `json:"deviceName"`
+	DeviceId    int         `json:"deviceId"`
+	ParamName   string      `json:"paramName"`
+	IotDataType string      `json:"iotDataType"`
+	Data        string      `json:"data"`
+	Unit        string      `json:"unit"`
+	Value       interface{} `json:"value"`
 }
 type YkYcData struct {
 	Yx []YkYcList `json:"yx"`
@@ -64,7 +68,7 @@ type YkYcData struct {
 func (r *CentralizedRepository) GetDeviceYkYtList() (YkYcData, error) {
 	var ykYtList []YkYcList
 	err := r.db.Table("em_device_model_cmd_param as param").
-		Select("param.id as id, param.name as param_name, param.data, param.iot_data_type, device.name as device_name").
+		Select("param.id as id, param.name as param_name, param.data, param.iot_data_type, device.name as device_name, device.id as device_id").
 		Joins("LEFT JOIN em_device_model_cmd as cmd on param.device_model_cmd_id = cmd.id").
 		Joins("LEFT JOIN em_device as device on cmd.device_model_id = device.model_id").
 		Where("(iot_data_type = 'yc' or iot_data_type = 'yx') and device_name not NULL").
@@ -77,10 +81,8 @@ func (r *CentralizedRepository) GetDeviceYkYtList() (YkYcData, error) {
 	type DeviceModel struct {
 		AccessMode int `json:"accessMode"`
 	}
-
 	for _, item := range ykYtList {
 		var deviceModel DeviceModel
-
 		err := json.Unmarshal([]byte(item.Data), &deviceModel)
 		if err != nil {
 			fmt.Println("解析 JSON 失败:", err)
@@ -88,8 +90,32 @@ func (r *CentralizedRepository) GetDeviceYkYtList() (YkYcData, error) {
 		}
 
 		if item.IotDataType == "yx" && deviceModel.AccessMode != 0 {
+			var realtime models.YxData
+			sql := fmt.Sprintf("select Last(ts), val, device_id, code from realtimedata.yx where device_id = %v and code =%s", item.DeviceId, item.ParamName)
+			rows, _ := r.taosDb.Query(sql)
+			defer rows.Close()
+
+			for rows.Next() {
+				err := rows.Scan(&realtime.Ts, &realtime.Value, &realtime.DeviceId, &realtime.Code)
+				if err != nil {
+					log.Printf("Request params:%v", err)
+				}
+			}
+			item.Value = realtime.Value
 			result.Yx = append(result.Yx, item)
 		} else if item.IotDataType == "yc" && deviceModel.AccessMode != 0 {
+			var realtime models.YcData
+			sql := fmt.Sprintf("select Last(ts), val, device_id, code from realtimedata.yc where device_id = %v and code =%s", item.DeviceId, item.ParamName)
+			rows, _ := r.taosDb.Query(sql)
+			defer rows.Close()
+
+			for rows.Next() {
+				err := rows.Scan(&realtime.Ts, &realtime.Value, &realtime.DeviceId, &realtime.Code)
+				if err != nil {
+					log.Printf("Request params:%v", err)
+				}
+			}
+			item.Value = realtime.Value
 			result.Yc = append(result.Yc, item)
 		}
 	}
