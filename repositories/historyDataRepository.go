@@ -185,7 +185,6 @@ func (r *HistoryDataRepository) GetSettingLogByDeviceIdsCodes(deviceIds, codes, 
 func (r *HistoryDataRepository) GetLastYcListByCode(deviceIds, codes string) ([]*models.YcData, error) {
 	var realtimeList []*models.YcData
 	tableName := "realtimedata.yc"
-	//
 	sql := fmt.Sprintf("SELECT last(ts),val,device_id,name,code FROM %s  where device_id in (%s) and  code in (%s) group by device_id,code", tableName, deviceIds, codes)
 	rows, err := r.taosDb.Query(sql)
 	if err != nil {

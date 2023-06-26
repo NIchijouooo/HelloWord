@@ -256,7 +256,7 @@ func (r *EmRepository) GetEmDeviceModelCmdParamListByDeviceIdCodes(deviceId int,
 	}
 	return emDeviceModelCmdParamList, nil
 }
-func (r *EmRepository) GetYcListByDeviceId(deviceId int, iotDataType []string) ([]models.EmDeviceModelCmdParam, error) {
+func (r *EmRepository) GetCodesListByDeviceIdAndYxYc(deviceId int, iotDataType []string, like string) ([]models.EmDeviceModelCmdParam, error) {
 	var emDeviceModelCmdParamList []models.EmDeviceModelCmdParam
 	query := r.db.Table("em_device_model_cmd_param as param").
 		Joins("left join em_device_model_cmd as cmd on param.device_model_cmd_id = cmd.id").
@@ -265,6 +265,9 @@ func (r *EmRepository) GetYcListByDeviceId(deviceId int, iotDataType []string) (
 		Where("device.id=?", deviceId)
 	if iotDataType != nil {
 		query.Where("param.iot_data_type in (?)", iotDataType)
+	}
+	if like != "" && len(like) > 0 {
+		query.Where(like)
 	}
 	if err := query.Select("param.id, param.device_model_cmd_id, param.name, param.label,param.data,param.iot_data_type,param.unit").Scan(&emDeviceModelCmdParamList).Error; err != nil {
 		return nil, err
