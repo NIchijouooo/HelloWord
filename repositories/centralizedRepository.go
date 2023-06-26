@@ -122,3 +122,13 @@ func (r *CentralizedRepository) GetDeviceYkYtList() (YkYcData, error) {
 
 	return result, err
 }
+
+/*
+*
+查询正在运行的策略列表
+*/
+func (r *CentralizedRepository) GetRunStrategyList() ([]models.EmStrategy, error) {
+	var policyList []models.EmStrategy
+	err := r.db.Find(&policyList).Where("del_flag = 0").Where("status = 1").Error
+	return policyList, err
+}

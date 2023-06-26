@@ -10,6 +10,9 @@ import (
 	"gateway/models"
 	"gateway/report"
 	"gateway/rule"
+	"gateway/service/job"
+	"github.com/robfig/cron/v3"
+
 	//"gateway/service/job"
 	"gateway/setting"
 	"gateway/utils"
@@ -71,6 +74,14 @@ func main() {
 	// 启动充放电量定时任务
 	setting.ZAPS.Debug("注册充放电量定时任务到 GoCron")
 	//_ = scheduler.Every(1).Hour().Do(job.StatisticsDayChargingAndDischarging)
+	// 定时半小时一次下发策略配置
+	cronProcess := cron.New(cron.WithSeconds())
+	_, err := cronProcess.AddFunc("0 0/30 * * * ?", job.ExecutionStrategy)
+	if err != nil {
+		setting.ZAPS.Error("启动定时下发策略配置失败", err)
+	} else {
+		cronProcess.Start()
+	}
 
 	// 每天0：0重启系统
 	//_ = scheduler.Every(1).Day().At("0:0").Do(setting.SystemReboot)
