@@ -43,7 +43,7 @@ func (ctrl *BmsController) RegisterRoutes(router *gin.RouterGroup) {
 	router.POST("/api/v2/bms/getBmsYcMaxAndMinListByDeviceIdCodes", ctrl.GetBmsYcMaxAndMinListByDeviceIdCodes)
 	router.POST("/api/v2/bms/getBmsDevices", ctrl.GetBmsDevices)
 	router.POST("/api/v2/bms/getDayElectricityChartByDeviceId", ctrl.GetDayElectricityChartByDeviceId) //获取日电量曲线
-	router.POST("/api/v2/bms/getDevicesStatus", ctrl.GetDevicesStatus)                                 //获取日电量曲线
+	router.POST("/api/v2/bms/getDevicesStatus", ctrl.GetDevicesStatus)                                 //获取设备状态
 
 }
 
@@ -157,6 +157,14 @@ func (c *BmsController) GetBmsYcMaxAndMinListByDeviceIdCodes(ctx *gin.Context) {
 		ctx.JSON(http.StatusOK, model.ResponseData{
 			"1",
 			"error" + err.Error(),
+			"",
+		})
+		return
+	}
+	if ycData.DeviceId == 0 {
+		ctx.JSON(http.StatusOK, model.ResponseData{
+			"1",
+			"缺少设备Id",
 			"",
 		})
 		return
