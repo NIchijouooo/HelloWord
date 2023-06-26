@@ -139,6 +139,7 @@ func (c *DeviceController) getDeviceListByType(ctx *gin.Context) {
 func (c *DeviceController) GetDeviceInfo(ctx *gin.Context) {
 	type Param struct {
 		Name  string      `json:"name"`
+		Label string      `json:"label"`
 		Value interface{} `json:"value"`
 	}
 	type Res struct {
@@ -165,12 +166,13 @@ func (c *DeviceController) GetDeviceInfo(ctx *gin.Context) {
 	for _, device := range deviceList {
 		var v Res
 		v.Id = device.Id
-		v.Name = device.Name
-		v.Label = device.Label
+		v.Name = device.Label
+		v.Label = device.Name
 		// 查数据
 		for _, dict := range dictDataList {
 			var p Param
-			p.Name = dict.DictLabel
+			p.Name = dict.DictValue
+			p.Label = dict.DictLabel
 			// 查时序库
 			code, err := strconv.Atoi(dict.DictValue)
 			if err != nil {
@@ -264,7 +266,7 @@ func (c *DeviceController) GetGenerateElectricityChart(ctx *gin.Context) {
 	}
 	var resC Res
 	resC.Name = "充电"
-	tdDataListC, _ := c.repoRealTimeData.GetGenerateElectricityChartByDeviceIds(ids, "charge_capacity", "h")
+	tdDataListC, _ := c.repoRealTimeData.GetGenerateElectricityChartByDeviceIds(ids, "charge_capacity", "d")
 	resC.Data = tdDataListC
 	// 计算充电累计
 	sumC := c.repoRealTimeData.GetGenerateElectricitySumByDeviceIds(ids)
@@ -272,10 +274,10 @@ func (c *DeviceController) GetGenerateElectricityChart(ctx *gin.Context) {
 	result = append(result, resC)
 	var resD Res
 	resD.Name = "放电"
-	tdDataListD, _ := c.repoRealTimeData.GetGenerateElectricityChartByDeviceIds(ids, "discharge_capacity", "h")
+	tdDataListD, _ := c.repoRealTimeData.GetGenerateElectricityChartByDeviceIds(ids, "discharge_capacity", "d")
 	resD.Data = tdDataListD
 	// 计算放电累计
-	sumD := c.repoRealTimeData.GetGenerateElectricitySumByDeviceIds(ids)
+	sumD := c.repoRealTimeData.GetReleaseElectricitySumByDeviceIds(ids)
 	resD.Sum = sumD.Val
 	result = append(result, resD)
 
@@ -301,6 +303,7 @@ func (c *DeviceController) GetProfitChart(ctx *gin.Context) {
 	var param Param
 	var result []Res
 	var ids []int
+	interval := "1d"
 
 	var startTimeC time.Time
 	var endTimeC time.Time
@@ -340,28 +343,29 @@ func (c *DeviceController) GetProfitChart(ctx *gin.Context) {
 		// 本月最后一天
 		endTimeC = utils.GetLastDateOfMonth(time.Now())
 		// 上月第一天
-		startTimeD = utils.GetLastWeekFirstDate(time.Now())
-		// 上周最后一天
-		endTimeD = utils.GetLastDateOfWeek(startTimeD)
+		startTimeD = utils.GetLastMonthFirstDate(time.Now())
+		// 上月最后一天
+		endTimeD = utils.GetLastDateOfLastMonth(time.Now())
 		nameC = "本月"
 		nameD = "上月"
 	case "year":
 		// 今年第一天
-		startTimeC = utils.GetFirstDateOfWeek(time.Now())
+		startTimeC = utils.GetFirstDateOfYear(time.Now())
 		// 今年最后一天
-		endTimeC = utils.GetLastDateOfWeek(time.Now())
+		endTimeC = utils.GetLastDateOfYear(time.Now())
 		// 去年第一天
-		startTimeD = utils.GetLastWeekFirstDate(time.Now())
+		startTimeD = utils.GetFirstDateOfFirstYear(time.Now())
 		// 去年最后一天
-		endTimeD = utils.GetLastDateOfWeek(startTimeD)
+		endTimeD = utils.GetLastDateOfLastYear(time.Now())
 		nameC = "今年"
 		nameD = "去年"
+		interval = "1n"
 	default:
 
 	}
 	var resC Res
 	resC.Name = nameC
-	tdDataListC, _ := c.repoRealTimeData.GetProfitChartByDeviceIds(ids, startTimeC.UnixMilli(), endTimeC.UnixMilli())
+	tdDataListC, _ := c.repoRealTimeData.GetProfitChartByDeviceIds(ids, startTimeC.UnixMilli(), endTimeC.UnixMilli(), interval)
 	resC.Data = tdDataListC
 	// 计算本周收益累计
 	sumC := c.repoRealTimeData.GetProfitSumByDeviceIds(ids, startTimeC.UnixMilli(), endTimeC.UnixMilli())
@@ -369,7 +373,7 @@ func (c *DeviceController) GetProfitChart(ctx *gin.Context) {
 	result = append(result, resC)
 	var resD Res
 	resD.Name = nameD
-	tdDataListD, _ := c.repoRealTimeData.GetProfitChartByDeviceIds(ids, startTimeD.UnixMilli(), endTimeD.UnixMilli())
+	tdDataListD, _ := c.repoRealTimeData.GetProfitChartByDeviceIds(ids, startTimeD.UnixMilli(), endTimeD.UnixMilli(), interval)
 	resD.Data = tdDataListD
 	// 计算下周累计
 	sumD := c.repoRealTimeData.GetProfitSumByDeviceIds(ids, startTimeD.UnixMilli(), endTimeD.UnixMilli())

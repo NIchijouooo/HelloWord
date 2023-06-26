@@ -104,8 +104,12 @@ func RouterWeb(port string) {
 		ruleHistoryController.RegisterRoutes(&router.RouterGroup)
 
 		// 越限配置
-		ruleController := controllers.NewLimitConfigController()
-		ruleController.RegisterRoutes(&router.RouterGroup)
+		limitConfigController := controllers.NewLimitConfigController()
+		limitConfigController.RegisterRoutes(&router.RouterGroup)
+
+		// 组态配置
+		webHmiPageController := controllers.NewWebHmiPageController()
+		webHmiPageController.RegisterRoutes(&router.RouterGroup)
 
 		accountRouter := router.Group("/api/v2/account")
 		{
