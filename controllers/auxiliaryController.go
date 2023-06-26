@@ -3,6 +3,7 @@ package controllers
 import (
 	"gateway/httpServer/model"
 	"gateway/models"
+	"gateway/models/ReturnModel"
 	"gateway/models/query"
 	repositories "gateway/repositories"
 	"gateway/utils"
@@ -204,8 +205,8 @@ func (c *AuxiliaryController) GetEmDeviceModelCmdParamListByDeviceId(ctx *gin.Co
 // 获取实时控制遥控遥调列表
 func (c *AuxiliaryController) GetDeviceControlPointList(ctx *gin.Context) {
 	type Res struct {
-		YcData []*models.YcData `json:"ycData"`
-		YxData []*models.YxData `json:"yxData"`
+		YcData []ReturnModel.AuxYcData `json:"ycData"`
+		YxData []ReturnModel.AuxYxData `json:"yxData"`
 	}
 	var tmp struct {
 		DeviceId int `json:"deviceId"`
@@ -230,25 +231,62 @@ func (c *AuxiliaryController) GetDeviceControlPointList(ctx *gin.Context) {
 	//收集所有codes查询最新测点信息
 	var YxCodes []string
 	var YcCodes []string
+	nameMap := make(map[string]models.EmDeviceModelCmdParam)
 	for i := 0; i < len(YkYtList); i++ {
+
 		if YkYtList[i].IotDataType == "yc" {
 			YcCodes = append(YcCodes, YkYtList[i].Name) //收集遥测code
 		} else if YkYtList[i].IotDataType == "yx" {
 			YxCodes = append(YxCodes, YkYtList[i].Name) //收集遥信code
 		}
+		nameMap[YkYtList[i].Name] = YkYtList[i]
 	}
 	var result Res
 	if len(YcCodes) > 0 {
 		ycList, err := c.hisRepo.GetLastYcListByCode(strconv.Itoa(tmp.DeviceId), strings.Join(YcCodes, ",")) //拿到所有可控测点的最新数据
+		var ycData []ReturnModel.AuxYcData
 		if err == nil {
-			result.YcData = ycList
+			if len(ycList) > 0 {
+				for i := range ycList { //遍历结果，重新赋值实体，然后返回
+					var tmpYcData ReturnModel.AuxYcData
+					tmpMap := nameMap[strconv.Itoa(ycList[i].Code)] //
+					if tmpMap != (models.EmDeviceModelCmdParam{}) { //如果存在对应的键值对 测点重新命名
+						tmpYcData.Name = tmpMap.Label
+						tmpYcData.Unit = tmpMap.Unit
+					} else {
+						tmpYcData.Name = ycList[i].Name
+					}
+					tmpYcData.Code = ycList[i].Code
+					tmpYcData.Value = ycList[i].Value
+					tmpYcData.Ts = ycList[i].Ts
+					ycData = append(ycData, tmpYcData)
+				}
+			}
 		}
+		result.YcData = ycData
 	}
 	if len(YxCodes) > 0 {
 		yxList, err := c.hisRepo.GetLastYxListByCode(tmp.DeviceId, strings.Join(YxCodes, ","))
+		var yxData []ReturnModel.AuxYxData
 		if err == nil {
-			result.YxData = yxList
+			if len(yxList) > 0 {
+				for i := range yxList { //遍历结果，重新赋值实体，然后返回
+					var tmpYxData ReturnModel.AuxYxData
+					tmpMap := nameMap[strconv.Itoa(yxList[i].Code)] //
+					if tmpMap != (models.EmDeviceModelCmdParam{}) { //如果存在对应的键值对 测点重新命名
+						tmpYxData.Name = tmpMap.Label
+						tmpYxData.Unit = tmpMap.Unit
+					} else {
+						tmpYxData.Name = yxList[i].Name
+					}
+					tmpYxData.Code = yxList[i].Code
+					tmpYxData.Value = yxList[i].Value
+					tmpYxData.Ts = yxList[i].Ts
+					yxData = append(yxData, tmpYxData)
+				}
+			}
 		}
+		result.YxData = yxData
 	}
 	ctx.JSON(http.StatusOK, model.ResponseData{
 		Code:    "0",

@@ -27,6 +27,24 @@ type YcData struct {
 	Level      int              `json:"level"`      //告警状态
 	LimitScope LimitScope       `json:"limitScope"` //告警范围
 }
+type AuxYcData struct {
+	Code     int              `json:"code"`     //测点编码
+	DeviceId int              `json:"deviceId"` //设备id
+	Value    float64          `json:"val"`      //值
+	Name     string           `json:"name"`     //名称
+	Type     string           `json:"type"`     //类型
+	Ts       models.LocalTime `json:"ts"`       //时间
+	Unit     string           `json:"unit"`     //单位
+}
+type AuxYxData struct {
+	Code     int              `json:"code"`     //测点编码
+	DeviceId int              `json:"deviceId"` //设备id
+	Value    int              `json:"val"`      //值
+	Name     string           `json:"name"`     //名称
+	Type     string           `json:"type"`     //类型
+	Ts       models.LocalTime `json:"ts"`       //时间
+	Unit     string           `json:"unit"`     //单位
+}
 
 type LimitScope struct {
 	DeviceType   string `json:"deviceType"`   //设备类型
