@@ -7,11 +7,12 @@ import (
 	"gateway/models/ReturnModel"
 	"gateway/models/query"
 	repositories "gateway/repositories"
-	"github.com/gin-gonic/gin"
 	"net/http"
 	"sort"
 	"strconv"
 	"strings"
+
+	"github.com/gin-gonic/gin"
 )
 
 type BmsController struct {
@@ -362,44 +363,7 @@ func (c *BmsController) GetBmsDevices(ctx *gin.Context) {
 	}
 }
 
-<<<<<<< HEAD
-////获取前一天每小时的放电电量
-//func (c *BmsController) GetHourElectricityChartByDeviceIds(ctx *gin.Context) {
-//	type Res struct {
-//		Name string             `json:"name"`
-//		Data []repositories.Res `json:"data"`
-//	}
-//
-//	var queryData query.QueryTaoData
-//	if err := ctx.Bind(&queryData); err != nil {
-//		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-//		return
-//	}
-//	//间隔时间段
-//	intervalStr := "h"
-//	var result []Res
-//	var resC Res
-//	resC.Name = "充电"
-//	//每小时充电电力
-//	tdDataLisC, _ := c.realRepo.GetGenerateElectricityChartByDeviceIds(queryData.DeviceIds, "charge_capacity", intervalStr)
-//	resC.Data = tdDataLisC
-//	var resD Res
-//	resC.Name = "放电"
-//	//每小时充电电力
-//	tdDataLisD, _ := c.realRepo.GetGenerateElectricityChartByDeviceIds(queryData.DeviceIds, "discharge_capacity", intervalStr)
-//	resD.Data = tdDataLisD
-//	result = append(result, resC)
-//	result = append(result, resD)
-//	ctx.JSON(http.StatusOK, model.ResponseData{
-//		"0",
-//		"获取信息成功！",
-//		result,
-//	})
-//}
-
-=======
->>>>>>> 218daa0ba07cad9d46ee108bfab2814a2e88b3e3
-//获取每天的充放电量数据
+// 获取每天的充放电量数据
 func (c *BmsController) GetDayElectricityChartByDeviceId(ctx *gin.Context) {
 	type Res struct {
 		Name string             `json:"name"`
@@ -461,42 +425,7 @@ func (c *BmsController) GetDayElectricityChartByDeviceId(ctx *gin.Context) {
 	})
 }
 
-<<<<<<< HEAD
-////累计放电电量
-//func (c *BmsController) GetReleaseElectricitySumByDeviceIds(ctx *gin.Context) {
-//	var queryData query.QueryTaoData
-//	if err := ctx.Bind(&queryData); err != nil {
-//		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-//		return
-//	}
-//	//查询设备信息
-//	list := c.realRepo.GetReleaseElectricitySumByDeviceIds(queryData.DeviceIds)
-//	ctx.JSON(http.StatusOK, model.ResponseData{
-//		"0",
-//		"获取信息成功！",
-//		list,
-//	})
-//}
-//
-////累计充电电量
-//func (c *BmsController) GetGenerateElectricitySumByDeviceIds(ctx *gin.Context) {
-//	var queryData query.QueryTaoData
-//	if err := ctx.Bind(&queryData); err != nil {
-//		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-//		return
-//	}
-//	//查询设备信息
-//	list := c.realRepo.GetGenerateElectricitySumByDeviceIds(queryData.DeviceIds)
-//	ctx.JSON(http.StatusOK, model.ResponseData{
-//		"0",
-//		"获取信息成功！",
-//		list,
-//	})
-//}
-
-=======
->>>>>>> 218daa0ba07cad9d46ee108bfab2814a2e88b3e3
-//获取设备状态信息
+// 获取设备状态信息
 func (c *BmsController) GetDevicesStatus(ctx *gin.Context) {
 	var queryData query.QueryTaoData
 	if err := ctx.Bind(&queryData); err != nil {
@@ -526,7 +455,6 @@ func (c *BmsController) GetDevicesStatus(ctx *gin.Context) {
 			"无数据",
 			"",
 		})
-<<<<<<< HEAD
 		return
 	}
 	//2.通过测点信息和设备id去获取最新测点值
@@ -535,16 +463,6 @@ func (c *BmsController) GetDevicesStatus(ctx *gin.Context) {
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
-=======
-		return
-	}
-	//2.通过测点信息和设备id去获取最新测点值
-	ycData, err := c.hisRepo.GetLastYcListByCode(strconv.Itoa(queryData.DeviceId), dict.DictValue) //查询最新测点值
-	if err != nil {
-		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-		return
-	}
->>>>>>> 218daa0ba07cad9d46ee108bfab2814a2e88b3e3
 	if ycData == nil {
 		ctx.JSON(http.StatusOK, model.ResponseData{
 			"1",
