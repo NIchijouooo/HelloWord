@@ -1,1 +1,1 @@
-{"CollectInterfaceParam":[{"CollInterfaceName":"采集接口1","CommInterfaceName":"通道1","protocolTypeName":"MODBUS-TCP","PollPeriod":10,"OfflinePeriod":5,"DeviceNodeCnt":1,"DeviceNodeNameMap":["第一簇"],"DeviceNodeLabelMap":["第一簇"],"DeviceNodeAddrMap":["1"],"DeviceNodeTypeMap":["第一簇"]}]}
+{"CollectInterfaceParam":[{"CollInterfaceName":"采集接口1","CommInterfaceName":"通道1","protocolTypeName":"MODBUS-TCP","PollPeriod":10,"OfflinePeriod":5,"DeviceNodeCnt":2,"DeviceNodeNameMap":["第一簇","第二簇"],"DeviceNodeLabelMap":["第一簇","第二簇"],"DeviceNodeAddrMap":["1","1"],"DeviceNodeTypeMap":["第一簇","第二簇"]}]}
