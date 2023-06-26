@@ -32,6 +32,8 @@ func (ctrl *AuxiliaryController) RegisterRoutes(router *gin.RouterGroup) {
 	router.POST("/api/v2/auxiliary/getLastYcByDeviceIdAndCodes", ctrl.GetLastYcByDeviceIdAndCodes)
 	router.POST("/api/v2/auxiliary/getHistoryYcByDeviceIdCodes", ctrl.GetHistoryYcByDeviceIdCodes)
 	router.POST("/api/v2/auxiliary/getEmDeviceModelCmdParamListByDeviceId", ctrl.GetEmDeviceModelCmdParamListByDeviceId)
+	router.POST("/api/v2/auxiliary/getDeviceControlPointList", ctrl.GetDeviceControlPointList)
+
 }
 
 // /获取设备类型下的所有设备数据
@@ -143,6 +145,12 @@ func (c *AuxiliaryController) GetHistoryYcByDeviceIdCodes(ctx *gin.Context) {
 	}
 }
 
+type DeviceModel struct {
+	Property struct {
+		AccessMode int `json:"accessMode"`
+	} `json:"property"`
+}
+
 // 根据设备ID获取所有模型
 func (c *AuxiliaryController) GetEmDeviceModelCmdParamListByDeviceId(ctx *gin.Context) {
 	var tmp struct {
@@ -152,8 +160,9 @@ func (c *AuxiliaryController) GetEmDeviceModelCmdParamListByDeviceId(ctx *gin.Co
 		ctx.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
+	array := []string{"yc"}
 	var deviceCmdParamList []models.EmDeviceModelCmdParam
-	deviceCmdParamList, _ = c.emRepo.GetEmDeviceModelCmdParamListByDeviceId(tmp.DeviceId)
+	deviceCmdParamList, _ = c.emRepo.GetYcListByDeviceId(tmp.DeviceId, array)
 	if deviceCmdParamList == nil {
 		ctx.JSON(http.StatusOK, model.ResponseData{
 			Code:    "1",
@@ -166,12 +175,17 @@ func (c *AuxiliaryController) GetEmDeviceModelCmdParamListByDeviceId(ctx *gin.Co
 	var codes []string
 	mapCodes := make(map[string]string) //按name进行label分组
 	for i := 0; i < len(deviceCmdParamList); i++ {
-		if "yc" == deviceCmdParamList[i].IotDataType { //筛选出遥测测点
-			codes = append(codes, deviceCmdParamList[i].Name)
-			mapCodes[deviceCmdParamList[i].Name] = deviceCmdParamList[i].Label
-		}
+		//var deviceModel DeviceModel
+		//err := json.Unmarshal([]byte(deviceCmdParamList[i].Data), &deviceModel) //取出不可控的遥测
+		//if err != nil {
+		//	continue
+		//}
+		//if deviceModel.Property.AccessMode == 0 { //等于0表示不可控，不等于0表示可控
+		codes = append(codes, deviceCmdParamList[i].Name)
+		mapCodes[deviceCmdParamList[i].Name] = deviceCmdParamList[i].Label
+		//}
 	}
-
+	//拿到所有不可控测点的最新数据
 	ycList, err := c.hisRepo.GetLastYcListByCode(strconv.Itoa(tmp.DeviceId), strings.Join(codes, ","))
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
@@ -185,4 +199,61 @@ func (c *AuxiliaryController) GetEmDeviceModelCmdParamListByDeviceId(ctx *gin.Co
 		Message: "成功",
 		Data:    ycList,
 	})
+}
+
+// 获取实时控制遥控遥调列表
+func (c *AuxiliaryController) GetDeviceControlPointList(ctx *gin.Context) {
+	type Res struct {
+		YcData []*models.YcData `json:"ycData"`
+		YxData []*models.YxData `json:"yxData"`
+	}
+	var tmp struct {
+		DeviceId int `json:"deviceId"`
+	}
+	if err := ctx.ShouldBindBodyWith(&tmp, binding.JSON); err != nil {
+		ctx.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+	array := []string{"yc", "yx"}
+	YkYtList, err := c.emRepo.GetYcListByDeviceId(tmp.DeviceId, array)
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	if len(YkYtList) == 0 {
+		ctx.JSON(http.StatusOK, model.ResponseData{
+			Code:    "1",
+			Message: "无数据",
+		})
+		return
+	}
+	//收集所有codes查询最新测点信息
+	var YxCodes []string
+	var YcCodes []string
+	for i := 0; i < len(YkYtList); i++ {
+		if YkYtList[i].IotDataType == "yc" {
+			YcCodes = append(YcCodes, YkYtList[i].Name) //收集遥测code
+		} else if YkYtList[i].IotDataType == "yx" {
+			YxCodes = append(YxCodes, YkYtList[i].Name) //收集遥信code
+		}
+	}
+	var result Res
+	if len(YcCodes) > 0 {
+		ycList, err := c.hisRepo.GetLastYcListByCode(strconv.Itoa(tmp.DeviceId), strings.Join(YcCodes, ",")) //拿到所有可控测点的最新数据
+		if err == nil {
+			result.YcData = ycList
+		}
+	}
+	if len(YxCodes) > 0 {
+		yxList, err := c.hisRepo.GetLastYxListByCode(tmp.DeviceId, strings.Join(YxCodes, ","))
+		if err == nil {
+			result.YxData = yxList
+		}
+	}
+	ctx.JSON(http.StatusOK, model.ResponseData{
+		Code:    "0",
+		Message: "获取数据成功！",
+		Data:    result,
+	})
+	return
 }

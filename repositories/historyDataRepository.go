@@ -344,3 +344,25 @@ func (r *HistoryDataRepository) GetCharData(ycQuery query.QueryTaoData) (ReturnM
 	returnMap := service.GetCharData(xAxisList, ycQuery.StartTime, ycQuery.EndTime, ycQuery.Interval, ycQuery.IntervalType, ycList, ycQuery.CodeList)
 	return returnMap, nil
 }
+
+// 批量code获取yx的最新一条信息
+func (r *HistoryDataRepository) GetLastYxListByCode(deviceId int, codes string) ([]*models.YxData, error) {
+	var realtimeList []*models.YxData
+	tableName := "realtimedata.yx"
+	//
+	sql := fmt.Sprintf("SELECT last(ts),val,device_id,name,code FROM %s  where device_id=%d and  code in (%s) group by device_id,code", tableName, deviceId, codes)
+	rows, err := r.taosDb.Query(sql)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	for rows.Next() {
+		realtime := &models.YxData{}
+		err := rows.Scan(&realtime.Ts, &realtime.Value, &realtime.DeviceId, &realtime.Name, &realtime.Code)
+		if err != nil {
+			return nil, err
+		}
+		realtimeList = append(realtimeList, realtime)
+	}
+	return realtimeList, err
+}
