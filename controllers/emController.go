@@ -286,6 +286,7 @@ func (c *EmController) AddEmDevice(ctx *gin.Context) {
 	emDevice.Name = addEmDevice.Name
 	emDevice.Label = addEmDevice.Label
 	emDevice.Addr = addEmDevice.Addr
+	emDevice.DeviceType = addEmDevice.DeviceType
 	// 判断是否有重名的设备，重名直接返回
 	emDevice.Name = addEmDevice.Name
 	emDeviceByName, _ := c.repo.GetEmDeviceByName(emDevice.Name)
@@ -363,6 +364,7 @@ func (c *EmController) UpdateEmDevice(ctx *gin.Context) {
 	var emDevice models.EmDevice
 	emDevice.Name = addEmDevice.Name
 	emDevice.Label = addEmDevice.Label
+	emDevice.DeviceType = addEmDevice.DeviceType
 
 	emCollInterfaceByName, _ := c.repo.GetCollInterfaceByName(addEmDevice.InterfaceName)
 	emDevice.CollInterfaceId = emCollInterfaceByName.Id

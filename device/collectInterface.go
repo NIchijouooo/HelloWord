@@ -84,16 +84,17 @@ func WriteCollectInterfaceManageToJson() {
 
 	//采集接口配置参数
 	type ConfigParamTemplate struct {
-		CollInterfaceName  string   `json:"CollInterfaceName"`  //采集接口
-		CommInterfaceName  string   `json:"CommInterfaceName"`  //通信接口
-		ProtocolTypeName   string   `json:"protocolTypeName"`   //协议类型名称,新增加的协议通过这个变量区分协议，不在通信接口里面做了--gwai add 2023-05-05
-		PollPeriod         int      `json:"PollPeriod"`         //采集周期
-		OfflinePeriod      int      `json:"OfflinePeriod"`      //离线超时周期
-		DeviceNodeCnt      int      `json:"DeviceNodeCnt"`      //设备数量
-		DeviceNodeNameMap  []string `json:"DeviceNodeNameMap"`  //节点名称
-		DeviceNodeLabelMap []string `json:"DeviceNodeLabelMap"` //节点标签
-		DeviceNodeAddrMap  []string `json:"DeviceNodeAddrMap"`  //节点地址
-		DeviceNodeTypeMap  []string `json:"DeviceNodeTypeMap"`  //节点类型
+		CollInterfaceName       string   `json:"CollInterfaceName"`       //采集接口
+		CommInterfaceName       string   `json:"CommInterfaceName"`       //通信接口
+		ProtocolTypeName        string   `json:"protocolTypeName"`        //协议类型名称,新增加的协议通过这个变量区分协议，不在通信接口里面做了--gwai add 2023-05-05
+		PollPeriod              int      `json:"PollPeriod"`              //采集周期
+		OfflinePeriod           int      `json:"OfflinePeriod"`           //离线超时周期
+		DeviceNodeCnt           int      `json:"DeviceNodeCnt"`           //设备数量
+		DeviceNodeNameMap       []string `json:"DeviceNodeNameMap"`       //节点名称
+		DeviceNodeLabelMap      []string `json:"DeviceNodeLabelMap"`      //节点标签
+		DeviceNodeAddrMap       []string `json:"DeviceNodeAddrMap"`       //节点地址
+		DeviceNodeTypeMap       []string `json:"DeviceNodeTypeMap"`       //节点类型
+		DeviceNodeDeviceTypeMap []string `json:"DeviceNodeDeviceTypeMap"` //节点类型
 	}
 
 	utils.DirIsExist("./selfpara")
@@ -123,12 +124,14 @@ func WriteCollectInterfaceManageToJson() {
 		ParamTemplate.DeviceNodeLabelMap = make([]string, 0)
 		ParamTemplate.DeviceNodeAddrMap = make([]string, 0)
 		ParamTemplate.DeviceNodeTypeMap = make([]string, 0)
+		ParamTemplate.DeviceNodeDeviceTypeMap = make([]string, 0)
 
 		for _, d := range v.DeviceNodeMap {
 			ParamTemplate.DeviceNodeNameMap = append(ParamTemplate.DeviceNodeNameMap, d.Name)
 			ParamTemplate.DeviceNodeLabelMap = append(ParamTemplate.DeviceNodeLabelMap, d.Label)
 			ParamTemplate.DeviceNodeAddrMap = append(ParamTemplate.DeviceNodeAddrMap, d.Addr)
 			ParamTemplate.DeviceNodeTypeMap = append(ParamTemplate.DeviceNodeTypeMap, d.TSL)
+			ParamTemplate.DeviceNodeDeviceTypeMap = append(ParamTemplate.DeviceNodeDeviceTypeMap, d.DeviceType)
 		}
 
 		configParamMap.CollectInterfaceParam = append(configParamMap.CollectInterfaceParam,
@@ -148,16 +151,17 @@ func WriteCollectInterfaceManageToJson() {
 func ReadCollectInterfaceManageFromJson() bool {
 	//采集接口配置参数
 	type ConfigParamTemplate struct {
-		CollInterfaceName  string   `json:"CollInterfaceName"`  //采集接口
-		CommInterfaceName  string   `json:"CommInterfaceName"`  //通信接口
-		ProtocolTypeName   string   `json:"ProtocolTypeName"`   //协议
-		PollPeriod         int      `json:"PollPeriod"`         //采集周期
-		OfflinePeriod      int      `json:"OfflinePeriod"`      //离线超时周期
-		DeviceNodeCnt      int      `json:"DeviceNodeCnt"`      //设备数量
-		DeviceNodeNameMap  []string `json:"DeviceNodeNameMap"`  //节点名称
-		DeviceNodeLabelMap []string `json:"DeviceNodeLabelMap"` //节点标签
-		DeviceNodeAddrMap  []string `json:"DeviceNodeAddrMap"`  //节点地址
-		DeviceNodeTypeMap  []string `json:"DeviceNodeTypeMap"`  //节点类型
+		CollInterfaceName       string   `json:"CollInterfaceName"`  //采集接口
+		CommInterfaceName       string   `json:"CommInterfaceName"`  //通信接口
+		ProtocolTypeName        string   `json:"ProtocolTypeName"`   //协议
+		PollPeriod              int      `json:"PollPeriod"`         //采集周期
+		OfflinePeriod           int      `json:"OfflinePeriod"`      //离线超时周期
+		DeviceNodeCnt           int      `json:"DeviceNodeCnt"`      //设备数量
+		DeviceNodeNameMap       []string `json:"DeviceNodeNameMap"`  //节点名称
+		DeviceNodeLabelMap      []string `json:"DeviceNodeLabelMap"` //节点标签
+		DeviceNodeAddrMap       []string `json:"DeviceNodeAddrMap"`  //节点地址
+		DeviceNodeTypeMap       []string `json:"DeviceNodeTypeMap"`  //节点类型
+		DeviceNodeDeviceTypeMap []string `json:"DeviceNodeDeviceTypeMap"`
 	}
 
 	data, err := utils.FileRead("./selfpara/collInterface.json")
@@ -210,7 +214,9 @@ func ReadCollectInterfaceManageFromJson() bool {
 				v.DeviceNodeNameMap[i],
 				v.DeviceNodeLabelMap[i],
 				v.DeviceNodeTypeMap[i],
-				v.DeviceNodeAddrMap[i])
+				v.DeviceNodeAddrMap[i],
+				v.DeviceNodeDeviceTypeMap[i],
+			)
 			//采集接口下设备模型去重复
 			nodeTypeMap[v.DeviceNodeTypeMap[i]] = v.DeviceNodeTypeMap[i]
 
@@ -512,7 +518,7 @@ func DeleteCollectInterface(collName string) error {
 日期    ：
 *******************************************************
 */
-func (d *CollectInterfaceTemplate) NewDeviceNode(index int, dName string, dLabel string, dTSL string, dAddr string) {
+func (d *CollectInterfaceTemplate) NewDeviceNode(index int, dName string, dLabel string, dTSL string, dAddr string, dDeviceType string) {
 
 	node := &DeviceNodeTemplate{
 		Index:          index,
@@ -520,6 +526,7 @@ func (d *CollectInterfaceTemplate) NewDeviceNode(index int, dName string, dLabel
 		Label:          dLabel,
 		Addr:           dAddr,
 		TSL:            dTSL,
+		DeviceType:     dDeviceType,
 		LastCommRTC:    "1970-01-01 00:00:00",
 		CommTotalCnt:   0,
 		CommSuccessCnt: 0,
@@ -535,7 +542,7 @@ func (d *CollectInterfaceTemplate) NewDeviceNode(index int, dName string, dLabel
 	d.DeviceNodeMap[dName] = node
 }
 
-func (d *CollectInterfaceTemplate) AddDeviceNode(dName string, dTSL string, dAddr string, dLabel string) error {
+func (d *CollectInterfaceTemplate) AddDeviceNode(dName string, dTSL string, dAddr string, dLabel string, dDeviceType string) error {
 
 	_, ok := d.TSLLuaStateMap[dTSL]
 	//物模型在采集中不存在
@@ -562,6 +569,7 @@ func (d *CollectInterfaceTemplate) AddDeviceNode(dName string, dTSL string, dAdd
 	node.Addr = dAddr
 	node.TSL = dTSL
 	node.Label = dLabel
+	node.DeviceType = dDeviceType
 	node.LastCommRTC = "1970-01-01 00:00:00"
 	node.CommTotalCnt = 0
 	node.CommSuccessCnt = 0
@@ -585,7 +593,7 @@ func (d *CollectInterfaceTemplate) AddDeviceNode(dName string, dTSL string, dAdd
 	return nil
 }
 
-func (d *CollectInterfaceTemplate) ModifyDeviceNode(dName string, dTSL string, dAddr string, dLabel string) error {
+func (d *CollectInterfaceTemplate) ModifyDeviceNode(dName string, dTSL string, dAddr string, dLabel string, dDeviceType string) error {
 
 	_, ok := d.TSLLuaStateMap[dTSL]
 	//物模型在采集中不存在
@@ -614,6 +622,7 @@ func (d *CollectInterfaceTemplate) ModifyDeviceNode(dName string, dTSL string, d
 	node.Addr = dAddr
 	node.TSL = dTSL
 	node.Label = dLabel
+	node.DeviceType = dDeviceType
 
 	writeTimer.Reset(time.Second)
 
