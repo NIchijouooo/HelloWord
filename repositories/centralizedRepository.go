@@ -31,17 +31,28 @@ func (r *CentralizedRepository) CreatePolicy(policyData *models.EmStrategy) erro
 }
 
 // 修改策略
-func (r *CentralizedRepository) UpdatePolicy(policyData *models.EmStrategy) error {
+func (r *CentralizedRepository) UpdatePolicy(policyData *models.EmStrategy) (models.EmStrategy, error) {
 	var emPolicyData models.EmStrategy
 	id := policyData.Id
 	r.db.Where("id = ?", id).First(&emPolicyData)
 	policyData.Id = emPolicyData.Id
-	return r.db.Save(policyData).Error
+	err := r.db.Save(policyData).Error
+	if err != nil {
+		return emPolicyData, err
+	}
+	return emPolicyData, err
 }
 
 // 删除策略
-func (r *CentralizedRepository) DeletePolicy(Id int) error {
-	return r.db.Delete(&models.EmStrategy{}, Id).Error
+func (r *CentralizedRepository) DeletePolicy(Id int) (models.EmStrategy, error) {
+	// 先查询
+	var emPolicyData models.EmStrategy
+	r.db.Where("id = ?", Id).First(&emPolicyData)
+	err := r.db.Delete(&models.EmStrategy{}, Id).Error
+	if err != nil {
+		return emPolicyData, err
+	}
+	return emPolicyData, nil
 }
 
 // 删除策略
