@@ -103,6 +103,18 @@ func (r *EmRepository) GetCollInterfaceByName(name string) (*models.EmCollInterf
 	return &emCollInterface, nil
 }
 
+/*
+*
+获取全部采集接口
+*/
+func (r *EmRepository) GetAllCollInterface() ([]*models.EmCollInterface, error) {
+	var list []*models.EmCollInterface
+	if err := r.db.Find(&list).Error; err != nil {
+		return nil, err
+	}
+	return list, nil
+}
+
 // AddEmDevice EM设备
 func (r *EmRepository) AddEmDevice(emDevice *models.EmDevice) error {
 	return r.db.Create(emDevice).Error
@@ -151,6 +163,18 @@ func (r *EmRepository) GetEmDeviceModelByName(name string) (*models.EmDeviceMode
 		return nil, err
 	}
 	return &emDeviceModel, nil
+}
+
+/*
+*
+获取全部设备模型
+*/
+func (r *EmRepository) GetAllEmDeviceModel() ([]*models.EmDeviceModel, error) {
+	var list []*models.EmDeviceModel
+	if err := r.db.Find(&list).Error; err != nil {
+		return nil, err
+	}
+	return list, nil
 }
 
 func (r *EmRepository) UpdateEmDeviceModel(emDeviceModel *models.EmDeviceModel) error {

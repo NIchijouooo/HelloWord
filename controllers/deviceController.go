@@ -205,6 +205,9 @@ func (c *DeviceController) GetChart(ctx *gin.Context) {
 	}
 	var param Param
 	var result []Res
+	now := time.Now().In(utils.Location)
+	startTime := time.Date(now.Year(), now.Month(), now.Day(), 0, 0, 0, 0, now.Location()).UnixMilli()
+	endTime := time.Date(now.Year(), now.Month(), now.Day()+1, 0, 0, 0, 0, now.Location()).Add(-time.Second).UnixMilli()
 	if err := ctx.ShouldBindJSON(&param); err != nil {
 		ctx.JSON(http.StatusOK, model.ResponseData{
 			Code:    "1",
@@ -225,7 +228,7 @@ func (c *DeviceController) GetChart(ctx *gin.Context) {
 		res.DeviceName = device.Name
 		for _, dictData := range dictDataList {
 			res.PointName = dictData.DictLabel
-			tdDataList, _ := c.repoRealTimeData.GetChartByDeviceIdAndCode(device.Id, dictData.DictValue)
+			tdDataList, _ := c.repoRealTimeData.GetChartByDeviceIdAndCode(device.Id, dictData.DictValue, startTime, endTime)
 			res.Data = tdDataList
 		}
 		result = append(result, res)
