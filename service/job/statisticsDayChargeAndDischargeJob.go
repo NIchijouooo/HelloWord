@@ -377,48 +377,6 @@ func ProcessData(DeviceIdList []int, deviceSettingMap map[string]map[int]int, pr
 	return insertList
 }
 
-func GetSettingValueListByDeviceIdListAndYcCode(devIDList []int, code int) []models.SettingData {
-	result := []models.SettingData{}
-	//DeviceIdList := append([]int{}, devIDList...)
-	//直接查taos，这里没有Redis
-	realtimeDataRepo := repositories.RealtimeDataRepository{}
-
-	stringDevIds := make([]string, len(devIDList))
-	for i, v := range devIDList {
-		stringDevIds[i] = strconv.Itoa(v)
-	}
-	subDevIds := strings.Join(stringDevIds, ",")
-	//直接查taos
-	settingValueList, _ := realtimeDataRepo.GetSettingListByDevIdsAndCodes(subDevIds, strconv.Itoa(code))
-	if settingValueList != nil {
-		for _, settingValuePo := range settingValueList {
-			//DeviceId := settingValuePo.DeviceId
-			value := settingValuePo.Value
-			if value != "" {
-				result = append(result, settingValuePo)
-				//DeviceIdList = removeDeviceId(DeviceIdList, DeviceId)
-			}
-		}
-	}
-	//这里就不用再查taos了
-	//if len(DeviceIdList) > 0 {
-	//	mysqlYcValuePosValueList := GetValueListByDeviceIdAndCode(DeviceIdList, code)
-	//	if mysqlYcValuePosValueList != nil {
-	//		result = append(result, mysqlYcValuePosValueList...)
-	//	}
-	//}
-	return result
-}
-
-func removeDeviceId(slice []int, DeviceId int) []int {
-	for i, id := range slice {
-		if id == DeviceId {
-			return append(slice[:i], slice[i+1:]...)
-		}
-	}
-	return slice
-}
-
 func GetLastYcHistoryByDeviceIdListAndCodeList(devIDList []int, codeList []int, beginDt int64, endDt int64) []models.YcData {
 	if len(devIDList) == 0 || len(codeList) == 0 || beginDt == 0 || endDt == 0 {
 		return []models.YcData{}
