@@ -176,10 +176,8 @@ func (c *AuxiliaryController) GetEmDeviceModelCmdParamListByDeviceId(ctx *gin.Co
 
 	//收集所有codes查询最新测点信息
 	var codes []string
-	mapCodes := make(map[string]models.EmDeviceModelCmdParam) //按name进行label分组
 	for i := 0; i < len(deviceCmdParamList); i++ {
 		codes = append(codes, deviceCmdParamList[i].Name)
-		mapCodes[deviceCmdParamList[i].Name] = deviceCmdParamList[i] //按code进行收集
 	}
 
 	//拿到所有不可控测点的最新数据
@@ -188,31 +186,24 @@ func (c *AuxiliaryController) GetEmDeviceModelCmdParamListByDeviceId(ctx *gin.Co
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
-	ycMap := make(map[int]*models.YcData) //收集遥测信息
+	ycMap := make(map[string]*models.YcData) //收集遥测信息
 	for i := 0; i < len(ycList); i++ {
-		ycMap[ycList[i].Code] = ycList[i]
+		ycMap[strconv.Itoa(ycList[i].Code)] = ycList[i]
 	}
+
 	var resYcData []ReturnModel.AuxYcData
-	//for i, model := range ycList { //遍历结果 重新拼接，需要返回name，单位字段
-	//	var ycData ReturnModel.AuxYcData
-	//	var tmpMap = mapCodes[strconv.Itoa(model.Code)]
-	//	ycData.Name = tmpMap.Label //名字从测点取
-	//	ycData.DeviceId = ycList[i].DeviceId
-	//	ycData.Code = ycList[i].Code
-	//	ycData.Value = model.Value
-	//	ycData.Unit = tmpMap.Unit
-	//	ycData.Ts = model.Ts
-	//	resYcData = append(resYcData, ycData)
-	//}
-	for i, model := range ycList { //遍历结果 重新拼接，需要返回name，单位字段
+	for _, model := range deviceCmdParamList { //遍历结果 重新拼接，需要返回name，单位字段
 		var ycData ReturnModel.AuxYcData
-		var tmpMap = mapCodes[strconv.Itoa(model.Code)]
-		ycData.Name = tmpMap.Label //名字从测点取
-		ycData.DeviceId = ycList[i].DeviceId
-		ycData.Code = ycList[i].Code
-		ycData.Value = model.Value
-		ycData.Unit = tmpMap.Unit
-		ycData.Ts = model.Ts
+		var tmpMap = ycMap[model.Name]
+		ycData.Name = model.Label                 //从模型取
+		ycData.Unit = model.Unit                  //从模型取
+		ycData.ParamId = model.Id                 //从模型取
+		ycData.Code, _ = strconv.Atoi(model.Name) //从模型取
+		if tmpMap != nil {
+			ycData.DeviceId = tmpMap.DeviceId //从测点取
+			ycData.Ts = tmpMap.Ts             //从测点取
+			ycData.Value = tmpMap.Value       //从测点取
+		}
 		resYcData = append(resYcData, ycData)
 	}
 
@@ -255,7 +246,6 @@ func (c *AuxiliaryController) GetDeviceControlPointList(ctx *gin.Context) {
 	var YcCodes []string
 	nameMap := make(map[string]models.EmDeviceModelCmdParam)
 	for i := 0; i < len(YkYtList); i++ {
-
 		if YkYtList[i].IotDataType == "yc" {
 			YcCodes = append(YcCodes, YkYtList[i].Name) //收集遥测code
 		} else if YkYtList[i].IotDataType == "yx" {
