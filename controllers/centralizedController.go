@@ -4,6 +4,7 @@ import (
 	"gateway/httpServer/model"
 	"gateway/models"
 	"gateway/repositories"
+	"gateway/service/job"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -88,13 +89,18 @@ func (c *CentralizedController) updatePolicy(ctx *gin.Context) {
 		})
 		return
 	}
-	if err := c.repo.UpdatePolicy(&policyData); err != nil {
+	oldData, err := c.repo.UpdatePolicy(&policyData)
+	if err != nil {
 		ctx.JSON(http.StatusOK, model.ResponseData{
 			"1",
 			"error" + err.Error(),
 			"",
 		})
 		return
+	}
+	// 原来开启,现在不开,更新成功后拿原来配置的时间重置功率
+	if oldData.Status == 1 && policyData.Status == 0 {
+		job.ResetPower(oldData)
 	}
 	ctx.JSON(http.StatusOK, model.ResponseData{
 		"0",
@@ -114,13 +120,18 @@ func (c *CentralizedController) deletePolicy(ctx *gin.Context) {
 		})
 		return
 	}
-	if err := c.repo.DeletePolicy(paramData.Id); err != nil {
+	oldData, err := c.repo.DeletePolicy(paramData.Id)
+	if err != nil {
 		ctx.JSON(http.StatusOK, model.ResponseData{
 			"1",
 			"error" + err.Error(),
 			"",
 		})
 		return
+	}
+	// 原来开启,现在删除,删除成功后拿原来配置的时间重置功率
+	if oldData.Status == 1 {
+		job.ResetPower(oldData)
 	}
 	ctx.JSON(http.StatusOK, model.ResponseData{
 		"0",
