@@ -35,9 +35,11 @@ func (r *DevicePointRepository) GetPointsByDeviceId(pointType string, deviceId, 
 	return pointParams
 }
 
-/**
+/*
+*
+
 	根据设备类型查所有命令参数
- */
+*/
 func (r *DevicePointRepository) GetDeviceByDeviceType(deviceType string) []*models.EmDeviceModelCmdParam {
 	var pointParams []*models.EmDeviceModelCmdParam
 	if deviceType == "" {
@@ -56,6 +58,20 @@ func (r *DevicePointRepository) GetDeviceByDevLabel(label string) []*models.EmDe
 	var emDevice []*models.EmDevice
 	r.sqldb.Where("em_device.label = ?", label).Find(&emDevice)
 	return emDevice
+}
+
+// GetDeviceByDevType 通过设备类型获取设备信息
+func (r *DevicePointRepository) GetDeviceByDevType(deviceType string) []*models.EmDevice {
+	var emDevice []*models.EmDevice
+	r.sqldb.Where("em_device.device_type = ?", deviceType).Find(&emDevice)
+	return emDevice
+}
+
+// GetDeviceIdListByDevType 通过设备类型获取设备ID
+func (r *DevicePointRepository) GetDeviceIdListByDevType(deviceType string) []int {
+	var emDeviceIdList []int
+	r.sqldb.Table("em_device").Select("id").Where("device_type = ?", deviceType).Find(&emDeviceIdList)
+	return emDeviceIdList
 }
 
 /*

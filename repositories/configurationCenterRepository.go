@@ -53,3 +53,23 @@ func (r *ConfigurationCenterRepository) GetConfigurationList(province string, mo
 func (r *ConfigurationCenterRepository) DeleteConfiguration(id int) error {
 	return r.db.Delete(&models.EmConfiguration{}, id).Error
 }
+
+// GetConfigurationByProvince 通过省份和月份获取电费配置
+func (r *ConfigurationCenterRepository) GetConfigurationByProvince(province string, month string) (models.EmConfiguration, error) {
+
+	var configuration models.EmConfiguration
+
+	query := r.db.Model(&models.EmConfiguration{})
+	if province != "" {
+		query = query.Where("province = ?", province)
+	}
+	if month != "" {
+		query = query.Where("month = ?", month)
+	}
+
+	if err := query.Find(&configuration).Error; err != nil {
+		return configuration, err
+	}
+
+	return configuration, nil
+}
