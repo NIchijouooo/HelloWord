@@ -121,6 +121,7 @@
           <el-table-column type="selection" width="55" fixed="left" />
           <el-table-column sortable prop="name" label="设备名称" width="auto" min-width="160" align="center" fixed="left">
           </el-table-column>
+          <el-table-column sortable prop="deviceType" label="设备类型" width="auto" min-width="160" align="center" :formatter="formatter"></el-table-column>
           <el-table-column sortable prop="label" label="设备标签" width="auto" min-width="160" align="center"> </el-table-column>
           <el-table-column sortable prop="tsl" label="设备模型" width="auto" min-width="160" align="center"> </el-table-column>
           <el-table-column sortable prop="collInterfaceName" label="采集接口" width="auto" min-width="160" align="center">
@@ -191,6 +192,17 @@
               placeholder="请输入设备名称"
             >
             </el-input>
+          </el-form-item>
+          <el-form-item label="设备类型" prop="deviceType">
+            <el-select v-model="ctxData.deviceForm.deviceType" style="width: 100%" placeholder="请选择设备类型">
+              <el-option
+                v-for="item of ctxData.deviceTypeOptions"
+                :key="item.value"
+                :label="item.dictLabel"
+                :value="item.dictValue"
+              >
+              </el-option>
+            </el-select>
           </el-form-item>
           <el-form-item label="设备标签" prop="label">
             <el-input type="text" v-model="ctxData.deviceForm.label" autocomplete="off" placeholder="请输入设备标签">
@@ -275,6 +287,7 @@ import DeviceModelApi from 'api/deviceModel.js'
 import InterfaceApi from 'api/interface.js'
 import { userStore } from 'stores/user'
 import DeviceProperty from './deviceManage/Device-property.vue'
+import dictApi from '@/api/dict/data.js'
 const users = userStore()
 
 const ctxData = reactive({
@@ -339,6 +352,13 @@ const ctxData = reactive({
         trigger: 'blur',
       },
     ],
+    deviceType: [
+      {
+        required: true,
+        message: '设备类型不能为空',
+        trigger: 'blur',
+      },
+    ],
   },
   deviceModelList: [],
   selectedDevices: [],
@@ -371,7 +391,29 @@ const ctxData = reactive({
   interfaces: [],
   checkedInterfaceList: [],
   collDeviceObj: {}, //采集接口与设备对应对象
+  deviceTypeOptions: [],
+  dictMap: {}
 })
+
+// 初始化设备类型字典
+const initdeviceTypeOptions = async()=>{
+  const pData = {
+    token: users.token,
+    data: { dictType: 'device_type' },
+  }
+  const res = await dictApi.getDicts(pData)
+  if(res.code==='0' && res.data) {
+    ctxData.deviceTypeOptions = res.data
+    for(const item of res.data) {
+      ctxData.dictMap[item.dictValue] = item.dictLabel
+    }
+  }
+}
+initdeviceTypeOptions()
+
+const formatter = (row,column)=>{
+  return ctxData.dictMap[row.deviceType]
+}
 
 const changeIdFlag = () => {
   ctxData.idFlag = true
