@@ -8,7 +8,6 @@ import (
 	"gorm.io/gorm"
 	"io"
 	"net/http"
-	"time"
 )
 
 var token string
@@ -23,42 +22,13 @@ func NewWebHmiPageRepository() *WebHmiPageRepository {
 	}
 }
 
-// GetWebHmiPageDeviceInfo 获取配置
-func (r *WebHmiPageRepository) GetWebHmiPageDeviceInfo(deviceId int) ([]models.WebHmiPageDeviceModel, error) {
-	var webHmiPageDeviceModelList []models.WebHmiPageDeviceModel
-	db := r.db
-	fmt.Println("deviceId ： ", deviceId)
-	if deviceId > 0 {
-		db = db.Where("device_id = ?", deviceId)
-	}
-	if err := db.Find(&webHmiPageDeviceModelList).Error; err != nil {
-		return nil, err
-	}
-	return webHmiPageDeviceModelList, nil
-}
-
-// SaveWebHmiPageDeviceInfo 保存设置
-func (r *WebHmiPageRepository) SaveWebHmiPageDeviceInfo(webHmiPageDeviceModelList []*models.WebHmiPageDeviceModel) (int, error) {
-	r.db.Where("id > ?", 0).Delete(&models.WebHmiPageDeviceModel{})
-	if len(webHmiPageDeviceModelList) > 0 {
-		createTime := time.Now().Format(time.DateTime)
-		for _, webHmiPageDeviceModel := range webHmiPageDeviceModelList {
-			webHmiPageDeviceModel.CreateTime = createTime
-		}
-		if err := r.db.Create(webHmiPageDeviceModelList).Error; err != nil {
-			return 0, err
-		}
-	}
-	return len(webHmiPageDeviceModelList), nil
-}
-
 // GetIotWebHmiPageInfo 获取IOT组态信息
 func (r *WebHmiPageRepository) GetIotWebHmiPageInfo(deviceId int) (int, string, error) {
-	var webHmiPageDeviceModel models.WebHmiPageDeviceModel
-	if err := r.db.Where("device_id = ?", deviceId).Find(&webHmiPageDeviceModel).Error; err != nil {
+	var deviceEquipmentAccountInfo models.DeviceEquipmentAccountInfo
+	if err := r.db.Where("device_id = ?", deviceId).Find(&deviceEquipmentAccountInfo).Error; err != nil {
 		return 0, "", err
 	}
-	webHmiPageCode := webHmiPageDeviceModel.WebHmiPageCode
+	webHmiPageCode := deviceEquipmentAccountInfo.WebHmiPageCode
 
 	webHmiPageId, iotToken := GetWebHmiPageInfo(webHmiPageCode)
 
