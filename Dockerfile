@@ -29,13 +29,14 @@ RUN npm run build
 
 FROM ubuntu:latest
 
-RUN apt-get update && apt-get install -y sqlite3 libsqlite3-dev
 ENV DEBIAN_FRONTEND noninteractive
+RUN apt-get update
+RUN apt-get install -y sqlite3 libsqlite3-dev
 
 RUN apt install -y tzdata --no-install-recommends \
   &&  echo "Asia/Shanghai" > /etc/timezone  \
   && cp /usr/share/zoneinfo/Asia/Shanghai /etc/localtime \
-  && dpkg-reconfigure -f noninteractive tzdata \
+  && dpkg-reconfigure -f noninteractive tzdata
 
 COPY --from=goBuild /app/app /app
 COPY --from=goBuild /app/em.db /em.db
