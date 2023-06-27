@@ -35,6 +35,18 @@ func (r *DevicePointRepository) GetPointsByDeviceId(pointType string, deviceId, 
 	return pointParams
 }
 
+/**
+	根据设备类型查所有命令参数
+ */
+func (r *DevicePointRepository) GetDeviceByDeviceType(deviceType string) []*models.EmDeviceModelCmdParam {
+	var pointParams []*models.EmDeviceModelCmdParam
+	if deviceType == "" {
+		return pointParams
+	}
+	r.sqldb.Joins("LEFT JOIN em_device_model_cmd ON em_device_model_cmd.id = em_device_model_cmd_param.device_model_cmd_id").Joins("LEFT JOIN em_device ON em_device.model_id = em_device_model_cmd.device_model_id").Where("em_device.device_type = ?", deviceType).Find(&pointParams).Distinct("em_device_model_cmd_param.id").Statement.SQL.String()
+	return pointParams
+}
+
 /*
 *
 
