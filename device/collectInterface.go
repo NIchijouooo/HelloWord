@@ -593,7 +593,7 @@ func (d *CollectInterfaceTemplate) AddDeviceNode(dName string, dTSL string, dAdd
 	return nil
 }
 
-func (d *CollectInterfaceTemplate) ModifyDeviceNode(dName string, dTSL string, dAddr string, dLabel string) error {
+func (d *CollectInterfaceTemplate) ModifyDeviceNode(dName string, dTSL string, dAddr string, dLabel string, dDeviceType string) error {
 
 	_, ok := d.TSLLuaStateMap[dTSL]
 	//物模型在采集中不存在
@@ -622,6 +622,7 @@ func (d *CollectInterfaceTemplate) ModifyDeviceNode(dName string, dTSL string, d
 	node.Addr = dAddr
 	node.TSL = dTSL
 	node.Label = dLabel
+	node.DeviceType = dDeviceType
 
 	writeTimer.Reset(time.Second)
 

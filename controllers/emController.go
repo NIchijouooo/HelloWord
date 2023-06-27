@@ -364,6 +364,7 @@ func (c *EmController) UpdateEmDevice(ctx *gin.Context) {
 	var emDevice models.EmDevice
 	emDevice.Name = addEmDevice.Name
 	emDevice.Label = addEmDevice.Label
+	emDevice.DeviceType = addEmDevice.DeviceType
 
 	emCollInterfaceByName, _ := c.repo.GetCollInterfaceByName(addEmDevice.InterfaceName)
 	emDevice.CollInterfaceId = emCollInterfaceByName.Id

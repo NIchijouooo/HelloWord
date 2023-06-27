@@ -439,6 +439,7 @@ func ApiModifyNode(context *gin.Context) {
 		Label         string `json:"label"`
 		Addr          string `json:"addr"`
 		TSL           string `json:"tsl"`
+		DeviceType    string `json:"deviceType"`
 	}{}
 
 	emController := controllers.NewEMController()
@@ -467,7 +468,7 @@ func ApiModifyNode(context *gin.Context) {
 		return
 	}
 
-	err = coll.ModifyDeviceNode(nodeInfo.Name, nodeInfo.TSL, nodeInfo.Addr, nodeInfo.Label)
+	err = coll.ModifyDeviceNode(nodeInfo.Name, nodeInfo.TSL, nodeInfo.Addr, nodeInfo.Label, nodeInfo.DeviceType)
 	if err != nil {
 		context.JSON(http.StatusOK, model.ResponseData{
 			Code:    "1",
