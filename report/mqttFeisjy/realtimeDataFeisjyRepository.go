@@ -101,7 +101,17 @@ func (r *RealtimeDataRepository) SaveRealtimeDataList(devName, collName string, 
 		//	setting.ZAPS.Infof("设备point:[%v]和[%v]和[%v]", v.Id, ycParam.ID, ycParam.Value, ycPropertyPostParam.Time)
 			//if numName, err := strconv.Atoi(ycParam.ID); err == nil {
 		//if v.Id == numName {
-						t, _ := time.Parse("2006-01-02 15:04:05", ycPropertyPostParam.Time)
+
+		// 打印结果
+						location, _ := time.LoadLocation("Asia/Shanghai")
+						t, _ := time.ParseInLocation("2006-01-02 15:04:05", ycPropertyPostParam.Time, location)
+		//				setting.ZAPS.Infof("时间point:", ycPropertyPostParam.Time)
+		//				setting.ZAPS.Infof("时间point:", t)
+		//				setting.ZAPS.Infof("时间point:", t.UnixMilli())
+		//				location, _ := time.LoadLocation("Asia/Shanghai")
+		//				easternTime := t.In(location)
+		//				setting.ZAPS.Infof("Asia/Shanghai时间point:", easternTime)
+
 						var pType int
 
 						var num = GetInterfaceToInt(ycParam.Value)

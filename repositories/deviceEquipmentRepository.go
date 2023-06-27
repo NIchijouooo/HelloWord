@@ -26,3 +26,13 @@ func (r DeviceEquipmentRepository) GetEquipmentInfoByDevId(deviceId int) (models
 	err := r.db.Where("device_id = ?", deviceId).Find(&result).Error
 	return result, err
 }
+
+/*
+*
+根据设备id获取设备台账信息
+*/
+func (r DeviceEquipmentRepository) GetEquipmentInfoByDevIdList(deviceIdList string) ([]models.DeviceEquipmentAccountInfo, error) {
+	var result []models.DeviceEquipmentAccountInfo
+	err := r.db.Where("device_id in (?)", deviceIdList).Find(&result).Error
+	return result, err
+}

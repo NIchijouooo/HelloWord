@@ -153,7 +153,7 @@ type DeviceModel struct {
 	} `json:"property"`
 }
 
-// 根据设备ID获取所有模型
+// 根据设备ID获取遥测列表
 func (c *AuxiliaryController) GetEmDeviceModelCmdParamListByDeviceId(ctx *gin.Context) {
 	var tmp struct {
 		DeviceId int `json:"deviceId"`
@@ -163,8 +163,9 @@ func (c *AuxiliaryController) GetEmDeviceModelCmdParamListByDeviceId(ctx *gin.Co
 		return
 	}
 	array := []string{"yc"}
+	likeQuery := "param.data  like '%\"accessMode\":0%'" //等于0说明是不可控测点
 	var deviceCmdParamList []models.EmDeviceModelCmdParam
-	deviceCmdParamList, _ = c.emRepo.GetYcListByDeviceId(tmp.DeviceId, array)
+	deviceCmdParamList, _ = c.emRepo.GetCodesListByDeviceIdAndYxYc(tmp.DeviceId, array, likeQuery)
 	if deviceCmdParamList == nil {
 		ctx.JSON(http.StatusOK, model.ResponseData{
 			Code:    "1",
@@ -175,31 +176,41 @@ func (c *AuxiliaryController) GetEmDeviceModelCmdParamListByDeviceId(ctx *gin.Co
 
 	//收集所有codes查询最新测点信息
 	var codes []string
-	mapCodes := make(map[string]string) //按name进行label分组
 	for i := 0; i < len(deviceCmdParamList); i++ {
-		//var deviceModel DeviceModel
-		//err := json.Unmarshal([]byte(deviceCmdParamList[i].Data), &deviceModel) //取出不可控的遥测
-		//if err != nil {
-		//	continue
-		//}
-		//if deviceModel.Property.AccessMode == 0 { //等于0表示不可控，不等于0表示可控
 		codes = append(codes, deviceCmdParamList[i].Name)
-		mapCodes[deviceCmdParamList[i].Name] = deviceCmdParamList[i].Label
-		//}
 	}
+
 	//拿到所有不可控测点的最新数据
 	ycList, err := c.hisRepo.GetLastYcListByCode(strconv.Itoa(tmp.DeviceId), strings.Join(codes, ","))
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
-	for _, model := range ycList {
-		model.Name = mapCodes[strconv.Itoa(model.Code)]
+	ycMap := make(map[string]*models.YcData) //收集遥测信息
+	for i := 0; i < len(ycList); i++ {
+		ycMap[strconv.Itoa(ycList[i].Code)] = ycList[i]
 	}
+
+	var resYcData []ReturnModel.AuxYcData
+	for _, model := range deviceCmdParamList { //遍历结果 重新拼接，需要返回name，单位字段
+		var ycData ReturnModel.AuxYcData
+		var tmpMap = ycMap[model.Name]
+		ycData.Name = model.Label                 //从模型取
+		ycData.Unit = model.Unit                  //从模型取
+		ycData.ParamId = model.Id                 //从模型取
+		ycData.Code, _ = strconv.Atoi(model.Name) //从模型取
+		if tmpMap != nil {
+			ycData.DeviceId = tmpMap.DeviceId //从测点取
+			ycData.Ts = tmpMap.Ts             //从测点取
+			ycData.Value = tmpMap.Value       //从测点取
+		}
+		resYcData = append(resYcData, ycData)
+	}
+
 	ctx.JSON(http.StatusOK, model.ResponseData{
 		Code:    "0",
 		Message: "成功",
-		Data:    ycList,
+		Data:    resYcData,
 	})
 }
 
@@ -217,7 +228,8 @@ func (c *AuxiliaryController) GetDeviceControlPointList(ctx *gin.Context) {
 		return
 	}
 	array := []string{"yc", "yx"}
-	YkYtList, err := c.emRepo.GetYcListByDeviceId(tmp.DeviceId, array)
+	likeQuery := "param.data not like '%\"accessMode\":0%'" //不在0里面为可控测点
+	YkYtList, err := c.emRepo.GetCodesListByDeviceIdAndYxYc(tmp.DeviceId, array, likeQuery)
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -234,7 +246,6 @@ func (c *AuxiliaryController) GetDeviceControlPointList(ctx *gin.Context) {
 	var YcCodes []string
 	nameMap := make(map[string]models.EmDeviceModelCmdParam)
 	for i := 0; i < len(YkYtList); i++ {
-
 		if YkYtList[i].IotDataType == "yc" {
 			YcCodes = append(YcCodes, YkYtList[i].Name) //收集遥测code
 		} else if YkYtList[i].IotDataType == "yx" {
@@ -254,6 +265,7 @@ func (c *AuxiliaryController) GetDeviceControlPointList(ctx *gin.Context) {
 					if tmpMap != (models.EmDeviceModelCmdParam{}) { //如果存在对应的键值对 测点重新命名
 						tmpYcData.Name = tmpMap.Label
 						tmpYcData.Unit = tmpMap.Unit
+						tmpYcData.ParamId = tmpMap.Id //参数id用于控制
 					} else {
 						tmpYcData.Name = ycList[i].Name
 					}
@@ -277,6 +289,7 @@ func (c *AuxiliaryController) GetDeviceControlPointList(ctx *gin.Context) {
 					if tmpMap != (models.EmDeviceModelCmdParam{}) { //如果存在对应的键值对 测点重新命名
 						tmpYxData.Name = tmpMap.Label
 						tmpYxData.Unit = tmpMap.Unit
+						tmpYxData.ParamId = tmpMap.Id //参数id用于控制
 					} else {
 						tmpYxData.Name = yxList[i].Name
 					}

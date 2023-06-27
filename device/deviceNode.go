@@ -14,11 +14,12 @@ import (
 
 // 设备模板
 type DeviceNodeTemplate struct {
-	Index          int                     `json:"index"`          //设备偏移量
-	Name           string                  `json:"name"`           //设备名称
-	Label          string                  `json:"label"`          //设备标签
-	Addr           string                  `json:"addr"`           //设备地址
-	TSL            string                  `json:"tsl"`            //设备物模型
+	Index          int                     `json:"index"` //设备偏移量
+	Name           string                  `json:"name"`  //设备名称
+	Label          string                  `json:"label"` //设备标签
+	Addr           string                  `json:"addr"`  //设备地址
+	TSL            string                  `json:"tsl"`   //设备物模型
+	DeviceType     string                  `json:"deviceType"`
 	LastCommRTC    string                  `json:"lastCommRTC"`    //最后一次通信时间戳
 	CommTotalCnt   int                     `json:"commTotalCnt"`   //通信总次数
 	CommSuccessCnt int                     `json:"commSuccessCnt"` //通信成功次数

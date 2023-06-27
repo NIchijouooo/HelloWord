@@ -26,6 +26,7 @@ func ApiAddNode(context *gin.Context) {
 		Label         string `json:"label"`
 		Addr          string `json:"addr"`
 		TSL           string `json:"tsl"`
+		DeviceType    string `json:"deviceType"`
 	}{}
 
 	emController := controllers.NewEMController()
@@ -74,7 +75,7 @@ func ApiAddNode(context *gin.Context) {
 		return
 	}
 
-	_ = coll.AddDeviceNode(nodeInfo.Name, nodeInfo.TSL, nodeInfo.Addr, nodeInfo.Label)
+	_ = coll.AddDeviceNode(nodeInfo.Name, nodeInfo.TSL, nodeInfo.Addr, nodeInfo.Label, nodeInfo.DeviceType)
 	context.JSON(http.StatusOK, model.ResponseData{
 		Code:    "0",
 		Message: "增加设备成功",
@@ -146,12 +147,14 @@ func ApiAddNodesFromXlsx(context *gin.Context) {
 			Label         string `json:"label"`
 			Addr          string `json:"addr"`
 			TSL           string `json:"tsl"`
+			DeviceType    string `json:"deviceType"`
 		}{
 			CollInterface: cell[0],
 			Name:          cell[1],
 			Label:         cell[2],
 			Addr:          cell[3],
 			TSL:           cell[4],
+			DeviceType:    cell[5],
 		}
 
 		// 获取采集接口名称
@@ -168,7 +171,7 @@ func ApiAddNodesFromXlsx(context *gin.Context) {
 			continue
 		}
 
-		_ = coll.AddDeviceNode(nodeInfo.Name, nodeInfo.TSL, nodeInfo.Addr, nodeInfo.Label)
+		_ = coll.AddDeviceNode(nodeInfo.Name, nodeInfo.TSL, nodeInfo.Addr, nodeInfo.Label, nodeInfo.DeviceType)
 		// 导入cmd写入sqlite
 		emController := controllers.NewEMController()
 		emController.AddEmDeviceFromXlsx(nodeInfo.Name, nodeInfo.TSL, nodeInfo.Addr, nodeInfo.Label, nodeInfo.CollInterface)
@@ -253,10 +256,11 @@ func ApiAddNodesFromCSV(context *gin.Context) {
 	setting.ZAPS.Debugf("records %v", result.Records)
 	for _, record := range result.Records {
 		nodeInfo := struct {
-			Name  string `json:"name"`
-			Label string `json:"label"`
-			Addr  string `json:"addr"`
-			TSL   string `json:"tsl"`
+			Name       string `json:"name"`
+			Label      string `json:"label"`
+			Addr       string `json:"addr"`
+			TSL        string `json:"tsl"`
+			DeviceType string `json:"deviceType"`
 		}{
 			Name:  record.GetString("name"),
 			Label: record.GetString("label"),
@@ -270,7 +274,7 @@ func ApiAddNodesFromCSV(context *gin.Context) {
 			continue
 		}
 
-		_ = coll.AddDeviceNode(nodeInfo.Name, nodeInfo.TSL, nodeInfo.Addr, nodeInfo.Label)
+		_ = coll.AddDeviceNode(nodeInfo.Name, nodeInfo.TSL, nodeInfo.Addr, nodeInfo.Label, nodeInfo.DeviceType)
 	}
 
 	context.JSON(http.StatusOK, model.ResponseData{
@@ -304,8 +308,8 @@ func ApiExportNodesToCSV(context *gin.Context) {
 	fileName := exeCurDir + "/selfpara/" + collName + ".xlsx"
 
 	excelRecords := [][]string{
-		{"设备名称", "设备标签", "通信地址", "采集模型"},
-		{"name", "label", "addr", "tsl"},
+		{"设备名称", "设备标签", "通信地址", "采集模型", "设备类型"},
+		{"name", "label", "addr", "tsl", "deviceType"},
 	}
 	for _, v := range coll.DeviceNodeMap {
 		record := make([]string, 0)
@@ -313,6 +317,7 @@ func ApiExportNodesToCSV(context *gin.Context) {
 		record = append(record, v.Label)
 		record = append(record, v.Addr)
 		record = append(record, v.TSL)
+		record = append(record, v.DeviceType)
 		excelRecords = append(excelRecords, record)
 	}
 
@@ -330,8 +335,8 @@ func ApiExportNodesToCSV(context *gin.Context) {
 	//创建一个新的写入文件流
 	csvFile := csv.NewWriter(fs)
 	csvRecords := [][]string{
-		{"设备名称", "设备标签", "通信地址", "采集模型"},
-		{"name", "label", "addr", "tsl"},
+		{"设备名称", "设备标签", "通信地址", "采集模型", "设备类型"},
+		{"name", "label", "addr", "tsl", "deviceType"},
 	}
 
 	for _, v := range coll.DeviceNodeMap {
@@ -340,6 +345,7 @@ func ApiExportNodesToCSV(context *gin.Context) {
 		record = append(record, v.Label)
 		record = append(record, v.Addr)
 		record = append(record, v.TSL)
+		record = append(record, v.DeviceType)
 		csvRecords = append(csvRecords, record)
 	}
 
@@ -387,8 +393,8 @@ func ApiExportNodesToXlsx(context *gin.Context) {
 	fileName := "./tmp/collInterfaceDevices.xlsx"
 
 	cells := [][]string{
-		{"采集接口名称", "设备名称", "设备标签", "通信地址", "采集模型名称"},
-		{"collInterface", "name", "label", "addr", "tsl"},
+		{"采集接口名称", "设备名称", "设备标签", "通信地址", "采集模型名称", "设备类型"},
+		{"collInterface", "name", "label", "addr", "tsl", "deviceType"},
 	}
 
 	for _, v := range param.Names {
@@ -406,6 +412,7 @@ func ApiExportNodesToXlsx(context *gin.Context) {
 			record = append(record, d.Label)
 			record = append(record, d.Addr)
 			record = append(record, d.TSL)
+			record = append(record, d.DeviceType)
 			cells = append(cells, record)
 		}
 	}
@@ -436,6 +443,7 @@ func ApiModifyNode(context *gin.Context) {
 		Label         string `json:"label"`
 		Addr          string `json:"addr"`
 		TSL           string `json:"tsl"`
+		DeviceType    string `json:"deviceType"`
 	}{}
 
 	emController := controllers.NewEMController()
@@ -464,7 +472,7 @@ func ApiModifyNode(context *gin.Context) {
 		return
 	}
 
-	err = coll.ModifyDeviceNode(nodeInfo.Name, nodeInfo.TSL, nodeInfo.Addr, nodeInfo.Label)
+	err = coll.ModifyDeviceNode(nodeInfo.Name, nodeInfo.TSL, nodeInfo.Addr, nodeInfo.Label, nodeInfo.DeviceType)
 	if err != nil {
 		context.JSON(http.StatusOK, model.ResponseData{
 			Code:    "1",
@@ -651,6 +659,7 @@ func ApiGetNodes(context *gin.Context) {
 		Label             string `json:"label"`             //设备标签
 		Addr              string `json:"addr"`              //设备地址
 		TSL               string `json:"tsl"`               //设备物模型
+		DeviceType        string `json:"deviceType"`        //设备类型
 		LastCommRTC       string `json:"lastCommRTC"`       //最后一次通信时间戳
 		CommTotalCnt      int    `json:"commTotalCnt"`      //通信总次数
 		CommSuccessCnt    int    `json:"commSuccessCnt"`    //通信成功次数
@@ -685,6 +694,7 @@ func ApiGetNodes(context *gin.Context) {
 				node.Label = d.Label
 				node.Addr = d.Addr
 				node.TSL = d.TSL
+				node.DeviceType = d.DeviceType
 				node.LastCommRTC = d.LastCommRTC
 				node.CommTotalCnt = d.CommTotalCnt
 				node.CommSuccessCnt = d.CommSuccessCnt

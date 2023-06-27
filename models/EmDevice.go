@@ -18,6 +18,7 @@ type AddEmDevice struct {
 	Label         string `json:"label"`
 	Addr          string `json:"addr"`
 	Tsl           string `json:"tsl"`
+	DeviceType    string `json:"deviceType"`
 }
 
 func (u *EmDevice) TableName() string {

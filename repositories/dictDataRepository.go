@@ -88,8 +88,11 @@ func (r *DictDataRepository) SelectDictValue(dictType string, dictLabel string) 
 
 func (r *DictDataRepository) GetDictDataByDictType(dictType string) ([]models.DictData, error) {
 	var dictDataList []models.DictData
-	err := r.db.Where("dict_type = ?", dictType).Find(&dictDataList).Error
-	return dictDataList, err
+	if err := r.db.Where("dict_type = ?", dictType).Find(&dictDataList).Error; err != nil {
+		fmt.Println(err)
+		return nil, err
+	}
+	return dictDataList, nil
 }
 
 // 根据字典标签获取字典建值

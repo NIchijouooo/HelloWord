@@ -35,6 +35,7 @@ type AuxYcData struct {
 	Type     string           `json:"type"`     //类型
 	Ts       models.LocalTime `json:"ts"`       //时间
 	Unit     string           `json:"unit"`     //单位
+	ParamId  int              `json:"paramId"`  //参数id
 }
 type AuxYxData struct {
 	Code     int              `json:"code"`     //测点编码
@@ -44,6 +45,7 @@ type AuxYxData struct {
 	Type     string           `json:"type"`     //类型
 	Ts       models.LocalTime `json:"ts"`       //时间
 	Unit     string           `json:"unit"`     //单位
+	ParamId  int              `json:"paramId"`  //参数id
 }
 
 type LimitScope struct {
