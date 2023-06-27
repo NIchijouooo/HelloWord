@@ -530,6 +530,7 @@ const editDevice = (row) => {
     label: row.label, // 设备标签
     addr: row.addr, // 设备通信地址
     tsl: row.tsl, // 物模型
+    deviceType: row.deviceType
   }
 }
 const deviceFormRef = ref(null)
