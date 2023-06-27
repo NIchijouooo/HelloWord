@@ -154,6 +154,7 @@ func ApiAddNodesFromXlsx(context *gin.Context) {
 			Label:         cell[2],
 			Addr:          cell[3],
 			TSL:           cell[4],
+			DeviceType:    cell[5],
 		}
 
 		// 获取采集接口名称
@@ -307,8 +308,8 @@ func ApiExportNodesToCSV(context *gin.Context) {
 	fileName := exeCurDir + "/selfpara/" + collName + ".xlsx"
 
 	excelRecords := [][]string{
-		{"设备名称", "设备标签", "通信地址", "采集模型"},
-		{"name", "label", "addr", "tsl"},
+		{"设备名称", "设备标签", "通信地址", "采集模型", "设备类型"},
+		{"name", "label", "addr", "tsl", "deviceType"},
 	}
 	for _, v := range coll.DeviceNodeMap {
 		record := make([]string, 0)
@@ -316,6 +317,7 @@ func ApiExportNodesToCSV(context *gin.Context) {
 		record = append(record, v.Label)
 		record = append(record, v.Addr)
 		record = append(record, v.TSL)
+		record = append(record, v.DeviceType)
 		excelRecords = append(excelRecords, record)
 	}
 
@@ -333,8 +335,8 @@ func ApiExportNodesToCSV(context *gin.Context) {
 	//创建一个新的写入文件流
 	csvFile := csv.NewWriter(fs)
 	csvRecords := [][]string{
-		{"设备名称", "设备标签", "通信地址", "采集模型"},
-		{"name", "label", "addr", "tsl"},
+		{"设备名称", "设备标签", "通信地址", "采集模型", "设备类型"},
+		{"name", "label", "addr", "tsl", "deviceType"},
 	}
 
 	for _, v := range coll.DeviceNodeMap {
@@ -343,6 +345,7 @@ func ApiExportNodesToCSV(context *gin.Context) {
 		record = append(record, v.Label)
 		record = append(record, v.Addr)
 		record = append(record, v.TSL)
+		record = append(record, v.DeviceType)
 		csvRecords = append(csvRecords, record)
 	}
 
@@ -390,8 +393,8 @@ func ApiExportNodesToXlsx(context *gin.Context) {
 	fileName := "./tmp/collInterfaceDevices.xlsx"
 
 	cells := [][]string{
-		{"采集接口名称", "设备名称", "设备标签", "通信地址", "采集模型名称"},
-		{"collInterface", "name", "label", "addr", "tsl"},
+		{"采集接口名称", "设备名称", "设备标签", "通信地址", "采集模型名称", "设备类型"},
+		{"collInterface", "name", "label", "addr", "tsl", "deviceType"},
 	}
 
 	for _, v := range param.Names {
@@ -409,6 +412,7 @@ func ApiExportNodesToXlsx(context *gin.Context) {
 			record = append(record, d.Label)
 			record = append(record, d.Addr)
 			record = append(record, d.TSL)
+			record = append(record, d.DeviceType)
 			cells = append(cells, record)
 		}
 	}
