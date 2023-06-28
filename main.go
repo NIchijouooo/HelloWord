@@ -25,6 +25,9 @@ import (
 )
 
 func main() {
+	loc, _ := time.LoadLocation("Asia/Shanghai")
+	time.Local = loc
+
 	// 连接SQLite数据库
 	models.InitDB()
 	models.InitTaosDB()
