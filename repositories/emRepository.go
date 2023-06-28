@@ -298,3 +298,87 @@ func (r *EmRepository) GetCodesListByDeviceIdAndYxYc(deviceId int, iotDataType [
 	}
 	return emDeviceModelCmdParamList, nil
 }
+
+func (r *EmRepository) GetDeviceList(param models.DevicePageParam) ([]models.EmDeviceParamVO, int64, error) {
+	var (
+		emDeviceVOList []models.EmDeviceParamVO
+		emDeviceList []models.EmDevice
+		total        int64
+	)
+	//处理分页
+	page := 1
+	pageSize := 10
+	if param.PageNum > 0 {
+		page = param.PageNum
+	}
+	if param.PageSize > 0 {
+		pageSize = param.PageSize
+	}
+	offset := (page - 1) * pageSize
+	//拼接sql
+	query := r.db.Model(&models.EmDevice{})
+	query.Where("1 = 1")
+	if param.KeyWork != "" {
+		// 构建查询条件
+		//condition1 := query.Where("name LIKE ?", "%"+param.KeyWork+"%")
+		//condition2 := query.Where("label LIKE ?", "%"+param.KeyWork+"%")
+		//// 使用Or方法进行条件查询
+		//query.Where(condition1.Or(condition2))
+		query = query.Where("name LIKE ? OR label LIKE ?", "%"+param.KeyWork+"%", "%"+param.KeyWork+"%")
+	}
+	if err := query.Count(&total).Error; err != nil {
+		return nil, 0, err
+	}
+
+	if err := query.Offset(offset).Limit(pageSize).Find(&emDeviceList).Error; err != nil {
+		return nil, 0, err
+	}
+
+	dictRepo := NewDictDataRepository()
+	dictDataList, _ := dictRepo.GetListByDiceType("device_type")
+	m := make(map[string]string)
+
+	// 遍历数组元素并将其添加到map中
+	for _, item := range dictDataList {
+		m[item.DictValue] = item.DictLabel
+	}
+
+	for _, emDevice := range emDeviceList {
+		vo := models.EmDeviceParamVO{
+			Id:				emDevice.Id,
+			Name:			emDevice.Name,
+			Label:			emDevice.Label,
+			DeviceType:		emDevice.DeviceType,
+			DeviceTypeKey:	m[emDevice.DeviceType],
+		}
+
+		ea, _ := r.GetEmDeviceEquipmentAccountByDevId(emDevice.Id)
+		if ea.ID > 0{
+			vo.Manufacturer = ea.Manufacturer
+			vo.Polarity = ea.Polarity
+			vo.FactoryModel = ea.FactoryModel
+		}
+		emDeviceVOList = append(emDeviceVOList, vo)
+	}
+
+
+	return emDeviceVOList, total, nil
+}
+
+
+// 获取单个设备台账
+func (r *EmRepository) GetEmDeviceEquipmentAccountByDevId(deviceId int) (models.DeviceEquipmentAccountInfo, error) {
+	var ea models.DeviceEquipmentAccountInfo
+	query := r.db.Model(&models.DeviceEquipmentAccountInfo{})
+	err := query.Where("device_id = ?", deviceId).First(&ea).Error
+	return ea, err
+}
+
+// 修改字典类型
+func (r *EmRepository) UpdateEmDeviceEquipmentAccountByDevId(ea *models.DeviceEquipmentAccountInfo) error {
+	return r.db.Save(ea).Error
+}
+// 新增字典类型
+func (r *EmRepository) CreateEmDeviceEquipmentAccountByDevId(ea *models.DeviceEquipmentAccountInfo) error {
+	return r.db.Create(ea).Error
+}

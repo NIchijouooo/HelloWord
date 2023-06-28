@@ -38,11 +38,16 @@ func (c *EmController) RegisterRoutes(router *gin.RouterGroup) {
 	router.POST("/api/v2/em/addEmDevice", c.AddEmDevice)
 	router.POST("/api/v2/em/updateEmDevice", c.AddEmDevice)
 	router.POST("/api/v2/em/delEmDevice", c.AddEmDevice)
+	router.POST("/api/v2/em/getDeviceList", c.GetDeviceList)
 	// 设备模型
 	router.POST("/api/v2/em/addEmDeviceModel", c.AddEmDeviceModel)
 	router.POST("/api/v2/em/addEmDeviceModelCmd", c.AddEmDeviceModelCmd)
 	router.POST("/api/v2/em/addEmDeviceModelCmdParam", c.AddEmDeviceModelCmdParam)
 	router.POST("/api/v2/em/getEmDeviceModelCmdParamListByName", c.GetEmDeviceModelCmdParamListByName)
+	//设备台账
+	router.POST("/api/v2/em/getEmDeviceEquipmentAccountByDevId", c.GetEmDeviceEquipmentAccountByDevId)
+	router.POST("/api/v2/em/updateEmDeviceEquipmentAccountByDevId", c.UpdateEmDeviceEquipmentAccountByDevId)
+
 }
 
 func (c *EmController) GetAllCommInterfaceProtocols(ctx *gin.Context) {
@@ -400,6 +405,33 @@ func (c *EmController) DeleteEmDevice(ctx *gin.Context) {
 		c.repo.DeleteEmDevice(emDeviceByName.Id)
 	}
 	return
+}
+//获取设备列表，设备名称，设备标签模糊搜索
+func (c *EmController) GetDeviceList(ctx *gin.Context) {
+	var devicePageParam models.DevicePageParam
+	if err := ctx.ShouldBindBodyWith(&devicePageParam, binding.JSON); err != nil {
+		ctx.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+	var list []models.EmDeviceParamVO
+	list, total, err := c.repo.GetDeviceList(devicePageParam)
+	if err != nil {
+		ctx.JSON(http.StatusOK, model.ResponseData{
+			"1",
+			"error" + err.Error(),
+			"",
+		})
+		return
+	}
+	// 将查询结果返回给客户端
+	ctx.JSON(http.StatusOK, model.ResponseData{
+		"0",
+		"",
+		gin.H{
+			"data":  list,
+			"total": total,
+		},
+	})
 }
 
 func (c *EmController) AddEmDeviceModel(ctx *gin.Context) {
@@ -938,5 +970,62 @@ func (c *EmController) GetEmDeviceModelCmdParamListByName(ctx *gin.Context) {
 		Code:    "0",
 		Message: "成功",
 		Data:    retList,
+	})
+}
+
+func (c *EmController) GetEmDeviceEquipmentAccountByDevId(ctx *gin.Context) {
+	var tmp struct {
+		DeviceId int `json:"deviceId"`
+	}
+	if err := ctx.ShouldBindBodyWith(&tmp, binding.JSON); err != nil {
+		ctx.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+	var deviceEquipmentAccountInfo models.DeviceEquipmentAccountInfo
+	deviceEquipmentAccountInfo, _ = c.repo.GetEmDeviceEquipmentAccountByDevId(tmp.DeviceId)
+	if deviceEquipmentAccountInfo.ID <= 0 {
+		deviceEquipmentAccountInfo.ID = -1
+	}
+	ctx.JSON(http.StatusOK, model.ResponseData{
+		Code:    "0",
+		Message: "成功",
+		Data:    deviceEquipmentAccountInfo,
+	})
+
+}
+
+func (c *EmController) UpdateEmDeviceEquipmentAccountByDevId(ctx *gin.Context) {
+	var ea models.DeviceEquipmentAccountInfo
+	if err := ctx.ShouldBindJSON(&ea); err != nil {
+		ctx.JSON(http.StatusOK, model.ResponseData{
+			"1",
+			"error" + err.Error(),
+			"",
+		})
+		return
+	}
+	if ea.ID <= 0 {
+		if err := c.repo.CreateEmDeviceEquipmentAccountByDevId(&ea); err != nil {
+			ctx.JSON(http.StatusOK, model.ResponseData{
+				"1",
+				"error" + err.Error(),
+				"",
+			})
+			return
+		}
+	}else {
+		if err := c.repo.UpdateEmDeviceEquipmentAccountByDevId(&ea); err != nil {
+			ctx.JSON(http.StatusOK, model.ResponseData{
+				"1",
+				"error" + err.Error(),
+				"",
+			})
+			return
+		}
+	}
+	ctx.JSON(http.StatusOK, model.ResponseData{
+		"0",
+		"",
+		ea,
 	})
 }
