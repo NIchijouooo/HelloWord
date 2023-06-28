@@ -54,11 +54,11 @@ func (r *RuleHistoryRepository) InsertRuleHistoryDevice(emRuleHistoryDeviceModel
 *
 获取告警历史集合
 */
-func (r *RuleHistoryRepository) GetRuleHistoryList(param models.RuleHistoryParam) ([]models.EmRuleHistoryModel, int64, error) {
+func (r *RuleHistoryRepository) GetRuleHistoryList(param models.RuleHistoryParam) ([]models.EmRuleHistoryVo, int64, error) {
 	pageNum := param.PageNum
 	pageSize := param.PageSize
 	var (
-		historyList []models.EmRuleHistoryModel
+		historyList []models.EmRuleHistoryVo
 		total       int64
 	)
 	query := r.db.Table("rule_history ruleHis").
@@ -115,7 +115,7 @@ func (r *RuleHistoryRepository) GetRuleHistoryList(param models.RuleHistoryParam
 	if pageNum > 0 && pageSize > 0 {
 		countErr := query.Count(&total).Error
 		if countErr != nil || total == 0 {
-			return []models.EmRuleHistoryModel{}, 0, countErr
+			return []models.EmRuleHistoryVo{}, 0, countErr
 		}
 		// 计算页数
 		pages := total / pageSize
@@ -132,7 +132,7 @@ func (r *RuleHistoryRepository) GetRuleHistoryList(param models.RuleHistoryParam
 	}
 	err := query.Select("ruleHis.*,ruleHisDev.device_id,ruleHisDev.property_code,dev.name as device_name").Order("ruleHis.produce_time desc").Find(&historyList).Error
 	if err != nil {
-		return []models.EmRuleHistoryModel{}, 0, err
+		return []models.EmRuleHistoryVo{}, 0, err
 	}
 	if pageNum == 0 || pageSize == 0 {
 		total = int64(len(historyList))
@@ -148,13 +148,13 @@ func (r *RuleHistoryRepository) GetRuleHistoryStatistic(param models.RuleHistory
 	}
 	var result models.EventStatisticVo
 	// 告警等级map,key=等级,value=等级对应的历史告警集合
-	levelMap := make(map[int][]models.EmRuleHistoryModel)
+	levelMap := make(map[int][]models.EmRuleHistoryVo)
 	if len(historyList) > 0 {
 		for _, event := range historyList {
 			level := event.Level
 			list, ok := levelMap[level]
 			if !ok {
-				list = []models.EmRuleHistoryModel{}
+				list = []models.EmRuleHistoryVo{}
 			}
 			list = append(list, event)
 			levelMap[level] = list

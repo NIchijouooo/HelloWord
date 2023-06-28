@@ -1,6 +1,6 @@
 package models
 
-type EmRuleHistoryModel struct {
+type EmRuleHistoryVo struct {
 	Id                 int    `json:"id" gorm:"primary_key"`
 	RuleId             int    `json:"ruleId"`
 	RuleName           string `json:"ruleName"`
@@ -12,8 +12,11 @@ type EmRuleHistoryModel struct {
 	Tag                int    `json:"tag"` // 恢复标记：0-未确认，1-自动恢复 2-手动恢复
 	CreateTime         string `json:"createTime"`
 	UpdateTime         string `json:"updateTime"`
+	DeviceId           int    `json:"deviceId"`
+	PropertyCode       int    `json:"propertyCode"`
+	DeviceName         string `json:"deviceName"`
 }
 
-func (u *EmRuleHistoryModel) TableName() string {
+func (u *EmRuleHistoryVo) TableName() string {
 	return "rule_history"
 }
