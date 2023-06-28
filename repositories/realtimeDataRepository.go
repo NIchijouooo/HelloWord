@@ -196,6 +196,36 @@ func (r *RealtimeDataRepository) BatchCreateEsChargeDischargeModel(realtimeList 
 
 /*
 *
+批量添加充放电和收益
+*/
+func (r *RealtimeDataRepository) BatchCreateEsHourChargeDischargeModel(realtimeList []*models.EsChargeDischargeModel) error {
+	var err error
+	for _, realtime := range realtimeList {
+		taosSql := fmt.Sprintf("INSERT INTO realtimedata.charge_discharge_hour_%v"+
+			" (ts,charge_capacity,discharge_capacity,profit,"+
+			"top_charge_capacity,top_discharge_capacity,top_profit,"+
+			"peak_charge_capacity,peak_discharge_capacity,peak_profit,"+
+			"flat_charge_capacity,flat_discharge_capacity,flat_profit,"+
+			"valley_charge_capacity,valley_discharge_capacity,valley_profit) "+
+			"using realtimedata.charge_discharge_hour tags(%v) "+
+			"VALUES (%v,%v, %v, %v, %v,%v, %v, %v, %v,%v, %v, %v, %v,%v, %v, %v)",
+			realtime.DeviceId, realtime.DeviceId,
+			realtime.Ts, realtime.ChargeCapacity, realtime.DischargeCapacity, realtime.Profit,
+			realtime.TopChargeCapacity, realtime.TopDischargeCapacity, realtime.TopProfit,
+			realtime.PeakChargeCapacity, realtime.PeakDischargeCapacity, realtime.PeakProfit,
+			realtime.FlatChargeCapacity, realtime.FlatDischargeCapacity, realtime.FlatProfit,
+			realtime.ValleyChargeCapacity, realtime.ValleyDischargeCapacity, realtime.ValleyProfit)
+
+		_, err := r.taosDb.Exec(taosSql)
+		if err != nil {
+			fmt.Println("err : ", err)
+		}
+	}
+	return err
+}
+
+/*
+*
 批量添加setting
 */
 func (r *RealtimeDataRepository) BatchCreateSetting(realtimeList []*models.SettingData) error {
@@ -456,11 +486,39 @@ func (r *RealtimeDataRepository) GetSettingListByDevIdsAndCodes(deviceIds, codes
 
 /*
 *
-获取多个yc，好像写重复了
+获取最后一条数据
 */
 func (r *RealtimeDataRepository) GetLastYcHistoryByDeviceIdListAndCodeList(codes string, beginDt int64, endDt int64) ([]models.YcData, error) {
 	realtimeData := make([]models.YcData, 0)
 	taosSql := fmt.Sprintf("select Last(ts) as ts, val as `value`, device_id as deviceId, code from realtimedata.yc where code in (%v) and ts >= %v and ts < %v group by device_id,code", codes, beginDt, endDt)
+
+	rows, err := r.taosDb.Query(taosSql)
+	if err != nil {
+		log.Printf("Query error: %v", err)
+		return realtimeData, err
+	}
+	defer rows.Close()
+
+	if rows != nil {
+		for rows.Next() {
+			realtime := models.YcData{}
+			scanErr := rows.Scan(&realtime.Ts, &realtime.Value, &realtime.DeviceId, &realtime.Code)
+			if scanErr != nil {
+				log.Printf("Request params:%v", err)
+			}
+			realtimeData = append(realtimeData, realtime)
+		}
+	}
+	return realtimeData, err
+}
+
+/*
+*
+获取第一条数据
+*/
+func (r *RealtimeDataRepository) GetFirstYcHistoryByDeviceIdListAndCodeList(codes string, beginDt int64, endDt int64) ([]models.YcData, error) {
+	realtimeData := make([]models.YcData, 0)
+	taosSql := fmt.Sprintf("select first(ts) as ts, val as `value`, device_id as deviceId, code from realtimedata.yc where code in (%v) and ts >= %v and ts < %v group by device_id,code", codes, beginDt, endDt)
 
 	rows, err := r.taosDb.Query(taosSql)
 	if err != nil {
