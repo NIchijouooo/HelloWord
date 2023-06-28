@@ -20,6 +20,7 @@ func NewRuleHistoryController() *RuleHistoryController {
 
 func (c *RuleHistoryController) RegisterRoutes(router *gin.RouterGroup) {
 	router.POST("/api/v2/ruleHistory/getRuleHistoryList", c.getRuleHistoryList)
+	router.POST("/api/v2/ruleHistory/getRuleHistoryStatistic", c.getRuleHistoryStatistic)
 	//router.POST("/api/v2/em/addCommInterface", c.AddCommInterface)
 	//router.POST("/api/v2/em/communication", c.GetCommInterfaces)
 	//router.DELETE("/api/v2/em/delComInterface", c.DelComInterface)
@@ -52,5 +53,35 @@ func (c *RuleHistoryController) getRuleHistoryList(ctx *gin.Context) {
 			"data":  list,
 			"total": total,
 		},
+	})
+}
+
+/*
+*
+获取历史告警统计数据
+*/
+func (c *RuleHistoryController) getRuleHistoryStatistic(ctx *gin.Context) {
+	var param models.RuleHistoryParam
+	if err := ctx.Bind(&param); err != nil {
+		ctx.JSON(http.StatusOK, model.ResponseData{
+			Code:    "1",
+			Message: "error" + err.Error(),
+			Data:    "",
+		})
+		return
+	}
+	data, err := c.repo.GetRuleHistoryStatistic(param)
+	if err != nil {
+		ctx.JSON(http.StatusOK, model.ResponseData{
+			Code:    "1",
+			Message: "error" + err.Error(),
+			Data:    "",
+		})
+		return
+	}
+	// 将查询结果返回给客户端
+	ctx.JSON(http.StatusOK, model.ResponseData{
+		Code: "0",
+		Data: data,
 	})
 }

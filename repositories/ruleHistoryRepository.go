@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"gateway/models"
 	"gorm.io/gorm"
+	"strconv"
 )
 
 type RuleHistoryRepository struct {
@@ -70,6 +71,11 @@ func (r *RuleHistoryRepository) GetRuleHistoryList(param models.RuleHistoryParam
 	if len(deviceIds) > 0 {
 		query.Where("ruleHisDev.device_id in ?", deviceIds)
 	}
+	// 设备类型集合
+	deviceTypeList := param.DeviceTypeList
+	if len(deviceTypeList) > 0 {
+		query.Where("dev.device_type in ?", deviceTypeList)
+	}
 	// 按点位查询
 	codes := param.Codes
 	if len(codes) > 0 {
@@ -132,4 +138,55 @@ func (r *RuleHistoryRepository) GetRuleHistoryList(param models.RuleHistoryParam
 		total = int64(len(historyList))
 	}
 	return historyList, total, nil
+}
+
+func (r *RuleHistoryRepository) GetRuleHistoryStatistic(param models.RuleHistoryParam) (models.EventStatisticVo, error) {
+	// 查告警列表
+	historyList, _, err := r.GetRuleHistoryList(param)
+	if err != nil {
+		return models.EventStatisticVo{}, err
+	}
+	var result models.EventStatisticVo
+	// 告警等级map,key=等级,value=等级对应的历史告警集合
+	levelMap := make(map[int][]models.EmRuleHistoryModel)
+	if len(historyList) > 0 {
+		for _, event := range historyList {
+			level := event.Level
+			list, ok := levelMap[level]
+			if !ok {
+				list = []models.EmRuleHistoryModel{}
+			}
+			list = append(list, event)
+			levelMap[level] = list
+		}
+	}
+	// 查告警等级字典
+	dictList, err := NewDictDataRepository().GetDictDataByDictType("event_level_list")
+	if err != nil {
+		return models.EventStatisticVo{}, err
+	}
+	var eventLevelStatisticList []models.EventStatisticData
+	total := 0
+	if len(dictList) > 0 {
+		// 封装数据
+		for _, data := range dictList {
+			level, err := strconv.Atoi(data.DictValue)
+			if err != nil {
+				continue
+			}
+			// 按等级获取历史告警集合
+			list := levelMap[level]
+			size := len(list)
+			total += size
+			statistic := models.EventStatisticData{
+				Total: size,
+				Code:  data.DictValue,
+				Name:  data.DictLabel,
+			}
+			eventLevelStatisticList = append(eventLevelStatisticList, statistic)
+		}
+	}
+	result.EventLevelStatisticList = eventLevelStatisticList
+	result.Total = total
+	return result, err
 }
