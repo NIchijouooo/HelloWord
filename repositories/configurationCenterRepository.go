@@ -49,6 +49,25 @@ func (r *ConfigurationCenterRepository) GetConfigurationList(province string, mo
 	return configurationList, total, nil
 }
 
+// 获取电费配置列表
+func (r *ConfigurationCenterRepository) GetConfigurationCheckById(id int, province string, month string) ([]models.EmConfiguration, error) {
+	var (
+		configurationList []models.EmConfiguration
+	)
+	var err error
+	query := r.db.Model(&models.EmConfiguration{})
+	if province == "" || month == "" || id <= 0{
+		return nil, err
+	}
+
+	query = query.Where("id <> ?", id).Where("month = ?", month).Where("province = ?", province)
+	if err := query.Find(&configurationList).Error; err != nil {
+		return nil, err
+	}
+
+	return configurationList, nil
+}
+
 // 删除电费配置
 func (r *ConfigurationCenterRepository) DeleteConfiguration(id int) error {
 	return r.db.Delete(&models.EmConfiguration{}, id).Error

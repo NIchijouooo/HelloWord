@@ -48,3 +48,38 @@ func (r *LimitConfigRepository) GetLimitConfigListByDeviceTypeAndCodes(deviceTyp
 	}
 	return limitConfigList, nil
 }
+
+//
+func (r *LimitConfigRepository) GetLimitConfigListCheckById(id int, propertyCode string) ([]models.LimitConfigVo, error) {
+	var (
+		limitConfigVoList []models.LimitConfigVo
+	)
+	var err error
+	query := r.db.Model(&models.LimitConfigVo{})
+	if propertyCode == "" || id <= 0{
+		return nil, err
+	}
+	query = query.Where("id <> ?", id).Where("property_code = ?", propertyCode)
+	if err := query.Find(&limitConfigVoList).Error; err != nil {
+		return nil, err
+	}
+
+	return limitConfigVoList, nil
+}
+
+//
+func (r *LimitConfigRepository) GetLimitConfigListList(propertyCode string) ([]models.LimitConfigVo, error) {
+	var (
+		configurationList []models.LimitConfigVo
+	)
+
+	query := r.db.Model(&models.LimitConfigVo{})
+	if propertyCode != "" {
+		query = query.Where("property_code = ?", propertyCode)
+	}
+	if err := query.Find(&configurationList).Error; err != nil {
+		return nil, err
+	}
+
+	return configurationList, nil
+}

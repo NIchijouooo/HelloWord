@@ -42,6 +42,26 @@ func (c *ConfigurationCenterController) AddConfiguration(ctx *gin.Context) {
 		})
 		return
 	}
+	//20230628同一省份同一月不能重复
+	configurationList, _, err := c.repo.GetConfigurationList(configuration.Province, configuration.Month, 1, 10)
+	if err != nil {
+		ctx.JSON(http.StatusOK, model.ResponseData{
+			"1",
+			"error" + err.Error(),
+			"",
+		})
+		return
+	}
+
+	if len(configurationList) > 0 {
+		ctx.JSON(http.StatusOK, model.ResponseData{
+			"1",
+			"不能重复添加该省份当月数据",
+			"",
+		})
+		return
+	}
+
 	if err := c.repo.AddConfiguration(&configuration); err != nil {
 		ctx.JSON(http.StatusOK, model.ResponseData{
 			"0",
@@ -68,6 +88,26 @@ func (c *ConfigurationCenterController) UpdateConfiguration(ctx *gin.Context) {
 		})
 		return
 	}
+	//20230628同一省份同一月不能重复,查id不同的其他数据，
+	configurationList, err := c.repo.GetConfigurationCheckById(configuration.Id, configuration.Province, configuration.Month)
+	if err != nil {
+		ctx.JSON(http.StatusOK, model.ResponseData{
+			"1",
+			"error" + err.Error(),
+			"",
+		})
+		return
+	}
+
+	if len(configurationList) > 0 {
+		ctx.JSON(http.StatusOK, model.ResponseData{
+			"1",
+			"不能重复添加该省份当月数据",
+			"",
+		})
+		return
+	}
+
 	if err := c.repo.UpdateConfiguration(&configuration); err != nil {
 		ctx.JSON(http.StatusOK, model.ResponseData{
 			"0",
