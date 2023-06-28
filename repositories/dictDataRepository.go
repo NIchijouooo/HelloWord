@@ -37,10 +37,6 @@ func (r *DictDataRepository) GetAll(dictLabel, dictType string, page, pageSize i
 		dictDataList []models.DictData
 		total        int64
 	)
-	fmt.Println(dictLabel)
-	fmt.Println(dictType)
-	fmt.Println(page)
-	fmt.Println(pageSize)
 	if page <= 0 {
 		page = 1
 	}
@@ -62,6 +58,26 @@ func (r *DictDataRepository) GetAll(dictLabel, dictType string, page, pageSize i
 	fmt.Println(sql)
 
 	return dictDataList, total, nil
+}
+
+// 获取所有字典类型
+func (r *DictDataRepository) GetListByDiceType(dictType string) ([]models.DictData, error) {
+	var (
+		dictDataList []models.DictData
+		total        int64
+	)
+	query := r.db.Model(&models.DictData{})
+	if dictType != "" {
+		query = query.Where("dict_type = ?", dictType)
+	}
+
+	if err := query.Count(&total).Error; err != nil {
+		return nil, err
+	}
+	sql := query.Find(&dictDataList).Statement.SQL.String()
+	fmt.Println(sql)
+
+	return dictDataList, nil
 }
 
 // 获取单个字典类型
