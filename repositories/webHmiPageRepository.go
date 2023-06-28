@@ -2,6 +2,7 @@ package repositories
 
 import (
 	"bytes"
+	"crypto/tls"
 	"encoding/json"
 	"fmt"
 	"gateway/models"
@@ -39,6 +40,19 @@ func GetWebHmiPageInfo(webHmiPageCode string) (id int, iotToken string) {
 	// 准备POST请求的数据
 	requestData := "{\"code\": \"" + webHmiPageCode + "\"}"
 
+	// 创建一个自定义的TLS配置
+	tlsConfig := &tls.Config{
+		// 忽略证书验证
+		InsecureSkipVerify: true,
+	}
+
+	// 创建一个自定义的HTTP客户端
+	client := &http.Client{
+		Transport: &http.Transport{
+			TLSClientConfig: tlsConfig,
+		},
+	}
+
 	// 发送POST请求
 	req, err := http.NewRequest("POST", "https://interface.feisjy.com/qianhai/hmiPage/getHmiPageInfoByCode", bytes.NewBuffer([]byte(requestData)))
 	if err != nil {
@@ -50,7 +64,7 @@ func GetWebHmiPageInfo(webHmiPageCode string) (id int, iotToken string) {
 	req.Header.Set("Authorization", token)
 
 	// 发送请求
-	resp, err := http.DefaultClient.Do(req)
+	resp, err := client.Do(req)
 	if err != nil {
 		panic(err)
 	}
@@ -98,10 +112,24 @@ func GetWebHmiPageInfo(webHmiPageCode string) (id int, iotToken string) {
 }
 
 func iotLogin() (isLogin bool) {
+
+	// 创建一个自定义的TLS配置
+	tlsConfig := &tls.Config{
+		// 忽略证书验证
+		InsecureSkipVerify: true,
+	}
+
+	// 创建一个自定义的HTTP客户端
+	client := &http.Client{
+		Transport: &http.Transport{
+			TLSClientConfig: tlsConfig,
+		},
+	}
+
 	// 准备POST请求的数据
 	requestData := "{\"checkCode\": false,\"code\": false,\"userAccountNum\": \"admin\",\"password\": \"Feisjy@2016\",\"domain\": \"iot.feisjy.com\",\"isHmiLogin\": true,\"isEncryption\": \"1\",\"scenesId\": \"18\"}"
 	// 发送POST请求
-	resp, err := http.Post("https://interface.feisjy.com/auth/m2mLogin", "application/json", bytes.NewBuffer([]byte(requestData)))
+	resp, err := client.Post("https://interface.feisjy.com/auth/m2mLogin", "application/json", bytes.NewBuffer([]byte(requestData)))
 	if err != nil {
 		panic(err)
 	}

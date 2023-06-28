@@ -36,15 +36,6 @@ func (c *RuleHistoryController) getRuleHistoryList(ctx *gin.Context) {
 		})
 		return
 	}
-	deviceIds := param.DeviceIds
-	if len(deviceIds) == 0 {
-		ctx.JSON(http.StatusOK, model.ResponseData{
-			Code:    "1",
-			Message: "参数错误",
-			Data:    "",
-		})
-		return
-	}
 	list, total, err := c.repo.GetRuleHistoryList(param)
 	if err != nil {
 		ctx.JSON(http.StatusOK, model.ResponseData{

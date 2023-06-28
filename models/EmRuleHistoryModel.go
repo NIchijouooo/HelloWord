@@ -14,6 +14,7 @@ type EmRuleHistoryModel struct {
 	UpdateTime         string `json:"updateTime"`
 	DeviceId           int    `json:"deviceId"`
 	PropertyCode       int    `json:"propertyCode"`
+	DeviceName         string `json:"deviceName"`
 }
 
 func (u *EmRuleHistoryModel) TableName() string {

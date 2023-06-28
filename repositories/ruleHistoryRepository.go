@@ -1,6 +1,7 @@
 package repositories
 
 import (
+	"fmt"
 	"gateway/models"
 	"gorm.io/gorm"
 )
@@ -61,8 +62,14 @@ func (r *RuleHistoryRepository) GetRuleHistoryList(param models.RuleHistoryParam
 	)
 	query := r.db.Table("rule_history ruleHis").
 		Joins("join rule_history_device ruleHisDev").
+		Joins("join em_device dev").
 		Where("ruleHis.id = ruleHisDev.rule_history_id").
-		Where("ruleHisDev.device_id in ?", param.DeviceIds)
+		Where("dev.id = ruleHisDev.device_id")
+	// 设备id
+	deviceIds := param.DeviceIds
+	if len(deviceIds) > 0 {
+		query.Where("ruleHisDev.device_id in ?", deviceIds)
+	}
 	// 按点位查询
 	codes := param.Codes
 	if len(codes) > 0 {
@@ -87,6 +94,17 @@ func (r *RuleHistoryRepository) GetRuleHistoryList(param models.RuleHistoryParam
 	if len(tag) > 0 {
 		query.Where("ruleHis.tag = ?", tag)
 	}
+	// 告警详情
+	description := param.Description
+	if len(description) > 0 {
+		description = fmt.Sprint("%", description, "%")
+		query.Where("ruleHis.description like ?", description)
+	}
+	deviceName := param.DeviceName
+	if len(deviceName) > 0 {
+		deviceName = fmt.Sprint("%", deviceName, "%")
+		query.Where("dev.name like ?", deviceName)
+	}
 	// 分页查询
 	if pageNum > 0 && pageSize > 0 {
 		countErr := query.Count(&total).Error
@@ -106,7 +124,7 @@ func (r *RuleHistoryRepository) GetRuleHistoryList(param models.RuleHistoryParam
 		offsetIndex := (pageNum - 1) * pageSize
 		query.Offset(int(offsetIndex)).Limit(int(offsetIndex + pageSize))
 	}
-	err := query.Select("ruleHis.*,ruleHisDev.device_id,ruleHisDev.property_code").Order("ruleHis.produce_time desc").Find(&historyList).Error
+	err := query.Select("ruleHis.*,ruleHisDev.device_id,ruleHisDev.property_code,dev.name as device_name").Order("ruleHis.produce_time desc").Find(&historyList).Error
 	if err != nil {
 		return []models.EmRuleHistoryModel{}, 0, err
 	}

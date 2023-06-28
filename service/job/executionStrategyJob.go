@@ -7,6 +7,8 @@ import (
 	"gateway/models"
 	"gateway/repositories"
 	"gateway/setting"
+	"strconv"
+	"strings"
 	"time"
 )
 
@@ -54,6 +56,42 @@ func ExecutionStrategy() {
 			sendStrategyVal(0, nowTime.Hour(), nowTime.Minute())
 		}
 	}
+}
+
+/*
+*
+重置功率,原来策略状态为开启,改为关闭或者删除策略时需要重置功率
+*/
+func ResetPower(strategy models.EmStrategy) {
+	startTimeStr := strategy.StartTime
+	endTimeStr := strategy.EndTime
+	if len(startTimeStr) == 0 || len(endTimeStr) == 0 {
+		return
+	}
+	now := time.Now()
+	// 截取小时和分钟并转换成int
+	startArray := strings.Split(startTimeStr, ":")
+	endArray := strings.Split(endTimeStr, ":")
+	startHour, startHourErr := strconv.Atoi(startArray[0])
+	endHour, endHourErr := strconv.Atoi(endArray[0])
+	startMinute, startMinuteErr := strconv.Atoi(startArray[1])
+	endMinute, endMinuteErr := strconv.Atoi(endArray[1])
+	if startHourErr != nil || endHourErr != nil || startMinuteErr != nil || endMinuteErr != nil {
+		setting.ZAPS.Errorf("策略配置时间错误,id=%d,startHourErr=%v,endHourErr=%v,startMinuteErr=%v,endMinuteErr=%v", strategy.Id, startHourErr, endHourErr, startMinuteErr, endMinuteErr)
+		return
+	}
+	// 按当天时间设置小时分钟,计算需要下发多少次重置
+	startTime := time.Date(now.Year(), now.Month(), now.Day(), startHour, startMinute, 0, 0, now.Location())
+	endTime := time.Date(now.Year(), now.Month(), now.Day(), endHour, endMinute, 0, 0, now.Location())
+	startMilli := startTime.UnixMilli()
+	endMilli := endTime.UnixMilli()
+	// 每次加半小时,从开始时间到结束时间前都重置为0
+	for i := startMilli; i < endMilli && i < now.UnixMilli(); i += 30 * 60 * 1000 {
+		resetTime := time.UnixMilli(i)
+		// 重置功率
+		sendStrategyVal(0, resetTime.Hour(), resetTime.Minute())
+	}
+
 }
 
 /*
