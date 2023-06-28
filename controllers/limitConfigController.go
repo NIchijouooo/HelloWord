@@ -91,7 +91,7 @@ func (c *LimitConfigController) SaveLimitConfig(ctx *gin.Context) {
 		}
 	} else {
 		//20230628同一点位不能重复
-		configurationList, err := c.repo.GetLimitConfigListList(limitConfig.PropertyCode)
+		configurationList, err := c.repo.GetLimitConfigListList(limitConfig.DeviceType, limitConfig.PropertyCode)
 		if err != nil {
 			ctx.JSON(http.StatusOK, model.ResponseData{
 				"1",

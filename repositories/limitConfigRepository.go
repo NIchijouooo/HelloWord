@@ -68,12 +68,14 @@ func (r *LimitConfigRepository) GetLimitConfigListCheckById(id int, propertyCode
 }
 
 //
-func (r *LimitConfigRepository) GetLimitConfigListList(propertyCode string) ([]models.LimitConfigVo, error) {
+func (r *LimitConfigRepository) GetLimitConfigListList(deviceType, propertyCode string) ([]models.LimitConfigVo, error) {
 	var (
 		configurationList []models.LimitConfigVo
 	)
-
 	query := r.db.Model(&models.LimitConfigVo{})
+	if deviceType != "" {
+		query = query.Where("device_type = ?", deviceType)
+	}
 	if propertyCode != "" {
 		query = query.Where("property_code = ?", propertyCode)
 	}
