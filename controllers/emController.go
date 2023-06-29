@@ -81,11 +81,11 @@ func (c *EmController) AddCommInterface(ctx *gin.Context) {
 	// 判断是否有重名的通道，有就直接返回
 	commInterfaceByName, _ := c.repo.GetCommInterfaceByName(commInterface.Name)
 	if commInterfaceByName != nil {
-		//ctx.JSON(http.StatusOK, model.ResponseData{
-		//	Code:    "1",
-		//	Message: "通道名已存在，添加失败",
-		//})
-		return
+		ctx.JSON(http.StatusOK, model.ResponseData{
+			Code:    "1",
+			Message: "通道名已存在，添加失败",
+		})
+		panic("通道名已存在")
 	}
 
 	protocolByName, _ := c.repo.GetCommInterfaceProtocolByName(commInterface.CommInterfaceProtocol)
@@ -93,12 +93,13 @@ func (c *EmController) AddCommInterface(ctx *gin.Context) {
 	commInterface.Data = string(data)
 	err := c.repo.AddCommInterface(&commInterface)
 	if err != nil {
-		fmt.Println("error:", err)
+		ctx.JSON(http.StatusOK, model.ResponseData{
+			Code:    "1",
+			Message: "通道入库失败",
+			Data:    err,
+		})
+		panic("通道入库失败")
 	}
-	//ctx.JSON(http.StatusOK, model.ResponseData{
-	//	Code:    "0",
-	//	Message: "添加通道成功",
-	//})
 }
 
 // GetCommInterfaces 获取所有通道
@@ -158,13 +159,13 @@ func (c *EmController) UpdateCommInterface(ctx *gin.Context) {
 	commInterface.Data = string(data)
 	err := c.repo.UpdateCommInterface(&commInterface)
 	if err != nil {
-		fmt.Println("error:", err)
+		ctx.JSON(http.StatusOK, model.ResponseData{
+			Code:    "1",
+			Message: "通道修改失败",
+			Data:    err,
+		})
+		panic("通道修改失败")
 	}
-	//ctx.JSON(http.StatusOK, model.ResponseData{
-	//	Code:    "0",
-	//	Message: "成功",
-	//	Data:    commInterface,
-	//})
 	return
 }
 
@@ -180,13 +181,13 @@ func (c *EmController) DelComInterface(ctx *gin.Context) {
 	commInterfaceByName, _ := c.repo.GetCommInterfaceByName(tmp.Name)
 
 	if err := c.repo.DelCommInterface(commInterfaceByName.Id); err != nil {
-		ctx.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-		return
+		ctx.JSON(http.StatusOK, model.ResponseData{
+			Code:    "1",
+			Message: "通道删除失败",
+			Data:    err,
+		})
+		panic("通道删除失败")
 	}
-	//ctx.JSON(http.StatusOK, model.ResponseData{
-	//	Code:    "1",
-	//	Message: "删除通信接口成功",
-	//})
 	return
 }
 
@@ -203,11 +204,11 @@ func (c *EmController) AddCollInterface(ctx *gin.Context) {
 	emCollInterface.Name = addEmCollInterface.CollInterfaceName
 	emCollInterfaceByName, _ := c.repo.GetCollInterfaceByName(emCollInterface.Name)
 	if emCollInterfaceByName != nil {
-		//ctx.JSON(http.StatusOK, model.ResponseData{
-		//	Code:    "0",
-		//	Message: "通道名已存在，添加失败",
-		//})
-		return
+		ctx.JSON(http.StatusOK, model.ResponseData{
+			Code:    "1",
+			Message: "通道名已存在，添加失败",
+		})
+		panic("通道名已存在，添加失败")
 	}
 
 	emCollInterface.OfflinePeriod = addEmCollInterface.OfflinePeriod
@@ -406,7 +407,8 @@ func (c *EmController) DeleteEmDevice(ctx *gin.Context) {
 	}
 	return
 }
-//获取设备列表，设备名称，设备标签模糊搜索
+
+// 获取设备列表，设备名称，设备标签模糊搜索
 func (c *EmController) GetDeviceList(ctx *gin.Context) {
 	var devicePageParam models.DevicePageParam
 	if err := ctx.ShouldBindBodyWith(&devicePageParam, binding.JSON); err != nil {
@@ -1013,7 +1015,7 @@ func (c *EmController) UpdateEmDeviceEquipmentAccountByDevId(ctx *gin.Context) {
 			})
 			return
 		}
-	}else {
+	} else {
 		if err := c.repo.UpdateEmDeviceEquipmentAccountByDevId(&ea); err != nil {
 			ctx.JSON(http.StatusOK, model.ResponseData{
 				"1",
