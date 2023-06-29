@@ -414,7 +414,7 @@ func (c *EmController) GetDeviceList(ctx *gin.Context) {
 		return
 	}
 	var list []models.EmDeviceParamVO
-	list, total, err := c.repo.GetDeviceList(devicePageParam)
+	list, total, err := c.repo.GetDeviceAndEAList(devicePageParam)
 	if err != nil {
 		ctx.JSON(http.StatusOK, model.ResponseData{
 			"1",

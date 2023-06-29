@@ -1,6 +1,7 @@
 package utils
 
 import (
+	"fmt"
 	"regexp"
 	"strconv"
 	"strings"
@@ -192,4 +193,90 @@ func GetLastDateOfLastYear(t time.Time) time.Time {
 	thisYearFirstDay := time.Date(t.Year(), time.January, 1, 0, 0, 0, 0, Location)
 	// 去年的最后一天即为今年的第一天的前一天
 	return thisYearFirstDay.AddDate(0, 0, -1)
+}
+
+// 获取今天之前7天每一天的日期，格式为dd日，返回一个日期数组
+func GetLast7Days() []string {
+	var dates []string
+	// 获取当前日期
+	today := time.Now()
+	// 构建日期数组
+	for i := 7; i >= 1; i-- {
+		date := today.AddDate(0, 0, -i)
+		dates = append(dates, date.Format("2日"))
+	}
+	return dates
+}
+
+// 获取当月每一天的日期，格式为dd日，返回一个日期数组
+func GetCurrentMonthDays() []string {
+	var dates []string
+	// 获取当月第一天的日期
+	firstDay := time.Now().AddDate(0, 0, -time.Now().Day() + 1)
+	// 获取下个月第一天的日期
+	nextMonth := firstDay.AddDate(0, 1, 0)
+	// 计算当月的天数
+	numDays := nextMonth.Sub(firstDay).Hours() / 24
+	// 构建日期数组
+	for i := 0; i < int(numDays); i++ {
+		date := firstDay.AddDate(0, 0, i)
+		dates = append(dates, date.Format("2日"))
+	}
+	return dates
+}
+
+// 获取一年中12个月，格式为MM月，返回一个月份数组
+func GetAllMonths() []string {
+	var months []string
+	// 构建月份数组
+	for i := 1; i <= 12; i++ {
+		month := fmt.Sprintf("%2d月", i)
+		months = append(months, month)
+	}
+	return months
+}
+
+
+// 获取今天之前7天的开始时间戳和结束时间戳
+func GetLast7DaysTimestamps() (int64, int64) {
+	// 获取当前时间
+	now := time.Now()
+	startOfDay := time.Date(now.Year(), now.Month(), now.Day(), 0, 0, 0, 0, now.Location())
+	// 计算开始时间
+	startTime := startOfDay.AddDate(0, 0, -7).UnixMilli()
+	// 计算结束时间
+	endOfDay := time.Date(now.Year(), now.Month(), now.Day(), 0, 0, 0, 0, now.Location())
+
+	endTime := endOfDay.UnixMilli()
+	return startTime, endTime
+}
+
+// 获取当月的开始时间戳和结束时间戳
+func GetCurrentMonthTimestamps() (int64, int64) {
+	// 获取当前时间
+	now := time.Now()
+	// 获取当月第一天的日期
+	firstDay := time.Date(now.Year(), now.Month(), 1, 0, 0, 0, 0, now.Location())
+	// 获取下个月第一天的日期
+	nextMonth := firstDay.AddDate(0, 1, 0)
+	// 计算开始时间
+	startTime := firstDay.UnixMilli()
+	// 计算结束时间
+	endTime := nextMonth.UnixMilli()
+	return startTime, endTime
+}
+
+// 获取当年的开始时间戳和结束时间戳
+func GetCurrentYearTimestamps() (int64, int64) {
+	// 获取当前时间
+	now := time.Now()
+	// 获取当年第一天的日期
+	firstDay := time.Date(now.Year(), 1, 1, 0, 0, 0, 0, now.Location())
+	// 获取下一年第一天的日期
+	nextYear := time.Date(now.Year()+1, 1, 1, 0, 0, 0, 0, now.Location())
+	// 计算开始时间
+	startTime := firstDay.UnixMilli()
+	// 计算结束时间
+	endTime := nextYear.UnixMilli()
+	return startTime, endTime
 }
