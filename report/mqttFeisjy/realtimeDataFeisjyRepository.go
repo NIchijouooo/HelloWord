@@ -91,7 +91,8 @@ func (r *RealtimeDataRepository) SaveRealtimeDataList(devName, collName string, 
 		//go func() {
 
 		// 从map中取数据
-		ycParam, exists := dataMap[v.Id]
+		key, _ := strconv.Atoi(v.Name)
+		ycParam, exists := dataMap[key]
 		if exists {
 			fmt.Println(ycParam)
 		} else {
