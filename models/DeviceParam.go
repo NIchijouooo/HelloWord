@@ -20,7 +20,7 @@ type GetDeviceModelCmdParam struct {
 }
 
 type DevicePageParam struct {
-	KeyWork   string `json:"keyWork"`
+	KeyWord   string `json:"keyWord"`
 	DeviceName   string `json:"deviceName"`
 	DeviceLabel 			string   `json:"deviceLabel"`
 	PageNum         int    `form:"pageNum"`
