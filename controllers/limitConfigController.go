@@ -57,6 +57,26 @@ func (c *LimitConfigController) SaveLimitConfig(ctx *gin.Context) {
 	id := limitConfig.Id
 	limitConfig.UpdateTime = time.Now().Format(time.DateTime)
 	if id > 0 {
+		//20230628同一省份同一月不能重复,查id不同的其他数据，
+		configurationList, err := c.repo.GetLimitConfigListCheckById(limitConfig.Id, limitConfig.PropertyCode)
+		if err != nil {
+			ctx.JSON(http.StatusOK, model.ResponseData{
+				"1",
+				"error" + err.Error(),
+				"",
+			})
+			return
+		}
+
+		if len(configurationList) > 0 {
+			ctx.JSON(http.StatusOK, model.ResponseData{
+				"1",
+				"不能重复添加该点位数据",
+				"",
+			})
+			return
+		}
+
 		updateFlag, err := c.repo.UpdateLimitConfig(limitConfig)
 		if err != nil {
 			ctx.JSON(http.StatusOK, model.ResponseData{
@@ -70,6 +90,26 @@ func (c *LimitConfigController) SaveLimitConfig(ctx *gin.Context) {
 			saveLimitRule(limitConfig, false)
 		}
 	} else {
+		//20230628同一点位不能重复
+		configurationList, err := c.repo.GetLimitConfigListList(limitConfig.DeviceType, limitConfig.PropertyCode)
+		if err != nil {
+			ctx.JSON(http.StatusOK, model.ResponseData{
+				"1",
+				"error" + err.Error(),
+				"",
+			})
+			return
+		}
+
+		if len(configurationList) > 0 {
+			ctx.JSON(http.StatusOK, model.ResponseData{
+				"1",
+				"不能重复添加该点位数据",
+				"",
+			})
+			return
+		}
+
 		limitConfig.CreateTime = time.Now().Format(time.DateTime)
 		insertFlag, err := c.repo.InsertLimitConfig(limitConfig)
 		if err != nil {

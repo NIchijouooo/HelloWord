@@ -2,13 +2,13 @@ package repositories
 
 import (
 	"bytes"
+	"crypto/tls"
 	"encoding/json"
 	"fmt"
 	"gateway/models"
 	"gorm.io/gorm"
 	"io"
 	"net/http"
-	"time"
 )
 
 var token string
@@ -23,42 +23,13 @@ func NewWebHmiPageRepository() *WebHmiPageRepository {
 	}
 }
 
-// GetWebHmiPageDeviceInfo 获取配置
-func (r *WebHmiPageRepository) GetWebHmiPageDeviceInfo(deviceId int) ([]models.WebHmiPageDeviceModel, error) {
-	var webHmiPageDeviceModelList []models.WebHmiPageDeviceModel
-	db := r.db
-	fmt.Println("deviceId ： ", deviceId)
-	if deviceId > 0 {
-		db = db.Where("device_id = ?", deviceId)
-	}
-	if err := db.Find(&webHmiPageDeviceModelList).Error; err != nil {
-		return nil, err
-	}
-	return webHmiPageDeviceModelList, nil
-}
-
-// SaveWebHmiPageDeviceInfo 保存设置
-func (r *WebHmiPageRepository) SaveWebHmiPageDeviceInfo(webHmiPageDeviceModelList []*models.WebHmiPageDeviceModel) (int, error) {
-	r.db.Where("id > ?", 0).Delete(&models.WebHmiPageDeviceModel{})
-	if len(webHmiPageDeviceModelList) > 0 {
-		createTime := time.Now().Format(time.DateTime)
-		for _, webHmiPageDeviceModel := range webHmiPageDeviceModelList {
-			webHmiPageDeviceModel.CreateTime = createTime
-		}
-		if err := r.db.Create(webHmiPageDeviceModelList).Error; err != nil {
-			return 0, err
-		}
-	}
-	return len(webHmiPageDeviceModelList), nil
-}
-
 // GetIotWebHmiPageInfo 获取IOT组态信息
 func (r *WebHmiPageRepository) GetIotWebHmiPageInfo(deviceId int) (int, string, error) {
-	var webHmiPageDeviceModel models.WebHmiPageDeviceModel
-	if err := r.db.Where("device_id = ?", deviceId).Find(&webHmiPageDeviceModel).Error; err != nil {
+	var deviceEquipmentAccountInfo models.DeviceEquipmentAccountInfo
+	if err := r.db.Where("device_id = ?", deviceId).Find(&deviceEquipmentAccountInfo).Error; err != nil {
 		return 0, "", err
 	}
-	webHmiPageCode := webHmiPageDeviceModel.WebHmiPageCode
+	webHmiPageCode := deviceEquipmentAccountInfo.WebHmiPageCode
 
 	webHmiPageId, iotToken := GetWebHmiPageInfo(webHmiPageCode)
 
@@ -68,6 +39,19 @@ func (r *WebHmiPageRepository) GetIotWebHmiPageInfo(deviceId int) (int, string, 
 func GetWebHmiPageInfo(webHmiPageCode string) (id int, iotToken string) {
 	// 准备POST请求的数据
 	requestData := "{\"code\": \"" + webHmiPageCode + "\"}"
+
+	// 创建一个自定义的TLS配置
+	tlsConfig := &tls.Config{
+		// 忽略证书验证
+		InsecureSkipVerify: true,
+	}
+
+	// 创建一个自定义的HTTP客户端
+	client := &http.Client{
+		Transport: &http.Transport{
+			TLSClientConfig: tlsConfig,
+		},
+	}
 
 	// 发送POST请求
 	req, err := http.NewRequest("POST", "https://interface.feisjy.com/qianhai/hmiPage/getHmiPageInfoByCode", bytes.NewBuffer([]byte(requestData)))
@@ -80,7 +64,7 @@ func GetWebHmiPageInfo(webHmiPageCode string) (id int, iotToken string) {
 	req.Header.Set("Authorization", token)
 
 	// 发送请求
-	resp, err := http.DefaultClient.Do(req)
+	resp, err := client.Do(req)
 	if err != nil {
 		panic(err)
 	}
@@ -128,10 +112,24 @@ func GetWebHmiPageInfo(webHmiPageCode string) (id int, iotToken string) {
 }
 
 func iotLogin() (isLogin bool) {
+
+	// 创建一个自定义的TLS配置
+	tlsConfig := &tls.Config{
+		// 忽略证书验证
+		InsecureSkipVerify: true,
+	}
+
+	// 创建一个自定义的HTTP客户端
+	client := &http.Client{
+		Transport: &http.Transport{
+			TLSClientConfig: tlsConfig,
+		},
+	}
+
 	// 准备POST请求的数据
 	requestData := "{\"checkCode\": false,\"code\": false,\"userAccountNum\": \"admin\",\"password\": \"Feisjy@2016\",\"domain\": \"iot.feisjy.com\",\"isHmiLogin\": true,\"isEncryption\": \"1\",\"scenesId\": \"18\"}"
 	// 发送POST请求
-	resp, err := http.Post("https://interface.feisjy.com/auth/m2mLogin", "application/json", bytes.NewBuffer([]byte(requestData)))
+	resp, err := client.Post("https://interface.feisjy.com/auth/m2mLogin", "application/json", bytes.NewBuffer([]byte(requestData)))
 	if err != nil {
 		panic(err)
 	}

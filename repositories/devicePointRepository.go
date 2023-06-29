@@ -2,6 +2,7 @@ package repositories
 
 import (
 	"database/sql"
+	"fmt"
 	"gateway/models"
 	"gorm.io/gorm"
 )
@@ -35,15 +36,23 @@ func (r *DevicePointRepository) GetPointsByDeviceId(pointType string, deviceId, 
 	return pointParams
 }
 
-/**
+/*
+*
+
 	根据设备类型查所有命令参数
- */
+*/
 func (r *DevicePointRepository) GetDeviceByDeviceType(deviceType string) []*models.EmDeviceModelCmdParam {
 	var pointParams []*models.EmDeviceModelCmdParam
+	var emDevice *models.EmDevice
 	if deviceType == "" {
 		return pointParams
 	}
-	r.sqldb.Joins("LEFT JOIN em_device_model_cmd ON em_device_model_cmd.id = em_device_model_cmd_param.device_model_cmd_id").Joins("LEFT JOIN em_device ON em_device.model_id = em_device_model_cmd.device_model_id").Where("em_device.device_type = ?", deviceType).Find(&pointParams).Distinct("em_device_model_cmd_param.id").Statement.SQL.String()
+	r.sqldb.Where("em_device.device_type = ?", deviceType).Find(&emDevice).Limit(1)
+	if emDevice.ModelId <= 0 {
+		return pointParams
+	}
+	fmt.Println(emDevice.ModelId)
+	r.sqldb.Joins("LEFT JOIN em_device_model_cmd ON em_device_model_cmd.id = em_device_model_cmd_param.device_model_cmd_id").Where("em_device_model_cmd.device_model_id = ?", emDevice.ModelId).Find(&pointParams)
 	return pointParams
 }
 
@@ -56,6 +65,20 @@ func (r *DevicePointRepository) GetDeviceByDevLabel(label string) []*models.EmDe
 	var emDevice []*models.EmDevice
 	r.sqldb.Where("em_device.label = ?", label).Find(&emDevice)
 	return emDevice
+}
+
+// GetDeviceByDevType 通过设备类型获取设备信息
+func (r *DevicePointRepository) GetDeviceByDevType(deviceType string) []*models.EmDevice {
+	var emDevice []*models.EmDevice
+	r.sqldb.Where("em_device.device_type = ?", deviceType).Find(&emDevice)
+	return emDevice
+}
+
+// GetDeviceIdListByDevType 通过设备类型获取设备ID
+func (r *DevicePointRepository) GetDeviceIdListByDevType(deviceType string) []int {
+	var emDeviceIdList []int
+	r.sqldb.Table("em_device").Select("id").Where("device_type = ?", deviceType).Find(&emDeviceIdList)
+	return emDeviceIdList
 }
 
 /*

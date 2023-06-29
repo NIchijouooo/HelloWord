@@ -234,10 +234,12 @@ func (c *AuxiliaryController) GetDeviceControlPointList(ctx *gin.Context) {
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
+	var result Res
 	if len(YkYtList) == 0 {
 		ctx.JSON(http.StatusOK, model.ResponseData{
-			Code:    "1",
+			Code:    "0",
 			Message: "无数据",
+			Data:    result,
 		})
 		return
 	}
@@ -253,7 +255,7 @@ func (c *AuxiliaryController) GetDeviceControlPointList(ctx *gin.Context) {
 		}
 		nameMap[YkYtList[i].Name] = YkYtList[i]
 	}
-	var result Res
+
 	if len(YcCodes) > 0 {
 		ycList, err := c.hisRepo.GetLastYcListByCode(strconv.Itoa(tmp.DeviceId), strings.Join(YcCodes, ",")) //拿到所有可控测点的最新数据
 		var ycData []ReturnModel.AuxYcData

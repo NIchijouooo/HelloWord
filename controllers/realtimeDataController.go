@@ -233,9 +233,6 @@ func (c *RealtimeDataController) GetRealtimeDataYcListByID(ctx *gin.Context) {
 		})
 		return
 	}
-	fmt.Println(realtimeData.StartTime)
-	fmt.Println(realtimeData.EndTime)
-
 	var ycList []*models.PointParam
 	ycList, err := c.repoHis.GetYcLogByDeviceIdsCodes(realtimeData.DeviceIds, realtimeData.Codes, realtimeData.Interval, realtimeData.StartTime, realtimeData.EndTime)
 	if err != nil {

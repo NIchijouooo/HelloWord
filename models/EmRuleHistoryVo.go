@@ -1,6 +1,6 @@
 package models
 
-type EmRuleHistoryModel struct {
+type EmRuleHistoryVo struct {
 	Id                 int    `json:"id" gorm:"primary_key"`
 	RuleId             int    `json:"ruleId"`
 	RuleName           string `json:"ruleName"`
@@ -17,6 +17,6 @@ type EmRuleHistoryModel struct {
 	DeviceName         string `json:"deviceName"`
 }
 
-func (u *EmRuleHistoryModel) TableName() string {
+func (u *EmRuleHistoryVo) TableName() string {
 	return "rule_history"
 }
