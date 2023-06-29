@@ -983,9 +983,9 @@ func (c *EmController) GetEmDeviceEquipmentAccountByDevId(ctx *gin.Context) {
 	}
 	var deviceEquipmentAccountInfo models.DeviceEquipmentAccountInfo
 	deviceEquipmentAccountInfo, _ = c.repo.GetEmDeviceEquipmentAccountByDevId(tmp.DeviceId)
-	if deviceEquipmentAccountInfo.ID <= 0 {
-		deviceEquipmentAccountInfo.ID = -1
-	}
+	//if deviceEquipmentAccountInfo.ID <= 0 {
+	//	deviceEquipmentAccountInfo.ID = -1
+	//}
 	ctx.JSON(http.StatusOK, model.ResponseData{
 		Code:    "0",
 		Message: "成功",
