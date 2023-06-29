@@ -138,7 +138,7 @@ func ApiAddNodesFromXlsx(context *gin.Context) {
 
 	setting.ZAPS.Debugf("cells %v", cells)
 	for _, cell := range cells {
-		if len(cell) < 5 {
+		if len(cell) < 6 {
 			continue
 		}
 		nodeInfo := struct {
