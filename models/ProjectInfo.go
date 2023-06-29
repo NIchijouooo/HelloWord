@@ -14,6 +14,7 @@ type ProjectInfo struct {
 	GridVoltage    string `gorm:"type:decimal(10,2);comment:'并网电压等级'" json:"gridVoltage"`  // 并网电压等级
 	GridDate       string `gorm:"type:date;comment:'并网日期'" json:"gridDate"`                // 并网日期
 	Status         string `gorm:"type:char(1);comment:'状态（0正常 1停用）'" json:"status"`        // 状态
+	Province       string `gorm:"type:char(1);comment:'所属省份'" json:"province"`             // 所属省份
 }
 
 func (u *ProjectInfo) TableName() string {
