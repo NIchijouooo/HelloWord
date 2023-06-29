@@ -318,13 +318,13 @@ func (r *EmRepository) GetDeviceList(param models.DevicePageParam) ([]models.EmD
 	//拼接sql
 	query := r.db.Model(&models.EmDevice{})
 	query.Where("1 = 1")
-	if param.KeyWork != "" {
+	if param.KeyWord != "" {
 		// 构建查询条件
 		//condition1 := query.Where("name LIKE ?", "%"+param.KeyWork+"%")
 		//condition2 := query.Where("label LIKE ?", "%"+param.KeyWork+"%")
 		//// 使用Or方法进行条件查询
 		//query.Where(condition1.Or(condition2))
-		query = query.Where("name LIKE ? OR label LIKE ?", "%"+param.KeyWork+"%", "%"+param.KeyWork+"%")
+		query = query.Where("name LIKE ? OR label LIKE ?", "%"+param.KeyWord+"%", "%"+param.KeyWord+"%")
 	}
 	if err := query.Count(&total).Error; err != nil {
 		return nil, 0, err
