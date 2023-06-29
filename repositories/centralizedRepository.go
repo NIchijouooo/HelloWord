@@ -2,9 +2,9 @@ package repositories
 
 import (
 	"database/sql"
-	"encoding/json"
 	"fmt"
 	"gateway/models"
+	"github.com/goccy/go-json"
 	"gorm.io/gorm"
 	"log"
 )
@@ -83,8 +83,7 @@ func (r *CentralizedRepository) GetDeviceYkYtList() (YkYcData, error) {
 		Joins("LEFT JOIN em_device_model_cmd as cmd on param.device_model_cmd_id = cmd.id").
 		Joins("LEFT JOIN em_device as device on cmd.device_model_id = device.model_id").
 		Where("(iot_data_type = 'yc' or iot_data_type = 'yx') and device_name not NULL").
-		Find(&ykYtList).
-		Error
+		Find(&ykYtList).Error
 
 	var result YkYcData
 
@@ -105,28 +104,35 @@ func (r *CentralizedRepository) GetDeviceYkYtList() (YkYcData, error) {
 			sql := fmt.Sprintf("select Last(ts), val, device_id, code from realtimedata.yx where device_id = %v and code =%s", item.DeviceId, item.ParamName)
 			rows, _ := r.taosDb.Query(sql)
 			defer rows.Close()
-
-			for rows.Next() {
-				err := rows.Scan(&realtime.Ts, &realtime.Value, &realtime.DeviceId, &realtime.Code)
-				if err != nil {
-					log.Printf("Request params:%v", err)
+			if rows != nil {
+				for rows.Next() {
+					err := rows.Scan(&realtime.Ts, &realtime.Value, &realtime.DeviceId, &realtime.Code)
+					if err != nil {
+						log.Printf("Request params:%v", err)
+					}
 				}
+				//item.Value = realtime.Value
 			}
-			item.Value = realtime.Value
+
 			result.Yx = append(result.Yx, item)
 		} else if item.IotDataType == "yc" && deviceModel.AccessMode != 0 {
 			var realtime models.YcData
 			sql := fmt.Sprintf("select Last(ts), val, device_id, code from realtimedata.yc where device_id = %v and code =%s", item.DeviceId, item.ParamName)
-			rows, _ := r.taosDb.Query(sql)
+			rows, tdErr := r.taosDb.Query(sql)
+			if tdErr != nil {
+				fmt.Println(tdErr)
+			}
 			defer rows.Close()
 
-			for rows.Next() {
-				err := rows.Scan(&realtime.Ts, &realtime.Value, &realtime.DeviceId, &realtime.Code)
-				if err != nil {
-					log.Printf("Request params:%v", err)
+			if rows != nil {
+				for rows.Next() {
+					err := rows.Scan(&realtime.Ts, &realtime.Value, &realtime.DeviceId, &realtime.Code)
+					if err != nil {
+						log.Printf("Request params:%v", err)
+					}
 				}
+				item.Value = realtime.Value
 			}
-			item.Value = realtime.Value
 			result.Yc = append(result.Yc, item)
 		}
 	}
