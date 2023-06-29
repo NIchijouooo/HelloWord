@@ -94,7 +94,7 @@ func (c *DeviceController) CtrlDevice(ctx *gin.Context) {
 	cmdRX := coll.CommQueueManage.CommunicationManageAddEmergency(cmd)
 	if cmdRX.Status == true {
 		aParam.Code = "0"
-		aParam.Message = ""
+		aParam.Message = "控制指令发送成功"
 		sJson, _ := json.Marshal(aParam)
 		ctx.String(http.StatusOK, string(sJson))
 	} else {
