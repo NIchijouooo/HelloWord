@@ -51,6 +51,7 @@ func StatisticsHourChargingAndDischarging() {
 	deviceRepository := repositories.NewDevicePointRepository()
 	deviceEquipmentRepository := repositories.NewDeviceEquipmentRepository()
 	configurationCenterRepository := repositories.NewConfigurationCenterRepository()
+	projectRepository := repositories.NewProjectInfoRepository()
 
 	dictDataList, _ := dictDataRepository.GetDictDataByDictType("energy_product_code_setting")
 
@@ -89,8 +90,12 @@ func StatisticsHourChargingAndDischarging() {
 		polarityMap[deviceEquipment.DeviceId] = deviceEquipment.Polarity
 	}
 
-	priceConfig, _ := configurationCenterRepository.GetConfigurationByProvince("安徽省", time.Now().AddDate(0, 0, -1).Format("2006-01"))
-
+	projectList, _ := projectRepository.GetAll("", "", "")
+	priceConfig := models.EmConfiguration{}
+	if len(projectList) > 0 {
+		priceConfigData, _ := configurationCenterRepository.GetConfigurationByProvince(projectList[0].Province, time.Now().AddDate(0, 0, -1).Format("2006-01"))
+		priceConfig = priceConfigData
+	}
 	deviceSettingMap := make(map[string]map[int]int)
 	deviceSettingMap["deviceMeterMagnificationMap"] = deviceMeterMagnificationMap
 	deviceSettingMap["deviceMeterReadFlipMap"] = deviceMeterReadFlipMap
@@ -207,6 +212,7 @@ func StatisticsDayChargingAndDischarging() {
 	deviceRepository := repositories.NewDevicePointRepository()
 	deviceEquipmentRepository := repositories.NewDeviceEquipmentRepository()
 	configurationCenterRepository := repositories.NewConfigurationCenterRepository()
+	projectRepository := repositories.NewProjectInfoRepository()
 
 	dictDataList, _ := dictDataRepository.GetDictDataByDictType("energy_product_code_setting")
 
@@ -245,8 +251,12 @@ func StatisticsDayChargingAndDischarging() {
 		polarityMap[deviceEquipment.DeviceId] = deviceEquipment.Polarity
 	}
 
-	priceConfig, _ := configurationCenterRepository.GetConfigurationByProvince("安徽省", time.Now().AddDate(0, 0, -1).Format("2006-01"))
-
+	projectList, _ := projectRepository.GetAll("", "", "")
+	priceConfig := models.EmConfiguration{}
+	if len(projectList) > 0 {
+		priceConfigData, _ := configurationCenterRepository.GetConfigurationByProvince(projectList[0].Province, time.Now().AddDate(0, 0, -1).Format("2006-01"))
+		priceConfig = priceConfigData
+	}
 	deviceSettingMap := make(map[string]map[int]int)
 	deviceSettingMap["deviceMeterMagnificationMap"] = deviceMeterMagnificationMap
 	deviceSettingMap["deviceMeterReadFlipMap"] = deviceMeterReadFlipMap
