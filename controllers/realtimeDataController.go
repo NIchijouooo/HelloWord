@@ -485,10 +485,18 @@ func (c *RealtimeDataController) GetProfitPowerRate(ctx *gin.Context) {
 	var xAxisList []string
 	//查这个类型的设备
 	deviceList, err := c.repoEm.GetDeviceList(dictData.DictValue)
-	//去taos查这些设备的日数据,0-7天,1-周,2-年
+	if len(deviceList) <= 0 {
+		ctx.JSON(http.StatusOK, model.ResponseData{
+			Code:    "1",
+			Message: "暂无设备",
+			Data:    "",
+		})
+		return
+	}
 	for _, device := range deviceList {
 		ids = append(ids, device.Id)
 	}
+	//去taos查这些设备的日数据,0-7天,1-周,2-年
 	if realtimeData.Interval == "" {
 		ctx.JSON(http.StatusOK, model.ResponseData{
 			Code:    "1",
