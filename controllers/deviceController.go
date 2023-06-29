@@ -120,15 +120,6 @@ func (c *DeviceController) getDeviceListByType(ctx *gin.Context) {
 		})
 		return
 	}
-	deviceType := param.DeviceType
-	if len(deviceType) == 0 {
-		ctx.JSON(http.StatusOK, model.ResponseData{
-			Code:    "1",
-			Message: "参数错误",
-			Data:    "",
-		})
-		return
-	}
 	list, _ := c.repo.GetDeviceListByType(param)
 	ctx.JSON(http.StatusOK, model.ResponseData{
 		Code: "0",
