@@ -872,12 +872,14 @@ func (c *EmController) AddEmDeviceModelCmdParamFromXlsx(property interface{}, pr
 		emDeviceModelCmdParam.Label = tslModbusPropertyTemplate.Label
 		emDeviceModelCmdParam.IotDataType = tslModbusPropertyTemplate.IotDataType
 		emDeviceModelCmdParam.Identity = tslModbusPropertyTemplate.Identity
+		emDeviceModelCmdParam.Unit = tslModbusPropertyTemplate.Unit
 	case "dlt645":
 		tslDLT6452007PropertyTemplate := property.(device.TSLDLT6452007PropertyTemplate)
 		emDeviceModelCmdParam.Name = tslDLT6452007PropertyTemplate.Name
 		emDeviceModelCmdParam.Label = tslDLT6452007PropertyTemplate.Label
 		emDeviceModelCmdParam.IotDataType = tslDLT6452007PropertyTemplate.IotDataType
 		emDeviceModelCmdParam.Identity = tslDLT6452007PropertyTemplate.Identity
+		emDeviceModelCmdParam.Unit = tslDLT6452007PropertyTemplate.Unit
 	default:
 		return
 	}
