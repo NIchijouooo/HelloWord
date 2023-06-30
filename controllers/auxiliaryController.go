@@ -168,7 +168,7 @@ func (ctrl *AuxiliaryController) GetEmDeviceModelCmdParamListByDeviceId(ctx *gin
 	deviceCmdParamList, _ = ctrl.emRepo.GetCodesListByDeviceIdAndYxYc(tmp.DeviceId, array, likeQuery)
 	if deviceCmdParamList == nil {
 		ctx.JSON(http.StatusOK, model.ResponseData{
-			Code:    "1",
+			Code:    "0",
 			Message: "无数据",
 		})
 		return
