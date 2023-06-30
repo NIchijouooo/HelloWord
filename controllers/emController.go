@@ -910,6 +910,7 @@ func (c *EmController) UpdateEmDeviceModelCmdParam(ctx *gin.Context) {
 	emDeviceModelCmdParam.Identity = addEmDeviceModelCmdParam.Identity
 	emDeviceModelCmdParamByName, _ := c.repo.GetEmDeviceModelCmdParamByName(addEmDeviceModelCmdParam.Name)
 	emDeviceModelCmdParam.Id = emDeviceModelCmdParamByName.Id
+	emDeviceModelCmdParam.Unit = addEmDeviceModelCmdParam.Unit
 
 	emDeviceModelCmdByName, _ := c.repo.GetEmDeviceModelCmdByName(addEmDeviceModelCmdParam.CmdName)
 	emDeviceModelCmdParam.DeviceModelCmdId = emDeviceModelCmdByName.Id
