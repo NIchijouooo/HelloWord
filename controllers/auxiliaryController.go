@@ -15,7 +15,7 @@ import (
 	"github.com/gin-gonic/gin/binding"
 )
 
-// 定义辅控管理的控制器
+// AuxiliaryController 定义辅控管理的控制器
 type AuxiliaryController struct {
 	repo    *repositories.AuxiliaryRepository
 	hisRepo *repositories.HistoryDataRepository
@@ -38,51 +38,51 @@ func (ctrl *AuxiliaryController) RegisterRoutes(router *gin.RouterGroup) {
 
 }
 
-// /获取设备类型下的所有设备数据
-func (c *AuxiliaryController) GetDeviceListByDeviceType(ctx *gin.Context) {
+// GetDeviceListByDeviceType /获取设备类型下的所有设备数据
+func (ctrl *AuxiliaryController) GetDeviceListByDeviceType(ctx *gin.Context) {
 	type tmpQuery struct {
 		DeviceType string `json:"deviceType"`
 	}
-	var query tmpQuery
-	if err := ctx.Bind(&query); err != nil {
+	var queryParam tmpQuery
+	if err := ctx.Bind(&queryParam); err != nil {
 		ctx.JSON(http.StatusOK, model.ResponseData{
-			"1",
-			"error" + err.Error(),
-			"",
+			Code:    "1",
+			Message: "error" + err.Error(),
+			Data:    "",
 		})
 		return
 	}
-	deviceList, err := c.repo.GetAuxiliaryDevice(query.DeviceType)
+	deviceList, err := ctrl.repo.GetAuxiliaryDevice(queryParam.DeviceType)
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
 	ctx.JSON(http.StatusOK, model.ResponseData{
-		"0",
-		"获取信息成功！",
-		deviceList,
+		Code:    "0",
+		Message: "获取信息成功！",
+		Data:    deviceList,
 	})
 	return
 }
 
-// 获取所有设备类型
-func (c *AuxiliaryController) GetAuxiliaryDeviceType(ctx *gin.Context) {
-	deviceTypeList, err := c.repo.GetAuxiliaryDeviceType()
+// GetAuxiliaryDeviceType 获取所有设备类型
+func (ctrl *AuxiliaryController) GetAuxiliaryDeviceType(ctx *gin.Context) {
+	deviceTypeList, err := ctrl.repo.GetAuxiliaryDeviceType()
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
 	ctx.JSON(http.StatusOK, model.ResponseData{
-		"0",
-		"获取信息成功！",
-		deviceTypeList,
+		Code:    "0",
+		Message: "获取信息成功！",
+		Data:    deviceTypeList,
 	})
 	return
 }
 
-// 获取最新遥测信息GetLastYcListByCode
+// GetLastYcByDeviceIdAndCodes 获取最新遥测信息GetLastYcListByCode
 // 遥测控制器已经写有
-func (c *AuxiliaryController) GetLastYcByDeviceIdAndCodes(ctx *gin.Context) {
+func (ctrl *AuxiliaryController) GetLastYcByDeviceIdAndCodes(ctx *gin.Context) {
 	type ycQueryData struct {
 		DeviceIds []int `form:"deviceIds"`
 		Codes     []int `form:"codes"`
@@ -91,9 +91,9 @@ func (c *AuxiliaryController) GetLastYcByDeviceIdAndCodes(ctx *gin.Context) {
 	//将传过来的请求体解析到ycQuery中
 	if err := ctx.Bind(&ycQuery); err != nil {
 		ctx.JSON(http.StatusOK, model.ResponseData{
-			"1",
-			"error" + err.Error(),
-			"",
+			Code:    "1",
+			Message: "error" + err.Error(),
+			Data:    "",
 		})
 		return
 	}
@@ -101,15 +101,15 @@ func (c *AuxiliaryController) GetLastYcByDeviceIdAndCodes(ctx *gin.Context) {
 	//将ycQuery.DeviceIds转换成字符串
 	deviceIds := utils.IntArrayToString(ycQuery.DeviceIds, ",")
 	codes := utils.IntArrayToString(ycQuery.Codes, ",")
-	ycLog, err := c.hisRepo.GetLastYcListByCode(deviceIds, codes)
+	ycLog, err := ctrl.hisRepo.GetLastYcListByCode(deviceIds, codes)
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
 	ctx.JSON(http.StatusOK, model.ResponseData{
-		"0",
-		"获取信息成功！",
-		ycLog,
+		Code:    "0",
+		Message: "获取信息成功！",
+		Data:    ycLog,
 	})
 }
 
@@ -120,7 +120,7 @@ type ReturnMap struct {
 
 //根据选择的codes返回对应时间的历史数据
 
-func (c *AuxiliaryController) GetHistoryYcByDeviceIdCodes(ctx *gin.Context) {
+func (ctrl *AuxiliaryController) GetHistoryYcByDeviceIdCodes(ctx *gin.Context) {
 	var ycQuery query.QueryTaoData
 	//解析json
 	if err := ctx.Bind(&ycQuery); err != nil {
@@ -131,7 +131,7 @@ func (c *AuxiliaryController) GetHistoryYcByDeviceIdCodes(ctx *gin.Context) {
 		})
 		return
 	}
-	returnMap, err := c.hisRepo.GetCharData(ycQuery)
+	returnMap, err := ctrl.hisRepo.GetCharData(ycQuery)
 	if err != nil {
 		ctx.JSON(http.StatusOK, model.ResponseData{
 			Code:    "1",
@@ -153,8 +153,8 @@ type DeviceModel struct {
 	} `json:"property"`
 }
 
-// 根据设备ID获取遥测列表
-func (c *AuxiliaryController) GetEmDeviceModelCmdParamListByDeviceId(ctx *gin.Context) {
+// GetEmDeviceModelCmdParamListByDeviceId 根据设备ID获取遥测列表
+func (ctrl *AuxiliaryController) GetEmDeviceModelCmdParamListByDeviceId(ctx *gin.Context) {
 	var tmp struct {
 		DeviceId int `json:"deviceId"`
 	}
@@ -165,7 +165,7 @@ func (c *AuxiliaryController) GetEmDeviceModelCmdParamListByDeviceId(ctx *gin.Co
 	array := []string{"yc"}
 	likeQuery := "param.data  like '%\"accessMode\":0%'" //等于0说明是不可控测点
 	var deviceCmdParamList []models.EmDeviceModelCmdParam
-	deviceCmdParamList, _ = c.emRepo.GetCodesListByDeviceIdAndYxYc(tmp.DeviceId, array, likeQuery)
+	deviceCmdParamList, _ = ctrl.emRepo.GetCodesListByDeviceIdAndYxYc(tmp.DeviceId, array, likeQuery)
 	if deviceCmdParamList == nil {
 		ctx.JSON(http.StatusOK, model.ResponseData{
 			Code:    "1",
@@ -181,7 +181,7 @@ func (c *AuxiliaryController) GetEmDeviceModelCmdParamListByDeviceId(ctx *gin.Co
 	}
 
 	//拿到所有不可控测点的最新数据
-	ycList, err := c.hisRepo.GetLastYcListByCode(strconv.Itoa(tmp.DeviceId), strings.Join(codes, ","))
+	ycList, err := ctrl.hisRepo.GetLastYcListByCode(strconv.Itoa(tmp.DeviceId), strings.Join(codes, ","))
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -192,13 +192,13 @@ func (c *AuxiliaryController) GetEmDeviceModelCmdParamListByDeviceId(ctx *gin.Co
 	}
 
 	var resYcData []ReturnModel.AuxYcData
-	for _, model := range deviceCmdParamList { //遍历结果 重新拼接，需要返回name，单位字段
+	for _, deviceParam := range deviceCmdParamList { //遍历结果 重新拼接，需要返回name，单位字段
 		var ycData ReturnModel.AuxYcData
-		var tmpMap = ycMap[model.Name]
-		ycData.Name = model.Label                 //从模型取
-		ycData.Unit = model.Unit                  //从模型取
-		ycData.ParamId = model.Id                 //从模型取
-		ycData.Code, _ = strconv.Atoi(model.Name) //从模型取
+		var tmpMap = ycMap[deviceParam.Name]
+		ycData.Name = deviceParam.Label                 //从模型取
+		ycData.Unit = deviceParam.Unit                  //从模型取
+		ycData.ParamId = deviceParam.Id                 //从模型取
+		ycData.Code, _ = strconv.Atoi(deviceParam.Name) //从模型取
 		if tmpMap != nil {
 			ycData.DeviceId = tmpMap.DeviceId //从测点取
 			ycData.Ts = tmpMap.Ts             //从测点取
@@ -214,8 +214,8 @@ func (c *AuxiliaryController) GetEmDeviceModelCmdParamListByDeviceId(ctx *gin.Co
 	})
 }
 
-// 获取实时控制遥控遥调列表
-func (c *AuxiliaryController) GetDeviceControlPointList(ctx *gin.Context) {
+// GetDeviceControlPointList 获取实时控制遥控遥调列表
+func (ctrl *AuxiliaryController) GetDeviceControlPointList(ctx *gin.Context) {
 	type Res struct {
 		YcData []ReturnModel.AuxYcData `json:"ycData"`
 		YxData []ReturnModel.AuxYxData `json:"yxData"`
@@ -229,7 +229,7 @@ func (c *AuxiliaryController) GetDeviceControlPointList(ctx *gin.Context) {
 	}
 	array := []string{"yc", "yx"}
 	likeQuery := "param.data not like '%\"accessMode\":0%'" //不在0里面为可控测点
-	YkYtList, err := c.emRepo.GetCodesListByDeviceIdAndYxYc(tmp.DeviceId, array, likeQuery)
+	YkYtList, err := ctrl.emRepo.GetCodesListByDeviceIdAndYxYc(tmp.DeviceId, array, likeQuery)
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -257,7 +257,7 @@ func (c *AuxiliaryController) GetDeviceControlPointList(ctx *gin.Context) {
 	}
 
 	if len(YcCodes) > 0 {
-		ycList, err := c.hisRepo.GetLastYcListByCode(strconv.Itoa(tmp.DeviceId), strings.Join(YcCodes, ",")) //拿到所有可控测点的最新数据
+		ycList, err := ctrl.hisRepo.GetLastYcListByCode(strconv.Itoa(tmp.DeviceId), strings.Join(YcCodes, ",")) //拿到所有可控测点的最新数据
 		var ycData []ReturnModel.AuxYcData
 		if err == nil {
 			if len(ycList) > 0 {
@@ -281,7 +281,7 @@ func (c *AuxiliaryController) GetDeviceControlPointList(ctx *gin.Context) {
 		result.YcData = ycData
 	}
 	if len(YxCodes) > 0 {
-		yxList, err := c.hisRepo.GetLastYxListByCode(tmp.DeviceId, strings.Join(YxCodes, ","))
+		yxList, err := ctrl.hisRepo.GetLastYxListByCode(tmp.DeviceId, strings.Join(YxCodes, ","))
 		var yxData []ReturnModel.AuxYxData
 		if err == nil {
 			if len(yxList) > 0 {

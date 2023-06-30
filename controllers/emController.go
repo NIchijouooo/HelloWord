@@ -81,11 +81,11 @@ func (c *EmController) AddCommInterface(ctx *gin.Context) {
 	// 判断是否有重名的通道，有就直接返回
 	commInterfaceByName, _ := c.repo.GetCommInterfaceByName(commInterface.Name)
 	if commInterfaceByName != nil {
-		//ctx.JSON(http.StatusOK, model.ResponseData{
-		//	Code:    "1",
-		//	Message: "通道名已存在，添加失败",
-		//})
-		return
+		ctx.JSON(http.StatusOK, model.ResponseData{
+			Code:    "1",
+			Message: "通道名已存在，添加失败",
+		})
+		panic("通道名已存在")
 	}
 
 	protocolByName, _ := c.repo.GetCommInterfaceProtocolByName(commInterface.CommInterfaceProtocol)
@@ -93,12 +93,13 @@ func (c *EmController) AddCommInterface(ctx *gin.Context) {
 	commInterface.Data = string(data)
 	err := c.repo.AddCommInterface(&commInterface)
 	if err != nil {
-		fmt.Println("error:", err)
+		ctx.JSON(http.StatusOK, model.ResponseData{
+			Code:    "1",
+			Message: "通道入库失败",
+			Data:    err,
+		})
+		panic("通道入库失败")
 	}
-	//ctx.JSON(http.StatusOK, model.ResponseData{
-	//	Code:    "0",
-	//	Message: "添加通道成功",
-	//})
 }
 
 // GetCommInterfaces 获取所有通道
@@ -158,13 +159,13 @@ func (c *EmController) UpdateCommInterface(ctx *gin.Context) {
 	commInterface.Data = string(data)
 	err := c.repo.UpdateCommInterface(&commInterface)
 	if err != nil {
-		fmt.Println("error:", err)
+		ctx.JSON(http.StatusOK, model.ResponseData{
+			Code:    "1",
+			Message: "通道修改失败",
+			Data:    err,
+		})
+		panic("通道修改失败")
 	}
-	//ctx.JSON(http.StatusOK, model.ResponseData{
-	//	Code:    "0",
-	//	Message: "成功",
-	//	Data:    commInterface,
-	//})
 	return
 }
 
@@ -180,13 +181,13 @@ func (c *EmController) DelComInterface(ctx *gin.Context) {
 	commInterfaceByName, _ := c.repo.GetCommInterfaceByName(tmp.Name)
 
 	if err := c.repo.DelCommInterface(commInterfaceByName.Id); err != nil {
-		ctx.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-		return
+		ctx.JSON(http.StatusOK, model.ResponseData{
+			Code:    "1",
+			Message: "通道删除失败",
+			Data:    err,
+		})
+		panic("通道删除失败")
 	}
-	//ctx.JSON(http.StatusOK, model.ResponseData{
-	//	Code:    "1",
-	//	Message: "删除通信接口成功",
-	//})
 	return
 }
 
@@ -203,11 +204,11 @@ func (c *EmController) AddCollInterface(ctx *gin.Context) {
 	emCollInterface.Name = addEmCollInterface.CollInterfaceName
 	emCollInterfaceByName, _ := c.repo.GetCollInterfaceByName(emCollInterface.Name)
 	if emCollInterfaceByName != nil {
-		//ctx.JSON(http.StatusOK, model.ResponseData{
-		//	Code:    "0",
-		//	Message: "通道名已存在，添加失败",
-		//})
-		return
+		ctx.JSON(http.StatusOK, model.ResponseData{
+			Code:    "1",
+			Message: "通道名已存在，添加失败",
+		})
+		panic("通道名已存在，添加失败")
 	}
 
 	emCollInterface.OfflinePeriod = addEmCollInterface.OfflinePeriod
@@ -406,7 +407,8 @@ func (c *EmController) DeleteEmDevice(ctx *gin.Context) {
 	}
 	return
 }
-//获取设备列表，设备名称，设备标签模糊搜索
+
+// 获取设备列表，设备名称，设备标签模糊搜索
 func (c *EmController) GetDeviceList(ctx *gin.Context) {
 	var devicePageParam models.DevicePageParam
 	if err := ctx.ShouldBindBodyWith(&devicePageParam, binding.JSON); err != nil {
@@ -414,7 +416,7 @@ func (c *EmController) GetDeviceList(ctx *gin.Context) {
 		return
 	}
 	var list []models.EmDeviceParamVO
-	list, total, err := c.repo.GetDeviceList(devicePageParam)
+	list, total, err := c.repo.GetDeviceAndEAList(devicePageParam)
 	if err != nil {
 		ctx.JSON(http.StatusOK, model.ResponseData{
 			"1",
@@ -870,12 +872,14 @@ func (c *EmController) AddEmDeviceModelCmdParamFromXlsx(property interface{}, pr
 		emDeviceModelCmdParam.Label = tslModbusPropertyTemplate.Label
 		emDeviceModelCmdParam.IotDataType = tslModbusPropertyTemplate.IotDataType
 		emDeviceModelCmdParam.Identity = tslModbusPropertyTemplate.Identity
+		emDeviceModelCmdParam.Unit = tslModbusPropertyTemplate.Unit
 	case "dlt645":
 		tslDLT6452007PropertyTemplate := property.(device.TSLDLT6452007PropertyTemplate)
 		emDeviceModelCmdParam.Name = tslDLT6452007PropertyTemplate.Name
 		emDeviceModelCmdParam.Label = tslDLT6452007PropertyTemplate.Label
 		emDeviceModelCmdParam.IotDataType = tslDLT6452007PropertyTemplate.IotDataType
 		emDeviceModelCmdParam.Identity = tslDLT6452007PropertyTemplate.Identity
+		emDeviceModelCmdParam.Unit = tslDLT6452007PropertyTemplate.Unit
 	default:
 		return
 	}
@@ -906,6 +910,7 @@ func (c *EmController) UpdateEmDeviceModelCmdParam(ctx *gin.Context) {
 	emDeviceModelCmdParam.Identity = addEmDeviceModelCmdParam.Identity
 	emDeviceModelCmdParamByName, _ := c.repo.GetEmDeviceModelCmdParamByName(addEmDeviceModelCmdParam.Name)
 	emDeviceModelCmdParam.Id = emDeviceModelCmdParamByName.Id
+	emDeviceModelCmdParam.Unit = addEmDeviceModelCmdParam.Unit
 
 	emDeviceModelCmdByName, _ := c.repo.GetEmDeviceModelCmdByName(addEmDeviceModelCmdParam.CmdName)
 	emDeviceModelCmdParam.DeviceModelCmdId = emDeviceModelCmdByName.Id
@@ -1013,7 +1018,7 @@ func (c *EmController) UpdateEmDeviceEquipmentAccountByDevId(ctx *gin.Context) {
 			})
 			return
 		}
-	}else {
+	} else {
 		if err := c.repo.UpdateEmDeviceEquipmentAccountByDevId(&ea); err != nil {
 			ctx.JSON(http.StatusOK, model.ResponseData{
 				"1",

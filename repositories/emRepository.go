@@ -299,7 +299,8 @@ func (r *EmRepository) GetCodesListByDeviceIdAndYxYc(deviceId int, iotDataType [
 	return emDeviceModelCmdParamList, nil
 }
 
-func (r *EmRepository) GetDeviceList(param models.DevicePageParam) ([]models.EmDeviceParamVO, int64, error) {
+//设备包括设备台账
+func (r *EmRepository) GetDeviceAndEAList(param models.DevicePageParam) ([]models.EmDeviceParamVO, int64, error) {
 	var (
 		emDeviceVOList []models.EmDeviceParamVO
 		emDeviceList []models.EmDevice
@@ -363,6 +364,18 @@ func (r *EmRepository) GetDeviceList(param models.DevicePageParam) ([]models.EmD
 
 
 	return emDeviceVOList, total, nil
+}
+
+//设备
+func (r *EmRepository) GetDeviceList(deviceType string) ([]models.EmDevice, error) {
+	var (
+		emDeviceList []models.EmDevice
+	)
+	query := r.db.Model(&models.EmDevice{})
+	if err := query.Where("device_type = ?", deviceType).Find(&emDeviceList).Error; err != nil {
+		return nil, err
+	}
+	return emDeviceList, nil
 }
 
 

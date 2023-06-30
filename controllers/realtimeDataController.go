@@ -8,6 +8,7 @@ import (
 	"gateway/httpServer/model"
 	"gateway/models"
 	"gateway/repositories"
+	"gateway/utils"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -18,13 +19,17 @@ type RealtimeDataController struct {
 	repo      *repositories.RealtimeDataRepository
 	repoHis   *repositories.HistoryDataRepository
 	repoPoint *repositories.DevicePointRepository
+	repoData *repositories.DictDataRepository
+	repoEm *repositories.EmRepository
 }
 
 func NewRealtimeDataController() *RealtimeDataController {
 	return &RealtimeDataController{
 		repo:      repositories.NewRealtimeDataRepository(),
 		repoHis:   repositories.NewHistoryDataRepository(),
-		repoPoint: repositories.NewDevicePointRepository()}
+		repoPoint: repositories.NewDevicePointRepository(),
+		repoData: repositories.NewDictDataRepository(),
+		repoEm: repositories.NewEmRepository()}
 }
 
 func (ctrl *RealtimeDataController) RegisterRoutes(router *gin.RouterGroup) {
@@ -42,6 +47,7 @@ func (ctrl *RealtimeDataController) RegisterRoutes(router *gin.RouterGroup) {
 	router.POST("/api/v2/realtimeData/GetDeviceByDevLabel", ctrl.GetDeviceByDevLabel)
 	router.POST("/api/v2/realtimeData/GetDeviceByDeviceType", ctrl.GetDeviceByDeviceType)
 	router.POST("/api/v2/realtimeData/GetRealtimeDataListByDevId", ctrl.GetRealtimeDataListByDevId)
+	router.POST("/api/v2/realtimeData/GetProfitPowerRate", ctrl.GetProfitPowerRate)
 	// 注册其他路由...
 }
 
@@ -62,6 +68,7 @@ type ParamRealtimeData struct {
 	Interval   string  `form:"interval"`
 	PointType  string  `form:"pointType"`
 	Lable      string  `form:"lable"`
+	ProjectId      string  `form:"projectId"`
 }
 
 /*
@@ -439,5 +446,104 @@ func (c *RealtimeDataController) GetRealtimeDataListByDevId(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, model.ResponseData{
 		Code: "0",
 		Data: slice1,
+	})
+}
+
+/*
+*
+获取收益，7天，月，年，拿字典中电能表类型的设备，sum.年的按月采样
+*/
+func (c *RealtimeDataController) GetProfitPowerRate(ctx *gin.Context) {
+	var returnMap struct {
+		XAxisList []string          `json:"xAxisList"`
+		DataMap   map[string][]float64 `json:"dataMap"`
+	}
+
+	var realtimeData ParamRealtimeData
+	if err := ctx.Bind(&realtimeData); err != nil {
+		ctx.JSON(http.StatusOK, model.ResponseData{
+			Code:    "1",
+			Message: "error" + err.Error(),
+			Data:    "",
+		})
+		return
+	}
+
+	dictData, err := c.repoData.SelectDictValue("device_type", "电能表")
+	if err != nil {
+		ctx.JSON(http.StatusOK, model.ResponseData{
+			Code:    "1",
+			Message: "error" + err.Error(),
+			Data:    "",
+		})
+		return
+	}
+	var ids []int
+	var intervalType string
+	var startTime  int64
+	var endTime    int64
+	var xAxisList []string
+	//查这个类型的设备
+	deviceList, err := c.repoEm.GetDeviceList(dictData.DictValue)
+	if len(deviceList) <= 0 {
+		ctx.JSON(http.StatusOK, model.ResponseData{
+			Code:    "1",
+			Message: "暂无设备",
+			Data:    "",
+		})
+		return
+	}
+	for _, device := range deviceList {
+		ids = append(ids, device.Id)
+	}
+	//去taos查这些设备的日数据,0-7天,1-周,2-年
+	if realtimeData.Interval == "" {
+		ctx.JSON(http.StatusOK, model.ResponseData{
+			Code:    "1",
+			Message: "参数错误",
+			Data:    "",
+		})
+		return
+	}else if realtimeData.Interval == "0" {
+		intervalType = "1d"
+		//7天
+		xAxisList = utils.GetLast7Days();
+		startTime, endTime = utils.GetLast7DaysTimestamps()
+	}else if realtimeData.Interval == "1"{
+		intervalType = "1d"
+		//月
+		xAxisList = utils.GetCurrentMonthDays();
+		// 获取当月的开始时间戳和结束时间戳
+		startTime, endTime = utils.GetCurrentMonthTimestamps()
+	}else if realtimeData.Interval == "2"{
+		intervalType = "1n"
+		//年
+		xAxisList = utils.GetAllMonths();
+		// 获取当年的开始时间戳和结束时间戳
+		startTime, endTime = utils.GetCurrentYearTimestamps()
+	}
+	if intervalType == "" {
+		ctx.JSON(http.StatusOK, model.ResponseData{
+			Code:    "1",
+			Message: "参数错误",
+			Data:    "",
+		})
+		return
+	}
+	listT, listP, listF, listV, err := c.repo.GetDayProfitByDeviceIds(ids, startTime, endTime, intervalType);
+	//拼接x轴
+	returnMap.XAxisList = xAxisList
+
+	pMap := make(map[string][]float64)
+	pMap["listTop"] = listT
+	pMap["listPeak"] = listP
+	pMap["listFlat"] = listF
+	pMap["listValley"] = listV
+
+	returnMap.DataMap = pMap
+
+	ctx.JSON(http.StatusOK, model.ResponseData{
+		Code: "0",
+		Data: returnMap,
 	})
 }

@@ -291,14 +291,14 @@ func (r *RealtimeDataRepository) GetYxById(deviceId, code int) (models.YxData, e
 */
 func (r *RealtimeDataRepository) GetYxListByDevIdsAndCodes(deviceIds, codes string) ([]models.YxData, error) {
 	var realtime []models.YxData
-	sqlStr := fmt.Sprintf("select Last(ts), val, device_id, code,name from yx where device_id in (%s) and code in (%s)", deviceIds, codes)
+	sqlStr := fmt.Sprintf("select Last(ts), val, device_id, code from yx where device_id in (%s) and code in (%s)", deviceIds, codes)
 	fmt.Println(sqlStr)
 	rows, err := r.taosDb.Query(sqlStr)
 	defer rows.Close()
 
 	for rows.Next() {
 		realtimeData := models.YxData{}
-		err := rows.Scan(&realtimeData.Ts, &realtimeData.Value, &realtimeData.DeviceId, &realtimeData.Code, &realtimeData.Name)
+		err := rows.Scan(&realtimeData.Ts, &realtimeData.Value, &realtimeData.DeviceId, &realtimeData.Code)
 		if err != nil {
 			log.Printf("Request params:%v", err)
 		}
@@ -312,14 +312,14 @@ func (r *RealtimeDataRepository) GetYxListByDevIdsAndCodes(deviceIds, codes stri
 获取yx
 */
 func (r *RealtimeDataRepository) GetYxListById(deviceId int) ([]models.YxData, error) {
-	rowsYx, err := r.taosDb.Query("SELECT last(code), last(name), last(val), last(ts) FROM yx where device_id = ? group by code order by code", deviceId)
+	rowsYx, err := r.taosDb.Query("SELECT last(code), last(val), last(ts) FROM yx where device_id = ? group by code order by code", deviceId)
 	if err != nil {
 		return nil, err
 	}
 	var yxList []models.YxData
 	for rowsYx.Next() {
 		yx := models.YxData{}
-		err := rowsYx.Scan(&yx.Code, &yx.Name, &yx.Value, &yx.Ts)
+		err := rowsYx.Scan(&yx.Code, &yx.Value, &yx.Ts)
 		if err != nil {
 			return nil, err
 		}
@@ -354,14 +354,14 @@ func (r *RealtimeDataRepository) GetYcById(deviceId, code int) (models.YcData, e
 */
 func (r *RealtimeDataRepository) GetYcListByDevIdsAndCodes(deviceIds, codes string) ([]models.YcData, error) {
 	var realtime []models.YcData
-	sqlStr := fmt.Sprintf("select Last(ts), val, device_id, code,name from yc where device_id in (%s) and code in (%s) group by device_id,code", deviceIds, codes)
+	sqlStr := fmt.Sprintf("select Last(ts), val, device_id, code from yc where device_id in (%s) and code in (%s) group by device_id,code", deviceIds, codes)
 	fmt.Println(sqlStr)
 	rows, err := r.taosDb.Query(sqlStr)
 	defer rows.Close()
 
 	for rows.Next() {
 		realtimeData := models.YcData{}
-		err := rows.Scan(&realtimeData.Ts, &realtimeData.Value, &realtimeData.DeviceId, &realtimeData.Code, &realtimeData.Name)
+		err := rows.Scan(&realtimeData.Ts, &realtimeData.Value, &realtimeData.DeviceId, &realtimeData.Code)
 		if err != nil {
 			log.Printf("Request params:%v", err)
 		}
@@ -391,14 +391,14 @@ func (r *RealtimeDataRepository) GetSettingById(deviceId, code int) (models.Sett
 }
 
 func (r *RealtimeDataRepository) GetYcListById(deviceId int) ([]models.YcData, error) {
-	rowsYx, err := r.taosDb.Query("SELECT last(code), last(name), last(val),last(ts) FROM yc where device_id = ? group by code order by code", deviceId)
+	rowsYx, err := r.taosDb.Query("SELECT last(code), last(val),last(ts) FROM yc where device_id = ? group by code order by code", deviceId)
 	if err != nil {
 		return nil, err
 	}
 	var list []models.YcData
 	for rowsYx.Next() {
 		yc := models.YcData{}
-		err := rowsYx.Scan(&yc.Code, &yc.Name, &yc.Value, &yc.Ts)
+		err := rowsYx.Scan(&yc.Code, &yc.Value, &yc.Ts)
 		if err != nil {
 			return nil, err
 		}
@@ -408,7 +408,7 @@ func (r *RealtimeDataRepository) GetYcListById(deviceId int) ([]models.YcData, e
 }
 
 func (r *RealtimeDataRepository) GetSettingPointParamListById(deviceId int) ([]models.PointParam, error) {
-	rowsYx, err := r.taosDb.Query("SELECT last(code), last(name), last(val),last(ts) FROM realtimedata.setting where device_id = ? group by code order by code", deviceId)
+	rowsYx, err := r.taosDb.Query("SELECT last(code), last(val),last(ts) FROM realtimedata.setting where device_id = ? group by code order by code", deviceId)
 	if err != nil {
 		return nil, err
 	}
@@ -416,7 +416,7 @@ func (r *RealtimeDataRepository) GetSettingPointParamListById(deviceId int) ([]m
 	for rowsYx.Next() {
 		var name sql.NullString
 		pointParam := models.PointParam{}
-		err := rowsYx.Scan(&pointParam.Code, &name, &pointParam.Value, &pointParam.Ts)
+		err := rowsYx.Scan(&pointParam.Code, &pointParam.Value, &pointParam.Ts)
 		if err != nil {
 			return nil, err
 		}
@@ -426,7 +426,7 @@ func (r *RealtimeDataRepository) GetSettingPointParamListById(deviceId int) ([]m
 	return list, err
 }
 func (r *RealtimeDataRepository) GetYxPointParamListById(deviceId int) ([]models.PointParam, error) {
-	rowsYx, err := r.taosDb.Query("SELECT last(code), last(name), last(val),last(ts) FROM realtimedata.yx where device_id = ? group by code order by code", deviceId)
+	rowsYx, err := r.taosDb.Query("SELECT last(code), last(val),last(ts) FROM realtimedata.yx where device_id = ? group by code order by code", deviceId)
 	if err != nil {
 		return nil, err
 	}
@@ -434,7 +434,7 @@ func (r *RealtimeDataRepository) GetYxPointParamListById(deviceId int) ([]models
 	for rowsYx.Next() {
 		var name sql.NullString
 		pointParam := models.PointParam{}
-		err := rowsYx.Scan(&pointParam.Code, &name, &pointParam.Value, &pointParam.Ts)
+		err := rowsYx.Scan(&pointParam.Code, &pointParam.Value, &pointParam.Ts)
 		if err != nil {
 			return nil, err
 		}
@@ -444,7 +444,7 @@ func (r *RealtimeDataRepository) GetYxPointParamListById(deviceId int) ([]models
 	return list, err
 }
 func (r *RealtimeDataRepository) GetYcPointParamListById(deviceId int) ([]models.PointParam, error) {
-	rowsYx, err := r.taosDb.Query("SELECT last(code), last(name), last(val),last(ts) FROM realtimedata.yc where device_id = ? group by code order by code", deviceId)
+	rowsYx, err := r.taosDb.Query("SELECT last(code), last(val),last(ts) FROM realtimedata.yc where device_id = ? group by code order by code", deviceId)
 	if err != nil {
 		return nil, err
 	}
@@ -452,7 +452,7 @@ func (r *RealtimeDataRepository) GetYcPointParamListById(deviceId int) ([]models
 	for rowsYx.Next() {
 		var name sql.NullString
 		pointParam := models.PointParam{}
-		err := rowsYx.Scan(&pointParam.Code, &name, &pointParam.Value, &pointParam.Ts)
+		err := rowsYx.Scan(&pointParam.Code, &pointParam.Value, &pointParam.Ts)
 		if err != nil {
 			return nil, err
 		}
@@ -468,14 +468,14 @@ func (r *RealtimeDataRepository) GetYcPointParamListById(deviceId int) ([]models
 */
 func (r *RealtimeDataRepository) GetSettingListByDevIdsAndCodes(deviceIds, codes string) ([]models.SettingData, error) {
 	var realtime []models.SettingData
-	sqlStr := fmt.Sprintf("select Last(ts), val, device_id, code,name from realtimedata.setting where device_id in (%s) and code in (%s) group by device_id,code", deviceIds, codes)
+	sqlStr := fmt.Sprintf("select Last(ts), val, device_id, code from realtimedata.setting where device_id in (%s) and code in (%s) group by device_id,code", deviceIds, codes)
 	fmt.Println(sqlStr)
 	rows, err := r.taosDb.Query(sqlStr)
 	defer rows.Close()
 
 	for rows.Next() {
 		realtimeData := models.SettingData{}
-		err := rows.Scan(&realtimeData.Ts, &realtimeData.Value, &realtimeData.DeviceId, &realtimeData.Code, &realtimeData.Name)
+		err := rows.Scan(&realtimeData.Ts, &realtimeData.Value, &realtimeData.DeviceId, &realtimeData.Code)
 		if err != nil {
 			log.Printf("Request params:%v", err)
 		}
@@ -653,3 +653,61 @@ func (r *RealtimeDataRepository) GetElectricityChartByDeviceIds(deviceIds []int,
 	}
 	return list, err
 }
+// GetGenerateElectricityChartByDeviceIds 获取充放电量信息topProfit,peakProfit,peakProfit,flatProfit
+func (r *RealtimeDataRepository) GetDayProfitByDeviceIds(deviceIds []int, startTime, endTime int64, intervalType string) ([]float64, []float64, []float64, []float64, error) {
+	ids := utils.IntArrayToString(deviceIds, ",")
+	sqlT := fmt.Sprintf("SELECT SUM(top_profit) AS val FROM realtimedata.charge_discharge WHERE device_id IN (%s) AND ts>=%v and ts<=%v INTERVAL(%s) FILL(VALUE,0);",
+		ids, startTime, endTime, intervalType)
+	rowsT, err := r.taosDb.Query(sqlT)
+	var listT []float64
+	for rowsT.Next() {
+		var val float64
+		err := rowsT.Scan(&val)
+		if err != nil {
+			fmt.Println(err)
+			//return nil, err
+		}
+		listT = append(listT, val)
+	}
+
+	sqlP := fmt.Sprintf("SELECT SUM(peak_profit) AS val FROM realtimedata.charge_discharge WHERE device_id IN (%s) AND ts>=%v and ts<=%v INTERVAL(%s) FILL(VALUE,0);",
+		ids, startTime, endTime, intervalType)
+	rowsP, err := r.taosDb.Query(sqlP)
+	var listP []float64
+	for rowsP.Next() {
+		var val float64
+		err := rowsP.Scan(&val)
+		if err != nil {
+			fmt.Println(err)
+		}
+		listP = append(listP, val)
+	}
+
+	sqlF := fmt.Sprintf("SELECT SUM(flat_profit) AS val FROM realtimedata.charge_discharge WHERE device_id IN (%s) AND ts>=%v and ts<=%v INTERVAL(%s) FILL(VALUE,0);",
+		ids, startTime, endTime, intervalType)
+	rowsF, err := r.taosDb.Query(sqlF)
+	var listF []float64
+	for rowsF.Next() {
+		var val float64
+		err := rowsF.Scan(&val)
+		if err != nil {
+			fmt.Println(err)
+		}
+		listF = append(listF, val)
+	}
+
+	sqlV := fmt.Sprintf("SELECT SUM(valley_profit) AS val FROM realtimedata.charge_discharge WHERE device_id IN (%s) AND ts>=%v and ts<=%v INTERVAL(%s) FILL(VALUE,0);",
+		ids, startTime, endTime, intervalType)
+	rowsV, err := r.taosDb.Query(sqlV)
+	var listV []float64
+	for rowsV.Next() {
+		var val float64
+		err := rowsV.Scan(&val)
+		if err != nil {
+			fmt.Println(err)
+		}
+		listV = append(listV, val)
+	}
+	return listT, listP, listF, listV, err
+}
+
