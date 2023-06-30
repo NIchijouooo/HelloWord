@@ -23,7 +23,7 @@ func (c *YcController) RegisterRoutes(router *gin.RouterGroup) {
 	router.POST("/api/v2/yc/batchYcHistoryListByDeviceIdAndCodes", c.BatchYcHistoryListByDeviceIdAndCodes)
 }
 
-//获取最新遥测信息GetLastYcListByCode
+// GetLastYcByDeviceIdsAndCodes 获取最新遥测信息GetLastYcListByCode
 /*
 {
     "deviceIds":[36559],  //设备id 必填
@@ -55,13 +55,13 @@ func (c *YcController) GetLastYcByDeviceIdsAndCodes(ctx *gin.Context) {
 		return
 	}
 	ctx.JSON(http.StatusOK, model.ResponseData{
-		"0",
-		"获取信息成功！",
-		ycLog,
+		Code:    "0",
+		Message: "获取信息成功！",
+		Data:    ycLog,
 	})
 }
 
-//根据时间获取多个遥测的历史数据信息
+// BatchYcHistoryListByDeviceIdAndCodes 根据时间获取多个遥测的历史数据信息
 /*{
 "deviceIds":36559,  //设备id集合 必填
 "codeList":[2002,2005],  //遥测编码集合  必填
