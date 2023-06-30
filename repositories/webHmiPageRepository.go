@@ -24,12 +24,16 @@ func NewWebHmiPageRepository() *WebHmiPageRepository {
 }
 
 // GetIotWebHmiPageInfo 获取IOT组态信息
-func (r *WebHmiPageRepository) GetIotWebHmiPageInfo(deviceId int) (int, string, error) {
-	var deviceEquipmentAccountInfo models.DeviceEquipmentAccountInfo
-	if err := r.db.Where("device_id = ?", deviceId).Find(&deviceEquipmentAccountInfo).Error; err != nil {
-		return 0, "", err
+func (r *WebHmiPageRepository) GetIotWebHmiPageInfo(webHmiPageDeviceModel models.WebHmiPageDeviceModel) (int, string, error) {
+
+	webHmiPageCode := webHmiPageDeviceModel.WebHmiPageCode
+	if webHmiPageDeviceModel.WebHmiPageCode == "" {
+		var deviceEquipmentAccountInfo models.DeviceEquipmentAccountInfo
+		if err := r.db.Where("device_id = ?", webHmiPageDeviceModel.DeviceId).Find(&deviceEquipmentAccountInfo).Error; err != nil {
+			return 0, "", err
+		}
+		webHmiPageCode = deviceEquipmentAccountInfo.WebHmiPageCode
 	}
-	webHmiPageCode := deviceEquipmentAccountInfo.WebHmiPageCode
 
 	webHmiPageId, iotToken := GetWebHmiPageInfo(webHmiPageCode)
 

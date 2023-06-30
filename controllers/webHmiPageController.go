@@ -31,7 +31,7 @@ func (c *WebHmiPageController) GetIotWebHmiPageInfo(ctx *gin.Context) {
 		ctx.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-	if webHmiPageDeviceModel.DeviceId == 0 {
+	if webHmiPageDeviceModel.WebHmiPageCode == "" && webHmiPageDeviceModel.DeviceId == 0 {
 		ctx.JSON(http.StatusOK, model.ResponseData{
 			Code:    "1",
 			Message: "参数错误",
@@ -39,7 +39,7 @@ func (c *WebHmiPageController) GetIotWebHmiPageInfo(ctx *gin.Context) {
 		})
 		return
 	}
-	webHmiPageId, token, err := c.repo.GetIotWebHmiPageInfo(webHmiPageDeviceModel.DeviceId)
+	webHmiPageId, token, err := c.repo.GetIotWebHmiPageInfo(webHmiPageDeviceModel)
 	if err != nil {
 		ctx.JSON(http.StatusOK, model.ResponseData{
 			Code:    "1",
