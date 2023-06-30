@@ -36,32 +36,32 @@ func NewBmsController() *BmsController {
 		bmsRepo:      repositories.NewBmsRepository(),
 		realRepo:     repositories.NewRealtimeDataRepository()}
 }
-func (ctrl *BmsController) RegisterRoutes(router *gin.RouterGroup) {
-	router.POST("/api/v2/bms/getDeviceTreeByDeviceType", ctrl.GetDeviceTreeByDeviceType)
-	router.POST("/api/v2/bms/getYcLogById", ctrl.GetYcLogById)
-	router.POST("/api/v2/bms/getHistoryYcByDeviceIdCodes", ctrl.GetHistoryYcByDeviceIdCodes)
-	router.POST("/api/v2/bms/getBmsYcMaxAndMinListByDeviceIdCodes", ctrl.GetBmsYcMaxAndMinListByDeviceIdCodes)
-	router.POST("/api/v2/bms/getBmsDevices", ctrl.GetBmsDevices)
-	router.POST("/api/v2/bms/getDayElectricityChartByDeviceId", ctrl.GetDayElectricityChartByDeviceId) //获取日电量曲线
-	router.POST("/api/v2/bms/getDevicesStatus", ctrl.GetDevicesStatus)                                 //获取设备状态
+func (c *BmsController) RegisterRoutes(router *gin.RouterGroup) {
+	router.POST("/api/v2/bms/getDeviceTreeByDeviceType", c.GetDeviceTreeByDeviceType)
+	router.POST("/api/v2/bms/getYcLogById", c.GetYcLogById)
+	router.POST("/api/v2/bms/getHistoryYcByDeviceIdCodes", c.GetHistoryYcByDeviceIdCodes)
+	router.POST("/api/v2/bms/getBmsYcMaxAndMinListByDeviceIdCodes", c.GetBmsYcMaxAndMinListByDeviceIdCodes)
+	router.POST("/api/v2/bms/getBmsDevices", c.GetBmsDevices)
+	router.POST("/api/v2/bms/getDayElectricityChartByDeviceId", c.GetDayElectricityChartByDeviceId) //获取日电量曲线
+	router.POST("/api/v2/bms/getDevicesStatus", c.GetDevicesStatus)                                 //获取设备状态
 
 }
 
-// /获取设备类型下的所有设备数据,返回树形结构
+// GetDeviceTreeByDeviceType /获取设备类型下的所有设备数据,返回树形结构
 func (c *BmsController) GetDeviceTreeByDeviceType(ctx *gin.Context) {
 	type tmpQuery struct {
 		DeviceType string `json:"deviceType"`
 	}
-	var query tmpQuery
-	if err := ctx.Bind(&query); err != nil {
+	var queryParam tmpQuery
+	if err := ctx.Bind(&queryParam); err != nil {
 		ctx.JSON(http.StatusOK, model.ResponseData{
-			"1",
-			"error" + err.Error(),
-			"",
+			Code:    "1",
+			Message: "error" + err.Error(),
+			Data:    "",
 		})
 		return
 	}
-	deviceList, err := c.bmsRepo.GetBmsDeviceList(query.DeviceType)
+	deviceList, err := c.bmsRepo.GetBmsDeviceList(queryParam.DeviceType)
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -102,9 +102,9 @@ func (c *BmsController) GetYcLogById(ctx *gin.Context) {
 	//将传过来的请求体解析到ycQuery中
 	if err := ctx.Bind(&ycQuery); err != nil {
 		ctx.JSON(http.StatusOK, model.ResponseData{
-			"1",
-			"error" + err.Error(),
-			"",
+			Code:    "1",
+			Message: "error" + err.Error(),
+			Data:    "",
 		})
 		return
 	}
@@ -116,13 +116,13 @@ func (c *BmsController) GetYcLogById(ctx *gin.Context) {
 	//	return
 	//}
 	ctx.JSON(http.StatusOK, model.ResponseData{
-		"0",
-		"获取信息成功！",
-		ycLog,
+		Code:    "0",
+		Message: "获取信息成功！",
+		Data:    ycLog,
 	})
 }
 
-// 根据选择的codes返回对应的历史数据
+// GetHistoryYcByDeviceIdCodes 根据选择的codes返回对应的历史数据
 func (c *BmsController) GetHistoryYcByDeviceIdCodes(ctx *gin.Context) {
 	var ycQuery query.QueryTaoData
 	//解析json
@@ -150,22 +150,22 @@ func (c *BmsController) GetHistoryYcByDeviceIdCodes(ctx *gin.Context) {
 	}
 }
 
-// BMS批量获取最高最低的遥测信息
+// GetBmsYcMaxAndMinListByDeviceIdCodes BMS批量获取最高最低的遥测信息
 func (c *BmsController) GetBmsYcMaxAndMinListByDeviceIdCodes(ctx *gin.Context) {
 	var ycData models.YcData
 	if err := ctx.Bind(&ycData); err != nil {
 		ctx.JSON(http.StatusOK, model.ResponseData{
-			"1",
-			"error" + err.Error(),
-			"",
+			Code:    "1",
+			Message: "error" + err.Error(),
+			Data:    "",
 		})
 		return
 	}
 	if ycData.DeviceId == 0 {
 		ctx.JSON(http.StatusOK, model.ResponseData{
-			"1",
-			"缺少设备Id",
-			"",
+			Code:    "1",
+			Message: "缺少设备Id",
+			Data:    "",
 		})
 		return
 	}
@@ -331,14 +331,14 @@ func (c *BmsController) GetBmsYcMaxAndMinListByDeviceIdCodes(ctx *gin.Context) {
 		return resData[i].Sort < resData[j].Sort
 	})
 	ctx.JSON(http.StatusOK, model.ResponseData{
-		"0",
-		"获取信息成功！",
-		resData,
+		Code:    "0",
+		Message: "获取信息成功！",
+		Data:    resData,
 	})
 	return
 }
 
-// 获取BMS设备
+// GetBmsDevices 获取BMS设备
 func (c *BmsController) GetBmsDevices(ctx *gin.Context) {
 	var dictLabels = []string{"energy_storage_bms_device_label"}
 	DictDataList, err := c.dictDataRepo.GetDictDataByDictLabel(dictLabels)
@@ -356,22 +356,22 @@ func (c *BmsController) GetBmsDevices(ctx *gin.Context) {
 			return
 		}
 		ctx.JSON(http.StatusOK, model.ResponseData{
-			"0",
-			"获取信息成功！",
-			deviceList,
+			Code:    "0",
+			Message: "获取信息成功！",
+			Data:    deviceList,
 		})
 		return
 	} else {
 		ctx.JSON(http.StatusOK, model.ResponseData{
-			"1",
-			"无数据！",
-			"",
+			Code:    "1",
+			Message: "无数据！",
+			Data:    "",
 		})
 		return
 	}
 }
 
-// 获取每天的充放电量数据
+// GetDayElectricityChartByDeviceId 获取每天的充放电量数据
 func (c *BmsController) GetDayElectricityChartByDeviceId(ctx *gin.Context) {
 	type Res struct {
 		Name string             `json:"name"`
@@ -386,9 +386,9 @@ func (c *BmsController) GetDayElectricityChartByDeviceId(ctx *gin.Context) {
 	//必要条件校验
 	if len(queryData.DeviceIds) == 0 || queryData.StartTime == 0 || queryData.EndTime == 0 || queryData.IntervalType == 0 {
 		ctx.JSON(http.StatusOK, model.ResponseData{
-			"1",
-			"缺少必要参数",
-			"",
+			Code:    "1",
+			Message: "缺少必要参数",
+			Data:    "",
 		})
 		return
 	}
@@ -427,13 +427,13 @@ func (c *BmsController) GetDayElectricityChartByDeviceId(ctx *gin.Context) {
 	result = append(result, resC)
 	result = append(result, resD)
 	ctx.JSON(http.StatusOK, model.ResponseData{
-		"0",
-		"获取信息成功！",
-		result,
+		Code:    "0",
+		Message: "获取信息成功！",
+		Data:    result,
 	})
 }
 
-// 获取设备状态信息
+// GetDevicesStatus 获取设备状态信息
 func (c *BmsController) GetDevicesStatus(ctx *gin.Context) {
 	var queryData query.QueryTaoData
 	if err := ctx.Bind(&queryData); err != nil {
@@ -443,9 +443,9 @@ func (c *BmsController) GetDevicesStatus(ctx *gin.Context) {
 	//必要条件校验
 	if queryData.DeviceId == 0 {
 		ctx.JSON(http.StatusOK, model.ResponseData{
-			"1",
-			"缺少必要参数",
-			"",
+			Code:    "1",
+			Message: "缺少必要参数",
+			Data:    "",
 		})
 		return
 	}
@@ -459,9 +459,9 @@ func (c *BmsController) GetDevicesStatus(ctx *gin.Context) {
 	}
 	if dict == (models.DictData{}) {
 		ctx.JSON(http.StatusOK, model.ResponseData{
-			"1",
-			"无数据",
-			"",
+			Code:    "1",
+			Message: "无数据",
+			Data:    "",
 		})
 		return
 	}
@@ -473,9 +473,9 @@ func (c *BmsController) GetDevicesStatus(ctx *gin.Context) {
 	}
 	if ycData == nil {
 		ctx.JSON(http.StatusOK, model.ResponseData{
-			"1",
-			"无数据",
-			"",
+			Code:    "1",
+			Message: "无数据",
+			Data:    "",
 		})
 		return
 	}
@@ -492,9 +492,9 @@ func (c *BmsController) GetDevicesStatus(ctx *gin.Context) {
 	errJson := json.Unmarshal([]byte(dictRes.DictValue), &status)
 	if errJson != nil {
 		ctx.JSON(http.StatusOK, model.ResponseData{
-			"1",
-			"json解析失败",
-			"",
+			Code:    "1",
+			Message: "json解析失败",
+			Data:    "",
 		})
 		return
 	}
@@ -506,8 +506,8 @@ func (c *BmsController) GetDevicesStatus(ctx *gin.Context) {
 		}
 	}
 	ctx.JSON(http.StatusOK, model.ResponseData{
-		"0",
-		"获取信息成功！",
-		ycData,
+		Code:    "0",
+		Message: "获取信息成功！",
+		Data:    ycData,
 	})
 }
