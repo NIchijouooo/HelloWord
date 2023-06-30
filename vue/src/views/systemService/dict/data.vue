@@ -1,7 +1,7 @@
 <template>
   <div class="main-container">
     <div class="main">
-      <div class="title" style="justify-content: space-between">
+      <div class="search-bar" style="height: 50px;display: flex;justify-content: space-between;">
         <div>
           <el-button type="primary" plain @click="router.back" style="margin-right: 10px">
             <el-icon class="el-input__icon"><back /></el-icon>
@@ -29,7 +29,7 @@
             </template>
           </el-input>
         </div>
-        <el-row :gutter="10" class="mb8">
+        <el-row :gutter="10" class="mb8" style="padding-right: 20px">
           <el-col :span="1.5">
             <el-button type="primary" bg @click="handleAdd">
               <el-icon class="btn-icon">
