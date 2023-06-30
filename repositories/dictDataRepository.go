@@ -102,6 +102,13 @@ func (r *DictDataRepository) SelectDictValue(dictType string, dictLabel string) 
 	return dictData, err
 }
 
+// SelectDictValue /*根据字典类型和字典label获取字典信息*
+func (r *DictDataRepository) GetDictValueByDictTypeAndDictLabel(dictType string, dictLabel string) (string, error) {
+	var dictValue string
+	err := r.db.Table("sys_dict_data").Select("dict_value").Where("dict_type = ?", dictType).Where("dict_label = ?", dictLabel).Find(&dictValue).Error
+	return dictValue, err
+}
+
 func (r *DictDataRepository) GetDictDataByDictType(dictType string) ([]models.DictData, error) {
 	var dictDataList []models.DictData
 	if err := r.db.Where("dict_type = ?", dictType).Find(&dictDataList).Error; err != nil {

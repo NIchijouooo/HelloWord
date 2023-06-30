@@ -111,6 +111,10 @@ func RouterWeb(port string) {
 		webHmiPageController := controllers.NewWebHmiPageController()
 		webHmiPageController.RegisterRoutes(&router.RouterGroup)
 
+		// 负荷追踪
+		LoadTrackingController := controllers.NewLoadTrackingController()
+		LoadTrackingController.RegisterRoutes(&router.RouterGroup)
+
 		accountRouter := router.Group("/api/v2/account")
 		{
 			accountRouter.GET("/permissions", contorl.ApiGetPermissions)

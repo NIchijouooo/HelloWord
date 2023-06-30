@@ -37,6 +37,15 @@ func (r DeviceRepository) GetDeviceListByType(param models.DeviceParam) ([]model
 }
 
 /*
+根据设备类型获取设备Id列表
+*/
+func (r DeviceRepository) GetDeviceIdListByDeviceType(deviceType string) ([]int, error) {
+	var result []int
+	err := r.db.Table("em_device").Select("id").Where("device_type = ?", deviceType).Find(&result).Error
+	return result, err
+}
+
+/*
 *
 根据设备类型获取设备列表
 */
