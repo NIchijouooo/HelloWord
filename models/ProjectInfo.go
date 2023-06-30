@@ -7,6 +7,7 @@ type ProjectInfo struct {
 	Avatar         string `gorm:"type:varchar(255);comment:'头像'" json:"avatar"`            // 头像
 	CommissionDate string `gorm:"type:date;comment:'投产时间'" json:"commissionDate"`          // 投产时间
 	Address        string `gorm:"type:varchar(255);comment:'地址'" json:"address"`           // 地址
+	HmiPageOverviewCode        string `gorm:"type:varchar(50);comment:'地址'" json:"hmiPageOverviewCode"`           // 地址
 	RatedPower     string `gorm:"type:decimal(10,2);comment:'额定功率'" json:"ratedPower"`     // 额定功率
 	InstalledPower string `gorm:"type:decimal(10,2);comment:'装机容量'" json:"installedPower"` // 装机容量
 	PCSCount       int    `gorm:"type:varchar(255);comment:'功率转换系统'" json:"pcsCount"`      // 功率转换系统
