@@ -365,3 +365,49 @@ func (r *HistoryDataRepository) GetLastYxListByCode(deviceId int, codes string) 
 	}
 	return realtimeList, err
 }
+
+func (r *HistoryDataRepository) GetLastYxByDeviceIdAndCode(param []query.DeviceIdAndCode) ([]*models.YxData, error) {
+	var err error
+	var realtimeList []*models.YxData
+	for _, item := range param {
+		tableName := "realtimedata.yx"
+		sql := fmt.Sprintf("SELECT last(ts),val,device_id,code FROM %s  where device_id=%d and  code = %s", tableName, item.DeviceId, item.Code)
+		rows, err := r.taosDb.Query(sql)
+		if err != nil {
+			return nil, err
+		}
+		defer rows.Close()
+		for rows.Next() {
+			realtime := &models.YxData{}
+			err := rows.Scan(&realtime.Ts, &realtime.Value, &realtime.DeviceId, &realtime.Code)
+			if err != nil {
+				return nil, err
+			}
+			realtimeList = append(realtimeList, realtime)
+		}
+	}
+	return realtimeList, err
+}
+
+func (r *HistoryDataRepository) GetLastYcByDeviceIdAndCode(param []query.DeviceIdAndCode) ([]*models.YcData, error) {
+	var err error
+	var realtimeList []*models.YcData
+	for _, item := range param {
+		tableName := "realtimedata.yc"
+		sql := fmt.Sprintf("SELECT last(ts),val,device_id,code FROM %s  where device_id=%d and  code = %s", tableName, item.DeviceId, item.Code)
+		rows, err := r.taosDb.Query(sql)
+		if err != nil {
+			return nil, err
+		}
+		defer rows.Close()
+		for rows.Next() {
+			realtime := &models.YcData{}
+			err := rows.Scan(&realtime.Ts, &realtime.Value, &realtime.DeviceId, &realtime.Code)
+			if err != nil {
+				return nil, err
+			}
+			realtimeList = append(realtimeList, realtime)
+		}
+	}
+	return realtimeList, err
+}

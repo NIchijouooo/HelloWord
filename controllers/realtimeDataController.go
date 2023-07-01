@@ -7,8 +7,10 @@ import (
 	"fmt"
 	"gateway/httpServer/model"
 	"gateway/models"
+	"gateway/models/query"
 	"gateway/repositories"
 	"gateway/utils"
+	"github.com/shopspring/decimal"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -19,8 +21,8 @@ type RealtimeDataController struct {
 	repo      *repositories.RealtimeDataRepository
 	repoHis   *repositories.HistoryDataRepository
 	repoPoint *repositories.DevicePointRepository
-	repoData *repositories.DictDataRepository
-	repoEm *repositories.EmRepository
+	repoData  *repositories.DictDataRepository
+	repoEm    *repositories.EmRepository
 }
 
 func NewRealtimeDataController() *RealtimeDataController {
@@ -28,8 +30,8 @@ func NewRealtimeDataController() *RealtimeDataController {
 		repo:      repositories.NewRealtimeDataRepository(),
 		repoHis:   repositories.NewHistoryDataRepository(),
 		repoPoint: repositories.NewDevicePointRepository(),
-		repoData: repositories.NewDictDataRepository(),
-		repoEm: repositories.NewEmRepository()}
+		repoData:  repositories.NewDictDataRepository(),
+		repoEm:    repositories.NewEmRepository()}
 }
 
 func (ctrl *RealtimeDataController) RegisterRoutes(router *gin.RouterGroup) {
@@ -48,7 +50,8 @@ func (ctrl *RealtimeDataController) RegisterRoutes(router *gin.RouterGroup) {
 	router.POST("/api/v2/realtimeData/GetDeviceByDeviceType", ctrl.GetDeviceByDeviceType)
 	router.POST("/api/v2/realtimeData/GetRealtimeDataListByDevId", ctrl.GetRealtimeDataListByDevId)
 	router.POST("/api/v2/realtimeData/GetProfitPowerRate", ctrl.GetProfitPowerRate)
-	// 注册其他路由...
+	router.POST("/api/v2/realtimeData/getLastYcByDeviceIdAndCode", ctrl.GetLastYcByDeviceIdAndCode)
+	router.POST("/api/v2/realtimeData/getLastYxByDeviceIdAndCode", ctrl.GetLastYxByDeviceIdAndCode)
 }
 
 type ParamRealtimeData struct {
@@ -68,7 +71,7 @@ type ParamRealtimeData struct {
 	Interval   string  `form:"interval"`
 	PointType  string  `form:"pointType"`
 	Lable      string  `form:"lable"`
-	ProjectId      string  `form:"projectId"`
+	ProjectId  string  `form:"projectId"`
 }
 
 /*
@@ -455,8 +458,8 @@ func (c *RealtimeDataController) GetRealtimeDataListByDevId(ctx *gin.Context) {
 */
 func (c *RealtimeDataController) GetProfitPowerRate(ctx *gin.Context) {
 	var returnMap struct {
-		XAxisList []string          `json:"xAxisList"`
-		DataMap   map[string][]float64 `json:"dataMap"`
+		XAxisList []string                     `json:"xAxisList"`
+		DataMap   map[string][]decimal.Decimal `json:"dataMap"`
 	}
 
 	var realtimeData ParamRealtimeData
@@ -480,8 +483,8 @@ func (c *RealtimeDataController) GetProfitPowerRate(ctx *gin.Context) {
 	}
 	var ids []int
 	var intervalType string
-	var startTime  int64
-	var endTime    int64
+	var startTime int64
+	var endTime int64
 	var xAxisList []string
 	//查这个类型的设备
 	deviceList, err := c.repoEm.GetDeviceList(dictData.DictValue)
@@ -504,21 +507,21 @@ func (c *RealtimeDataController) GetProfitPowerRate(ctx *gin.Context) {
 			Data:    "",
 		})
 		return
-	}else if realtimeData.Interval == "0" {
+	} else if realtimeData.Interval == "0" {
 		intervalType = "1d"
 		//7天
-		xAxisList = utils.GetLast7Days();
+		xAxisList = utils.GetLast7Days()
 		startTime, endTime = utils.GetLast7DaysTimestamps()
-	}else if realtimeData.Interval == "1"{
+	} else if realtimeData.Interval == "1" {
 		intervalType = "1d"
 		//月
-		xAxisList = utils.GetCurrentMonthDays();
+		xAxisList = utils.GetCurrentMonthDays()
 		// 获取当月的开始时间戳和结束时间戳
 		startTime, endTime = utils.GetCurrentMonthTimestamps()
-	}else if realtimeData.Interval == "2"{
+	} else if realtimeData.Interval == "2" {
 		intervalType = "1n"
 		//年
-		xAxisList = utils.GetAllMonths();
+		xAxisList = utils.GetAllMonths()
 		// 获取当年的开始时间戳和结束时间戳
 		startTime, endTime = utils.GetCurrentYearTimestamps()
 	}
@@ -530,11 +533,11 @@ func (c *RealtimeDataController) GetProfitPowerRate(ctx *gin.Context) {
 		})
 		return
 	}
-	listT, listP, listF, listV, err := c.repo.GetDayProfitByDeviceIds(ids, startTime, endTime, intervalType);
+	listT, listP, listF, listV, err := c.repo.GetDayProfitByDeviceIds(ids, startTime, endTime, intervalType)
 	//拼接x轴
 	returnMap.XAxisList = xAxisList
 
-	pMap := make(map[string][]float64)
+	pMap := make(map[string][]decimal.Decimal)
 	pMap["listTop"] = listT
 	pMap["listPeak"] = listP
 	pMap["listFlat"] = listF
@@ -545,5 +548,57 @@ func (c *RealtimeDataController) GetProfitPowerRate(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, model.ResponseData{
 		Code: "0",
 		Data: returnMap,
+	})
+}
+
+func (c *RealtimeDataController) GetLastYcByDeviceIdAndCode(ctx *gin.Context) {
+	var param []query.DeviceIdAndCode
+	if err := ctx.Bind(&param); err != nil {
+		ctx.JSON(http.StatusOK, model.ResponseData{
+			Code:    "1",
+			Message: err.Error(),
+			Data:    "",
+		})
+		return
+	}
+	data, err := c.repoHis.GetLastYcByDeviceIdAndCode(param)
+	if err != nil {
+		ctx.JSON(http.StatusOK, model.ResponseData{
+			Code:    "1",
+			Message: err.Error(),
+			Data:    "",
+		})
+		return
+	}
+	ctx.JSON(http.StatusOK, model.ResponseData{
+		Code:    "0",
+		Message: "成功",
+		Data:    data,
+	})
+}
+
+func (c *RealtimeDataController) GetLastYxByDeviceIdAndCode(ctx *gin.Context) {
+	var param []query.DeviceIdAndCode
+	if err := ctx.Bind(&param); err != nil {
+		ctx.JSON(http.StatusOK, model.ResponseData{
+			Code:    "1",
+			Message: err.Error(),
+			Data:    "",
+		})
+		return
+	}
+	data, err := c.repoHis.GetLastYxByDeviceIdAndCode(param)
+	if err != nil {
+		ctx.JSON(http.StatusOK, model.ResponseData{
+			Code:    "1",
+			Message: err.Error(),
+			Data:    "",
+		})
+		return
+	}
+	ctx.JSON(http.StatusOK, model.ResponseData{
+		Code:    "0",
+		Message: "成功",
+		Data:    data,
 	})
 }
