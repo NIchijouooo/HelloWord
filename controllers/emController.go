@@ -956,7 +956,7 @@ func (c *EmController) GetEmDeviceModelCmdParamListByName(ctx *gin.Context) {
 	deviceCmdParamList, _ = c.repo.GetEmDeviceModelCmdParamListByName(tmp.Name)
 	if deviceCmdParamList == nil {
 		ctx.JSON(http.StatusOK, model.ResponseData{
-			Code:    "1",
+			Code:    "0",
 			Message: "无数据",
 		})
 	}

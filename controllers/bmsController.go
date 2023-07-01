@@ -363,7 +363,7 @@ func (c *BmsController) GetBmsDevices(ctx *gin.Context) {
 		return
 	} else {
 		ctx.JSON(http.StatusOK, model.ResponseData{
-			Code:    "1",
+			Code:    "0",
 			Message: "无数据！",
 			Data:    "",
 		})
@@ -459,7 +459,7 @@ func (c *BmsController) GetDevicesStatus(ctx *gin.Context) {
 	}
 	if dict == (models.DictData{}) {
 		ctx.JSON(http.StatusOK, model.ResponseData{
-			Code:    "1",
+			Code:    "0",
 			Message: "无数据",
 			Data:    "",
 		})
@@ -473,7 +473,7 @@ func (c *BmsController) GetDevicesStatus(ctx *gin.Context) {
 	}
 	if ycData == nil {
 		ctx.JSON(http.StatusOK, model.ResponseData{
-			Code:    "1",
+			Code:    "0",
 			Message: "无数据",
 			Data:    "",
 		})
