@@ -8,7 +8,6 @@ import (
 	"gateway/device"
 	"gateway/httpServer"
 	"gateway/models"
-	"gateway/report"
 	"gateway/rule"
 	"gateway/service/job"
 	"github.com/robfig/cron/v3"
@@ -84,19 +83,18 @@ func main() {
 	}
 	// 启动充放电量定时任务
 	setting.ZAPS.Debug("注册充放电量定时任务到 GoCron")
-	//_, err2 := cronProcess.AddFunc("0 0/30 * * * ?", job.StatisticsDayChargingAndDischarging)
-	//if err2 != nil {
-	//	setting.ZAPS.Error("启动StatisticsDayChargingAndDischarging策略配置失败", err)
-	//} else {
-	//	cronProcess.Start()
-	//}
-	//_, err3 := cronProcess.AddFunc("0 0/30 * * * ?", job.StatisticsHourChargingAndDischarging)
-	//if err3 != nil {
-	//	setting.ZAPS.Error("启动StatisticsHourChargingAndDischarging策略配置失败", err)
-	//} else {
-	//	cronProcess.Start()
-	//}
-
+	_, err2 := cronProcess.AddFunc("0 0 * * * ? ", job.StatisticsDayChargingAndDischarging)
+	if err2 != nil {
+		setting.ZAPS.Error("启动StatisticsDayChargingAndDischarging策略配置失败", err)
+	} else {
+		cronProcess.Start()
+	}
+	_, err3 := cronProcess.AddFunc("0 0 * * * ? ", job.StatisticsHourChargingAndDischarging)
+	if err3 != nil {
+		setting.ZAPS.Error("启动StatisticsHourChargingAndDischarging策略配置失败", err)
+	} else {
+		cronProcess.Start()
+	}
 
 	// 每天0：0重启系统
 	//_ = scheduler.Every(1).Day().At("0:0").Do(setting.SystemReboot)
@@ -104,7 +102,7 @@ func main() {
 	/**************虚拟设备初始化****************/
 	virtual.VirtualDeviceInit()
 	/**************上报服务初始化****************/
-	report.ReportServiceInit()
+	//report.ReportServiceInit()
 	/**************LED初始化****************/
 	setting.LedInit()
 	setting.LedFlash(setting.LEDNet)
