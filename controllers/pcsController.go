@@ -76,7 +76,7 @@ func (ctrl *PcsController) getPcsDeviceInfoById(ctx *gin.Context) {
 	// 设备状态遥测编码
 	deviceStatusCode, _ := strconv.Atoi(dictData.DictValue)
 	ycData, _ := ctrl.realtimeRepo.GetYcById(deviceId, deviceStatusCode)
-	status := "-"
+	status := "--"
 	if ycData.DeviceId > 0 {
 		status = fmt.Sprintf("%v", ycData.Value)
 		statusMap := map[string]string{}

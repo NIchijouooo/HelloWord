@@ -719,4 +719,3 @@ func (r *RealtimeDataRepository) GetDayProfitByDeviceIds(deviceIds []int, startT
 	}
 	return listT, listP, listF, listV, err
 }
-
