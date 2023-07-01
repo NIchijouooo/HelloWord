@@ -10,6 +10,7 @@ import (
 	"gateway/models/query"
 	"gateway/repositories"
 	"gateway/utils"
+	"github.com/shopspring/decimal"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -457,8 +458,8 @@ func (c *RealtimeDataController) GetRealtimeDataListByDevId(ctx *gin.Context) {
 */
 func (c *RealtimeDataController) GetProfitPowerRate(ctx *gin.Context) {
 	var returnMap struct {
-		XAxisList []string             `json:"xAxisList"`
-		DataMap   map[string][]string `json:"dataMap"`
+		XAxisList []string                     `json:"xAxisList"`
+		DataMap   map[string][]decimal.Decimal `json:"dataMap"`
 	}
 
 	var realtimeData ParamRealtimeData
@@ -536,7 +537,7 @@ func (c *RealtimeDataController) GetProfitPowerRate(ctx *gin.Context) {
 	//拼接x轴
 	returnMap.XAxisList = xAxisList
 
-	pMap := make(map[string][]string)
+	pMap := make(map[string][]decimal.Decimal)
 	pMap["listTop"] = listT
 	pMap["listPeak"] = listP
 	pMap["listFlat"] = listF
