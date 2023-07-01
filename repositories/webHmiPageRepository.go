@@ -35,12 +35,12 @@ func (r *WebHmiPageRepository) GetIotWebHmiPageInfo(webHmiPageDeviceModel models
 		webHmiPageCode = deviceEquipmentAccountInfo.WebHmiPageCode
 	}
 
-	webHmiPageId, iotToken := GetWebHmiPageInfo(webHmiPageCode)
+	webHmiPageId, iotToken := getWebHmiPageInfo(webHmiPageCode)
 
 	return webHmiPageId, iotToken, nil
 }
 
-func GetWebHmiPageInfo(webHmiPageCode string) (id int, iotToken string) {
+func getWebHmiPageInfo(webHmiPageCode string) (id int, iotToken string) {
 	// 准备POST请求的数据
 	requestData := "{\"code\": \"" + webHmiPageCode + "\"}"
 
@@ -108,7 +108,7 @@ func GetWebHmiPageInfo(webHmiPageCode string) (id int, iotToken string) {
 		if !isLogin {
 			return 0, ""
 		}
-		return GetWebHmiPageInfo(webHmiPageCode)
+		return getWebHmiPageInfo(webHmiPageCode)
 	} else if response.Code == 200 {
 		return response.Data.Id, token
 	}
