@@ -12,6 +12,8 @@ import (
 	"gateway/utils"
 	"github.com/shopspring/decimal"
 	"net/http"
+	"strconv"
+	"strings"
 
 	"github.com/gin-gonic/gin"
 )
@@ -201,6 +203,12 @@ func (c *RealtimeDataController) GetRealtimeDataYxListByIdOrCodeList(ctx *gin.Co
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
+	deviceIdList, err := utils.StringArrayToIntArray(strings.Split(realtimeData.DeviceIds, ","))
+	if err == nil {
+		for _, devId := range deviceIdList {
+			c.SetDataPointName(yxList, []models.YcData{}, devId)
+		}
+	}
 	ctx.JSON(http.StatusOK, model.ResponseData{
 		Code: "0",
 		Data: yxList,
@@ -275,6 +283,12 @@ func (c *RealtimeDataController) GetRealtimeDataYcListByIdOrCodeList(ctx *gin.Co
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
+	}
+	deviceIdList, err := utils.StringArrayToIntArray(strings.Split(realtimeData.DeviceIds, ","))
+	if err == nil {
+		for _, devId := range deviceIdList {
+			c.SetDataPointName([]models.YxData{}, ycList, devId)
+		}
 	}
 	ctx.JSON(http.StatusOK, model.ResponseData{
 		Code: "0",
@@ -378,6 +392,7 @@ func (c *RealtimeDataController) GetRealtimeDataYxListByDevId(ctx *gin.Context) 
 		return
 	}
 	yxList, _ := c.repo.GetYxListById(deviceId)
+	c.SetDataPointName(yxList, []models.YcData{}, deviceId)
 	ctx.JSON(http.StatusOK, model.ResponseData{
 		Code: "0",
 		Data: yxList,
@@ -408,6 +423,7 @@ func (c *RealtimeDataController) GetRealtimeDataYcListByDevId(ctx *gin.Context) 
 		return
 	}
 	ycList, _ := c.repo.GetYcListById(deviceId)
+	c.SetDataPointName([]models.YxData{}, ycList, deviceId)
 	ctx.JSON(http.StatusOK, model.ResponseData{
 		Code: "0",
 		Data: ycList,
@@ -601,4 +617,52 @@ func (c *RealtimeDataController) GetLastYxByDeviceIdAndCode(ctx *gin.Context) {
 		Message: "成功",
 		Data:    data,
 	})
+}
+
+/*
+*
+从td查出来的数据没有name
+前端可能要显示
+在这里查设备命令列表,然后赋值到点位上
+*/
+func (c *RealtimeDataController) SetDataPointName(yxList []models.YxData, ycList []models.YcData, deviceId int) {
+	if deviceId == 0 {
+		return
+	}
+	paramList, err := c.repoEm.GetEmDeviceModelCmdParamListByDeviceId(deviceId)
+	if err != nil || len(paramList) == 0 {
+		return
+	}
+	pointMap := map[string]string{}
+	for _, param := range paramList {
+		pointMap[param.Name] = param.Label
+	}
+	if len(yxList) > 0 {
+		points := &yxList
+		for index := range yxList {
+			list := *points
+			data := list[index]
+			if data.DeviceId != deviceId {
+				continue
+			}
+			name, ok := pointMap[strconv.Itoa(data.Code)]
+			if ok {
+				list[index].Name = name
+			}
+		}
+	}
+	if len(ycList) > 0 {
+		points := &ycList
+		for index := range ycList {
+			list := *points
+			data := list[index]
+			if data.DeviceId != deviceId {
+				continue
+			}
+			name, ok := pointMap[strconv.Itoa(data.Code)]
+			if ok {
+				list[index].Name = name
+			}
+		}
+	}
 }
