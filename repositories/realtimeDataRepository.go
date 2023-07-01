@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"gateway/models"
 	"gateway/utils"
+	"github.com/shopspring/decimal"
 	"gorm.io/gorm"
 	"log"
 )
@@ -654,59 +655,74 @@ func (r *RealtimeDataRepository) GetElectricityChartByDeviceIds(deviceIds []int,
 	return list, err
 }
 // GetGenerateElectricityChartByDeviceIds 获取充放电量信息topProfit,peakProfit,peakProfit,flatProfit
-func (r *RealtimeDataRepository) GetDayProfitByDeviceIds(deviceIds []int, startTime, endTime int64, intervalType string) ([]float64, []float64, []float64, []float64, error) {
+func (r *RealtimeDataRepository) GetDayProfitByDeviceIds(deviceIds []int, startTime, endTime int64, intervalType string) ([]string, []string, []string, []string, error) {
 	ids := utils.IntArrayToString(deviceIds, ",")
 	sqlT := fmt.Sprintf("SELECT SUM(top_profit) AS val FROM realtimedata.charge_discharge WHERE device_id IN (%s) AND ts>=%v and ts<=%v INTERVAL(%s) FILL(VALUE,0);",
 		ids, startTime, endTime, intervalType)
 	rowsT, err := r.taosDb.Query(sqlT)
-	var listT []float64
+	var listT []string
 	for rowsT.Next() {
 		var val float64
 		err := rowsT.Scan(&val)
 		if err != nil {
 			fmt.Println(err)
-			//return nil, err
 		}
-		listT = append(listT, val)
+		amountInYuan := decimal.NewFromFloat(val)
+		// 转换为以万元为单位的金额，并拼接上"万元"字样
+		amountInTenThousand := amountInYuan.Div(decimal.NewFromInt(10000))
+		amountWithUnit := fmt.Sprintf("%s万", amountInTenThousand.String())
+		listT = append(listT, amountWithUnit)
 	}
 
 	sqlP := fmt.Sprintf("SELECT SUM(peak_profit) AS val FROM realtimedata.charge_discharge WHERE device_id IN (%s) AND ts>=%v and ts<=%v INTERVAL(%s) FILL(VALUE,0);",
 		ids, startTime, endTime, intervalType)
 	rowsP, err := r.taosDb.Query(sqlP)
-	var listP []float64
+	var listP []string
 	for rowsP.Next() {
 		var val float64
 		err := rowsP.Scan(&val)
 		if err != nil {
 			fmt.Println(err)
 		}
-		listP = append(listP, val)
+		amountInYuan := decimal.NewFromFloat(val)
+		// 转换为以万元为单位的金额，并拼接上"万元"字样
+		amountInTenThousand := amountInYuan.Div(decimal.NewFromInt(10000))
+		amountWithUnit := fmt.Sprintf("%s万", amountInTenThousand.String())
+		listP = append(listP, amountWithUnit)
 	}
 
 	sqlF := fmt.Sprintf("SELECT SUM(flat_profit) AS val FROM realtimedata.charge_discharge WHERE device_id IN (%s) AND ts>=%v and ts<=%v INTERVAL(%s) FILL(VALUE,0);",
 		ids, startTime, endTime, intervalType)
 	rowsF, err := r.taosDb.Query(sqlF)
-	var listF []float64
+	var listF []string
 	for rowsF.Next() {
 		var val float64
 		err := rowsF.Scan(&val)
 		if err != nil {
 			fmt.Println(err)
 		}
-		listF = append(listF, val)
+		amountInYuan := decimal.NewFromFloat(val)
+		// 转换为以万元为单位的金额，并拼接上"万元"字样
+		amountInTenThousand := amountInYuan.Div(decimal.NewFromInt(10000))
+		amountWithUnit := fmt.Sprintf("%s万", amountInTenThousand.String())
+		listF = append(listF, amountWithUnit)
 	}
 
 	sqlV := fmt.Sprintf("SELECT SUM(valley_profit) AS val FROM realtimedata.charge_discharge WHERE device_id IN (%s) AND ts>=%v and ts<=%v INTERVAL(%s) FILL(VALUE,0);",
 		ids, startTime, endTime, intervalType)
 	rowsV, err := r.taosDb.Query(sqlV)
-	var listV []float64
+	var listV []string
 	for rowsV.Next() {
 		var val float64
 		err := rowsV.Scan(&val)
 		if err != nil {
 			fmt.Println(err)
 		}
-		listV = append(listV, val)
+		amountInYuan := decimal.NewFromFloat(val)
+		// 转换为以万元为单位的金额，并拼接上"万元"字样
+		amountInTenThousand := amountInYuan.Div(decimal.NewFromInt(10000))
+		amountWithUnit := fmt.Sprintf("%s万", amountInTenThousand.String())
+		listV = append(listV, amountWithUnit)
 	}
 	return listT, listP, listF, listV, err
 }

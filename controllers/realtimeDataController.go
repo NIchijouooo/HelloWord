@@ -456,7 +456,7 @@ func (c *RealtimeDataController) GetRealtimeDataListByDevId(ctx *gin.Context) {
 func (c *RealtimeDataController) GetProfitPowerRate(ctx *gin.Context) {
 	var returnMap struct {
 		XAxisList []string          `json:"xAxisList"`
-		DataMap   map[string][]float64 `json:"dataMap"`
+		DataMap   map[string][]string `json:"dataMap"`
 	}
 
 	var realtimeData ParamRealtimeData
@@ -534,7 +534,7 @@ func (c *RealtimeDataController) GetProfitPowerRate(ctx *gin.Context) {
 	//拼接x轴
 	returnMap.XAxisList = xAxisList
 
-	pMap := make(map[string][]float64)
+	pMap := make(map[string][]string)
 	pMap["listTop"] = listT
 	pMap["listPeak"] = listP
 	pMap["listFlat"] = listF
