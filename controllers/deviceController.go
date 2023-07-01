@@ -31,6 +31,7 @@ func NewDeviceController() *DeviceController {
 func (c *DeviceController) RegisterRoutes(router *gin.RouterGroup) {
 	router.POST("/api/v2/device/ctrlDevice", c.CtrlDevice)
 	router.POST("/api/v2/device/getDeviceListByType", c.getDeviceListByType)
+	router.POST("/api/v2/device/getDeviceListByTypeList", c.getDeviceListByTypeList)
 	router.POST("/api/v2/device/getDeviceInfo", c.GetDeviceInfo)
 	router.POST("/api/v2/device/getChart", c.GetChart)
 	router.POST("/api/v2/device/getGenerateElectricityChart", c.GetGenerateElectricityChart)
@@ -122,8 +123,33 @@ func (c *DeviceController) getDeviceListByType(ctx *gin.Context) {
 	}
 	list, _ := c.repo.GetDeviceListByType(param)
 	ctx.JSON(http.StatusOK, model.ResponseData{
-		Code: "0",
-		Data: list,
+		Code:    "0",
+		Message: "成功",
+		Data:    list,
+	})
+}
+
+func (c *DeviceController) getDeviceListByTypeList(ctx *gin.Context) {
+	var param []string
+	var res []models.EmDevice
+	if err := ctx.Bind(&param); err != nil {
+		ctx.JSON(http.StatusOK, model.ResponseData{
+			Code:    "1",
+			Message: err.Error(),
+			Data:    "",
+		})
+		return
+	}
+	for _, item := range param {
+		var deviceType models.DeviceParam
+		deviceType.DeviceType = item
+		list, _ := c.repo.GetDeviceListByType(deviceType)
+		res = append(res, list...)
+	}
+	ctx.JSON(http.StatusOK, model.ResponseData{
+		Code:    "0",
+		Message: "成功",
+		Data:    res,
 	})
 }
 
