@@ -1,14 +1,11 @@
 package repositories
 
 import (
-	"bytes"
-	"crypto/tls"
 	"encoding/json"
 	"fmt"
 	"gateway/models"
+	"gateway/utils"
 	"gorm.io/gorm"
-	"io"
-	"net/http"
 )
 
 var token string
@@ -43,44 +40,10 @@ func (r *WebHmiPageRepository) GetIotWebHmiPageInfo(webHmiPageDeviceModel models
 func getWebHmiPageInfo(webHmiPageCode string) (id int, iotToken string) {
 	// 准备POST请求的数据
 	requestData := "{\"code\": \"" + webHmiPageCode + "\"}"
-
-	// 创建一个自定义的TLS配置
-	tlsConfig := &tls.Config{
-		// 忽略证书验证
-		InsecureSkipVerify: true,
-	}
-
-	// 创建一个自定义的HTTP客户端
-	client := &http.Client{
-		Transport: &http.Transport{
-			TLSClientConfig: tlsConfig,
-		},
-	}
-
-	// 发送POST请求
-	req, err := http.NewRequest("POST", "https://interface.feisjy.com/qianhai/hmiPage/getHmiPageInfoByCode", bytes.NewBuffer([]byte(requestData)))
-	if err != nil {
-		panic(err)
-	}
-
-	// 设置请求头
-	req.Header.Set("Content-Type", "application/json")
-	req.Header.Set("Authorization", token)
-
-	// 发送请求
-	resp, err := client.Do(req)
-	if err != nil {
-		panic(err)
-	}
-	defer resp.Body.Close()
-
-	// 检查响应状态码
-	if resp.StatusCode != http.StatusOK {
-		panic("请求失败")
-	}
-
-	// 读取响应体的内容
-	responseData, err := io.ReadAll(resp.Body)
+	url := "https://interface.feisjy.com/qianhai/hmiPage/getHmiPageInfoByCode"
+	header := make(map[string]string)
+	header["Authorization"] = token
+	result, err := utils.SendPostTls(url, requestData, header)
 	if err != nil {
 		panic(err)
 	}
@@ -97,7 +60,7 @@ func getWebHmiPageInfo(webHmiPageCode string) (id int, iotToken string) {
 
 	// 将响应体内容转换为JSON
 	var response responseDataJson
-	err = json.Unmarshal(responseData, &response)
+	err = json.Unmarshal([]byte(result), &response)
 	if err != nil {
 		panic(err)
 	}
@@ -117,35 +80,10 @@ func getWebHmiPageInfo(webHmiPageCode string) (id int, iotToken string) {
 
 func iotLogin() (isLogin bool) {
 
-	// 创建一个自定义的TLS配置
-	tlsConfig := &tls.Config{
-		// 忽略证书验证
-		InsecureSkipVerify: true,
-	}
-
-	// 创建一个自定义的HTTP客户端
-	client := &http.Client{
-		Transport: &http.Transport{
-			TLSClientConfig: tlsConfig,
-		},
-	}
-
 	// 准备POST请求的数据
 	requestData := "{\"checkCode\": false,\"code\": false,\"userAccountNum\": \"admin\",\"password\": \"Feisjy@2016\",\"domain\": \"iot.feisjy.com\",\"isHmiLogin\": true,\"isEncryption\": \"1\",\"scenesId\": \"18\"}"
-	// 发送POST请求
-	resp, err := client.Post("https://interface.feisjy.com/auth/m2mLogin", "application/json", bytes.NewBuffer([]byte(requestData)))
-	if err != nil {
-		panic(err)
-	}
-	defer resp.Body.Close()
-
-	// 检查响应状态码
-	if resp.StatusCode != http.StatusOK {
-		panic("请求失败")
-	}
-
-	// 读取响应体的内容
-	responseData, err := io.ReadAll(resp.Body)
+	url := "https://interface.feisjy.com/auth/m2mLogin"
+	result, err := utils.SendPostTls(url, requestData, nil)
 	if err != nil {
 		panic(err)
 	}
@@ -162,7 +100,7 @@ func iotLogin() (isLogin bool) {
 
 	// 将响应体内容转换为JSON
 	var response responseDataJson
-	err = json.Unmarshal(responseData, &response)
+	err = json.Unmarshal([]byte(result), &response)
 	if err != nil {
 		panic(err)
 	}
