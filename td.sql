@@ -52,3 +52,41 @@ INSERT INTO realtimedata.charge_discharge_111(ts, charge_capacity, discharge_cap
 
 
 INSERT INTO realtimedata.charge_discharge_222(ts, charge_capacity, discharge_capacity, profit) using realtimedata.charge_discharge tags(222) VALUES ("2023-06-16 18:35:29.909", 8, 143, 10.4);
+
+----------pcs
+INSERT INTO realtimedata.yc_111_582(ts, val) using realtimedata.yc tags(111,"582") VALUES (NOW, 212.3);
+INSERT INTO realtimedata.yc_111_592(ts, val) using realtimedata.yc tags(111,"592") VALUES (NOW, 122.4);
+INSERT INTO realtimedata.yc_111_606(ts, val) using realtimedata.yc tags(111,"606") VALUES (NOW, 0);
+
+INSERT INTO realtimedata.yc_1113_582(ts, val) using realtimedata.yc tags(1113,"582") VALUES (NOW, 212.3);
+INSERT INTO realtimedata.yc_1113_592(ts, val) using realtimedata.yc tags(1113,"592") VALUES (NOW, 122.4);
+INSERT INTO realtimedata.yc_1113_606(ts, val) using realtimedata.yc tags(1113,"606") VALUES (NOW, 1);
+
+INSERT INTO realtimedata.yc_1120_582(ts, val) using realtimedata.yc tags(1120,"582") VALUES (NOW, 212.3);
+INSERT INTO realtimedata.yc_1120_592(ts, val) using realtimedata.yc tags(1120,"592") VALUES (NOW, 122.4);
+INSERT INTO realtimedata.yc_1120_606(ts, val) using realtimedata.yc tags(1120,"606") VALUES (NOW, 2);
+
+----------------------bms
+INSERT INTO realtimedata.yc_56_607(ts, val) using realtimedata.yc tags(56,"607") VALUES (NOW, 212.3);
+INSERT INTO realtimedata.yc_56_719(ts, val) using realtimedata.yc tags(56,"719") VALUES (NOW, 122.4);
+INSERT INTO realtimedata.yc_56_818(ts, val) using realtimedata.yc tags(56,"818") VALUES (NOW, 2);
+
+INSERT INTO realtimedata.yc_57_607(ts, val) using realtimedata.yc tags(57,"607") VALUES (NOW, 212.3);
+INSERT INTO realtimedata.yc_57_719(ts, val) using realtimedata.yc tags(57,"719") VALUES (NOW, 122.4);
+INSERT INTO realtimedata.yc_57_818(ts, val) using realtimedata.yc tags(57,"818") VALUES (NOW, 0);
+
+INSERT INTO realtimedata.yc_58_607(ts, val) using realtimedata.yc tags(58,"607") VALUES (NOW, 212.3);
+INSERT INTO realtimedata.yc_58_719(ts, val) using realtimedata.yc tags(58,"719") VALUES (NOW, 122.4);
+INSERT INTO realtimedata.yc_58_818(ts, val) using realtimedata.yc tags(58,"818") VALUES (NOW, 1);
+
+INSERT INTO realtimedata.yc_1114_607(ts, val) using realtimedata.yc tags(1114,"607") VALUES (NOW, 212.3);
+INSERT INTO realtimedata.yc_1114_719(ts, val) using realtimedata.yc tags(1114,"719") VALUES (NOW, 122.4);
+INSERT INTO realtimedata.yc_1114_818(ts, val) using realtimedata.yc tags(1114,"818") VALUES (NOW, 3);
+
+INSERT INTO realtimedata.yc_1117_607(ts, val) using realtimedata.yc tags(1117,"607") VALUES (NOW, 312.3);
+INSERT INTO realtimedata.yc_1117_719(ts, val) using realtimedata.yc tags(1117,"719") VALUES (NOW, 622.4);
+INSERT INTO realtimedata.yc_1117_818(ts, val) using realtimedata.yc tags(1117,"818") VALUES (NOW, 4);
+
+INSERT INTO realtimedata.yc_1120_607(ts, val) using realtimedata.yc tags(1120,"607") VALUES (NOW, 1212.3);
+INSERT INTO realtimedata.yc_1120_719(ts, val) using realtimedata.yc tags(1120,"719") VALUES (NOW, 1022.4);
+INSERT INTO realtimedata.yc_1120_818(ts, val) using realtimedata.yc tags(1120,"818") VALUES (NOW, 5);
