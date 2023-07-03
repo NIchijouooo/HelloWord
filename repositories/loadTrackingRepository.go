@@ -99,7 +99,7 @@ func GetLoadTrackingData(ycQuery query.QueryTaoData) models.LoadTrackingCharVo {
 	priceConfig := models.EmConfiguration{}
 	if len(projectList) > 0 {
 		configurationCenterRepository := NewConfigurationCenterRepository()
-		priceConfigData, _ := configurationCenterRepository.GetConfigurationByProvince(projectList[0].Province, time.Now().AddDate(0, 0, -1).Format("2006-01"))
+		priceConfigData, _ := configurationCenterRepository.GetConfigurationByProvince(projectList[0].Province, time.UnixMilli(ycQuery.EndTime).Format("2006-01"))
 		priceConfig = priceConfigData
 	}
 	result.FlatPeriod = priceConfig.FlatPeriod
