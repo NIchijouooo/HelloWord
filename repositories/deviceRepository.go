@@ -16,6 +16,12 @@ type DevicePoint struct {
 	Code     string `json:"code"`
 }
 
+type CtrlHistory struct {
+	DeviceName string `json:"deviceName"`
+	ParamName  string `json:"paramName"`
+	models.EmCtrlHistory
+}
+
 func NewDeviceRepository() *DeviceRepository {
 	return &DeviceRepository{db: models.DB, taosDb: models.TaosDB}
 }
@@ -78,13 +84,37 @@ func (r *DeviceRepository) GetDeviceModelCmdParam(paramId int) models.GetDeviceM
 	var res models.GetDeviceModelCmdParam
 	r.db.Table("em_device ed").
 		Select("ed.name AS device_name,cmd.name AS cmd_name,eci.name AS coll_name,cmdp.name AS param_name").
-		Joins("left join em_device_model_cmd cmd").
-		Joins("left join em_coll_interface eci").
-		Joins("left join em_device_model_cmd_param cmdp").
-		Where("model_id = cmd.device_model_id").
-		Where("ed.coll_interface_id = eci.id").
-		Where("cmd.id = cmdp.device_model_cmd_id").
+		Joins("left join em_device_model_cmd cmd ON model_id = cmd.device_model_id").
+		Joins("left join em_coll_interface eci ON ed.coll_interface_id = eci.id").
+		Joins("left join em_device_model_cmd_param cmdp ON cmd.id = cmdp.device_model_cmd_id").
 		Where("cmdp.id =?", paramId).
 		Scan(&res)
 	return res
+}
+
+// GetCtrlHistoryList 获取控制历史列表
+func (r *DeviceRepository) GetCtrlHistoryList(page, pageSize int) ([]CtrlHistory, int64, error) {
+	var (
+		res   []CtrlHistory
+		total int64
+	)
+	rows := r.db.Table("em_ctrl_history ech").
+		Select("ech.id AS id, ech.value AS value, ech.ctrl_user_name AS ctrl_user_name," +
+			" ech.ctrl_status AS ctrl_status, ech.create_time AS create_time," +
+			" ech.update_time AS update_time, ed.name AS device_name, cmdp.name AS param_name").
+		Joins("left join em_device ed ON ech.device_id = ed.id").
+		Joins("left join em_device_model_cmd_param cmdp ON ech.param_id = cmdp.id").
+		Scan(&res)
+
+	if err := rows.Count(&total).Error; err != nil {
+		return nil, 0, err
+	}
+	if err := rows.Offset((page - 1) * pageSize).Limit(pageSize).Find(&res).Error; err != nil {
+		return nil, 0, err
+	}
+	return res, total, nil
+}
+
+func (r *DeviceRepository) AddCtrlHistory(emCtrlHistory *models.EmCtrlHistory) error {
+	return r.db.Create(emCtrlHistory).Error
 }
