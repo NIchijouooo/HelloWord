@@ -28,7 +28,7 @@
         <div class="title" style="position: relative;width: 40%;justify-content: flex-start;">
           <div class="tName">{{ ctxData.curDeviceModel.label }}：命令列表</div>
         </div>
-        <div class="search-bar" style="text-align:right;">
+        <div class="search-bar" style="text-align:right;white-space: nowrap;">
           <el-form :inline="true" ref="searchFormRef" status-icon label-width="90px">
             <el-form-item style="margin-left: 20px;">
               <el-input style="width: 200px" placeholder="请输入命令名称" v-model="ctxData.deviceModelBlock">
