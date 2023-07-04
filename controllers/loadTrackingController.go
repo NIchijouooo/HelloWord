@@ -1,17 +1,14 @@
 package controllers
 
 import (
-	"fmt"
 	"gateway/httpServer/model"
-	"gateway/models"
-	"gateway/models/ReturnModel"
 	"gateway/models/query"
 	"gateway/repositories"
 	"github.com/gin-gonic/gin"
 	"github.com/gin-gonic/gin/binding"
+	"github.com/xuri/excelize/v2"
 	"net/http"
 	"strconv"
-	"time"
 )
 
 type LoadTrackingController struct {
@@ -26,17 +23,59 @@ func NewLoadTrackingController() *LoadTrackingController {
 
 func (c *LoadTrackingController) RegisterRoutes(router *gin.RouterGroup) {
 	router.POST("/api/v2/loadTracking/GetLoadTrackingData", c.GetLoadTrackingData)
+	router.POST("/api/v2/loadTracking/ExportData", c.ExportData)
 }
 
-type resultData struct {
-	XAxisList    []string      `json:"xAxisList"`
-	OnGridData   []interface{} `json:"onGridData"`
-	MeterData    []interface{} `json:"meterData"`
-	LoadData     []interface{} `json:"loadData"`
-	TopPeriod    string        `json:"topPeriod"`
-	PeakPeriod   string        `json:"peakPeriod"`
-	FlatPeriod   string        `json:"flatPeriod"`
-	ValleyPeriod string        `json:"valleyPeriod"`
+func (c *LoadTrackingController) ExportData(ctx *gin.Context) {
+	ycQuery := query.QueryTaoData{}
+
+	if err := ctx.ShouldBindBodyWith(&ycQuery, binding.JSON); err != nil {
+		ctx.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+	if ycQuery.StartTime == 0 && ycQuery.EndTime == 0 {
+		ctx.JSON(http.StatusOK, model.ResponseData{
+			Code:    "1",
+			Message: "参数错误",
+			Data:    "",
+		})
+		return
+	}
+
+	if ycQuery.Interval == 0 {
+		ycQuery.Interval = 30
+	}
+	if ycQuery.IntervalType == 0 {
+		ycQuery.IntervalType = 2
+	}
+
+	result := repositories.GetLoadTrackingData(ycQuery)
+
+	onGridData := result.OnGridData
+	meterData := result.MeterData
+	loadData := result.LoadData
+	xAxisList := result.XAxisList
+
+	f := excelize.NewFile() // 创建一个新的Excel文件
+
+	f.SetCellValue("Sheet1", "A1", "时间")
+	f.SetCellValue("Sheet1", "B1", "并网点功率")
+	f.SetCellValue("Sheet1", "C1", "关口表功率")
+	f.SetCellValue("Sheet1", "D1", "负载功率")
+	for i, date := range xAxisList {
+		f.SetCellValue("Sheet1", "A"+strconv.Itoa(i+2), date)
+		f.SetCellValue("Sheet1", "B"+strconv.Itoa(i+2), onGridData[i])
+		f.SetCellValue("Sheet1", "C"+strconv.Itoa(i+2), meterData[i])
+		f.SetCellValue("Sheet1", "D"+strconv.Itoa(i+2), loadData[i])
+	}
+
+	// 将Excel文件写入响应体
+	ctx.Header("Content-Type", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
+	ctx.Header("Content-Disposition", "attachment; filename=example.xlsx")
+	err := f.Write(ctx.Writer)
+	if err != nil {
+		return
+	}
 }
 
 func (c *LoadTrackingController) GetLoadTrackingData(ctx *gin.Context) {
@@ -55,106 +94,15 @@ func (c *LoadTrackingController) GetLoadTrackingData(ctx *gin.Context) {
 		})
 		return
 	}
-	ycQuery.Interval = 30
-	ycQuery.IntervalType = 2
-
-	historyDataRepository := repositories.NewHistoryDataRepository()
-	dictDataRepository := repositories.NewDictDataRepository()
-	deviceRepository := repositories.NewDeviceRepository()
-	pcsDeviceType, _ := dictDataRepository.GetDictValueByDictTypeAndDictLabel("device_type", "PCS")
-	pcsPowerCode, _ := dictDataRepository.GetDictValueByDictTypeAndDictLabel("energy_product_code_setting", "energy_storage_pcs_active_power_code")
-	var pcsData ReturnModel.CharData
-	if pcsDeviceType != "" && pcsPowerCode != "" {
-		deviceIdList, _ := deviceRepository.GetDeviceIdListByDeviceType(pcsDeviceType)
-		ycQuery.DeviceIds = deviceIdList
-		intPcsPowerCode, _ := strconv.Atoi(pcsPowerCode)
-		ycQuery.CodeList = []int{intPcsPowerCode}
-		pcsDataResult, _ := historyDataRepository.GetCharData(ycQuery)
-		pcsData = pcsDataResult
+	if ycQuery.Interval == 0 {
+		ycQuery.Interval = 30
+	}
+	if ycQuery.IntervalType == 0 {
+		ycQuery.IntervalType = 2
 	}
 
-	meterPowerCode, _ := dictDataRepository.GetDictValueByDictTypeAndDictLabel("energy_product_code_setting", "energy_storage_ac_meter_yggl")
-	meterDeviceType, _ := dictDataRepository.GetDictValueByDictTypeAndDictLabel("device_type", "电能表")
-	var meterData ReturnModel.CharData
-	if meterPowerCode != "" && meterDeviceType != "" {
-		deviceIdList, _ := deviceRepository.GetDeviceIdListByDeviceType(meterDeviceType)
-		ycQuery.DeviceIds = deviceIdList
-		intMeterPowerCode, _ := strconv.Atoi(meterPowerCode)
-		ycQuery.CodeList = []int{intMeterPowerCode}
-		meterDataResult, _ := historyDataRepository.GetCharData(ycQuery)
-		meterData = meterDataResult
-	}
+	result := repositories.GetLoadTrackingData(ycQuery)
 
-	xaxisList := pcsData.XAxisList
-	intPcsPowerCode, _ := strconv.Atoi(pcsPowerCode)
-	pcsValueData := pcsData.DataMap[intPcsPowerCode]
-	intMeterPowerCode, _ := strconv.Atoi(meterPowerCode)
-	meterValueData := meterData.DataMap[intMeterPowerCode]
-
-	result := resultData{
-		XAxisList: xaxisList,
-	}
-	result.OnGridData = pcsValueData
-	result.MeterData = meterValueData
-	loadData := make([]interface{}, 0)
-	for i, _ := range xaxisList {
-		var loadValueI interface{} = nil
-		var loadValue float64 = 0
-		pcsValue := pcsValueData[i]
-		var isHaveValue = false
-		if pcsValue != nil {
-			pcsValueF, ok := pcsValue.(float64)
-			if !ok {
-				fmt.Println("pcsValue to float64 failed")
-				return
-			}
-			loadValue = pcsValueF
-			isHaveValue = true
-		}
-
-		meterValue := meterValueData[i]
-		if meterValue != nil {
-			meterValueF, ok := meterValue.(float64)
-			if !ok {
-				fmt.Println("meterValue to float64 failed")
-				return
-			}
-			loadValue = meterValueF + loadValue
-			isHaveValue = true
-		}
-
-		if isHaveValue {
-			loadValueI = loadValue
-		}
-		loadData = append(loadData, loadValueI)
-	}
-
-	result.LoadData = loadData
-
-	projectRepository := repositories.NewProjectInfoRepository()
-	projectList, _ := projectRepository.GetAll("", "", "")
-	priceConfig := models.EmConfiguration{}
-	if len(projectList) > 0 {
-		configurationCenterRepository := repositories.NewConfigurationCenterRepository()
-		priceConfigData, _ := configurationCenterRepository.GetConfigurationByProvince(projectList[0].Province, time.Now().AddDate(0, 0, -1).Format("2006-01"))
-		priceConfig = priceConfigData
-	}
-	result.FlatPeriod = priceConfig.FlatPeriod
-	result.PeakPeriod = priceConfig.PeakPeriod
-	result.TopPeriod = priceConfig.TopPeriod
-	result.ValleyPeriod = priceConfig.ValleyPeriod
-	//if err != nil {
-	//	ctx.JSON(http.StatusOK, model.ResponseData{
-	//		Code:    "1",
-	//		Message: "error" + err.Error(),
-	//		Data:    "",
-	//	})
-	//	return
-	//}
-	//result := map[string]interface{}{
-	//	"webHmiPageId": webHmiPageId,
-	//	"token":        token,
-	//}
 	ctx.JSON(http.StatusOK, model.ResponseData{
 		Code: "0",
 		Data: result,

@@ -5,6 +5,7 @@ import (
 	"gateway/device"
 	"gateway/httpServer/model"
 	"gateway/models"
+	"gateway/models/query"
 	repositories "gateway/repositories"
 	"gateway/utils"
 	"github.com/gin-gonic/gin"
@@ -36,6 +37,7 @@ func (c *DeviceController) RegisterRoutes(router *gin.RouterGroup) {
 	router.POST("/api/v2/device/getChart", c.GetChart)
 	router.POST("/api/v2/device/getGenerateElectricityChart", c.GetGenerateElectricityChart)
 	router.POST("/api/v2/device/getProfitChart", c.GetProfitChart)
+	router.POST("/api/v2/device/getCtrlHistoryList", c.GetCtrlHistoryList)
 }
 
 // CtrlDevice 遥控摇调
@@ -48,15 +50,6 @@ func (c *DeviceController) CtrlDevice(ctx *gin.Context) {
 			Data:    "",
 		})
 		return
-	}
-	aParam := struct {
-		Code    string `json:"Code"`
-		Message string `json:"Message"`
-		Data    string `json:"Data"`
-	}{
-		Code:    "1",
-		Message: "",
-		Data:    "",
 	}
 
 	serviceInfo := struct {
@@ -79,10 +72,11 @@ func (c *DeviceController) CtrlDevice(ctx *gin.Context) {
 	coll, ok := device.CollectInterfaceMap.Coll[serviceInfo.CollInterfaceName]
 	device.CollectInterfaceMap.Lock.Unlock()
 	if !ok {
-		aParam.Code = "1"
-		aParam.Message = "device is not exist"
-		sJson, _ := json.Marshal(aParam)
-		ctx.String(http.StatusOK, string(sJson))
+		ctx.JSON(http.StatusOK, model.ResponseData{
+			Code:    "1",
+			Message: "device is not exist",
+			Data:    "",
+		})
 		return
 	}
 
@@ -93,17 +87,29 @@ func (c *DeviceController) CtrlDevice(ctx *gin.Context) {
 	paramStr, _ := json.Marshal(serviceInfo.ServiceParam)
 	cmd.FunPara = string(paramStr)
 	cmdRX := coll.CommQueueManage.CommunicationManageAddEmergency(cmd)
+	var emCtrlHistory models.EmCtrlHistory
+	emCtrlHistory.DeviceId = param.DeviceId
+	emCtrlHistory.ParamId = param.ParamId
+	emCtrlHistory.CtrlUserName = param.CtrlUserName
+	emCtrlHistory.Value = fmt.Sprint(param.Value)
+	emCtrlHistory.CreateTime = time.Now().String()
+	emCtrlHistory.UpdateTime = time.Now().String()
 	if cmdRX.Status == true {
-		aParam.Code = "0"
-		aParam.Message = "控制指令发送成功"
-		sJson, _ := json.Marshal(aParam)
-		ctx.String(http.StatusOK, string(sJson))
+		emCtrlHistory.CtrlStatus = 1
+		ctx.JSON(http.StatusOK, model.ResponseData{
+			Code:    "0",
+			Message: "控制指令发送成功",
+			Data:    "",
+		})
 	} else {
-		aParam.Code = "1"
-		aParam.Message = "device is not return"
-		sJson, _ := json.Marshal(aParam)
-		ctx.String(http.StatusOK, string(sJson))
+		emCtrlHistory.CtrlStatus = 0
+		ctx.JSON(http.StatusOK, model.ResponseData{
+			Code:    "1",
+			Message: "device is not return",
+			Data:    "",
+		})
 	}
+	c.repo.AddCtrlHistory(&emCtrlHistory)
 }
 
 /*
@@ -403,5 +409,40 @@ func (c *DeviceController) GetProfitChart(ctx *gin.Context) {
 		Code:    "0",
 		Message: "成功",
 		Data:    result,
+	})
+}
+
+func (c *DeviceController) GetCtrlHistoryList(ctx *gin.Context) {
+	var (
+		res   []repositories.CtrlHistory
+		total int64
+	)
+	var PageBase query.PageBase
+	if err := ctx.Bind(&PageBase); err != nil {
+		ctx.JSON(http.StatusOK, model.ResponseData{
+			"1",
+			err.Error(),
+			"",
+		})
+		return
+	}
+
+	res, total, err := c.repo.GetCtrlHistoryList(PageBase.PageNum, PageBase.PageSize)
+	if err != nil {
+		ctx.JSON(http.StatusOK, model.ResponseData{
+			"1",
+			err.Error(),
+			"",
+		})
+		return
+	}
+
+	ctx.JSON(http.StatusOK, model.ResponseData{
+		"0",
+		"成功",
+		gin.H{
+			"data":  res,
+			"total": total,
+		},
 	})
 }

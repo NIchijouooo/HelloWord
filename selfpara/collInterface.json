@@ -1,1 +1,90 @@
-{"CollectInterfaceParam":[{"CollInterfaceName":"PLC主机","CommInterfaceName":"modbus-tcp主机","protocolTypeName":"MODBUS-TCP","PollPeriod":10,"OfflinePeriod":5,"DeviceNodeCnt":6,"DeviceNodeNameMap":["BMS01","液冷空调01","PLC01","PCS01","第一簇BMS","第二簇BMS"],"DeviceNodeLabelMap":["BMS01","液冷空调01","PLC01","PCS01","第一簇BMS","第二簇BMS"],"DeviceNodeAddrMap":["1","1","1","1","1","1"],"DeviceNodeTypeMap":["BMS","液冷空调","PLC","PCS","ESMU第一簇","ESMU第二簇"],"DeviceNodeDeviceTypeMap":["bms","空调","plc","pcs","clusterBMS","clusterBMS"]},{"CollInterfaceName":"PLC从机","CommInterfaceName":"modbus-tcp从机","protocolTypeName":"MODBUS-TCP","PollPeriod":10,"OfflinePeriod":5,"DeviceNodeCnt":4,"DeviceNodeNameMap":["PCS02","BMS02","液冷空调02","PLC02"],"DeviceNodeLabelMap":["PCS02","BMS02","液冷空调02","PLC02"],"DeviceNodeAddrMap":["1","1","1","1"],"DeviceNodeTypeMap":["PCS","BMS","液冷空调","PLC"],"DeviceNodeDeviceTypeMap":["pcs","bms","空调","plc"]}]}
+{
+  "CollectInterfaceParam": [
+    {
+      "CollInterfaceName": "PLC主机",
+      "CommInterfaceName": "modbus-tcp主机",
+      "protocolTypeName": "MODBUS-TCP",
+      "PollPeriod": 10,
+      "OfflinePeriod": 5,
+      "DeviceNodeCnt": 6,
+      "DeviceNodeNameMap": [
+        "第二簇BMS",
+        "BMS01",
+        "液冷空调01",
+        "PLC01",
+        "PCS01",
+        "第一簇BMS"
+      ],
+      "DeviceNodeLabelMap": [
+        "第二簇BMS",
+        "BMS01",
+        "液冷空调01",
+        "PLC01",
+        "PCS01",
+        "第一簇BMS"
+      ],
+      "DeviceNodeAddrMap": [
+        "1",
+        "1",
+        "1",
+        "1",
+        "1",
+        "1"
+      ],
+      "DeviceNodeTypeMap": [
+        "ESMU第二簇",
+        "BMS",
+        "液冷空调",
+        "PLC",
+        "PCS",
+        "ESMU第一簇"
+      ],
+      "DeviceNodeDeviceTypeMap": [
+        "clusterBMS",
+        "bms",
+        "空调",
+        "plc",
+        "pcs",
+        "clusterBMS"
+      ]
+    },
+    {
+      "CollInterfaceName": "PLC从机",
+      "CommInterfaceName": "modbus-tcp从机",
+      "protocolTypeName": "MODBUS-TCP",
+      "PollPeriod": 10,
+      "OfflinePeriod": 5,
+      "DeviceNodeCnt": 4,
+      "DeviceNodeNameMap": [
+        "PCS02",
+        "BMS02",
+        "液冷空调02",
+        "PLC02"
+      ],
+      "DeviceNodeLabelMap": [
+        "PCS02",
+        "BMS02",
+        "液冷空调02",
+        "PLC02"
+      ],
+      "DeviceNodeAddrMap": [
+        "1",
+        "1",
+        "1",
+        "1"
+      ],
+      "DeviceNodeTypeMap": [
+        "PCS",
+        "BMS",
+        "液冷空调",
+        "PLC"
+      ],
+      "DeviceNodeDeviceTypeMap": [
+        "pcs",
+        "bms",
+        "空调",
+        "plc"
+      ]
+    }
+  ]
+}
