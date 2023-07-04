@@ -21,7 +21,7 @@ func NewCentralizedRepository() *CentralizedRepository {
 // 获取策略数据
 func (r *CentralizedRepository) GetPolicyList() ([]models.EmStrategy, error) {
 	var policyList []models.EmStrategy
-	err := r.db.Find(&policyList).Error
+	err := r.db.Order("update_time desc").Find(&policyList).Error
 	return policyList, err
 }
 

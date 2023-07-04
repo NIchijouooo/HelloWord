@@ -23,11 +23,11 @@ func NewCentralizedController() *CentralizedController {
 }
 
 func (ctrl *CentralizedController) RegisterRoutes(router *gin.RouterGroup) {
-	router.POST("/api/v2/auxiliary/getPolicyList", ctrl.getPolicyList)
-	router.POST("/api/v2/auxiliary/createPolicy", ctrl.createPolicy)
-	router.POST("/api/v2/auxiliary/updatePolicy", ctrl.updatePolicy)
-	router.POST("/api/v2/auxiliary/deletePolicy", ctrl.deletePolicy)
-	router.POST("/api/v2/auxiliary/getDeviceYkYtList", ctrl.getDeviceYkYtList)
+	router.POST("/api/v2/centralized/getPolicyList", ctrl.getPolicyList)
+	router.POST("/api/v2/centralized/createPolicy", ctrl.createPolicy)
+	router.POST("/api/v2/centralized/updatePolicy", ctrl.updatePolicy)
+	router.POST("/api/v2/centralized/deletePolicy", ctrl.deletePolicy)
+	router.POST("/api/v2/centralized/getDeviceYkYtList", ctrl.getDeviceYkYtList)
 }
 
 // 请求参数
