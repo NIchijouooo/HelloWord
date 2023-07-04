@@ -58,7 +58,7 @@ func (c *LimitConfigController) SaveLimitConfig(ctx *gin.Context) {
 	limitConfig.UpdateTime = time.Now().Format(time.DateTime)
 	if id > 0 {
 		//20230628同一省份同一月不能重复,查id不同的其他数据，
-		configurationList, err := c.repo.GetLimitConfigListCheckById(limitConfig.Id, limitConfig.PropertyCode)
+		configurationList, err := c.repo.GetLimitConfigListCheckById(limitConfig.Id, limitConfig.DeviceType, limitConfig.PropertyCode)
 		if err != nil {
 			ctx.JSON(http.StatusOK, model.ResponseData{
 				"1",
