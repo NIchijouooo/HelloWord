@@ -48,6 +48,9 @@ func (c *LimitConfigController) GetLimitConfigListByDeviceType(ctx *gin.Context)
 	})
 }
 
+/**
+	新增或修改越限配置
+ */
 func (c *LimitConfigController) SaveLimitConfig(ctx *gin.Context) {
 	limitConfig := new(models.LimitConfigVo)
 	if err := ctx.ShouldBindBodyWith(&limitConfig, binding.JSON); err != nil {
