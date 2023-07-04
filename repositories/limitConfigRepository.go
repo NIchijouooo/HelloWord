@@ -49,6 +49,7 @@ func (r *LimitConfigRepository) GetLimitConfigListByDeviceTypeAndCodes(deviceTyp
 	return limitConfigList, nil
 }
 
+// 根据设备类型和codes获取越限配置信息？？
 func (r *LimitConfigRepository) GetLimitConfigListCheckById(id int, deviceType string, propertyCode string) ([]models.LimitConfigVo, error) {
 	var (
 		limitConfigVoList []models.LimitConfigVo
