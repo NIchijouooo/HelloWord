@@ -9,6 +9,8 @@ type EmStrategy struct {
 	ActivePower   float64 `json:"activePower"`
 	ReactivePower float64 `json:"reactivePower"`
 	Status        int     `json:"status"`
+	CreateTime    string  `json:"createTime"`
+	UpdateTime    string  `json:"updateTime"`
 }
 
 func (u *EmStrategy) TableName() string {

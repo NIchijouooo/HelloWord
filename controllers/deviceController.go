@@ -8,11 +8,12 @@ import (
 	"gateway/models/query"
 	repositories "gateway/repositories"
 	"gateway/utils"
-	"github.com/gin-gonic/gin"
-	"github.com/goccy/go-json"
 	"net/http"
 	"strconv"
 	"time"
+
+	"github.com/gin-gonic/gin"
+	"github.com/goccy/go-json"
 )
 
 type DeviceController struct {
@@ -92,8 +93,8 @@ func (c *DeviceController) CtrlDevice(ctx *gin.Context) {
 	emCtrlHistory.ParamId = param.ParamId
 	emCtrlHistory.CtrlUserName = param.CtrlUserName
 	emCtrlHistory.Value = fmt.Sprint(param.Value)
-	emCtrlHistory.CreateTime = time.Now().String()
-	emCtrlHistory.UpdateTime = time.Now().String()
+	emCtrlHistory.CreateTime = time.Now().Format("2006-01-02 15:04:05")
+	emCtrlHistory.UpdateTime = time.Now().Format("2006-01-02 15:04:05")
 	if cmdRX.Status == true {
 		emCtrlHistory.CtrlStatus = 1
 		ctx.JSON(http.StatusOK, model.ResponseData{
