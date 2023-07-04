@@ -57,7 +57,7 @@
             </div>
           </el-col>
           <el-col :span="16" style="height: calc(104%);background-color: #f5f8fa;border-radius: 4px;">
-            <div style="padding-top: 10px;">
+            <div style="padding-top: 10px;position: relative">
               <div class="bi-title">上报信息</div>
               <div class="bi-body">
                 <div class="info-list">

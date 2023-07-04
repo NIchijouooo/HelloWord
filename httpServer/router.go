@@ -4,6 +4,7 @@ import (
 	"gateway/controllers"
 	"gateway/httpServer/contorl"
 	"gateway/httpServer/middleware"
+	"gateway/report/mqttFeisjy"
 	"gateway/setting"
 	"os"
 	"path/filepath"
@@ -62,12 +63,12 @@ func RouterWeb(port string) {
 		emController.RegisterRoutes(&router.RouterGroup)
 
 		/**
-		20230605
+		20230605实时数据写入taos
 		*/
 		/**
 		字典
 		*/
-		//mqttFeisjy.NewRealtimeDataSubRepository()
+		mqttFeisjy.NewRealtimeDataSubRepository()
 
 		realtimeDataController := controllers.NewRealtimeDataController()
 		realtimeDataController.RegisterRoutes(&router.RouterGroup)

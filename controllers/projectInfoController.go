@@ -40,6 +40,24 @@ func (c *ProjectInfoController) CreateProject(ctx *gin.Context) {
 		})
 		return
 	}
+	if len(project.Name) > 300 {
+		ctx.JSON(http.StatusOK, model.ResponseData{
+			"1",
+			"项目名输入长度不能大于100",
+			"",
+		})
+		return
+	}
+
+	if len(project.Address) > 600 {
+		ctx.JSON(http.StatusOK, model.ResponseData{
+			"1",
+			"地址输入长度不能大于200",
+			"",
+		})
+		return
+	}
+
 	if err := c.repo.Create(&project); err != nil {
 		ctx.JSON(http.StatusOK, model.ResponseData{
 			"0",
@@ -112,6 +130,24 @@ func (c *ProjectInfoController) UpdateProject(ctx *gin.Context) {
 		})
 		return
 	}
+	if len(project.Name) > 300 {
+		ctx.JSON(http.StatusOK, model.ResponseData{
+			"1",
+			"项目名输入长度不能大于100",
+			"",
+		})
+		return
+	}
+
+	if len(project.Address) > 600 {
+		ctx.JSON(http.StatusOK, model.ResponseData{
+			"1",
+			"地址输入长度不能大于200",
+			"",
+		})
+		return
+	}
+
 	if err := c.repo.Update(&project); err != nil {
 		ctx.JSON(http.StatusOK, model.ResponseData{
 			"0",

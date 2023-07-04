@@ -67,7 +67,7 @@ func (r *ReportServiceParamFeisjyTemplate) ProcessCollRealtimeData(ctx context.C
 		case msg := <-sub.Out():
 			{
 				subMsg := msg.(device.CollectInterfaceEventTemplate)
-				setting.ZAPS.Debugf("ProcessCollRealtimeData start......[%v]", device.CollectInterfaceMap)
+				//setting.ZAPS.Debugf("ProcessCollRealtimeData start......[%v]", device.CollectInterfaceMap)
 				for _, collParam := range device.CollectInterfaceMap.Coll {
 					if collParam.CollInterfaceName == subMsg.CollName {
 						node := collParam.DeviceNodeMap[subMsg.NodeName]
@@ -178,7 +178,7 @@ func (r *ReportServiceParamFeisjyTemplate) ProcessTaosRealtimeData(devProperties
 	/**
 	20230615实时值更新taos
 	*/
-	setting.ZAPS.Infof("[%v]设备[%v]时值更新taos", collName, nodeName)
+	//setting.ZAPS.Infof("[%v]设备[%v]时值更新taos", collName, nodeName)
 	NewRealtimeDataRepository().SaveRealtimeDataList(nodeName, collName, ycPropertyPostParam)
 
 }
