@@ -56,7 +56,7 @@ func (r *LimitConfigRepository) GetLimitConfigListCheckById(id int, deviceType s
 	)
 	var err error
 	query := r.db.Model(&models.LimitConfigVo{})
-	if propertyCode == "" || deviceType == "" || id <= 0 {
+	if propertyCode == "" || deviceType == "" || id <= 0{
 		return nil, err
 	}
 	query = query.Where("id <> ?", id).Where("device_type = ? and property_code = ?", deviceType, propertyCode)

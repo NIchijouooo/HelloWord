@@ -12,7 +12,7 @@ type LocalTime struct { // 内嵌方式（推荐）
 
 func (t LocalTime) MarshalJSON() ([]byte, error) {
 	// tune := fmt.Sprintf(`"%s"`, t.Format("2006-01-02 15:04:05"))
-	tune := t.Format(`"2006-01-02 15:04:05"`)
+	tune := t.Local().Format(`"2006-01-02 15:04:05"`)
 	return []byte(tune), nil
 }
 
