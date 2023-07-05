@@ -40,7 +40,7 @@ func (r *LimitConfigRepository) UpdateLimitConfig(limitConfig *models.LimitConfi
 	return 1, nil
 }
 
-//根据设备类型和codes获取越限配置信息
+// 根据设备类型和codes获取越限配置信息
 func (r *LimitConfigRepository) GetLimitConfigListByDeviceTypeAndCodes(deviceType string, codes []string) ([]models.LimitConfigVo, error) {
 	var limitConfigList []models.LimitConfigVo
 	if err := r.db.Where("del_flag = ?", 0).Where("device_type = ?", deviceType).Where("property_code in ?", codes).Find(&limitConfigList).Error; err != nil {
@@ -49,17 +49,17 @@ func (r *LimitConfigRepository) GetLimitConfigListByDeviceTypeAndCodes(deviceTyp
 	return limitConfigList, nil
 }
 
-//
-func (r *LimitConfigRepository) GetLimitConfigListCheckById(id int, propertyCode string) ([]models.LimitConfigVo, error) {
+// 根据设备类型和codes获取越限配置信息？？
+func (r *LimitConfigRepository) GetLimitConfigListCheckById(id int, deviceType string, propertyCode string) ([]models.LimitConfigVo, error) {
 	var (
 		limitConfigVoList []models.LimitConfigVo
 	)
 	var err error
 	query := r.db.Model(&models.LimitConfigVo{})
-	if propertyCode == "" || id <= 0{
+	if propertyCode == "" || deviceType == "" || id <= 0 {
 		return nil, err
 	}
-	query = query.Where("id <> ?", id).Where("property_code = ?", propertyCode)
+	query = query.Where("id <> ?", id).Where("device_type = ? and property_code = ?", deviceType, propertyCode)
 	if err := query.Find(&limitConfigVoList).Error; err != nil {
 		return nil, err
 	}
@@ -67,7 +67,6 @@ func (r *LimitConfigRepository) GetLimitConfigListCheckById(id int, propertyCode
 	return limitConfigVoList, nil
 }
 
-//
 func (r *LimitConfigRepository) GetLimitConfigListList(deviceType, propertyCode string) ([]models.LimitConfigVo, error) {
 	var (
 		configurationList []models.LimitConfigVo

@@ -37,8 +37,8 @@ func ExecutionStrategy() {
 			continue
 		}
 		// 判断是否在执行时间内
-		startTimeStr := startDate + startTime
-		endTimeStr := endDate + endTime
+		startTimeStr := startDate + startTime + ":00"
+		endTimeStr := endDate + endTime + ":00"
 		start, startErr := time.ParseInLocation(layout, startTimeStr, nowTime.Location())
 		end, endErr := time.ParseInLocation(layout, endTimeStr, nowTime.Location())
 		if startErr != nil || endErr != nil {

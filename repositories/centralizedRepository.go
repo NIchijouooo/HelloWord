@@ -4,9 +4,10 @@ import (
 	"database/sql"
 	"fmt"
 	"gateway/models"
+	"log"
+
 	"github.com/goccy/go-json"
 	"gorm.io/gorm"
-	"log"
 )
 
 type CentralizedRepository struct {

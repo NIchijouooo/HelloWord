@@ -3,6 +3,7 @@ package repositories
 import (
 	"database/sql"
 	"gateway/models"
+
 	"gorm.io/gorm"
 )
 
@@ -104,6 +105,7 @@ func (r *DeviceRepository) GetCtrlHistoryList(page, pageSize int) ([]CtrlHistory
 			" ech.update_time AS update_time, ed.name AS device_name, cmdp.name AS param_name").
 		Joins("left join em_device ed ON ech.device_id = ed.id").
 		Joins("left join em_device_model_cmd_param cmdp ON ech.param_id = cmdp.id").
+		Order("ech.id desc").
 		Scan(&res)
 
 	if err := rows.Count(&total).Error; err != nil {
