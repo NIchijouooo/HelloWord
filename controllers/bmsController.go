@@ -109,12 +109,7 @@ func (c *BmsController) GetYcLogById(ctx *gin.Context) {
 		return
 	}
 	//查询历史数据
-	var ycLog []map[string]interface{} //这里需要解开
-	//ycLog, err := c.hisRepo.GetYcLogById(ycQuery.DeviceId, ycQuery.Codes, ycQuery.StartTime, ycQuery.EndTime)
-	//if err != nil {
-	//	ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-	//	return
-	//}
+	var ycLog []map[string]interface{}
 	ctx.JSON(http.StatusOK, model.ResponseData{
 		Code:    "0",
 		Message: "获取信息成功！",
@@ -213,22 +208,6 @@ func (c *BmsController) GetBmsYcMaxAndMinListByDeviceIdCodes(ctx *gin.Context) {
 			paramMap[v.Name] = &item //name就是测点code
 		}
 	}
-	//4.查询告警信息---暂时先不用，自己遍历=====================================================
-	//var param models.RuleHistoryParam
-	//deviceIds := []int{ycData.DeviceId}
-	//param.DeviceIds = deviceIds
-	//param.Codes, err = utils.StringArrayToIntArray(codeList) //测点code
-	//param.Tag = "0"                                          //最新告警
-	//list, total, err := c.ruRepo.GetRuleHistoryList(param)
-	//var ruleHistoryMap = make(map[string]*models.EmRuleHistoryModel)
-	//if total != 0 { //存在数据
-	//	//for循环list，以键值对形式存储到map中
-	//	for _, v := range list {
-	//		item := v
-	//		ruleHistoryMap[strconv.Itoa(v.PropertyCode)] = &item
-	//	}
-	//}
-	//=====================================================
 	//5.获取越线配置信息=============================================
 	//根据设备id获取设备信息
 	emDevice, err := c.emRepo.GetEmDeviceById(ycData.DeviceId)
@@ -267,14 +246,6 @@ func (c *BmsController) GetBmsYcMaxAndMinListByDeviceIdCodes(ctx *gin.Context) {
 		if tmpUnit != nil {              //存在测点数据，取出单位
 			yc.Unit = tmpUnit.Unit //单位还要再去查表
 		}
-		//告警等级--------------------------------------
-		//tmpLevel := ruleHistoryMap[v.DictValue] //告警数据
-		//if tmpLevel != nil {
-		//	yc.Level = tmpLevel.Level
-		//} else {
-		//	yc.Level = -1 //-1无告警
-		//}
-
 		//遥测数据--------------------------------------
 		if tmpYcData != nil { //没有数据赋值为空
 			//越线配置--------------------------------------
