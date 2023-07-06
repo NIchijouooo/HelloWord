@@ -17,6 +17,10 @@ func NewAuxiliaryRepository() *AuxiliaryRepository {
 // 获取设备类型下的所有设备数据
 func (r *AuxiliaryRepository) GetAuxiliaryDevice(deviceType string) ([]models.EmDevice, error) {
 	var deviceList []models.EmDevice
+	if deviceType == "" {
+		err := r.db.Find(&deviceList).Error
+		return deviceList, err
+	}
 	err := r.db.Where("device_type=?", deviceType).Find(&deviceList).Error
 	return deviceList, err
 }
