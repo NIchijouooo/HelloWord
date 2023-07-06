@@ -203,7 +203,7 @@ func GetLast7Days() []string {
 	// 构建日期数组
 	for i := 7; i >= 1; i-- {
 		date := today.AddDate(0, 0, -i)
-		dates = append(dates, date.Format("2日"))
+		dates = append(dates, date.Format("1月2日"))
 	}
 	return dates
 }
@@ -212,7 +212,7 @@ func GetLast7Days() []string {
 func GetCurrentMonthDays() []string {
 	var dates []string
 	// 获取当月第一天的日期
-	firstDay := time.Now().AddDate(0, 0, -time.Now().Day() + 1)
+	firstDay := time.Now().AddDate(0, 0, -time.Now().Day()+1)
 	// 获取下个月第一天的日期
 	nextMonth := firstDay.AddDate(0, 1, 0)
 	// 计算当月的天数
@@ -235,7 +235,6 @@ func GetAllMonths() []string {
 	}
 	return months
 }
-
 
 // 获取今天之前7天的开始时间戳和结束时间戳
 func GetLast7DaysTimestamps() (int64, int64) {

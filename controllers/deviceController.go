@@ -418,8 +418,13 @@ func (c *DeviceController) GetCtrlHistoryList(ctx *gin.Context) {
 		res   []repositories.CtrlHistory
 		total int64
 	)
-	var PageBase query.PageBase
-	if err := ctx.Bind(&PageBase); err != nil {
+
+	type Param struct {
+		query.PageBase
+		DeviceId int
+	}
+	var param Param
+	if err := ctx.Bind(&param); err != nil {
 		ctx.JSON(http.StatusOK, model.ResponseData{
 			"1",
 			err.Error(),
@@ -428,7 +433,7 @@ func (c *DeviceController) GetCtrlHistoryList(ctx *gin.Context) {
 		return
 	}
 
-	res, total, err := c.repo.GetCtrlHistoryList(PageBase.PageNum, PageBase.PageSize)
+	res, total, err := c.repo.GetCtrlHistoryList(param.PageNum, param.PageSize, param.DeviceId)
 	if err != nil {
 		ctx.JSON(http.StatusOK, model.ResponseData{
 			"1",

@@ -94,17 +94,18 @@ func (r *DeviceRepository) GetDeviceModelCmdParam(paramId int) models.GetDeviceM
 }
 
 // GetCtrlHistoryList 获取控制历史列表
-func (r *DeviceRepository) GetCtrlHistoryList(page, pageSize int) ([]CtrlHistory, int64, error) {
+func (r *DeviceRepository) GetCtrlHistoryList(page, pageSize, deviceId int) ([]CtrlHistory, int64, error) {
 	var (
 		res   []CtrlHistory
 		total int64
 	)
 	rows := r.db.Table("em_ctrl_history ech").
-		Select("ech.id AS id, ech.value AS value, ech.ctrl_user_name AS ctrl_user_name," +
-			" ech.ctrl_status AS ctrl_status, ech.create_time AS create_time," +
+		Select("ech.id AS id, ech.value AS value, ech.ctrl_user_name AS ctrl_user_name,"+
+			" ech.ctrl_status AS ctrl_status, ech.create_time AS create_time,"+
 			" ech.update_time AS update_time, ed.name AS device_name, cmdp.name AS param_name").
 		Joins("left join em_device ed ON ech.device_id = ed.id").
 		Joins("left join em_device_model_cmd_param cmdp ON ech.param_id = cmdp.id").
+		Where("ech.device_id =?", deviceId).
 		Order("ech.id desc").
 		Scan(&res)
 
