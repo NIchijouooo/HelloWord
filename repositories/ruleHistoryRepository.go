@@ -3,6 +3,7 @@ package repositories
 import (
 	"fmt"
 	"gateway/models"
+	"github.com/taosdata/driver-go/v3/errors"
 	"gorm.io/gorm"
 	"strconv"
 )
@@ -147,21 +148,41 @@ func (r *RuleHistoryRepository) GetRuleHistoryStatistic(param models.RuleHistory
 		return models.EventStatisticVo{}, err
 	}
 	var result models.EventStatisticVo
+	// 统计类型;1-统计告警等级,2-统计告警状态
+	statisticType := param.StatisticType
+	if statisticType == 0 {
+		return models.EventStatisticVo{}, errors.NewError(1, "统计类型错误")
+	}
 	// 告警等级map,key=等级,value=等级对应的历史告警集合
-	levelMap := make(map[int][]models.EmRuleHistoryVo)
+	statisticMap := make(map[int][]models.EmRuleHistoryVo)
 	if len(historyList) > 0 {
 		for _, event := range historyList {
 			level := event.Level
-			list, ok := levelMap[level]
+			tag := event.Tag
+			var list []models.EmRuleHistoryVo
+			var ok bool
+			if statisticType == 1 {
+				list, ok = statisticMap[level]
+			} else {
+				list, ok = statisticMap[tag]
+			}
 			if !ok {
 				list = []models.EmRuleHistoryVo{}
 			}
 			list = append(list, event)
-			levelMap[level] = list
+			if statisticType == 1 {
+				statisticMap[level] = list
+			} else {
+				statisticMap[tag] = list
+			}
 		}
 	}
+	dictType := "event_level_list"
+	if statisticType == 2 {
+		dictType = "event_tag_list"
+	}
 	// 查告警等级字典
-	dictList, err := NewDictDataRepository().GetDictDataByDictType("event_level_list")
+	dictList, err := NewDictDataRepository().GetDictDataByDictType(dictType)
 	if err != nil {
 		return models.EventStatisticVo{}, err
 	}
@@ -170,12 +191,12 @@ func (r *RuleHistoryRepository) GetRuleHistoryStatistic(param models.RuleHistory
 	if len(dictList) > 0 {
 		// 封装数据
 		for _, data := range dictList {
-			level, err := strconv.Atoi(data.DictValue)
+			dictValInt, err := strconv.Atoi(data.DictValue)
 			if err != nil {
 				continue
 			}
 			// 按等级获取历史告警集合
-			list := levelMap[level]
+			list := statisticMap[dictValInt]
 			size := len(list)
 			total += size
 			statistic := models.EventStatisticData{
@@ -186,7 +207,7 @@ func (r *RuleHistoryRepository) GetRuleHistoryStatistic(param models.RuleHistory
 			eventLevelStatisticList = append(eventLevelStatisticList, statistic)
 		}
 	}
-	result.EventLevelStatisticList = eventLevelStatisticList
+	result.EventStatisticList = eventLevelStatisticList
 	result.Total = total
 	return result, err
 }
