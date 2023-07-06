@@ -13,4 +13,5 @@ type RuleHistoryParam struct {
 	Description    string   `json:"description"`
 	DeviceName     string   `json:"deviceName"`
 	DeviceTypeList []string `json:"deviceTypeList"`
+	StatisticType  int      `json:"statisticType"` // 统计类型;1-统计告警等级,2-统计告警状态
 }
